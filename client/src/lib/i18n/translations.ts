@@ -469,6 +469,15 @@ const en = {
   
   // Staff Client Homes
   addYourFirstClientDesc: "Add client homes where you provide services",
+  
+  // Storage Limits
+  storageWarning: "Storage Warning",
+  storageWarningMessage: "You are using {percent}% of available storage ({current}/{limit} records). Consider deleting old records to free up space.",
+  storageLimitReached: "Storage Limit Reached",
+  storageLimitMessage: "You have reached the maximum storage limit ({limit} records). Please delete some records to continue adding new ones.",
+  totalRecords: "Total Records",
+  deleteOldRecords: "Delete Old Records",
+  storageAlmostFull: "Storage Almost Full",
 };
 
 const hi: typeof en = {
@@ -918,6 +927,15 @@ const hi: typeof en = {
   deleteLaundryEntry: "लॉन्ड्री प्रविष्टि हटाएं?",
   deleteLaundryEntryConfirm: "इस लॉन्ड्री प्रविष्टि को हटा दिया जाएगा। यह कार्रवाई पूर्ववत नहीं की जा सकती।",
   addYourFirstClientDesc: "उन ग्राहक घरों को जोड़ें जहां आप सेवाएं प्रदान करते हैं",
+  
+  // Storage Limits
+  storageWarning: "स्टोरेज चेतावनी",
+  storageWarningMessage: "आप उपलब्ध स्टोरेज का {percent}% उपयोग कर रहे हैं ({current}/{limit} रिकॉर्ड)। जगह बनाने के लिए पुराने रिकॉर्ड हटाने पर विचार करें।",
+  storageLimitReached: "स्टोरेज सीमा पूर्ण",
+  storageLimitMessage: "आप अधिकतम स्टोरेज सीमा ({limit} रिकॉर्ड) तक पहुंच गए हैं। नए रिकॉर्ड जोड़ने के लिए कृपया कुछ रिकॉर्ड हटाएं।",
+  totalRecords: "कुल रिकॉर्ड",
+  deleteOldRecords: "पुराने रिकॉर्ड हटाएं",
+  storageAlmostFull: "स्टोरेज लगभग भर गया",
 };
 
 const gu: typeof en = {
@@ -1173,6 +1191,15 @@ const gu: typeof en = {
   deleteLaundryEntry: "લોન્ડ્રી એન્ટ્રી કાઢી નાખો?",
   deleteLaundryEntryConfirm: "આ લોન્ડ્રી એન્ટ્રી કાઢી નાખવામાં આવશે. આ ક્રિયા પૂર્વવત થઈ શકતી નથી.",
   addYourFirstClientDesc: "જ્યાં તમે સેવાઓ પ્રદાન કરો છો તે ગ્રાહક ઘરો ઉમેરો",
+  
+  // Storage Limits
+  storageWarning: "સ્ટોરેજ ચેતવણી",
+  storageWarningMessage: "તમે ઉપલબ્ધ સ્ટોરેજનો {percent}% ઉપયોગ કરી રહ્યા છો ({current}/{limit} રેકોર્ડ્સ). જગ્યા ખાલી કરવા માટે જૂના રેકોર્ડ્સ કાઢી નાખવાનું વિચારો.",
+  storageLimitReached: "સ્ટોરેજ મર્યાદા પૂર્ણ",
+  storageLimitMessage: "તમે મહત્તમ સ્ટોરેજ મર્યાદા ({limit} રેકોર્ડ્સ) સુધી પહોંચી ગયા છો. નવા રેકોર્ડ્સ ઉમેરવા માટે કૃપા કરીને કેટલાક રેકોર્ડ્સ કાઢી નાખો.",
+  totalRecords: "કુલ રેકોર્ડ્સ",
+  deleteOldRecords: "જૂના રેકોર્ડ્સ કાઢી નાખો",
+  storageAlmostFull: "સ્ટોરેજ લગભગ ભરેલું છે",
 };
 
 const kn: typeof en = {
@@ -1428,6 +1455,15 @@ const kn: typeof en = {
   deleteLaundryEntry: "ಲಾಂಡ್ರಿ ಎಂಟ್ರಿ ಅಳಿಸಬೇಕೇ?",
   deleteLaundryEntryConfirm: "ಈ ಲಾಂಡ್ರಿ ಎಂಟ್ರಿಯನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ. ಈ ಕ್ರಿಯೆಯನ್ನು ಹಿಂಪಡೆಯಲು ಸಾಧ್ಯವಿಲ್ಲ.",
   addYourFirstClientDesc: "ನೀವು ಸೇವೆಗಳನ್ನು ಒದಗಿಸುವ ಗ್ರಾಹಕ ಮನೆಗಳನ್ನು ಸೇರಿಸಿ",
+  
+  // Storage Limits
+  storageWarning: "ಸಂಗ್ರಹಣೆ ಎಚ್ಚರಿಕೆ",
+  storageWarningMessage: "ನೀವು ಲಭ್ಯವಿರುವ ಸಂಗ್ರಹಣೆಯ {percent}% ಬಳಸುತ್ತಿದ್ದೀರಿ ({current}/{limit} ದಾಖಲೆಗಳು). ಜಾಗ ಖಾಲಿ ಮಾಡಲು ಹಳೆಯ ದಾಖಲೆಗಳನ್ನು ಅಳಿಸುವುದನ್ನು ಪರಿಗಣಿಸಿ.",
+  storageLimitReached: "ಸಂಗ್ರಹಣೆ ಮಿತಿ ತಲುಪಿದೆ",
+  storageLimitMessage: "ನೀವು ಗರಿಷ್ಠ ಸಂಗ್ರಹಣೆ ಮಿತಿಯನ್ನು ({limit} ದಾಖಲೆಗಳು) ತಲುಪಿದ್ದೀರಿ. ಹೊಸ ದಾಖಲೆಗಳನ್ನು ಸೇರಿಸಲು ದಯವಿಟ್ಟು ಕೆಲವು ದಾಖಲೆಗಳನ್ನು ಅಳಿಸಿ.",
+  totalRecords: "ಒಟ್ಟು ದಾಖಲೆಗಳು",
+  deleteOldRecords: "ಹಳೆಯ ದಾಖಲೆಗಳನ್ನು ಅಳಿಸಿ",
+  storageAlmostFull: "ಸಂಗ್ರಹಣೆ ಬಹುತೇಕ ತುಂಬಿದೆ",
 };
 
 const ml: typeof en = {
@@ -1683,6 +1719,15 @@ const ml: typeof en = {
   deleteLaundryEntry: "ലോൺഡ്രി എൻട്രി ഇല്ലാതാക്കണോ?",
   deleteLaundryEntryConfirm: "ഈ ലോൺഡ്രി എൻട്രി നീക്കം ചെയ്യപ്പെടും. ഈ പ്രവർത്തനം പഴയപടിയാക്കാൻ കഴിയില്ല.",
   addYourFirstClientDesc: "നിങ്ങൾ സേവനങ്ങൾ നൽകുന്ന ക്ലയന്റ് ഹോമുകൾ ചേർക്കുക",
+  
+  // Storage Limits
+  storageWarning: "സ്റ്റോറേജ് മുന്നറിയിപ്പ്",
+  storageWarningMessage: "ലഭ്യമായ സ്റ്റോറേജിന്റെ {percent}% നിങ്ങൾ ഉപയോഗിക്കുന്നു ({current}/{limit} റെക്കോർഡുകൾ). ഇടം ഒഴിവാക്കാൻ പഴയ റെക്കോർഡുകൾ ഇല്ലാതാക്കുന്നത് പരിഗണിക്കുക.",
+  storageLimitReached: "സ്റ്റോറേജ് പരിധി എത്തി",
+  storageLimitMessage: "നിങ്ങൾ പരമാവധി സ്റ്റോറേജ് പരിധി ({limit} റെക്കോർഡുകൾ) എത്തിയിരിക്കുന്നു. പുതിയ റെക്കോർഡുകൾ ചേർക്കാൻ ചില റെക്കോർഡുകൾ ഇല്ലാതാക്കുക.",
+  totalRecords: "മൊത്തം റെക്കോർഡുകൾ",
+  deleteOldRecords: "പഴയ റെക്കോർഡുകൾ ഇല്ലാതാക്കുക",
+  storageAlmostFull: "സ്റ്റോറേജ് ഏതാണ്ട് നിറഞ്ഞിരിക്കുന്നു",
 };
 
 // For brevity, other languages will fall back to English with key translations
