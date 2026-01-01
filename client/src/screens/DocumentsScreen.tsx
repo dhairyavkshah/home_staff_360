@@ -262,14 +262,16 @@ export function DocumentsScreen() {
                     )}
                   </div>
                   <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowPreview(doc)}
-                      data-testid={`button-view-${doc.id}`}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
+                    {/^image\/(jpeg|jpg|png|bmp|heif|heic)$/i.test(doc.fileType) && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowPreview(doc)}
+                        data-testid={`button-view-${doc.id}`}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
