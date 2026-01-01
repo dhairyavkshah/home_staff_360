@@ -25,34 +25,36 @@ const isTestBypassEnabled = (): boolean => {
   return false;
 };
 
+// Permissions - users can skip during onboarding and grant later when needed
+// The 'required' flag indicates if the permission is essential for a core feature
 export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
   {
     id: "location",
     name: "Location Access",
     description: "Detect your country to set the correct currency and regional settings automatically.",
     icon: "map-pin",
-    required: true,
+    required: false, // Optional - country can be selected manually
   },
   {
     id: "storage",
     name: "Storage Access",
     description: "Save and access your data, photos, and backup files. All data stays on your device for complete privacy.",
     icon: "folder",
-    required: true,
+    required: true, // Required for backup/restore and document attachments
   },
   {
     id: "notifications",
     name: "Notifications",
     description: "Receive reminders for pending payments, attendance tracking, and important updates.",
     icon: "bell",
-    required: true,
+    required: false, // Optional - app works without notifications
   },
   {
     id: "camera",
     name: "Camera Access",
     description: "Take photos for staff profiles and document scanning. This helps you quickly capture and store important information.",
     icon: "camera",
-    required: true,
+    required: false, // Optional - can add photos from gallery
   },
 ];
 
@@ -218,12 +220,21 @@ class PermissionsService {
   }
 
   areRequiredPermissionsGranted(status: PermissionStatus): boolean {
-    // Allow bypass for automated testing
-    if (isTestBypassEnabled()) {
-      return true;
-    }
+    // Check if truly required permissions are granted
     const requiredPerms = REQUIRED_PERMISSIONS.filter(p => p.required);
     return requiredPerms.every(perm => status[perm.id] === "granted");
+  }
+
+  // Check if a specific permission is granted
+  isPermissionGranted(status: PermissionStatus, type: PermissionType): boolean {
+    return status[type] === "granted";
+  }
+
+  // Get list of skipped permissions that weren't granted
+  getSkippedPermissions(status: PermissionStatus): PermissionType[] {
+    return REQUIRED_PERMISSIONS
+      .filter(p => status[p.id] !== "granted")
+      .map(p => p.id);
   }
 
   private mapCapacitorStatus(status: string): "granted" | "denied" | "prompt" | "unavailable" {
