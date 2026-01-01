@@ -61,6 +61,13 @@ export function StaffHomeScreen() {
 
   const modulesRequiringBusiness = ['clients', 'attendance', 'laundry', 'expenses', 'reports', 'documents', 'invoices'];
   const modulesRequiringClient = ['attendance', 'laundry', 'expenses', 'reports', 'invoices'];
+  
+  const isLaundryBusiness = useMemo(() => {
+    if (showAllContexts) {
+      return accounts.some(a => a.profession === 'Laundry Service');
+    }
+    return activeAccount?.profession === 'Laundry Service';
+  }, [accounts, activeAccount, showAllContexts]);
 
   const handleModuleClick = (moduleId: string, screen: string) => {
     if (modulesRequiringBusiness.includes(moduleId) && !hasBusinesses) {
@@ -159,7 +166,7 @@ export function StaffHomeScreen() {
     }).reduce((sum, e) => sum + e.amount, 0);
   }, [refreshKey, showAllContexts, activeAccountId]);
 
-  const modules = [
+  const allModules = [
     {
       id: 'businesses',
       title: tLabel('businesses', 'Businesses'),
@@ -225,6 +232,8 @@ export function StaffHomeScreen() {
       subtitle: tLabel('billClients', 'Bill Clients'),
     },
   ];
+  
+  const modules = isLaundryBusiness ? allModules : allModules.filter(m => m.id !== 'laundry');
 
   const getHaloClass = (color: string) => {
     const classes: Record<string, string> = {

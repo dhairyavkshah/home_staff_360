@@ -313,6 +313,7 @@ export const laundryBatchSchema = z.object({
   id: z.string(),
   accountId: z.string(),
   personId: z.string().optional(),
+  staffId: z.string().optional(),
   provider: z.string().optional(),
   serviceType: z.enum(LAUNDRY_SERVICE_TYPES).optional(),
   date: z.string(),
@@ -415,6 +416,7 @@ export type InsertSelfAttendance = z.infer<typeof insertSelfAttendanceSchema>;
 export const staffLaundryJobSchema = z.object({
   id: z.string(),
   staffUserId: z.string(),
+  accountId: z.string().optional(),
   clientHomeId: z.string(),
   date: z.string(),
   itemCount: z.number().int().nonnegative(),

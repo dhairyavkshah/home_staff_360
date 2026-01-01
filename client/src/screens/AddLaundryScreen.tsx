@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { X, FileText, Truck, Info, Edit2, Shirt } from "lucide-react";
+import { X, FileText, Truck, Info, Edit2, Shirt, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,7 @@ import { useActiveContext } from "@/hooks/use-active-context";
 import { getTodayString, formatCurrency } from "@/lib/calculations";
 import { QuickAddClothModal } from "@/components/laundry/QuickAddClothModal";
 import { LAUNDRY_SERVICE_TYPES, type LaundryItem, type LaundryServiceType, currencySymbols } from "@shared/schema";
+import type { Person } from "@shared/schema";
 
 function generateItemId(): string {
   return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -47,6 +48,7 @@ export function AddLaundryScreen() {
   const [serviceType, setServiceType] = useState<LaundryServiceType>("Ironing");
   const [date, setDate] = useState(getTodayString());
   const [provider, setProvider] = useState("");
+  const [selectedStaffId, setSelectedStaffId] = useState("");
   const [items, setItems] = useState<LaundryItem[]>([]);
   const [pickupDelivery, setPickupDelivery] = useState(false);
   const [pickupDeliveryCharge, setPickupDeliveryCharge] = useState("");
@@ -55,6 +57,13 @@ export function AddLaundryScreen() {
   const [editingItem, setEditingItem] = useState<LaundryItem | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  const laundryStaff = useMemo(() => {
+    const activeAccountId = storage.getActiveAccountId();
+    if (!activeAccountId) return [];
+    const people = storage.getPeopleByAccount(activeAccountId);
+    return people.filter((p: Person) => p.role === 'Laundry' && p.isActive);
+  }, []);
 
   useEffect(() => {
     if (navData.laundryId && !isLoaded) {
@@ -63,6 +72,7 @@ export function AddLaundryScreen() {
         setServiceType((existingBatch.serviceType as LaundryServiceType) || "Ironing");
         setDate(existingBatch.date);
         setProvider(existingBatch.provider || "");
+        setSelectedStaffId(existingBatch.staffId || "");
         setItems(existingBatch.items || []);
         setPickupDelivery(!!existingBatch.pickupDelivery);
         setPickupDeliveryCharge(existingBatch.pickupDeliveryCharge?.toString() || "");
@@ -138,6 +148,7 @@ export function AddLaundryScreen() {
 
     if (!serviceType) newErrors.serviceType = "Service Type is required";
     if (!date) newErrors.date = "Date is required";
+    if (!selectedStaffId && laundryStaff.length > 0) newErrors.staffId = "Staff is required";
     if (items.length === 0) newErrors.items = "Add at least one item";
     if (pickupDelivery && (!pickupDeliveryCharge || parseFloat(pickupDeliveryCharge) <= 0)) {
       newErrors.pickupDeliveryCharge = "Enter a valid pickup/delivery charge";
@@ -160,6 +171,7 @@ export function AddLaundryScreen() {
     
     const laundryData = {
       provider: provider.trim() || undefined,
+      staffId: selectedStaffId || undefined,
       serviceType: serviceType as typeof LAUNDRY_SERVICE_TYPES[number],
       date,
       items,
@@ -222,6 +234,28 @@ export function AddLaundryScreen() {
             />
             {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
           </div>
+          
+          {laundryStaff.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="staff">Staff <span className="text-destructive">*</span></Label>
+              <Select value={selectedStaffId} onValueChange={(v) => { setSelectedStaffId(v); markDirty(); }}>
+                <SelectTrigger id="staff" data-testid="select-staff">
+                  <SelectValue placeholder="Select staff member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {laundryStaff.map((staff) => (
+                    <SelectItem key={staff.id} value={staff.id}>
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        {staff.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.staffId && <p className="text-xs text-destructive">{errors.staffId}</p>}
+            </div>
+          )}
         </section>
 
         <section className="flex flex-col gap-4 fade-in-up" style={{ animationDelay: "50ms" }}>

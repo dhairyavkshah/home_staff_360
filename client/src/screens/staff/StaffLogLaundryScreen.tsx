@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { X, Truck, Shirt } from "lucide-react";
+import { X, Truck, Shirt, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,7 @@ import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { QuickAddClothModal } from "@/components/laundry/QuickAddClothModal";
 import { currencySymbols, LAUNDRY_SERVICE_TYPES } from "@shared/schema";
-import type { LaundryServiceType } from "@shared/schema";
+import type { LaundryServiceType, Account } from "@shared/schema";
 
 interface LaundryItem {
   id: string;
@@ -45,9 +45,18 @@ export function StaffLogLaundryScreen() {
   const data = useNavigationData<{ laundryJobId?: string }>();
 
   const profile = useMemo(() => storage.getProfile(), []);
-  const clientHomes = useMemo(() => storage.getActiveClientHomes(), []);
   const settings = useMemo(() => storage.getSettings(), []);
   const symbol = settings.customCurrencySymbol || currencySymbols[settings.currency];
+  
+  const laundryBusinesses = useMemo(() => {
+    const accounts = storage.getAccounts().filter(a => a.ownerType === 'STAFF');
+    return accounts.filter((a: Account) => a.profession === 'Laundry Service');
+  }, []);
+  
+  const activeAccountId = useMemo(() => storage.getActiveAccountId(), []);
+  const activeAccount = useMemo(() => {
+    return laundryBusinesses.find(a => a.id === activeAccountId);
+  }, [laundryBusinesses, activeAccountId]);
 
   const editMode = !!data.laundryJobId;
   const existingJob = useMemo(() => {
@@ -56,6 +65,7 @@ export function StaffLogLaundryScreen() {
   }, [data.laundryJobId]);
 
   const today = new Date().toISOString().split('T')[0];
+  const [selectedBusinessId, setSelectedBusinessId] = useState<string>(activeAccount?.id || "");
   const [selectedHome, setSelectedHome] = useState<string>("");
   const [date, setDate] = useState(today);
   const [provider, setProvider] = useState("");
@@ -66,6 +76,19 @@ export function StaffLogLaundryScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  const clientHomes = useMemo(() => {
+    if (selectedBusinessId) {
+      return storage.getActiveClientHomesByAccount(selectedBusinessId);
+    }
+    return storage.getActiveClientHomes();
+  }, [selectedBusinessId]);
+  
+  useEffect(() => {
+    if (!selectedBusinessId && activeAccount) {
+      setSelectedBusinessId(activeAccount.id);
+    }
+  }, [activeAccount, selectedBusinessId]);
 
   const itemsTotal = items.reduce((sum, item) => sum + item.subtotal, 0);
   const deliveryCharge = pickupDelivery ? parseFloat(pickupDeliveryCharge) || 0 : 0;
@@ -74,6 +97,7 @@ export function StaffLogLaundryScreen() {
 
   useEffect(() => {
     if (existingJob) {
+      if (existingJob.accountId) setSelectedBusinessId(existingJob.accountId);
       setSelectedHome(existingJob.clientHomeId);
       setDate(existingJob.date);
       if (existingJob.note) setProvider(existingJob.note);
@@ -143,6 +167,7 @@ export function StaffLogLaundryScreen() {
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
+    if (!selectedBusinessId) newErrors.selectedBusinessId = "Business is required";
     if (!selectedHome) newErrors.selectedHome = t("selectClientHome") || "Client Home is required";
     if (!serviceType) newErrors.serviceType = "Service Type is required";
     if (!date) newErrors.date = "Date is required";
@@ -175,6 +200,7 @@ export function StaffLogLaundryScreen() {
 
     if (editMode && data.laundryJobId) {
       storage.updateStaffLaundryJob(data.laundryJobId, {
+        accountId: selectedBusinessId,
         clientHomeId: selectedHome,
         date,
         itemCount: totalItems,
@@ -190,6 +216,7 @@ export function StaffLogLaundryScreen() {
     } else {
       storage.addStaffLaundryJob({
         staffUserId: profile.id,
+        accountId: selectedBusinessId,
         clientHomeId: selectedHome,
         date,
         itemCount: totalItems,
@@ -222,6 +249,28 @@ export function StaffLogLaundryScreen() {
       <ScrollContent className="page-enter">
         <section className="flex flex-col gap-4 fade-in-up">
           <h2 className="text-lg font-semibold">{t("basicInformation") || "Basic Information"}</h2>
+
+          {laundryBusinesses.length > 1 && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="business">{t("business") || "Business"} <span className="text-destructive">*</span></Label>
+              <Select value={selectedBusinessId} onValueChange={(v) => { setSelectedBusinessId(v); setSelectedHome(""); markDirty(); }}>
+                <SelectTrigger id="business" data-testid="select-business">
+                  <SelectValue placeholder={t("selectBusiness") || "Select business"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {laundryBusinesses.map((business) => (
+                    <SelectItem key={business.id} value={business.id}>
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="w-4 h-4" />
+                        {business.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.selectedBusinessId && <p className="text-xs text-destructive">{errors.selectedBusinessId}</p>}
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="clientHome">{t("clientHomes")} <span className="text-destructive">*</span></Label>

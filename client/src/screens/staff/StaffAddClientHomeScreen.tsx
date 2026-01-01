@@ -211,31 +211,38 @@ export function StaffAddClientHomeScreen() {
           {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Label>{t("salaryType")} <span className="text-destructive">*</span></Label>
-          <Select value={salaryType} onValueChange={(v) => { setSalaryType(v as SalaryType); markDirty(); }}>
-            <SelectTrigger data-testid="select-salary-type">
-              <SelectValue placeholder={t("salaryType")} />
-            </SelectTrigger>
-            <SelectContent>
-              {salaryTypes.map((type) => (
-                <SelectItem key={type} value={type}>{SALARY_TYPE_LABELS[type]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">{t("daily")}, {t("hourly")}, or {t("monthly")}</p>
-        </div>
+        {role !== 'Laundry' && (
+          <div className="flex flex-col gap-2">
+            <Label>{t("salaryType")} <span className="text-destructive">*</span></Label>
+            <Select value={salaryType} onValueChange={(v) => { setSalaryType(v as SalaryType); markDirty(); }}>
+              <SelectTrigger data-testid="select-salary-type">
+                <SelectValue placeholder={t("salaryType")} />
+              </SelectTrigger>
+              <SelectContent>
+                {salaryTypes.map((type) => (
+                  <SelectItem key={type} value={type}>{SALARY_TYPE_LABELS[type]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">{t("daily")}, {t("hourly")}, or {t("monthly")}</p>
+          </div>
+        )}
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="rate">{t("rate")} <span className="text-destructive">*</span></Label>
+          <Label htmlFor="rate">
+            {role === 'Laundry' ? tLabel("ratePerItem", "Rate (per Item)") : t("rate")} <span className="text-destructive">*</span>
+          </Label>
           <Input
             id="rate"
             type="number"
             value={rate}
             onChange={(e) => { setRate(e.target.value); markDirty(); }}
-            placeholder={salaryType === 'DAILY' ? "500" : salaryType === 'HOURLY' ? "100" : "15000"}
+            placeholder={role === 'Laundry' ? "10" : (salaryType === 'DAILY' ? "500" : salaryType === 'HOURLY' ? "100" : "15000")}
             data-testid="input-rate"
           />
+          {role === 'Laundry' && (
+            <p className="text-xs text-muted-foreground">Rate charged per laundry item</p>
+          )}
           {errors.rate && <p className="text-xs text-destructive">{errors.rate}</p>}
         </div>
 
