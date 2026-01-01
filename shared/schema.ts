@@ -304,6 +304,8 @@ export const transactionSchema = z.object({
   date: z.string(),
   isPaid: z.boolean(),
   createdAt: z.string(),
+  recordCurrency: z.string().optional(),
+  recordCurrencySymbol: z.string().optional(),
 });
 
 export type Transaction = z.infer<typeof transactionSchema>;
@@ -354,6 +356,8 @@ export const laundryBatchSchema = z.object({
   isPaid: z.boolean().default(false),
   paidAt: z.string().optional(),
   createdAt: z.string(),
+  recordCurrency: z.string().optional(),
+  recordCurrencySymbol: z.string().optional(),
 });
 
 export type LaundryBatch = z.infer<typeof laundryBatchSchema>;
@@ -374,6 +378,8 @@ export const expenseSchema = z.object({
   reminderDays: z.number().min(0).optional(),
   isPaid: z.boolean(),
   createdAt: z.string(),
+  recordCurrency: z.string().optional(),
+  recordCurrencySymbol: z.string().optional(),
 });
 
 export type Expense = z.infer<typeof expenseSchema>;
@@ -466,6 +472,8 @@ export const staffLaundryJobSchema = z.object({
   pickupDeliveryCharge: z.number().optional(),
   note: z.string().optional(),
   createdAt: z.string(),
+  recordCurrency: z.string().optional(),
+  recordCurrencySymbol: z.string().optional(),
 });
 
 export type StaffLaundryJob = z.infer<typeof staffLaundryJobSchema>;
@@ -482,6 +490,8 @@ export const staffEarningSchema = z.object({
   type: z.enum(['salary', 'laundry', 'bonus', 'tip', 'advance', 'other']),
   description: z.string().optional(),
   createdAt: z.string(),
+  recordCurrency: z.string().optional(),
+  recordCurrencySymbol: z.string().optional(),
 });
 
 export type StaffEarning = z.infer<typeof staffEarningSchema>;
@@ -503,6 +513,8 @@ export const staffExpenseSchema = z.object({
   recurrence: z.enum(["one-time", "weekly", "monthly", "yearly"]).default("one-time"),
   reminderDays: z.number().optional(),
   createdAt: z.string(),
+  recordCurrency: z.string().optional(),
+  recordCurrencySymbol: z.string().optional(),
 });
 export type StaffExpense = z.infer<typeof staffExpenseSchema>;
 
@@ -540,6 +552,8 @@ export const staffInvoiceSchema = z.object({
   notes: z.string().optional(),
   createdAt: z.string(),
   paidDate: z.string().optional(),
+  recordCurrency: z.string().optional(),
+  recordCurrencySymbol: z.string().optional(),
 });
 
 export type StaffInvoice = z.infer<typeof staffInvoiceSchema>;
