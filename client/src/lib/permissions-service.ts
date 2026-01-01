@@ -1,13 +1,12 @@
 import { Capacitor } from "@capacitor/core";
-import { Camera } from "@capacitor/camera";
-import { geolocationService } from "./geolocation-service";
+import { Camera, CameraResultType } from "@capacitor/camera";
 
-export type PermissionType = "camera" | "storage" | "location";
+export type PermissionType = "camera" | "storage" | "notifications";
 
 export interface PermissionStatus {
   camera: "granted" | "denied" | "prompt" | "unavailable";
   storage: "granted" | "denied" | "prompt" | "unavailable";
-  location: "granted" | "denied" | "prompt" | "unavailable";
+  notifications: "granted" | "denied" | "prompt" | "unavailable";
 }
 
 export interface PermissionInfo {
@@ -27,17 +26,17 @@ const isTestBypassEnabled = (): boolean => {
 
 export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
   {
-    id: "location",
-    name: "Location Access",
-    description: "Detect your country to set up the right currency and phone number format. This only happens once during setup.",
-    icon: "map-pin",
-    required: true,
-  },
-  {
     id: "storage",
     name: "Storage Access",
     description: "Save and access your data, photos, and backup files. All data stays on your device for complete privacy.",
     icon: "folder",
+    required: true,
+  },
+  {
+    id: "notifications",
+    name: "Notifications",
+    description: "Receive reminders for pending payments, attendance tracking, and important updates.",
+    icon: "bell",
     required: true,
   },
   {
@@ -56,7 +55,7 @@ class PermissionsService {
     const status: PermissionStatus = {
       camera: "unavailable",
       storage: "unavailable",
-      location: "unavailable",
+      notifications: "unavailable",
     };
 
     if (this.isNative) {
@@ -69,11 +68,20 @@ class PermissionsService {
         status.storage = "unavailable";
       }
 
-      status.location = await geolocationService.checkLocationPermission();
+      try {
+        if ("Notification" in window) {
+          status.notifications = this.mapWebNotificationStatus(Notification.permission);
+        }
+      } catch {
+        status.notifications = "unavailable";
+      }
     } else {
       status.camera = await this.checkWebCameraPermission();
       status.storage = "granted";
-      status.location = await geolocationService.checkLocationPermission();
+      
+      if ("Notification" in window) {
+        status.notifications = this.mapWebNotificationStatus(Notification.permission);
+      }
     }
 
     if (!this.isNative) {
@@ -136,8 +144,17 @@ class PermissionsService {
     }
   }
 
-  async requestLocationPermission(): Promise<"granted" | "denied"> {
-    return geolocationService.requestLocationPermission();
+  async requestNotificationPermission(): Promise<"granted" | "denied"> {
+    if (!("Notification" in window)) {
+      return "denied";
+    }
+    
+    try {
+      const result = await Notification.requestPermission();
+      return result === "granted" ? "granted" : "denied";
+    } catch {
+      return "denied";
+    }
   }
 
   async requestPermission(type: PermissionType): Promise<"granted" | "denied"> {
@@ -146,8 +163,8 @@ class PermissionsService {
         return this.requestCameraPermission();
       case "storage":
         return this.requestStoragePermission();
-      case "location":
-        return this.requestLocationPermission();
+      case "notifications":
+        return this.requestNotificationPermission();
       default:
         return "denied";
     }
@@ -174,6 +191,17 @@ class PermissionsService {
         return "prompt";
       default:
         return "unavailable";
+    }
+  }
+
+  private mapWebNotificationStatus(status: NotificationPermission): "granted" | "denied" | "prompt" {
+    switch (status) {
+      case "granted":
+        return "granted";
+      case "denied":
+        return "denied";
+      default:
+        return "prompt";
     }
   }
 

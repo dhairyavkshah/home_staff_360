@@ -29,7 +29,7 @@ import { AddExpenseScreen } from "@/screens/AddExpenseScreen";
 import { ExpenseCalendarScreen } from "@/screens/ExpenseCalendarScreen";
 import { ReportsScreen } from "@/screens/ReportsScreen";
 import { SettingsScreen } from "@/screens/SettingsScreen";
-import { DonationScreen } from "@/screens/DonationScreen";
+import { PlanScreen } from "@/screens/PlanScreen";
 import { BackupScreen } from "@/screens/BackupScreen";
 import { PayablesScreen } from "@/screens/PayablesScreen";
 import { DocumentsScreen } from "@/screens/DocumentsScreen";
@@ -108,8 +108,8 @@ function MobileAppRouter() {
       return <ReportsScreen />;
     case "settings":
       return <SettingsScreen />;
-    case "donate":
-      return <DonationScreen />;
+    case "plan":
+      return <PlanScreen />;
     case "backup":
       return <BackupScreen />;
     case "staff-home":

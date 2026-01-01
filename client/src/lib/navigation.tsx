@@ -29,7 +29,7 @@ export type Screen =
   | "export"
   | "backup"
   | "settings"
-  | "donate"
+  | "plan"
   | "documents"
   | "staff-home"
   | "businesses"

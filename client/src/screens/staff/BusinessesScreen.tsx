@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Briefcase, Trash2, Edit2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
@@ -28,7 +28,7 @@ import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useToast } from "@/hooks/use-toast";
 import { notifyActiveContextChange } from "@/hooks/use-active-context";
 import { usePlanStatus } from "@/hooks/use-plan-status";
-import { BUSINESS_PROFESSIONS, COUNTRIES } from "@shared/schema";
+import { BUSINESS_PROFESSIONS } from "@shared/schema";
 
 export function BusinessesScreen() {
   const { navigate } = useNavigation();
@@ -41,15 +41,7 @@ export function BusinessesScreen() {
   const [businessName, setBusinessName] = useState("");
   const [businessDescription, setBusinessDescription] = useState("");
   const [businessProfession, setBusinessProfession] = useState("");
-  const [businessCountry, setBusinessCountry] = useState("");
   const { planType } = usePlanStatus();
-
-  useEffect(() => {
-    const settings = storage.getSettings();
-    if (settings.userCountry && !businessCountry) {
-      setBusinessCountry(settings.userCountry);
-    }
-  }, []);
 
   const profile = useMemo(() => storage.getProfile(), [refreshKey]);
   const accounts = useMemo(() => storage.getAccounts().filter(a => a.ownerType === 'STAFF'), [refreshKey]);
@@ -68,8 +60,6 @@ export function BusinessesScreen() {
     setBusinessName("");
     setBusinessDescription("");
     setBusinessProfession("");
-    const settings = storage.getSettings();
-    setBusinessCountry(settings.userCountry || "");
     setEditingId(null);
     setShowAddDialog(true);
   };
@@ -80,7 +70,6 @@ export function BusinessesScreen() {
       setBusinessName(account.name);
       setBusinessDescription(account.description || "");
       setBusinessProfession(account.profession || "");
-      setBusinessCountry(account.country || storage.getSettings().userCountry || "");
       setEditingId(id);
       setShowAddDialog(true);
     }
