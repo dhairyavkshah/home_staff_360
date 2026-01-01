@@ -34,10 +34,10 @@ export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
   },
   {
     id: "notifications",
-    name: "Push Notifications",
-    description: "Receive reminders for pending payments, attendance tracking, and important updates. You can enable this later in settings.",
+    name: "Notifications",
+    description: "Receive reminders for pending payments, attendance tracking, and important updates.",
     icon: "bell",
-    required: false,
+    required: true,
   },
   {
     id: "camera",

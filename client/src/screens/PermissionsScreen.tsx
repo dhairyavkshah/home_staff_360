@@ -77,14 +77,6 @@ export function PermissionsScreen() {
     }
   };
 
-  const handleSkipOptional = () => {
-    if (currentIndex < permissions.length - 1) {
-      emblaApi?.scrollNext();
-    } else {
-      checkAllAndProceed();
-    }
-  };
-
   const navigateAfterPermissions = () => {
     const userType = data.userType || "HOME";
     const returnToApp = data.returnToApp;
@@ -179,9 +171,7 @@ export function PermissionsScreen() {
                       <div className="text-center space-y-2">
                         <div className="flex items-center justify-center gap-2">
                           <h2 className="text-xl font-semibold">{permission.name}</h2>
-                          <Badge variant={permission.required ? "secondary" : "outline"}>
-                            {permission.required ? "Required" : "Optional"}
-                          </Badge>
+                          <Badge variant="secondary">Required</Badge>
                         </div>
                         <p className="text-muted-foreground text-sm leading-relaxed">
                           {permission.description}
@@ -209,26 +199,14 @@ export function PermissionsScreen() {
                           </Button>
                         </div>
                       ) : (
-                        <div className="space-y-2 w-full">
-                          <Button
-                            className="w-full"
-                            onClick={handleRequestPermission}
-                            disabled={isRequesting}
-                            data-testid={`button-allow-${permission.id}`}
-                          >
-                            {isRequesting ? "Requesting..." : "Allow Access"}
-                          </Button>
-                          {!permission.required && (
-                            <Button
-                              variant="ghost"
-                              className="w-full"
-                              onClick={handleSkipOptional}
-                              data-testid={`button-skip-${permission.id}`}
-                            >
-                              Maybe Later
-                            </Button>
-                          )}
-                        </div>
+                        <Button
+                          className="w-full"
+                          onClick={handleRequestPermission}
+                          disabled={isRequesting}
+                          data-testid={`button-allow-${permission.id}`}
+                        >
+                          {isRequesting ? "Requesting..." : "Allow Access"}
+                        </Button>
                       )}
 
                     </Card>
