@@ -15,6 +15,7 @@ export function LauncherScreen() {
       
       const permissionsStatus = await permissionsService.checkAllPermissions();
       const permissionsGranted = permissionsService.areRequiredPermissionsGranted(permissionsStatus);
+      const hasCompletedPermissions = permissionsService.hasCompletedPermissionsFlow();
       
       if (settings.hasCompletedOnboarding && profile) {
         if (!permissionsGranted) {
@@ -34,7 +35,7 @@ export function LauncherScreen() {
           }
         }
       } else if (profile) {
-        if (!permissionsGranted) {
+        if (!hasCompletedPermissions) {
           navigate("permissions", { userType: profile.type });
         } else {
           navigate("onboarding", { userType: profile.type });

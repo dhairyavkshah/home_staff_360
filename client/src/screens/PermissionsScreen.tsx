@@ -331,7 +331,7 @@ export function PermissionsScreen() {
           {canFinish && (
             <div className="text-center mt-4">
               <Button
-                variant="link"
+                variant="ghost"
                 className="text-xs text-muted-foreground"
                 onClick={finishPermissions}
                 data-testid="button-skip-all"
