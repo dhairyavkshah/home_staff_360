@@ -42,7 +42,7 @@ export function Header({
   const ContextIcon = contextMode === "staff" ? Briefcase : Home;
   
   const headerContent = (
-    <div className="content-container py-3 min-h-14">
+    <div className="content-container py-2.5 min-h-12">
       {contextLabel && (
         <div className="flex items-center gap-2 mb-1.5" data-testid="context-indicator">
           <Badge variant="secondary" className="gap-1 font-normal">
@@ -128,14 +128,14 @@ export function Header({
 
   if (sticky) {
     return (
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border/50 flex-shrink-0">
+      <header className="sticky top-0 z-50 bg-background border-b border-border flex-shrink-0">
         {headerContent}
       </header>
     );
   }
 
   return (
-    <header className="flex-shrink-0">
+    <header className="flex-shrink-0 border-b border-border">
       {headerContent}
     </header>
   );
