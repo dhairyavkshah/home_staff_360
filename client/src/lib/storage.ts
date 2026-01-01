@@ -1221,7 +1221,7 @@ export const storage = {
   } {
     const homeAttendance = this.getAttendance().length;
     const homeTransactions = this.getTransactions().length;
-    const homeLaundry = this.getLaundryBatches().length;
+    const homeLaundry = this.getLaundry().length;
     const homeExpenses = this.getExpenses().length;
     const staffAttendance = this.getSelfAttendance().length;
     const staffLaundry = this.getStaffLaundryJobs().length;
