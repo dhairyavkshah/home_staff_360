@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
+import { SafeArea, SystemBarsStyle } from '@capacitor-community/safe-area';
 
 export async function initSafeArea(): Promise<void> {
   if (!Capacitor.isNativePlatform()) {
@@ -7,14 +7,10 @@ export async function initSafeArea(): Promise<void> {
   }
 
   try {
-    await StatusBar.setOverlaysWebView({ overlay: false });
-
     const isDarkMode = document.documentElement.classList.contains('dark');
-    await StatusBar.setStyle({ style: isDarkMode ? Style.Dark : Style.Light });
-
-    if (Capacitor.getPlatform() === 'android') {
-      await StatusBar.setBackgroundColor({ color: isDarkMode ? '#1a1a1a' : '#ffffff' });
-    }
+    await SafeArea.setSystemBarsStyle({
+      style: isDarkMode ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
+    });
   } catch {
   }
 }
@@ -25,11 +21,9 @@ export async function updateStatusBarTheme(isDark: boolean): Promise<void> {
   }
 
   try {
-    await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light });
-    
-    if (Capacitor.getPlatform() === 'android') {
-      await StatusBar.setBackgroundColor({ color: isDark ? '#1a1a1a' : '#ffffff' });
-    }
+    await SafeArea.setSystemBarsStyle({
+      style: isDark ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
+    });
   } catch {
   }
 }

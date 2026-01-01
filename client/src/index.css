@@ -4,6 +4,15 @@
 
 /* Home Manager 360 Design System - Samsung One UI + Material 3 + Fluent fusion */
 
+/* Safe Area Insets - Android/iOS compatibility */
+:root {
+  /* Safe area CSS custom properties with fallbacks */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);
@@ -277,12 +286,20 @@
   }
   
   /* Safe area padding using CSS environment variables for device notches/status bars */
+  /* Uses custom properties that can be overridden by Capacitor safe-area plugin on Android */
   .safe-area-top {
-    padding-top: max(env(safe-area-inset-top, 0px), 24px);
+    padding-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+    min-height: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
   }
   
   .safe-area-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+    padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+    min-height: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  }
+  
+  /* Fixed bottom elements should use bottom position offset */
+  .safe-area-bottom-fixed {
+    bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
   }
   
   /* Content container with standard 16px horizontal padding */
