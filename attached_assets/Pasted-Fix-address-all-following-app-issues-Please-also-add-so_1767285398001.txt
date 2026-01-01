@@ -1,0 +1,21 @@
+Fix/address all following app issues:
+
+Please also add sound-effects when I tap on Cards/fields/widgets/elements, or anywhere on the screens, just standard simple pure feeble sound.
+Please implement it such that on tap/click, it makes sound, that is enable sound-based click/tap effect. I want you to implement the "ticks," "clicks," or "pops" UI Sounds or Feedback Sounds, throughout the app, if not already done.
+
+Need to add/select the Staff (from dropdown) when adding Laundry. Keep it required field/dropdown. | Also, please thoroughly configure the permissions required for the app - Camera, Microphone, Location, Phone, Music and Audio (I believe that is why currently the UI pops/clicks/tap etc. sounds are not working), Notifications, Photos and Videos. Also, the main android app image is still not changed! Please see the image I get in when installing the app - Please make this image App icon. Also, please employ a design check as per Android guidelines, requirements, and best practices. Also, in the Reports, when I click on "Export" or "Send Report", the app is crashing! Please fix. |||Please do a thorough analysis of the application's every screen/page and functionality from start to finish; and ensure it is ready to compile/build as apk. I need haptic or UI sounds support in the app for touches/taps/pops/clicks. Also, ensure that the app's subscription is coded well to go on Google Play Store in paid app with a free trial basis. Check that the safe area spacing (at the top and bottom) is perfect as per Android guidelines. Also, replace use that attached as App Icon image as per android's app icon requirements; so that when I build the app apk and install it looks perfectly. Also resolve the issue that currently the notification messages are going into the top safe zone/android top bar; which really looks bads; please fix it.
+
+I want all system UI sounds to be simple, standard feeble please. Also, currently it is not working at someplace, fpr e.g. clicking/tapping on Attendance Calendar. Please ensure all screens are covered with touch/tap sounds (UI Sounds). And currently there is some lag when playing the sound. Please resolve the lag issue.
+
+While adding Laundry, only show that staff which as Role/Profession as Laundry, and not others. Ensure this check is also there in Staff User Mode while adding/logging laundry.
+
+Remove the "Report Bug or Suggest Improvement" module entirely from the Settings, and remove any dependencies on it. We will incorporate it later when needed.
+
+When I add a Client Details in Staff User Mode, with my Role/Service as Laundry, then salary type should not be displayed, and Rate should be mentioned as Rate (per Item), same as how it is in the Home User Mode.
+
+In the Staff Mode, "Laundry" mode should only be shown where the "Service/Profession Type" is "Laundry Service"; otherwise do not show "Laundry Service". Understand my purpose/context why I am asking this change. Then make the changes.
+
+Add a dropdown "Business Name" in this page, by default automatically populating the current active/default Business in Staff User Mode. This means that we want to track the Laundry against the Business under which I am adding the Laundry.
+
+Staff User ode: Currently, it is not linking the Laundry record with the Business and Client perfectly ||| Issue: I had added the Laundry under Ramesh Laundry, but later when I added Business Viraj Laundry Service, then the record is now also showing under Business "Ramesh Laundry" and "Viraj Laundry Service". So basically it is not maintaining linking correctly in Staff User Mode. Also, the Laundry is not showing "Laundry Details" which I had added in the Laundry, when I edit/view that record. Please check. ||| Also, when I select the "All Businesses", and go to internal screens; it is not filtering the results as per Active Business. ; to fix this I suggest that we remove the "All Households" (in Home User Mode) option and "All Businesses" (in Staff User Mode) to address this issue; please let me know if this is an apt move to make.
+
