@@ -3,6 +3,7 @@ import {
   STAFF_STORAGE_KEYS,
   DOCUMENT_STORAGE_KEY,
   PLAN_LIMITS,
+  CURRENCIES,
   type AppSettings,
   type HomeSettings,
   type StaffSettings,
@@ -38,6 +39,7 @@ import {
   type InsertDocument,
   type PlanType,
   type LinkedRecordType,
+  type Currency,
   defaultSettings,
   defaultHomeSettings,
   defaultStaffSettings,
@@ -58,6 +60,27 @@ function getItem<T>(key: string, defaultValue: T): T {
 
 function setItem<T>(key: string, value: T): void {
   localStorage.setItem(key, JSON.stringify(value));
+}
+
+function getCurrentCurrencyInfo(): { currency: string; symbol: string } {
+  const profile = getItem<UserProfile | null>(STORAGE_KEYS.PROFILE, null);
+  const isStaffMode = profile?.type === 'STAFF';
+  
+  if (isStaffMode) {
+    const staffSettings = getItem(STORAGE_KEYS.STAFF_SETTINGS, defaultStaffSettings);
+    const currency = staffSettings.currency || 'USD';
+    const symbol = currency === 'OTHER' && staffSettings.customCurrencySymbol 
+      ? staffSettings.customCurrencySymbol 
+      : CURRENCIES[currency as Currency]?.symbol || '$';
+    return { currency, symbol };
+  } else {
+    const homeSettings = getItem(STORAGE_KEYS.HOME_SETTINGS, defaultHomeSettings);
+    const currency = homeSettings.currency || 'USD';
+    const symbol = currency === 'OTHER' && homeSettings.customCurrencySymbol 
+      ? homeSettings.customCurrencySymbol 
+      : CURRENCIES[currency as Currency]?.symbol || '$';
+    return { currency, symbol };
+  }
 }
 
 export const storage = {
@@ -395,10 +418,13 @@ export const storage = {
 
   addTransaction(data: InsertTransaction): Transaction {
     const transactions = this.getTransactions();
+    const currencyInfo = getCurrentCurrencyInfo();
     const transaction: Transaction = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
+      recordCurrency: data.recordCurrency || currencyInfo.currency,
+      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
     };
     transactions.push(transaction);
     setItem(STORAGE_KEYS.TRANSACTIONS, transactions);
@@ -443,10 +469,13 @@ export const storage = {
 
   addLaundry(data: InsertLaundryBatch): LaundryBatch {
     const laundry = this.getLaundry();
+    const currencyInfo = getCurrentCurrencyInfo();
     const batch: LaundryBatch = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
+      recordCurrency: data.recordCurrency || currencyInfo.currency,
+      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
     };
     laundry.push(batch);
     setItem(STORAGE_KEYS.LAUNDRY, laundry);
@@ -512,10 +541,13 @@ export const storage = {
 
   addExpense(data: InsertExpense): Expense {
     const expenses = this.getExpenses();
+    const currencyInfo = getCurrentCurrencyInfo();
     const expense: Expense = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
+      recordCurrency: data.recordCurrency || currencyInfo.currency,
+      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
     };
     expenses.push(expense);
     setItem(STORAGE_KEYS.EXPENSES, expenses);
@@ -734,10 +766,13 @@ export const storage = {
 
   addStaffLaundryJob(data: InsertStaffLaundryJob): StaffLaundryJob {
     const jobs = this.getStaffLaundryJobs();
+    const currencyInfo = getCurrentCurrencyInfo();
     const job: StaffLaundryJob = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
+      recordCurrency: data.recordCurrency || currencyInfo.currency,
+      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
     };
     jobs.push(job);
     setItem(STAFF_STORAGE_KEYS.LAUNDRY_JOBS, jobs);
@@ -777,10 +812,13 @@ export const storage = {
 
   addStaffEarning(data: InsertStaffEarning): StaffEarning {
     const earnings = this.getStaffEarnings();
+    const currencyInfo = getCurrentCurrencyInfo();
     const earning: StaffEarning = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
+      recordCurrency: data.recordCurrency || currencyInfo.currency,
+      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
     };
     earnings.push(earning);
     setItem(STAFF_STORAGE_KEYS.EARNINGS, earnings);
@@ -816,10 +854,13 @@ export const storage = {
 
   addStaffExpense(data: InsertStaffExpense): StaffExpense {
     const expenses = this.getStaffExpenses();
+    const currencyInfo = getCurrentCurrencyInfo();
     const expense: StaffExpense = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
+      recordCurrency: data.recordCurrency || currencyInfo.currency,
+      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
     };
     expenses.push(expense);
     setItem(STAFF_STORAGE_KEYS.EXPENSES, expenses);
@@ -873,10 +914,13 @@ export const storage = {
 
   addStaffInvoice(data: InsertStaffInvoice): StaffInvoice {
     const invoices = this.getStaffInvoices();
+    const currencyInfo = getCurrentCurrencyInfo();
     const invoice: StaffInvoice = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
+      recordCurrency: data.recordCurrency || currencyInfo.currency,
+      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
     };
     invoices.push(invoice);
     setItem(STAFF_STORAGE_KEYS.INVOICES, invoices);
