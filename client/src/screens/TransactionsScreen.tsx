@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowRightLeft, User, Link2, ChevronUp, ChevronDown, Pencil, Trash2, Plus } from "lucide-react";
+import { ArrowRightLeft, User, Link2, ChevronUp, ChevronDown, Trash2, Plus } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -49,7 +49,6 @@ export function TransactionsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   
-  const [editingTransaction, setEditingTransaction] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const settings = useMemo(() => storage.getSettings(), [refreshKey]);
@@ -146,7 +145,6 @@ export function TransactionsScreen() {
     setAmount("");
     setDate(getTodayString());
     setErrors({});
-    setEditingTransaction(null);
   };
 
   const validate = () => {
@@ -162,45 +160,19 @@ export function TransactionsScreen() {
   const handleSubmit = () => {
     if (!validate()) return;
 
-    if (editingTransaction) {
-      storage.updateTransaction(editingTransaction, {
-        personId: selectedPersonId,
-        category,
-        description: description.trim(),
-        amount: parseFloat(amount),
-        date,
-        isPaid: true,
-      });
-      toast({ title: tLabel('transactionUpdated', 'Transaction updated successfully') });
-      setEditingTransaction(null);
-    } else {
-      storage.addTransaction({
-        personId: selectedPersonId,
-        category,
-        description: description.trim(),
-        amount: parseFloat(amount),
-        date,
-        isPaid: true,
-      });
-      toast({ title: tLabel('transactionAdded', 'Transaction added successfully') });
-    }
+    storage.addTransaction({
+      personId: selectedPersonId,
+      category,
+      description: description.trim(),
+      amount: parseFloat(amount),
+      date,
+      isPaid: true,
+    });
+    toast({ title: tLabel('transactionAdded', 'Transaction added successfully') });
 
     resetForm();
     setShowAddForm(false);
     setRefreshKey(prev => prev + 1);
-  };
-
-  const handleEdit = (txId: string) => {
-    const tx = storage.getTransactions().find(t => t.id === txId);
-    if (!tx) return;
-    
-    setSelectedPersonId(tx.personId);
-    setCategory(tx.category);
-    setDescription(tx.description);
-    setAmount(tx.amount.toString());
-    setDate(tx.date);
-    setEditingTransaction(txId);
-    setShowAddForm(true);
   };
 
   const handleDelete = (txId: string) => {
@@ -235,7 +207,7 @@ export function TransactionsScreen() {
         <div className="content-container pb-4 flex-shrink-0 border-b">
           <Card className="p-4 flex flex-col gap-4">
             <h2 className="text-base font-semibold">
-              {editingTransaction ? tLabel('editTransaction', 'Edit Transaction') : tLabel('addTransaction', 'Add Transaction')}
+              {tLabel('addTransaction', 'Add Transaction')}
             </h2>
             
             <div className="flex flex-col gap-2">
@@ -310,7 +282,7 @@ export function TransactionsScreen() {
                 {tLabel('cancel', 'Cancel')}
               </Button>
               <Button className="flex-1" onClick={handleSubmit} data-testid="button-save">
-                {editingTransaction ? tLabel('update', 'Update') : tLabel('save', 'Save')}
+                {tLabel('save', 'Save')}
               </Button>
             </div>
           </Card>
@@ -375,24 +347,14 @@ export function TransactionsScreen() {
                       <p className="font-semibold text-sm whitespace-nowrap">
                         {formatCurrency(tx.amount, settings.currency, settings.customCurrencySymbol)}
                       </p>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={(e) => { e.stopPropagation(); handleEdit(tx.id); }}
-                          data-testid={`button-edit-${tx.id}`}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(tx.id); }}
-                          data-testid={`button-delete-${tx.id}`}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(tx.id); }}
+                        data-testid={`button-delete-${tx.id}`}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge className={`text-xs ${getCategoryColor(tx.category)}`}>

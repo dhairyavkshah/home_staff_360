@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
-import { Calendar, Check, X, Clock } from "lucide-react";
+import { Calendar, Check, X, Clock, Trash2, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -12,6 +13,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
@@ -38,6 +49,8 @@ export function StaffLogAttendanceScreen() {
     return storage.getSelfAttendance().find(a => a.id === data.attendanceId);
   }, [data.attendanceId]);
 
+  const isViewMode = editMode && existingRecord;
+
   const today = new Date().toISOString().split('T')[0];
   const [selectedHome, setSelectedHome] = useState<string>("");
   const [date, setDate] = useState(today);
@@ -45,6 +58,7 @@ export function StaffLogAttendanceScreen() {
   const [hours, setHours] = useState<string>("");
   const [note, setNote] = useState("");
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     if (existingRecord) {
@@ -83,30 +97,157 @@ export function StaffLogAttendanceScreen() {
     }
     if (!profile) return;
 
-    if (editMode && data.attendanceId) {
-      storage.updateSelfAttendance(data.attendanceId, {
-        clientHomeId: selectedHome,
-        date,
-        status,
-        hoursWorked: hours ? parseFloat(hours) : undefined,
-        note: note.trim() || undefined,
-      });
-      toast({ title: t("attendanceUpdated") || "Attendance updated" });
-    } else {
-      storage.addSelfAttendance({
-        staffUserId: profile.id,
-        clientHomeId: selectedHome,
-        date,
-        status,
-        hoursWorked: hours ? parseFloat(hours) : undefined,
-        note: note.trim() || undefined,
-      });
-      toast({ title: t("attendanceLogged") });
-    }
+    storage.addSelfAttendance({
+      staffUserId: profile.id,
+      clientHomeId: selectedHome,
+      date,
+      status,
+      hoursWorked: hours ? parseFloat(hours) : undefined,
+      note: note.trim() || undefined,
+    });
+    toast({ title: t("attendanceLogged") });
 
     markClean();
     navigate("staff-home");
   };
+
+  const handleDelete = () => {
+    if (!data.attendanceId) return;
+    
+    storage.deleteSelfAttendance(data.attendanceId);
+    toast({ title: t("attendanceDeleted") || "Attendance deleted successfully" });
+    navigate("staff-attendance");
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getClientHomeName = (homeId: string): string => {
+    const home = clientHomes.find(h => h.id === homeId);
+    return home ? `${home.name} - ${home.role}` : homeId;
+  };
+
+  const getStatusBadge = (statusValue: AttendanceStatus) => {
+    switch (statusValue) {
+      case "FULL":
+        return <Badge variant="default" data-testid="view-status">{t("fullDay")}</Badge>;
+      case "HALF":
+        return <Badge variant="secondary" data-testid="view-status">{t("halfDay")}</Badge>;
+      case "ABSENT":
+        return <Badge variant="outline" data-testid="view-status">{t("absent")}</Badge>;
+      default:
+        return <Badge variant="outline" data-testid="view-status">{statusValue}</Badge>;
+    }
+  };
+
+  if (isViewMode && existingRecord) {
+    return (
+      <AppLayout>
+        <Header
+          title={"View Attendance"}
+          subtitle={t("recordYourWorkDay")}
+          onBack={() => navigate("staff-attendance")}
+          onHome={() => navigate("staff-home")}
+        />
+
+        <ScrollContent>
+          <Card className="p-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 mb-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  {"This record cannot be edited"}
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                  {"Attendance records are locked after creation. If you need to make changes, delete this record and create a new one."}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">{"Attendance Details"}</h2>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{t("clientHomes")}</Label>
+              <p className="font-medium" data-testid="view-client-home">
+                {getClientHomeName(existingRecord.clientHomeId)}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{t("date")}</Label>
+              <p className="font-medium" data-testid="view-date">{formatDate(existingRecord.date)}</p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{t("status")}</Label>
+              <div data-testid="view-status-container">
+                {getStatusBadge(existingRecord.status)}
+              </div>
+            </div>
+
+            {existingRecord.hoursWorked && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{t("hoursWorked")}</Label>
+                <p className="font-medium" data-testid="view-hours">{existingRecord.hoursWorked} {t("hours") || "hours"}</p>
+              </div>
+            )}
+
+            {existingRecord.note && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{t("notes")}</Label>
+                <p className="font-medium" data-testid="view-note">{existingRecord.note}</p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{"Recorded On"}</Label>
+              <p className="text-sm text-muted-foreground" data-testid="view-created">
+                {formatDate(existingRecord.createdAt)}
+              </p>
+            </div>
+          </section>
+
+          <Button 
+            variant="destructive" 
+            className="w-full" 
+            onClick={() => setShowDeleteDialog(true)} 
+            data-testid="button-delete"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            {t("deleteAttendance") || "Delete Attendance"}
+          </Button>
+        </ScrollContent>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("deleteAttendance") || "Delete Attendance"}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("deleteAttendanceConfirm") || "Are you sure you want to delete this attendance record? This action cannot be undone."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                {t("delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -219,7 +360,7 @@ export function StaffLogAttendanceScreen() {
               onClick={handleSave}
               data-testid="button-save"
             >
-              {editMode ? t("updateAttendance") : existingAttendance ? t("updateAttendance") : t("logAttendance")}
+              {existingAttendance ? t("updateAttendance") : t("logAttendance")}
             </Button>
           </>
         )}
