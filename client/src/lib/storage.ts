@@ -3,6 +3,7 @@ import {
   STAFF_STORAGE_KEYS,
   DOCUMENT_STORAGE_KEY,
   PLAN_LIMITS,
+  STORAGE_LIMITS,
   CURRENCIES,
   type AppSettings,
   type HomeSettings,
@@ -1201,5 +1202,74 @@ export const storage = {
     if (totalBytes < 1024) return { totalBytes, formatted: `${totalBytes} B` };
     if (totalBytes < 1024 * 1024) return { totalBytes, formatted: `${(totalBytes / 1024).toFixed(1)} KB` };
     return { totalBytes, formatted: `${(totalBytes / (1024 * 1024)).toFixed(1)} MB` };
+  },
+
+  getTotalRecordsCount(): { 
+    total: number; 
+    breakdown: { 
+      homeAttendance: number;
+      homeTransactions: number;
+      homeLaundry: number;
+      homeExpenses: number;
+      staffAttendance: number;
+      staffLaundry: number;
+      staffExpenses: number;
+      staffInvoices: number;
+      documents: number;
+    };
+  } {
+    const homeAttendance = this.getAttendance().length;
+    const homeTransactions = this.getTransactions().length;
+    const homeLaundry = this.getLaundryBatches().length;
+    const homeExpenses = this.getExpenses().length;
+    const staffAttendance = this.getSelfAttendance().length;
+    const staffLaundry = this.getStaffLaundryJobs().length;
+    const staffExpenses = this.getStaffExpenses().length;
+    const staffInvoices = this.getStaffInvoices().length;
+    const documents = this.getDocuments().length;
+    
+    const total = homeAttendance + homeTransactions + homeLaundry + homeExpenses + 
+                  staffAttendance + staffLaundry + staffExpenses + staffInvoices + documents;
+    
+    return {
+      total,
+      breakdown: {
+        homeAttendance,
+        homeTransactions,
+        homeLaundry,
+        homeExpenses,
+        staffAttendance,
+        staffLaundry,
+        staffExpenses,
+        staffInvoices,
+        documents,
+      },
+    };
+  },
+
+  getStorageStatus(): {
+    totalRecords: number;
+    warningThreshold: number;
+    limitThreshold: number;
+    status: 'ok' | 'warning' | 'limit';
+    percentUsed: number;
+  } {
+    const { total } = this.getTotalRecordsCount();
+    const { totalRecordsWarning, totalRecordsLimit } = STORAGE_LIMITS;
+    
+    let status: 'ok' | 'warning' | 'limit' = 'ok';
+    if (total >= totalRecordsLimit) {
+      status = 'limit';
+    } else if (total >= totalRecordsWarning) {
+      status = 'warning';
+    }
+    
+    return {
+      totalRecords: total,
+      warningThreshold: totalRecordsWarning,
+      limitThreshold: totalRecordsLimit,
+      status,
+      percentUsed: Math.min(100, Math.round((total / totalRecordsLimit) * 100)),
+    };
   },
 };

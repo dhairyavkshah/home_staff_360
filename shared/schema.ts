@@ -602,7 +602,7 @@ export const PLAN_LIMITS = {
     PREMIUM: {
       maxHouseholds: 10,
       maxStaffTotal: 100,
-      maxDocuments: 100,
+      maxDocuments: 250,
     },
   },
   STAFF: {
@@ -614,9 +614,14 @@ export const PLAN_LIMITS = {
     PREMIUM: {
       maxBusinesses: 10,
       maxClientsTotal: 100,
-      maxDocuments: 100,
+      maxDocuments: 250,
     },
   },
+} as const;
+
+export const STORAGE_LIMITS = {
+  totalRecordsWarning: 800,
+  totalRecordsLimit: 1000,
 } as const;
 
 // ============ DOCUMENT CATEGORIES ============
