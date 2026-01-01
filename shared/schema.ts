@@ -36,6 +36,7 @@ export const accountSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   profession: z.string().optional(),
+  country: z.string().optional(),
   createdAt: z.string(),
 });
 
@@ -61,7 +62,7 @@ export const BUSINESS_PROFESSIONS = [
   'Other',
 ] as const;
 
-export const currencies = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'OTHER'] as const;
+export const currencies = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'AUD', 'CAD', 'SGD', 'JPY', 'CNY', 'OTHER'] as const;
 export type Currency = typeof currencies[number];
 
 export const getCurrencySymbol = (currency: Currency): string => {
@@ -71,9 +72,80 @@ export const getCurrencySymbol = (currency: Currency): string => {
     EUR: '€',
     GBP: '£',
     AED: 'د.إ',
+    AUD: 'A$',
+    CAD: 'C$',
+    SGD: 'S$',
+    JPY: '¥',
+    CNY: '¥',
     OTHER: '$',
   };
   return symbols[currency];
+};
+
+export const COUNTRIES = [
+  { code: 'IN', name: 'India', currency: 'INR' as Currency, phonePrefix: '+91', phoneDigits: 10 },
+  { code: 'US', name: 'United States', currency: 'USD' as Currency, phonePrefix: '+1', phoneDigits: 10 },
+  { code: 'GB', name: 'United Kingdom', currency: 'GBP' as Currency, phonePrefix: '+44', phoneDigits: 10 },
+  { code: 'AE', name: 'United Arab Emirates', currency: 'AED' as Currency, phonePrefix: '+971', phoneDigits: 9 },
+  { code: 'AU', name: 'Australia', currency: 'AUD' as Currency, phonePrefix: '+61', phoneDigits: 9 },
+  { code: 'CA', name: 'Canada', currency: 'CAD' as Currency, phonePrefix: '+1', phoneDigits: 10 },
+  { code: 'SG', name: 'Singapore', currency: 'SGD' as Currency, phonePrefix: '+65', phoneDigits: 8 },
+  { code: 'DE', name: 'Germany', currency: 'EUR' as Currency, phonePrefix: '+49', phoneDigits: 11 },
+  { code: 'FR', name: 'France', currency: 'EUR' as Currency, phonePrefix: '+33', phoneDigits: 9 },
+  { code: 'IT', name: 'Italy', currency: 'EUR' as Currency, phonePrefix: '+39', phoneDigits: 10 },
+  { code: 'ES', name: 'Spain', currency: 'EUR' as Currency, phonePrefix: '+34', phoneDigits: 9 },
+  { code: 'NL', name: 'Netherlands', currency: 'EUR' as Currency, phonePrefix: '+31', phoneDigits: 9 },
+  { code: 'BE', name: 'Belgium', currency: 'EUR' as Currency, phonePrefix: '+32', phoneDigits: 9 },
+  { code: 'AT', name: 'Austria', currency: 'EUR' as Currency, phonePrefix: '+43', phoneDigits: 10 },
+  { code: 'CH', name: 'Switzerland', currency: 'EUR' as Currency, phonePrefix: '+41', phoneDigits: 9 },
+  { code: 'JP', name: 'Japan', currency: 'JPY' as Currency, phonePrefix: '+81', phoneDigits: 10 },
+  { code: 'CN', name: 'China', currency: 'CNY' as Currency, phonePrefix: '+86', phoneDigits: 11 },
+  { code: 'NZ', name: 'New Zealand', currency: 'NZD' as Currency, phonePrefix: '+64', phoneDigits: 9 },
+  { code: 'SA', name: 'Saudi Arabia', currency: 'SAR' as Currency, phonePrefix: '+966', phoneDigits: 9 },
+  { code: 'QA', name: 'Qatar', currency: 'QAR' as Currency, phonePrefix: '+974', phoneDigits: 8 },
+  { code: 'KW', name: 'Kuwait', currency: 'KWD' as Currency, phonePrefix: '+965', phoneDigits: 8 },
+  { code: 'OM', name: 'Oman', currency: 'OMR' as Currency, phonePrefix: '+968', phoneDigits: 8 },
+  { code: 'BH', name: 'Bahrain', currency: 'BHD' as Currency, phonePrefix: '+973', phoneDigits: 8 },
+  { code: 'MY', name: 'Malaysia', currency: 'MYR' as Currency, phonePrefix: '+60', phoneDigits: 10 },
+  { code: 'TH', name: 'Thailand', currency: 'THB' as Currency, phonePrefix: '+66', phoneDigits: 9 },
+  { code: 'PH', name: 'Philippines', currency: 'PHP' as Currency, phonePrefix: '+63', phoneDigits: 10 },
+  { code: 'ID', name: 'Indonesia', currency: 'IDR' as Currency, phonePrefix: '+62', phoneDigits: 12 },
+  { code: 'VN', name: 'Vietnam', currency: 'VND' as Currency, phonePrefix: '+84', phoneDigits: 10 },
+  { code: 'ZA', name: 'South Africa', currency: 'ZAR' as Currency, phonePrefix: '+27', phoneDigits: 9 },
+  { code: 'NG', name: 'Nigeria', currency: 'NGN' as Currency, phonePrefix: '+234', phoneDigits: 10 },
+  { code: 'KE', name: 'Kenya', currency: 'KES' as Currency, phonePrefix: '+254', phoneDigits: 9 },
+  { code: 'EG', name: 'Egypt', currency: 'EGP' as Currency, phonePrefix: '+20', phoneDigits: 10 },
+  { code: 'BR', name: 'Brazil', currency: 'BRL' as Currency, phonePrefix: '+55', phoneDigits: 11 },
+  { code: 'MX', name: 'Mexico', currency: 'MXN' as Currency, phonePrefix: '+52', phoneDigits: 10 },
+  { code: 'AR', name: 'Argentina', currency: 'ARS' as Currency, phonePrefix: '+54', phoneDigits: 10 },
+  { code: 'CL', name: 'Chile', currency: 'CLP' as Currency, phonePrefix: '+56', phoneDigits: 9 },
+  { code: 'CO', name: 'Colombia', currency: 'COP' as Currency, phonePrefix: '+57', phoneDigits: 10 },
+  { code: 'PK', name: 'Pakistan', currency: 'PKR' as Currency, phonePrefix: '+92', phoneDigits: 10 },
+  { code: 'BD', name: 'Bangladesh', currency: 'BDT' as Currency, phonePrefix: '+880', phoneDigits: 10 },
+  { code: 'LK', name: 'Sri Lanka', currency: 'LKR' as Currency, phonePrefix: '+94', phoneDigits: 9 },
+  { code: 'NP', name: 'Nepal', currency: 'NPR' as Currency, phonePrefix: '+977', phoneDigits: 10 },
+] as const;
+
+export type CountryCode = typeof COUNTRIES[number]['code'];
+
+export const getCountryByCode = (code: string) => COUNTRIES.find(c => c.code === code);
+export const getDefaultCurrencyForCountry = (countryCode: string): Currency => {
+  const country = getCountryByCode(countryCode);
+  if (country) {
+    if (currencies.includes(country.currency as Currency)) {
+      return country.currency as Currency;
+    }
+  }
+  return 'USD';
+};
+
+export const getPhoneValidationForCountry = (countryCode: string) => {
+  const country = getCountryByCode(countryCode);
+  return {
+    prefix: country?.phonePrefix || '+1',
+    digits: country?.phoneDigits || 10,
+    isIndia: countryCode === 'IN',
+  };
 };
 
 export const languages = ['en', 'hi', 'gu', 'kn', 'ml', 'es', 'fr', 'de', 'ar', 'zh', 'ja', 'pt'] as const;
@@ -181,6 +253,8 @@ export const appSettingsSchema = z.object({
   // Feedback settings
   hapticFeedbackEnabled: z.boolean().optional(),
   soundEffectsEnabled: z.boolean().optional(),
+  // User country (detected from location)
+  userCountry: z.string().optional(),
 });
 
 export type AppSettings = z.infer<typeof appSettingsSchema>;
@@ -378,6 +452,11 @@ export const currencySymbols: Record<Currency, string> = {
   EUR: '€',
   GBP: '£',
   AED: 'د.إ',
+  AUD: 'A$',
+  CAD: 'C$',
+  SGD: 'S$',
+  JPY: '¥',
+  CNY: '¥',
   OTHER: '$',
 };
 

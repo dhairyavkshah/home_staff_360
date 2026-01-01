@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Camera, FolderOpen, Bell, Check, X, ChevronRight, ChevronLeft, Shield } from "lucide-react";
+import { Camera, FolderOpen, MapPin, Check, X, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,11 +11,14 @@ import {
   type PermissionStatus, 
   type PermissionType 
 } from "@/lib/permissions-service";
+import { geolocationService } from "@/lib/geolocation-service";
+import { storage } from "@/lib/storage";
+import { getDefaultCurrencyForCountry } from "@shared/schema";
 
 const iconMap: Record<string, typeof Camera> = {
   camera: Camera,
   folder: FolderOpen,
-  bell: Bell,
+  "map-pin": MapPin,
 };
 
 export function PermissionsScreen() {
@@ -25,7 +28,7 @@ export function PermissionsScreen() {
   const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>({
     camera: "prompt",
     storage: "prompt",
-    notifications: "prompt",
+    location: "prompt",
   });
   const [isRequesting, setIsRequesting] = useState(false);
 
@@ -63,6 +66,18 @@ export function PermissionsScreen() {
       ...prev,
       [currentPermission.id]: result,
     }));
+    
+    if (currentPermission.id === "location" && result === "granted") {
+      const locationResult = await geolocationService.detectCountry();
+      if (locationResult.success) {
+        const settings = storage.getSettings();
+        storage.saveSettings({
+          ...settings,
+          userCountry: locationResult.countryCode,
+          currency: locationResult.currency,
+        });
+      }
+    }
     
     setIsRequesting(false);
     

@@ -1,12 +1,13 @@
 import { Capacitor } from "@capacitor/core";
-import { Camera, CameraResultType } from "@capacitor/camera";
+import { Camera } from "@capacitor/camera";
+import { geolocationService } from "./geolocation-service";
 
-export type PermissionType = "camera" | "storage" | "notifications";
+export type PermissionType = "camera" | "storage" | "location";
 
 export interface PermissionStatus {
   camera: "granted" | "denied" | "prompt" | "unavailable";
   storage: "granted" | "denied" | "prompt" | "unavailable";
-  notifications: "granted" | "denied" | "prompt" | "unavailable";
+  location: "granted" | "denied" | "prompt" | "unavailable";
 }
 
 export interface PermissionInfo {
@@ -25,6 +26,13 @@ const isTestBypassEnabled = (): boolean => {
 };
 
 export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
+  {
+    id: "location",
+    name: "Location Access",
+    description: "Detect your country to set up the right currency and phone number format. This only happens once during setup.",
+    icon: "map-pin",
+    required: true,
+  },
   {
     id: "storage",
     name: "Storage Access",
@@ -48,7 +56,7 @@ class PermissionsService {
     const status: PermissionStatus = {
       camera: "unavailable",
       storage: "unavailable",
-      notifications: "unavailable",
+      location: "unavailable",
     };
 
     if (this.isNative) {
@@ -61,20 +69,11 @@ class PermissionsService {
         status.storage = "unavailable";
       }
 
-      try {
-        if ("Notification" in window) {
-          status.notifications = this.mapWebNotificationStatus(Notification.permission);
-        }
-      } catch {
-        status.notifications = "unavailable";
-      }
+      status.location = await geolocationService.checkLocationPermission();
     } else {
       status.camera = await this.checkWebCameraPermission();
       status.storage = "granted";
-      
-      if ("Notification" in window) {
-        status.notifications = this.mapWebNotificationStatus(Notification.permission);
-      }
+      status.location = await geolocationService.checkLocationPermission();
     }
 
     if (!this.isNative) {
@@ -137,17 +136,8 @@ class PermissionsService {
     }
   }
 
-  async requestNotificationPermission(): Promise<"granted" | "denied"> {
-    if (!("Notification" in window)) {
-      return "denied";
-    }
-    
-    try {
-      const result = await Notification.requestPermission();
-      return result === "granted" ? "granted" : "denied";
-    } catch {
-      return "denied";
-    }
+  async requestLocationPermission(): Promise<"granted" | "denied"> {
+    return geolocationService.requestLocationPermission();
   }
 
   async requestPermission(type: PermissionType): Promise<"granted" | "denied"> {
@@ -156,8 +146,8 @@ class PermissionsService {
         return this.requestCameraPermission();
       case "storage":
         return this.requestStoragePermission();
-      case "notifications":
-        return this.requestNotificationPermission();
+      case "location":
+        return this.requestLocationPermission();
       default:
         return "denied";
     }
@@ -184,17 +174,6 @@ class PermissionsService {
         return "prompt";
       default:
         return "unavailable";
-    }
-  }
-
-  private mapWebNotificationStatus(status: NotificationPermission): "granted" | "denied" | "prompt" {
-    switch (status) {
-      case "granted":
-        return "granted";
-      case "denied":
-        return "denied";
-      default:
-        return "prompt";
     }
   }
 
