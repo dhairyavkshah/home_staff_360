@@ -42,26 +42,29 @@ export function calculateWages(
   attendanceEntries: AttendanceEntry[],
   settings: AppSettings
 ): number {
-  const halfDayPercentage = person.halfDayPercentage ?? settings.halfDayPercentage;
   let totalWages = 0;
 
   for (const entry of attendanceEntries) {
+    const salaryType = entry.recordSalaryType ?? person.salaryType;
+    const baseRate = entry.recordBaseRate ?? person.baseRate;
+    const halfDayPercentage = entry.recordHalfDayPercentage ?? person.halfDayPercentage ?? settings.halfDayPercentage;
+    
     if (entry.status === "FULL") {
-      if (person.salaryType === "HOURLY" && entry.hours) {
-        totalWages += person.baseRate * entry.hours;
-      } else if (person.salaryType === "DAILY") {
-        totalWages += person.baseRate;
-      } else if (person.salaryType === "MONTHLY") {
-        totalWages += person.baseRate / 30;
+      if (salaryType === "HOURLY" && entry.hours) {
+        totalWages += baseRate * entry.hours;
+      } else if (salaryType === "DAILY") {
+        totalWages += baseRate;
+      } else if (salaryType === "MONTHLY") {
+        totalWages += baseRate / 30;
       }
     } else if (entry.status === "HALF") {
       const multiplier = halfDayPercentage / 100;
-      if (person.salaryType === "HOURLY" && entry.hours) {
-        totalWages += person.baseRate * entry.hours * multiplier;
-      } else if (person.salaryType === "DAILY") {
-        totalWages += person.baseRate * multiplier;
-      } else if (person.salaryType === "MONTHLY") {
-        totalWages += (person.baseRate / 30) * multiplier;
+      if (salaryType === "HOURLY" && entry.hours) {
+        totalWages += baseRate * entry.hours * multiplier;
+      } else if (salaryType === "DAILY") {
+        totalWages += baseRate * multiplier;
+      } else if (salaryType === "MONTHLY") {
+        totalWages += (baseRate / 30) * multiplier;
       }
     }
   }

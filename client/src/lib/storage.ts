@@ -984,11 +984,8 @@ export const storage = {
     
     let fromAttendance = 0;
     attendance.forEach(a => {
-      const home = homeRates.get(a.clientHomeId);
-      if (home) {
-        const rate = home.rate;
-        fromAttendance += a.status === 'FULL' ? rate : rate * 0.5;
-      }
+      const rate = a.recordRate ?? homeRates.get(a.clientHomeId)?.rate ?? 0;
+      fromAttendance += a.status === 'FULL' ? rate : rate * 0.5;
     });
     
     const fromLaundry = laundryJobs.reduce((sum, j) => sum + j.totalEarned, 0);

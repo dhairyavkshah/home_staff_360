@@ -125,7 +125,7 @@ export function StaffReportsScreen() {
             .filter((a) => a.status !== "ABSENT")
             .map((a) => {
               const client = clientHomes.find((c) => c.id === a.clientHomeId);
-              const rate = client?.rate || 0;
+              const rate = a.recordRate ?? client?.rate ?? 0;
               const earned = a.status === "FULL" ? rate : rate * 0.5;
               return {
                 date: a.date,
