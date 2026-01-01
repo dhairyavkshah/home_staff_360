@@ -39,8 +39,7 @@ export function BottomTabBar({ mode }: BottomTabBarProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border/50 z-50" data-testid="bottom-tab-bar">
-      <div className="safe-area-bottom">
-        <div className="flex items-center justify-around h-14">
+      <div className="flex items-center justify-around h-14">
           {tabs.map((tab) => {
             const isActive = isTabActive(tab.screen);
             const Icon = tab.icon;
@@ -61,8 +60,8 @@ export function BottomTabBar({ mode }: BottomTabBarProps) {
               </button>
             );
           })}
-        </div>
       </div>
+      <div className="safe-area-bottom" />
     </nav>
   );
 }
