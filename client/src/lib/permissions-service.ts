@@ -33,13 +33,6 @@ export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
     required: true,
   },
   {
-    id: "notifications",
-    name: "Notifications",
-    description: "Receive reminders for pending payments, attendance tracking, and important updates.",
-    icon: "bell",
-    required: true,
-  },
-  {
     id: "camera",
     name: "Camera Access",
     description: "Take photos for staff profiles and document scanning. This helps you quickly capture and store important information.",

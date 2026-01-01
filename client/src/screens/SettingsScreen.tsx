@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Database, Trash2, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle, Volume2, Vibrate } from "lucide-react";
+import { Database, Trash2, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Heart, HelpCircle, Volume2, Vibrate } from "lucide-react";
 import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
 import { Button } from "@/components/ui/button";
@@ -316,28 +316,23 @@ export function SettingsScreen() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("subscriptionPlan")}</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Support</h2>
           <button
             className="w-full text-left hover-elevate"
-            onClick={() => navigate("plan")}
-            data-testid="button-plan"
+            onClick={() => navigate("donate")}
+            data-testid="button-donate"
           >
             <Card className="p-3">
               <div className="flex items-center gap-3">
-                <div className="icon-halo-warning w-10 h-10">
-                  <Crown className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <div className="icon-halo-success w-10 h-10">
+                  <Heart className="w-5 h-5 text-pink-500 dark:text-pink-400" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-sm">{t("subscriptionPlan")}</p>
-                    <Badge variant="default" className="text-[10px] px-1.5 py-0">
-                      {storage.getTrialInfo().status === "PURCHASED" ? "PREMIUM" : 
-                       storage.getTrialInfo().status === "TRIAL" ? `${storage.getTrialInfo().daysRemaining} DAYS LEFT` : "EXPIRED"}
-                    </Badge>
+                    <p className="font-semibold text-sm">Support the Developer</p>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {storage.getTrialInfo().status === "PURCHASED" ? "Lifetime premium access" : 
-                     storage.getTrialInfo().status === "TRIAL" ? "Free trial - all features unlocked" : "Upgrade to unlock all features"}
+                    Help us keep improving this app
                   </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />

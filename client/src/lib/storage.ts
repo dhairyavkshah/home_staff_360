@@ -972,44 +972,10 @@ export const storage = {
     trialStartedAt: string | null;
     isActive: boolean;
   } {
-    const settings = this.getSettings();
-    
-    if (settings.purchaseStatus === 'PURCHASED') {
-      return { 
-        status: 'PURCHASED', 
-        daysRemaining: 0, 
-        trialStartedAt: settings.trialStartedAt || null,
-        isActive: true 
-      };
-    }
-    
-    if (!settings.trialStartedAt) {
-      return { 
-        status: 'TRIAL', 
-        daysRemaining: 30, 
-        trialStartedAt: null,
-        isActive: false 
-      };
-    }
-    
-    const trialStart = new Date(settings.trialStartedAt);
-    const now = new Date();
-    const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
-    const daysRemaining = Math.max(0, 30 - daysPassed);
-    
-    if (daysPassed >= 30) {
-      return { 
-        status: 'EXPIRED', 
-        daysRemaining: 0, 
-        trialStartedAt: settings.trialStartedAt,
-        isActive: false 
-      };
-    }
-    
     return { 
-      status: 'TRIAL', 
-      daysRemaining, 
-      trialStartedAt: settings.trialStartedAt,
+      status: 'PURCHASED', 
+      daysRemaining: 0, 
+      trialStartedAt: null,
       isActive: true 
     };
   },
@@ -1033,21 +999,7 @@ export const storage = {
   },
 
   isPremiumUnlocked(): boolean {
-    const settings = this.getSettings();
-    
-    if (settings.purchaseStatus === 'PURCHASED') {
-      return true;
-    }
-    
-    if (!settings.trialStartedAt) {
-      return false;
-    }
-    
-    const trialStart = new Date(settings.trialStartedAt);
-    const now = new Date();
-    const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
-    
-    return daysPassed < 30;
+    return true;
   },
 
   markPurchased(): void {
@@ -1073,24 +1025,6 @@ export const storage = {
   // ============ PLAN LIMIT HELPERS ============
 
   getPlanType(): PlanType {
-    const settings = this.getSettings();
-    
-    if (settings.purchaseStatus === 'PURCHASED') {
-      return 'PREMIUM';
-    }
-    
-    if (!settings.trialStartedAt) {
-      return 'PREMIUM';
-    }
-    
-    const trialStart = new Date(settings.trialStartedAt);
-    const now = new Date();
-    const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (daysPassed >= 30) {
-      return 'FREE';
-    }
-    
     return 'PREMIUM';
   },
 
