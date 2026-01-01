@@ -54,34 +54,32 @@ export function RoleSelectionScreen() {
   const { navigate } = useNavigation();
 
   const handleSelectRole = (type: UserType) => {
-    // Always show permissions screen for first-time users from role selection
-    // This ensures new users go through the permissions flow even if localStorage has stale data
-    permissionsService.clearPermissionsGranted();
-    navigate("permissions", { userType: type });
+    if (permissionsService.hasCompletedPermissionsFlow()) {
+      navigate("onboarding", { userType: type });
+    } else {
+      navigate("permissions", { userType: type });
+    }
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background" data-testid="screen-role-selection">
+    <div className="min-h-screen flex flex-col bg-background page-enter" data-testid="screen-role-selection">
       <div className="safe-area-top" />
 
-      <header className="content-container py-3 min-h-14 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="icon-halo-primary w-10 h-10">
-            <Home className="w-5 h-5 text-primary" />
+      <div className="flex-1 overflow-y-auto">
+        <div className="content-container py-4 flex flex-col gap-4">
+          <div className="flex flex-col items-center text-center gap-3 fade-in-up">
+            <div className="icon-halo-primary w-14 h-14">
+              <Home className="w-7 h-7 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold" data-testid="text-choose-role">
+                Select Your Default Mode
+              </h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Choose how you will use the app primarily.
+              </p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-semibold" data-testid="text-choose-role">
-              Select Your Default Mode
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Choose how you will use the app primarily
-            </p>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="content-container pb-20 flex flex-col gap-4">
 
           <div className="flex flex-col gap-3">
             <RoleCard
@@ -113,14 +111,14 @@ export function RoleSelectionScreen() {
             />
           </div>
 
-          <div className="flex items-center gap-2 px-2">
+          <div className="flex items-center gap-2 px-2 fade-in-up" style={{ animationDelay: "200ms" }}>
             <Info className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             <p className="text-xs text-muted-foreground">
               You can switch between the modes and change the default mode from the Settings easily.
             </p>
           </div>
 
-          <Card className="p-3 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
+          <Card className="p-3 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 fade-in-up" style={{ animationDelay: "300ms" }}>
             <div className="flex items-start gap-2">
               <Shield className="w-5 h-5 text-primary flex-shrink-0" />
               <div>
