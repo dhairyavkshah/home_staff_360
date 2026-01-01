@@ -40,15 +40,15 @@ function playTapSound(): void {
     oscillator.connect(gainNode);
     gainNode.connect(ctx.destination);
 
-    oscillator.frequency.setValueAtTime(800, ctx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.05);
+    oscillator.frequency.setValueAtTime(2400, ctx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(1800, ctx.currentTime + 0.008);
     oscillator.type = 'sine';
 
-    gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+    gainNode.gain.setValueAtTime(0.015, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.008);
 
     oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.05);
+    oscillator.stop(ctx.currentTime + 0.01);
   } catch {
   }
 }
@@ -64,15 +64,15 @@ function playPopSound(): void {
     oscillator.connect(gainNode);
     gainNode.connect(ctx.destination);
 
-    oscillator.frequency.setValueAtTime(600, ctx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.08);
-    oscillator.type = 'triangle';
+    oscillator.frequency.setValueAtTime(1800, ctx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.012);
+    oscillator.type = 'sine';
 
-    gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+    gainNode.gain.setValueAtTime(0.02, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.012);
 
     oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.08);
+    oscillator.stop(ctx.currentTime + 0.015);
   } catch {
   }
 }
