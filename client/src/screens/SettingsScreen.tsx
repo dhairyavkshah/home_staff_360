@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Database, Trash2, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle } from "lucide-react";
+import { Database, Trash2, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle, Volume2, Vibrate } from "lucide-react";
 import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { useTheme } from "@/lib/theme-provider";
 import { pinService } from "@/lib/pin-service";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useTour } from "@/lib/guided-tour";
+import { setHapticEnabled, setSoundEnabled, isHapticEnabled, isSoundEnabled } from "@/lib/sound-service";
 
 export function SettingsScreen() {
   const { navigate, goBack } = useNavigation();
@@ -76,6 +77,8 @@ export function SettingsScreen() {
   const [appMode, setAppMode] = useState<UserType>(profile?.type || "HOME");
   const isPinEnabled = pinService.isPinEnabled();
   const { startTour } = useTour();
+  const [hapticFeedback, setHapticFeedback] = useState(isHapticEnabled());
+  const [soundEffects, setSoundEffects] = useState(isSoundEnabled());
 
   const handleStartTour = () => {
     const mode = profile?.type || "HOME";
@@ -437,6 +440,54 @@ export function SettingsScreen() {
                 checked={theme === "dark"}
                 onCheckedChange={toggleDarkMode}
                 data-testid="switch-dark-mode"
+              />
+            </div>
+          </Card>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Feedback</h2>
+          <Card className="divide-y">
+            <div className="p-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="icon-halo-primary w-9 h-9">
+                  <Vibrate className="w-4.5 h-4.5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Haptic Feedback</p>
+                  <p className="text-xs text-muted-foreground">Vibration on touch interactions</p>
+                </div>
+              </div>
+              <Switch
+                checked={hapticFeedback}
+                onCheckedChange={(checked) => {
+                  setHapticFeedback(checked);
+                  setHapticEnabled(checked);
+                  const currentSettings = storage.getSettings();
+                  storage.saveSettings({ ...currentSettings, hapticFeedbackEnabled: checked });
+                }}
+                data-testid="switch-haptic-feedback"
+              />
+            </div>
+            <div className="p-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="icon-halo-info w-9 h-9">
+                  <Volume2 className="w-4.5 h-4.5 text-info" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Sound Effects</p>
+                  <p className="text-xs text-muted-foreground">Play tap sounds on interactions</p>
+                </div>
+              </div>
+              <Switch
+                checked={soundEffects}
+                onCheckedChange={(checked) => {
+                  setSoundEffects(checked);
+                  setSoundEnabled(checked);
+                  const currentSettings = storage.getSettings();
+                  storage.saveSettings({ ...currentSettings, soundEffectsEnabled: checked });
+                }}
+                data-testid="switch-sound-effects"
               />
             </div>
           </Card>

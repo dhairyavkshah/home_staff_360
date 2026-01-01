@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { updateStatusBarTheme } from "@/lib/safe-area";
 
 type Theme = "dark" | "light" | "system";
 
@@ -46,6 +47,7 @@ export function ThemeProvider({
 
     root.classList.add(effectiveTheme);
     setResolvedTheme(effectiveTheme);
+    updateStatusBarTheme(effectiveTheme === "dark");
   }, [theme]);
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export function ThemeProvider({
         const effectiveTheme = mediaQuery.matches ? "dark" : "light";
         root.classList.add(effectiveTheme);
         setResolvedTheme(effectiveTheme);
+        updateStatusBarTheme(effectiveTheme === "dark");
       };
       mediaQuery.addEventListener("change", handleChange);
       return () => mediaQuery.removeEventListener("change", handleChange);

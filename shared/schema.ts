@@ -178,6 +178,9 @@ export const appSettingsSchema = z.object({
   purchaseStatus: z.enum(['TRIAL', 'EXPIRED', 'PURCHASED']).optional(),
   purchaseDate: z.string().optional(),
   purchaseCountry: z.string().optional(),
+  // Feedback settings
+  hapticFeedbackEnabled: z.boolean().optional(),
+  soundEffectsEnabled: z.boolean().optional(),
 });
 
 export type AppSettings = z.infer<typeof appSettingsSchema>;
@@ -196,6 +199,8 @@ export const defaultSettings: AppSettings = {
   homeTourCompleted: false,
   staffTourCompleted: false,
   purchaseStatus: 'TRIAL',
+  hapticFeedbackEnabled: true,
+  soundEffectsEnabled: true,
 };
 
 export const homeSettingsSchema = z.object({
