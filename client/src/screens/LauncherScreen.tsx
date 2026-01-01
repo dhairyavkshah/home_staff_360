@@ -41,6 +41,8 @@ export function LauncherScreen() {
           navigate("onboarding", { userType: profile.type });
         }
       } else {
+        // No profile means fresh start - clear any stale permissions flag
+        permissionsService.clearPermissionsGranted();
         navigate("role-selection");
       }
     };
