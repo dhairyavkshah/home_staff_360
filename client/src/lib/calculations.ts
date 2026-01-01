@@ -1,0 +1,272 @@
+import type { Person, AttendanceEntry, AppSettings, Transaction, LaundryBatch } from "@shared/schema";
+import { currencySymbols, type Currency } from "@shared/schema";
+import { storage } from "./storage";
+import { 
+  IndianRupee, 
+  DollarSign, 
+  Euro, 
+  PoundSterling, 
+  Banknote,
+  type LucideIcon 
+} from "lucide-react";
+
+export function getCategoryLabel(category: string): string {
+  switch (category) {
+    case 'payment': return 'Payment';
+    case 'advance': return 'Advance';
+    case 'deduction': return 'Deduction';
+    case 'other': return 'Other';
+    default: return category.charAt(0).toUpperCase() + category.slice(1);
+  }
+}
+
+export function getCurrencyIcon(currency: Currency): LucideIcon {
+  switch (currency) {
+    case "INR":
+      return IndianRupee;
+    case "USD":
+      return DollarSign;
+    case "EUR":
+      return Euro;
+    case "GBP":
+      return PoundSterling;
+    case "AED":
+    case "OTHER":
+    default:
+      return Banknote;
+  }
+}
+
+export function calculateWages(
+  person: Person,
+  attendanceEntries: AttendanceEntry[],
+  settings: AppSettings
+): number {
+  const halfDayPercentage = person.halfDayPercentage ?? settings.halfDayPercentage;
+  let totalWages = 0;
+
+  for (const entry of attendanceEntries) {
+    if (entry.status === "FULL") {
+      if (person.salaryType === "HOURLY" && entry.hours) {
+        totalWages += person.baseRate * entry.hours;
+      } else if (person.salaryType === "DAILY") {
+        totalWages += person.baseRate;
+      } else if (person.salaryType === "MONTHLY") {
+        totalWages += person.baseRate / 30;
+      }
+    } else if (entry.status === "HALF") {
+      const multiplier = halfDayPercentage / 100;
+      if (person.salaryType === "HOURLY" && entry.hours) {
+        totalWages += person.baseRate * entry.hours * multiplier;
+      } else if (person.salaryType === "DAILY") {
+        totalWages += person.baseRate * multiplier;
+      } else if (person.salaryType === "MONTHLY") {
+        totalWages += (person.baseRate / 30) * multiplier;
+      }
+    }
+  }
+
+  return totalWages;
+}
+
+export function calculatePersonBalance(personId: string): number {
+  const person = storage.getPerson(personId);
+  if (!person) return 0;
+
+  const settings = storage.getSettings();
+  const attendance = storage.getAttendanceByPerson(personId);
+  const transactions = storage.getTransactionsByPerson(personId);
+  const laundry = storage.getLaundryByPerson(personId);
+
+  const earnings = calculateWages(person, attendance, settings);
+
+  const paidTransactions = transactions
+    .filter((t) => t.isPaid)
+    .reduce((sum, t) => {
+      if (t.category === "payment") {
+        return sum - t.amount;
+      } else if (t.category === "advance") {
+        return sum - t.amount;
+      } else if (t.category === "deduction") {
+        return sum + t.amount;
+      }
+      return sum;
+    }, 0);
+
+  // Only deduct paid laundry from wages (unpaid laundry hasn't been settled yet)
+  const paidLaundryCharges = laundry
+    .filter((batch) => batch.isPaid)
+    .reduce((sum, batch) => sum + batch.total, 0);
+
+  return earnings + paidTransactions - paidLaundryCharges;
+}
+
+// Get unpaid laundry total for a person (adds to payables)
+export function getUnpaidLaundryTotal(personId: string): number {
+  const laundry = storage.getLaundryByPerson(personId);
+  return laundry
+    .filter((batch) => !batch.isPaid)
+    .reduce((sum, batch) => sum + batch.total, 0);
+}
+
+// Get total payable including unpaid laundry
+export function calculateTotalPayable(personId: string): number {
+  const balance = calculatePersonBalance(personId);
+  const unpaidLaundry = getUnpaidLaundryTotal(personId);
+  // Unpaid laundry is owed TO the employer, so it reduces what employer owes staff
+  return Math.max(0, balance - unpaidLaundry);
+}
+
+export function formatCurrency(
+  amount: number,
+  currency: Currency,
+  customSymbol?: string
+): string {
+  const symbol = currency === "OTHER" && customSymbol ? customSymbol : currencySymbols[currency];
+  const formatted = Math.abs(amount).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  if (amount < 0) {
+    return `-${symbol}${formatted}`;
+  }
+  return `${symbol}${formatted}`;
+}
+
+export function getTodayString(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export function formatShortDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export function getFirstDayOfMonth(): string {
+  const date = new Date();
+  return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split("T")[0];
+}
+
+export function getLastDayOfMonth(): string {
+  const date = new Date();
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split("T")[0];
+}
+
+export function getDaysInRange(startDate: string, endDate: string): string[] {
+  const days: string[] = [];
+  const current = new Date(startDate);
+  const end = new Date(endDate);
+
+  while (current <= end) {
+    days.push(current.toISOString().split("T")[0]);
+    current.setDate(current.getDate() + 1);
+  }
+
+  return days;
+}
+
+export function getAttendanceSummary(personId: string, startDate?: string, endDate?: string) {
+  let attendance = storage.getAttendanceByPerson(personId);
+  
+  if (startDate && endDate) {
+    attendance = attendance.filter(
+      (a) => a.date >= startDate && a.date <= endDate
+    );
+  }
+
+  return {
+    full: attendance.filter((a) => a.status === "FULL").length,
+    half: attendance.filter((a) => a.status === "HALF").length,
+    absent: attendance.filter((a) => a.status === "ABSENT").length,
+    total: attendance.length,
+  };
+}
+
+export function getDashboardStats() {
+  const accountId = storage.getActiveAccountId();
+  const people = accountId ? storage.getPeopleByAccount(accountId) : storage.getPeople();
+  const expenses = accountId ? storage.getExpensesByAccount(accountId) : storage.getExpenses();
+  const laundry = accountId ? storage.getLaundryByAccount(accountId) : storage.getLaundry();
+  const attendance = accountId ? storage.getAttendanceByAccount(accountId) : storage.getAttendance();
+  const settings = storage.getSettings();
+
+  const activeStaff = people.filter(p => p.isActive !== false).length;
+  const activePeople = people.filter(p => p.isActive !== false);
+  
+  // Calculate unpaid laundry amount (all unpaid batches at account level)
+  const unpaidLaundryAmount = laundry
+    .filter((l) => !l.isPaid)
+    .reduce((sum, l) => sum + l.total, 0);
+  
+  let totalPayable = 0;
+  for (const person of people) {
+    const wageBalance = calculatePersonBalance(person.id);
+    const unpaidLaundry = getUnpaidLaundryTotal(person.id);
+    // Net payable = wages owed PLUS unpaid laundry linked to this person
+    const netBalance = wageBalance + unpaidLaundry;
+    if (netBalance > 0) {
+      totalPayable += netBalance;
+    }
+  }
+  
+  // Add account-level unpaid laundry (not linked to specific person) to total payables
+  // This includes all unpaid laundry since laundry records may not have personId set
+  totalPayable += unpaidLaundryAmount;
+  
+  // Subtract person-linked unpaid laundry to avoid double-counting
+  for (const person of people) {
+    totalPayable -= getUnpaidLaundryTotal(person.id);
+  }
+
+  const today = getTodayString();
+  const unpaidBills = expenses.filter(
+    (e) => !e.isPaid && e.dueDate <= today
+  ).length;
+
+  const totalExpenses = expenses
+    .filter((e) => !e.isPaid)
+    .reduce((sum, e) => sum + e.amount, 0);
+  
+  // Calculate total laundry amount (all batches for display)
+  const totalLaundryAmount = laundry.reduce((sum, l) => sum + l.total, 0);
+
+  // Today's attendance stats
+  const todayAttendance = attendance.filter((a) => a.date === today);
+  const presentCount = todayAttendance.filter((a) => a.status === "FULL").length;
+  const halfDayCount = todayAttendance.filter((a) => a.status === "HALF").length;
+  const absentCount = todayAttendance.filter((a) => a.status === "ABSENT").length;
+  const markedCount = todayAttendance.length;
+  const unmarkedCount = Math.max(0, activePeople.length - markedCount);
+
+  return {
+    activeStaff,
+    totalPayable,
+    unpaidBills,
+    totalExpenses,
+    totalLaundryAmount,
+    unpaidLaundryAmount,
+    todayAttendance: {
+      present: presentCount,
+      halfDay: halfDayCount,
+      absent: absentCount,
+      marked: markedCount,
+      unmarked: unmarkedCount,
+    },
+    currency: settings.currency,
+    customCurrencySymbol: settings.customCurrencySymbol,
+  };
+}

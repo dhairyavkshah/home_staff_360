@@ -1,0 +1,230 @@
+import { useMemo, useState } from "react";
+import { Edit2, Trash2, FileText, Clock, CheckCircle, AlertCircle, XCircle, Share } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { Header } from "@/components/layout/Header";
+import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
+import { useNavigation, useNavigationData } from "@/lib/navigation";
+import { storage } from "@/lib/storage";
+import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/calculations";
+import { currencySymbols, type InvoiceStatus } from "@shared/schema";
+
+const STATUS_CONFIG: Record<InvoiceStatus, { icon: typeof CheckCircle; color: string; label: string }> = {
+  draft: { icon: FileText, color: "bg-muted text-muted-foreground", label: "Draft" },
+  sent: { icon: Clock, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", label: "Sent" },
+  paid: { icon: CheckCircle, color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400", label: "Paid" },
+  overdue: { icon: AlertCircle, color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", label: "Overdue" },
+  cancelled: { icon: XCircle, color: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400", label: "Cancelled" },
+};
+
+export function StaffInvoiceViewScreen() {
+  const { navigate, goBack } = useNavigation();
+  const { toast } = useToast();
+  const data = useNavigationData<{ invoiceId: string }>();
+  
+  const settings = useMemo(() => storage.getSettings(), []);
+  const symbol = settings.customCurrencySymbol || currencySymbols[settings.currency];
+  const [refreshKey] = useState(0);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const activeAccountId = useMemo(() => storage.getActiveAccountId(), [refreshKey]);
+  const showAllContexts = useMemo(() => storage.getShowAllContexts(), [refreshKey]);
+  const clientHomes = useMemo(() => {
+    if (!showAllContexts && activeAccountId) {
+      return storage.getClientHomesByAccount(activeAccountId);
+    }
+    return storage.getClientHomes();
+  }, [activeAccountId, showAllContexts, refreshKey]);
+  
+  const invoice = useMemo(() => {
+    if (!data.invoiceId) return null;
+    return storage.getStaffInvoice(data.invoiceId);
+  }, [data.invoiceId]);
+
+  const client = useMemo(() => {
+    if (!invoice) return null;
+    return clientHomes.find(c => c.id === invoice.clientHomeId);
+  }, [invoice, clientHomes]);
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString(undefined, { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const handleDelete = () => {
+    if (!data.invoiceId) return;
+    storage.deleteStaffInvoice(data.invoiceId);
+    toast({ title: "Invoice deleted" });
+    navigate("staff-invoices");
+  };
+
+  const handleMarkPaid = () => {
+    if (!data.invoiceId) return;
+    storage.updateStaffInvoice(data.invoiceId, { 
+      status: 'paid',
+      paidDate: new Date().toISOString().split('T')[0]
+    });
+    toast({ title: "Invoice marked as paid" });
+    navigate("staff-invoices");
+  };
+
+  if (!invoice) {
+    return (
+      <AppLayout>
+        <Header title="Invoice Not Found" onBack={() => navigate("staff-invoices")} />
+        <ScrollContent>
+          <div className="flex flex-col items-center justify-center py-12">
+            <FileText className="w-12 h-12 text-muted-foreground/50 mb-3" />
+            <p className="text-muted-foreground">This invoice could not be found.</p>
+          </div>
+        </ScrollContent>
+      </AppLayout>
+    );
+  }
+
+  const statusConfig = STATUS_CONFIG[invoice.status];
+  const StatusIcon = statusConfig.icon;
+
+  return (
+    <AppLayout>
+      <Header
+        title={invoice.invoiceNumber}
+        subtitle={client?.name || "Unknown Client"}
+        onBack={() => navigate("staff-invoices")}
+        onEdit={() => navigate("staff-add-invoice", { invoiceId: invoice.id })}
+        onDelete={handleDelete}
+      />
+
+      <ScrollContent>
+        <Card className="p-4 mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <Badge variant="outline" className={statusConfig.color}>
+              <StatusIcon className="w-3 h-3 mr-1" />
+              {statusConfig.label}
+            </Badge>
+            {invoice.status !== 'paid' && invoice.status !== 'cancelled' && (
+              <Button size="sm" onClick={handleMarkPaid} data-testid="button-mark-paid">
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Mark Paid
+              </Button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Issue Date</p>
+              <p className="font-medium">{formatDate(invoice.issueDate)}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Due Date</p>
+              <p className="font-medium">{formatDate(invoice.dueDate)}</p>
+            </div>
+            {invoice.paidDate && (
+              <div className="col-span-2">
+                <p className="text-muted-foreground">Paid Date</p>
+                <p className="font-medium text-green-600">{formatDate(invoice.paidDate)}</p>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        <Card className="p-4 mb-4">
+          <h3 className="font-semibold mb-3">Client Details</h3>
+          {client ? (
+            <div className="text-sm space-y-1">
+              <p className="font-medium">{client.name}</p>
+              {client.address && <p className="text-muted-foreground">{client.address}</p>}
+              {client.contactName && <p>{client.contactName}</p>}
+              {client.contactPhone && <p className="text-muted-foreground">{client.contactPhone}</p>}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm">Client details unavailable</p>
+          )}
+        </Card>
+
+        <Card className="p-4 mb-4">
+          <h3 className="font-semibold mb-3">Items</h3>
+          <div className="space-y-3">
+            {invoice.items.map((item, index) => (
+              <div key={item.id} className="flex justify-between text-sm">
+                <div className="flex-1">
+                  <p className="font-medium">{item.description}</p>
+                  <p className="text-muted-foreground">
+                    {item.quantity} x {symbol}{item.rate.toFixed(2)}
+                  </p>
+                </div>
+                <p className="font-medium">
+                  {formatCurrency(item.amount, settings.currency, settings.customCurrencySymbol)}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <Separator className="my-4" />
+
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span>{formatCurrency(invoice.subtotal, settings.currency, settings.customCurrencySymbol)}</span>
+            </div>
+            {invoice.taxRate && invoice.taxAmount && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Tax ({invoice.taxRate}%)</span>
+                <span>{formatCurrency(invoice.taxAmount, settings.currency, settings.customCurrencySymbol)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-semibold text-base pt-2 border-t">
+              <span>Total</span>
+              <span>{formatCurrency(invoice.total, settings.currency, settings.customCurrencySymbol)}</span>
+            </div>
+          </div>
+        </Card>
+
+        {invoice.notes && (
+          <Card className="p-4 mb-4">
+            <h3 className="font-semibold mb-2">Notes</h3>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{invoice.notes}</p>
+          </Card>
+        )}
+
+        <div className="flex gap-3 mt-4">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => navigate("staff-add-invoice", { invoiceId: invoice.id })}
+            data-testid="button-edit-invoice"
+          >
+            <Edit2 className="w-4 h-4 mr-2" />
+            Edit
+          </Button>
+          <Button 
+            variant="destructive" 
+            className="flex-1" 
+            data-testid="button-delete-invoice"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete
+          </Button>
+        </div>
+
+        <ConfirmModal
+          open={showDeleteConfirm}
+          onOpenChange={setShowDeleteConfirm}
+          title="Delete Invoice?"
+          description={`This will permanently delete invoice ${invoice.invoiceNumber}. This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="destructive"
+          onConfirm={handleDelete}
+        />
+      </ScrollContent>
+    </AppLayout>
+  );
+}

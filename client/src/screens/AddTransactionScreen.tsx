@@ -1,0 +1,363 @@
+import { useState, useMemo } from "react";
+import { Info, Paperclip, X, Image as ImageIcon, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Header } from "@/components/layout/Header";
+import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
+import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
+import { AttachmentChooser } from "@/components/AttachmentChooser";
+import { useNavigation } from "@/lib/navigation";
+import { storage } from "@/lib/storage";
+import { useToast } from "@/hooks/use-toast";
+import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
+import { useTranslation } from "@/lib/i18n/i18n-context";
+import { getTodayString, calculatePersonBalance, formatCurrency } from "@/lib/calculations";
+import { HOME_DOCUMENT_CATEGORIES } from "@shared/schema";
+
+interface PendingAttachment {
+  file: File;
+  preview: string;
+}
+
+export function AddTransactionScreen() {
+  const { navigate, goBack, data } = useNavigation();
+  const { toast } = useToast();
+  const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  const { tLabel } = useTranslation();
+  const personId = data.personId as string;
+  const presetAmount = data.presetAmount as number | undefined;
+  const defaultDescription = data.defaultDescription as string | undefined;
+  const defaultCategory = data.defaultCategory as string | undefined;
+  const source = data.source as "attendance" | "payables" | "quick-pay" | "person-detail" | undefined;
+
+  const person = useMemo(() => storage.getPerson(personId), [personId]);
+  const settings = useMemo(() => storage.getSettings(), []);
+  
+  const currentBalance = useMemo(() => 
+    person ? calculatePersonBalance(personId) : 0, 
+    [personId, person]
+  );
+
+  const getSmartDefaults = useMemo(() => {
+    if (!person) return { description: "", amount: "" };
+    
+    let description = defaultDescription || "";
+    let amount = presetAmount && presetAmount > 0 ? String(presetAmount) : "";
+    
+    if (source === "attendance") {
+      description = description || `Salary Payment for Attendance - ${person.name}`;
+    } else if (source === "payables" || source === "person-detail") {
+      if (!description && currentBalance > 0) {
+        description = `Salary Payment for ${person.name}`;
+      }
+      if (!amount && currentBalance > 0) {
+        amount = String(currentBalance);
+      }
+    }
+    
+    return { description, amount };
+  }, [person, defaultDescription, presetAmount, source, currentBalance]);
+
+  const [category, setCategory] = useState(defaultCategory || "payment");
+  const [description, setDescription] = useState(getSmartDefaults.description);
+  const [transactionNo, setTransactionNo] = useState("");
+  const [amount, setAmount] = useState(getSmartDefaults.amount);
+  const [date, setDate] = useState(getTodayString());
+  const [isPaid, setIsPaid] = useState(true);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showAttachmentChooser, setShowAttachmentChooser] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState<PendingAttachment[]>([]);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+
+  const handleBack = () => {
+    if (source === "payables") {
+      navigate("payables");
+    } else {
+      navigate("person-detail", { personId, source });
+    }
+  };
+
+  if (!person) {
+    return (
+      <AppLayout>
+        <Header title={tLabel('staffNotFound', 'Staff Not Found')} onBack={handleBack} />
+        <ScrollContent>
+          <p className="text-center text-muted-foreground">
+            {tLabel('staffNotFoundMessage', 'This staff member could not be found.')}
+          </p>
+        </ScrollContent>
+      </AppLayout>
+    );
+  }
+
+  const handleFileSelected = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPendingAttachments(prev => [...prev, {
+        file,
+        preview: reader.result as string
+      }]);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeAttachment = (index: number) => {
+    setPendingAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!description.trim()) newErrors.description = "Description is required";
+    if (!amount || parseFloat(amount) <= 0) {
+      newErrors.amount = "Amount must be greater than 0";
+    }
+    if (!date) newErrors.date = "Date is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) return;
+
+    const newTransaction = storage.addTransaction({
+      personId,
+      category,
+      description: description.trim(),
+      transactionNo: transactionNo.trim() || undefined,
+      amount: parseFloat(amount),
+      date,
+      isPaid,
+    });
+
+    for (const attachment of pendingAttachments) {
+      let accountId: string;
+      try {
+        accountId = storage.requireActiveAccountId();
+      } catch {
+        continue;
+      }
+      
+      storage.addDocument({
+        ownerType: 'HOME',
+        accountId,
+        category: HOME_DOCUMENT_CATEGORIES[0],
+        description: `Receipt for: ${description.trim()}`,
+        fileName: attachment.file.name,
+        fileType: attachment.file.type,
+        fileSize: attachment.file.size,
+        fileData: attachment.preview,
+        linkedRecordType: 'TRANSACTION',
+        linkedRecordId: newTransaction.id,
+      });
+    }
+
+    markClean();
+    toast({ title: tLabel('transactionAdded', 'Transaction added successfully') });
+    navigate("person-detail", { personId, source });
+  };
+
+  const handleHomePress = () => {
+    if (isDirty) {
+      setShowUnsavedDialog(true);
+    } else {
+      navigate("home");
+    }
+  };
+
+  const handleDiscardAndGoHome = () => {
+    setShowUnsavedDialog(false);
+    markClean();
+    navigate("home");
+  };
+
+  return (
+    <AppLayout>
+      <Header
+        title={tLabel('transactionDetails', 'Transaction Details')}
+        subtitle={`${tLabel('for', 'for')} ${person.name}`}
+        onBack={handleBack}
+        onHome={handleHomePress}
+      />
+
+      <ScrollContent>
+        {currentBalance > 0 && (
+          <Card className="p-3 bg-info/10 border-info/20">
+            <div className="flex items-start gap-2">
+              <Info className="w-4 h-4 text-info shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <span className="text-muted-foreground">{tLabel('outstandingBalance', 'Outstanding balance')}: </span>
+                <span className="font-semibold">
+                  {formatCurrency(currentBalance, settings.currency, settings.customCurrencySymbol)}
+                </span>
+                {source === "attendance" && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {tLabel('recordingSalaryPayment', 'Recording salary payment for attendance')}
+                  </p>
+                )}
+              </div>
+            </div>
+          </Card>
+        )}
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold">{tLabel('transactionDetails', 'Transaction Details')}</h2>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="category">{tLabel('category', 'Category')} <span className="text-destructive">*</span></Label>
+            <Select value={category} onValueChange={(v) => { setCategory(v); markDirty(); }}>
+              <SelectTrigger id="category" data-testid="select-category">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="payment">{tLabel('payment', 'Payment')}</SelectItem>
+                <SelectItem value="advance">{tLabel('advance', 'Advance')}</SelectItem>
+                <SelectItem value="deduction">{tLabel('deduction', 'Deduction')}</SelectItem>
+                <SelectItem value="other">{tLabel('other', 'Other')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="description">{tLabel('description', 'Description')} <span className="text-destructive">*</span></Label>
+            <Input
+              id="description"
+              value={description}
+              onChange={(e) => { setDescription(e.target.value); markDirty(); }}
+              placeholder={source === "attendance" 
+                ? tLabel('salaryPaymentAttendance', 'Salary Payment for Attendance')
+                : tLabel('transactionPlaceholder', 'e.g., Salary payment, Festival bonus')}
+              data-testid="input-description"
+            />
+            {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="transactionNo">{tLabel('transactionNo', 'Transaction No.')}</Label>
+            <Input
+              id="transactionNo"
+              value={transactionNo}
+              onChange={(e) => { setTransactionNo(e.target.value); markDirty(); }}
+              placeholder={tLabel('transactionNoPlaceholder', 'e.g., TXN-001, REF-123')}
+              data-testid="input-transaction-no"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="amount">{tLabel('amount', 'Amount')} <span className="text-destructive">*</span></Label>
+            <Input
+              id="amount"
+              type="number"
+              value={amount}
+              onChange={(e) => { setAmount(e.target.value); markDirty(); }}
+              placeholder="0.00"
+              data-testid="input-amount"
+            />
+            {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="date">{tLabel('date', 'Date')} <span className="text-destructive">*</span></Label>
+            <Input
+              id="date"
+              type="date"
+              value={date}
+              onChange={(e) => { setDate(e.target.value); markDirty(); }}
+              data-testid="input-date"
+            />
+            {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">{tLabel('attachments', 'Attachments')}</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAttachmentChooser(true)}
+              data-testid="button-add-attachment"
+            >
+              <Paperclip className="w-4 h-4 mr-2" />
+              {tLabel('add', 'Add')}
+            </Button>
+          </div>
+          
+          {pendingAttachments.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {pendingAttachments.map((attachment, index) => (
+                <Card key={index} className="p-3 flex items-center gap-3">
+                  {attachment.file.type.startsWith('image/') ? (
+                    <img
+                      src={attachment.preview}
+                      alt={attachment.file.name}
+                      className="w-10 h-10 object-cover rounded"
+                    />
+                  ) : (
+                    <FileText className="w-5 h-5 text-primary" />
+                  )}
+                  <span className="flex-1 text-sm truncate">{attachment.file.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeAttachment(index)}
+                    data-testid={`button-remove-pending-${index}`}
+                  >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-3">
+              {tLabel('noAttachments', 'No attachments. Add receipts or invoices.')}
+            </p>
+          )}
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold">{tLabel('status', 'Status')}</h2>
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              id="isPaid"
+              checked={isPaid}
+              onCheckedChange={(checked) => { setIsPaid(checked as boolean); markDirty(); }}
+              data-testid="checkbox-paid"
+            />
+            <Label htmlFor="isPaid" className="font-normal cursor-pointer">
+              {tLabel('markAsPaid', 'Mark as paid')}
+            </Label>
+          </div>
+        </section>
+
+        <Button className="w-full" onClick={handleSubmit} data-testid="button-save">
+          {tLabel('saveTransaction', 'Save Transaction')}
+        </Button>
+      </ScrollContent>
+
+      <AttachmentChooser
+        open={showAttachmentChooser}
+        onOpenChange={setShowAttachmentChooser}
+        onFileSelected={handleFileSelected}
+      />
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardAndGoHome}
+        onCancel={() => setShowUnsavedDialog(false)}
+      />
+    </AppLayout>
+  );
+}
