@@ -28,6 +28,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
@@ -270,22 +275,23 @@ export function AddLaundryScreen() {
         />
 
         <ScrollContent>
-          <Card className="p-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 mb-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                  This record cannot be edited
-                </p>
-                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                  Financial records are locked after creation. If you need to make changes, delete this record and create a new one.
-                </p>
-              </div>
-            </div>
-          </Card>
-
           <section className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold">Basic Information</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold">Basic Information</h2>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6" data-testid="button-info-readonly">
+                    <Info className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium">This record cannot be edited</p>
+                    <p className="text-xs text-muted-foreground">Financial records are locked after creation. If you need to make changes, delete this record and create a new one.</p>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
 
             <div className="flex flex-col gap-1">
               <Label className="text-muted-foreground text-sm">Service Type</Label>
