@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Database, Trash2, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle, MessageSquareText } from "lucide-react";
+import { Database, Trash2, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle } from "lucide-react";
 import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
 import { Button } from "@/components/ui/button";
@@ -456,20 +456,6 @@ export function SettingsScreen() {
               <div className="flex-1">
                 <p className="font-medium text-sm">See Guided Tour</p>
                 <p className="text-xs text-muted-foreground">Learn how to use the app effectively</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <button
-              className="w-full p-3 flex items-center gap-3 hover-elevate text-left"
-              onClick={() => navigate("feedback")}
-              data-testid="button-feedback"
-            >
-              <div className="icon-halo-primary w-9 h-9">
-                <MessageSquareText className="w-4.5 h-4.5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-sm">Report Bug or Suggest Improvement</p>
-                <p className="text-xs text-muted-foreground">Help us make the app better</p>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>

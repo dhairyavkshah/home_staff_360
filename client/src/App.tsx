@@ -31,7 +31,6 @@ import { ReportsScreen } from "@/screens/ReportsScreen";
 import { SettingsScreen } from "@/screens/SettingsScreen";
 import { PlanScreen } from "@/screens/PlanScreen";
 import { BackupScreen } from "@/screens/BackupScreen";
-import { FeedbackScreen } from "@/screens/FeedbackScreen";
 import { PayablesScreen } from "@/screens/PayablesScreen";
 import { DocumentsScreen } from "@/screens/DocumentsScreen";
 import { HouseholdsScreen } from "@/screens/HouseholdsScreen";
@@ -113,8 +112,6 @@ function MobileAppRouter() {
       return <PlanScreen />;
     case "backup":
       return <BackupScreen />;
-    case "feedback":
-      return <FeedbackScreen />;
     case "staff-home":
       return <StaffHomeScreen />;
     case "businesses":
