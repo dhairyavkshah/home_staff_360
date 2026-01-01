@@ -617,11 +617,14 @@ export function SettingsScreen() {
 
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">About</h2>
-          <Card className="p-3">
-            <div className="text-center">
-              <p className="font-medium text-sm">Home Staff 360</p>
-              <p className="text-xs text-muted-foreground">Version 1.0.0</p>
-              <p className="text-xs text-muted-foreground mt-1">Offline-first mobile app</p>
+          <Card className="p-4">
+            <div className="text-center flex flex-col gap-2">
+              <div>
+                <p className="font-semibold text-base">Home Staff 360</p>
+                <p className="text-xs text-muted-foreground">Version 1.0.0</p>
+              </div>
+              <p className="text-sm text-muted-foreground">Private household management app</p>
+              <p className="text-xs text-muted-foreground/70 pt-1">Crafted by The Team 360</p>
             </div>
           </Card>
         </section>
