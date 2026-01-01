@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Camera, FolderOpen, Bell, Check, ChevronRight, MapPin, ArrowRight } from "lucide-react";
+import { Camera, FolderOpen, Bell, Check, ChevronRight, MapPin, ArrowRight, Image } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,6 +20,7 @@ const iconMap: Record<string, typeof Camera> = {
   folder: FolderOpen,
   bell: Bell,
   "map-pin": MapPin,
+  image: Image,
 };
 
 export function PermissionsScreen() {
@@ -31,6 +32,7 @@ export function PermissionsScreen() {
     storage: "prompt",
     notifications: "prompt",
     location: "prompt",
+    media: "prompt",
   });
   const [isRequesting, setIsRequesting] = useState(false);
 
@@ -210,7 +212,8 @@ export function PermissionsScreen() {
                       <div className="bg-muted/50 rounded-lg p-3 mt-2">
                         <p className="text-xs text-muted-foreground">
                           {permission.id === "location" && "Used to auto-detect your country for currency settings"}
-                          {permission.id === "storage" && "Required for backup files and document attachments"}
+                          {permission.id === "storage" && "Required for backup files and exported reports"}
+                          {permission.id === "media" && "Used for staff photos and document attachments"}
                           {permission.id === "notifications" && "Used for payment reminders and alerts"}
                           {permission.id === "camera" && "Used to scan documents and capture receipts"}
                         </p>

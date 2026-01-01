@@ -1,13 +1,16 @@
 import { Capacitor } from "@capacitor/core";
-import { Camera, CameraResultType } from "@capacitor/camera";
+import { Camera } from "@capacitor/camera";
+import { Filesystem } from "@capacitor/filesystem";
+import { LocalNotifications } from "@capacitor/local-notifications";
 
-export type PermissionType = "camera" | "storage" | "notifications" | "location";
+export type PermissionType = "camera" | "storage" | "notifications" | "location" | "media";
 
 export interface PermissionStatus {
   camera: "granted" | "denied" | "prompt" | "unavailable";
   storage: "granted" | "denied" | "prompt" | "unavailable";
   notifications: "granted" | "denied" | "prompt" | "unavailable";
   location: "granted" | "denied" | "prompt" | "unavailable";
+  media: "granted" | "denied" | "prompt" | "unavailable";
 }
 
 export interface PermissionInfo {
@@ -20,41 +23,41 @@ export interface PermissionInfo {
 
 const isNativePlatform = Capacitor.isNativePlatform();
 
-// Test mode bypass - disabled for production
-const isTestBypassEnabled = (): boolean => {
-  return false;
-};
-
-// Permissions - users can skip during onboarding and grant later when needed
-// The 'required' flag indicates if the permission is essential for a core feature
 export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
   {
     id: "location",
     name: "Location Access",
     description: "Detect your country to set the correct currency and regional settings automatically.",
     icon: "map-pin",
-    required: false, // Optional - country can be selected manually
+    required: false,
   },
   {
     id: "storage",
     name: "Storage Access",
-    description: "Save and access your data, photos, and backup files. All data stays on your device for complete privacy.",
+    description: "Save and access backup files and exported reports. All data stays on your device for complete privacy.",
     icon: "folder",
-    required: true, // Required for backup/restore and document attachments
+    required: true,
+  },
+  {
+    id: "media",
+    name: "Media Access",
+    description: "Access photos and images for staff profiles and document attachments.",
+    icon: "image",
+    required: false,
   },
   {
     id: "notifications",
     name: "Notifications",
     description: "Receive reminders for pending payments, attendance tracking, and important updates.",
     icon: "bell",
-    required: false, // Optional - app works without notifications
+    required: false,
   },
   {
     id: "camera",
     name: "Camera Access",
     description: "Take photos for staff profiles and document scanning. This helps you quickly capture and store important information.",
     icon: "camera",
-    required: false, // Optional - can add photos from gallery
+    required: false,
   },
 ];
 
@@ -63,10 +66,11 @@ class PermissionsService {
 
   async checkAllPermissions(): Promise<PermissionStatus> {
     const status: PermissionStatus = {
-      camera: "unavailable",
-      storage: "unavailable",
-      notifications: "unavailable",
+      camera: "prompt",
+      storage: "prompt",
+      notifications: "prompt",
       location: "prompt",
+      media: "prompt",
     };
 
     status.location = await this.checkLocationPermission();
@@ -75,25 +79,34 @@ class PermissionsService {
       try {
         const cameraStatus = await Camera.checkPermissions();
         status.camera = this.mapCapacitorStatus(cameraStatus.camera);
-        status.storage = this.mapCapacitorStatus(cameraStatus.photos);
+        status.media = this.mapCapacitorStatus(cameraStatus.photos);
       } catch {
-        status.camera = "unavailable";
-        status.storage = "unavailable";
+        status.camera = "prompt";
+        status.media = "prompt";
       }
 
       try {
-        if ("Notification" in window) {
-          status.notifications = this.mapWebNotificationStatus(Notification.permission);
-        }
+        const fsStatus = await Filesystem.checkPermissions();
+        status.storage = this.mapCapacitorStatus(fsStatus.publicStorage);
       } catch {
-        status.notifications = "unavailable";
+        status.storage = "prompt";
+      }
+
+      try {
+        const notifStatus = await LocalNotifications.checkPermissions();
+        status.notifications = this.mapCapacitorStatus(notifStatus.display);
+      } catch {
+        status.notifications = "prompt";
       }
     } else {
       status.camera = await this.checkWebCameraPermission();
       status.storage = "granted";
+      status.media = "granted";
       
       if ("Notification" in window) {
         status.notifications = this.mapWebNotificationStatus(Notification.permission);
+      } else {
+        status.notifications = "unavailable";
       }
     }
 
@@ -148,7 +161,7 @@ class PermissionsService {
   async requestCameraPermission(): Promise<"granted" | "denied"> {
     if (this.isNative) {
       try {
-        const result = await Camera.requestPermissions({ permissions: ["camera", "photos"] });
+        const result = await Camera.requestPermissions({ permissions: ["camera"] });
         return result.camera === "granted" ? "granted" : "denied";
       } catch {
         return "denied";
@@ -164,7 +177,7 @@ class PermissionsService {
     }
   }
 
-  async requestStoragePermission(): Promise<"granted" | "denied"> {
+  async requestMediaPermission(): Promise<"granted" | "denied"> {
     if (this.isNative) {
       try {
         const result = await Camera.requestPermissions({ permissions: ["photos"] });
@@ -177,16 +190,38 @@ class PermissionsService {
     }
   }
 
-  async requestNotificationPermission(): Promise<"granted" | "denied"> {
-    if (!("Notification" in window)) {
-      return "denied";
+  async requestStoragePermission(): Promise<"granted" | "denied"> {
+    if (this.isNative) {
+      try {
+        const result = await Filesystem.requestPermissions();
+        return result.publicStorage === "granted" ? "granted" : "denied";
+      } catch {
+        return "denied";
+      }
+    } else {
+      return "granted";
     }
-    
-    try {
-      const result = await Notification.requestPermission();
-      return result === "granted" ? "granted" : "denied";
-    } catch {
-      return "denied";
+  }
+
+  async requestNotificationPermission(): Promise<"granted" | "denied"> {
+    if (this.isNative) {
+      try {
+        const result = await LocalNotifications.requestPermissions();
+        return result.display === "granted" ? "granted" : "denied";
+      } catch {
+        return "denied";
+      }
+    } else {
+      if (!("Notification" in window)) {
+        return "denied";
+      }
+      
+      try {
+        const result = await Notification.requestPermission();
+        return result === "granted" ? "granted" : "denied";
+      } catch {
+        return "denied";
+      }
     }
   }
 
@@ -210,6 +245,8 @@ class PermissionsService {
         return this.requestCameraPermission();
       case "storage":
         return this.requestStoragePermission();
+      case "media":
+        return this.requestMediaPermission();
       case "notifications":
         return this.requestNotificationPermission();
       case "location":
@@ -220,24 +257,22 @@ class PermissionsService {
   }
 
   areRequiredPermissionsGranted(status: PermissionStatus): boolean {
-    // Check if truly required permissions are granted
     const requiredPerms = REQUIRED_PERMISSIONS.filter(p => p.required);
     return requiredPerms.every(perm => status[perm.id] === "granted");
   }
 
-  // Check if a specific permission is granted
   isPermissionGranted(status: PermissionStatus, type: PermissionType): boolean {
     return status[type] === "granted";
   }
 
-  // Get list of skipped permissions that weren't granted
   getSkippedPermissions(status: PermissionStatus): PermissionType[] {
     return REQUIRED_PERMISSIONS
       .filter(p => status[p.id] !== "granted")
       .map(p => p.id);
   }
 
-  private mapCapacitorStatus(status: string): "granted" | "denied" | "prompt" | "unavailable" {
+  private mapCapacitorStatus(status: string | undefined): "granted" | "denied" | "prompt" | "unavailable" {
+    if (!status) return "prompt";
     switch (status) {
       case "granted":
       case "limited":
@@ -248,7 +283,7 @@ class PermissionsService {
       case "prompt-with-rationale":
         return "prompt";
       default:
-        return "unavailable";
+        return "prompt";
     }
   }
 
