@@ -47,11 +47,76 @@ export function BackupScreen() {
 
     try {
       const text = await selectedFile.text();
-      const data = JSON.parse(text);
+      let data: unknown;
+      
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("File is not valid JSON. Please select a valid .hs360 backup file.");
+      }
 
-      const result = backupDataSchema.safeParse(data);
+      if (typeof data !== 'object' || data === null) {
+        throw new Error("Invalid backup file structure");
+      }
+      
+      const rawData = data as Record<string, unknown>;
+      
+      if (!rawData.version || !rawData.exportDate) {
+        throw new Error("Missing required backup metadata (version/exportDate)");
+      }
+      
+      if (!rawData.settings || typeof rawData.settings !== 'object') {
+        throw new Error("Missing or invalid settings in backup file");
+      }
+      
+      const settingsData = rawData.settings as Record<string, unknown>;
+      
+      const validCurrencies = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'JPY', 'CNY', 'CAD', 'AUD', 'CHF', 'SGD', 'MXN', 'BRL', 'ZAR', 'OTHER'];
+      const currencyValue = typeof settingsData.currency === 'string' && validCurrencies.includes(settingsData.currency) 
+        ? settingsData.currency 
+        : 'USD';
+      
+      const normalizedSettings = {
+        currency: currencyValue,
+        customCurrencySymbol: settingsData.customCurrencySymbol,
+        language: settingsData.language || 'en',
+        salaryStartDay: typeof settingsData.salaryStartDay === 'number' ? settingsData.salaryStartDay : 1,
+        halfDayPercentage: typeof settingsData.halfDayPercentage === 'number' ? settingsData.halfDayPercentage : 50,
+        hasCompletedOnboarding: settingsData.hasCompletedOnboarding ?? false,
+        pinEnabled: settingsData.pinEnabled,
+        pinCode: settingsData.pinCode,
+        householdName: settingsData.householdName,
+        darkMode: settingsData.darkMode,
+        planType: settingsData.planType,
+        showAllContexts: settingsData.showAllContexts,
+        defaultAppMode: settingsData.defaultAppMode,
+        homeTourCompleted: settingsData.homeTourCompleted,
+        staffTourCompleted: settingsData.staffTourCompleted,
+        trialStartedAt: settingsData.trialStartedAt,
+        purchaseStatus: settingsData.purchaseStatus,
+        purchaseDate: settingsData.purchaseDate,
+        purchaseCountry: settingsData.purchaseCountry,
+        hapticFeedbackEnabled: settingsData.hapticFeedbackEnabled ?? true,
+        soundEffectsEnabled: settingsData.soundEffectsEnabled ?? true,
+        country: settingsData.country,
+        detectedCountry: settingsData.detectedCountry,
+      };
+      
+      const normalizedData = {
+        ...rawData,
+        settings: normalizedSettings,
+        people: Array.isArray(rawData.people) ? rawData.people : [],
+        attendance: Array.isArray(rawData.attendance) ? rawData.attendance : [],
+        transactions: Array.isArray(rawData.transactions) ? rawData.transactions : [],
+        laundry: Array.isArray(rawData.laundry) ? rawData.laundry : [],
+        expenses: Array.isArray(rawData.expenses) ? rawData.expenses : [],
+      };
+
+      const result = backupDataSchema.safeParse(normalizedData);
       if (!result.success) {
-        throw new Error("Invalid backup file format");
+        const errorMessages = result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join('; ');
+        console.error("Backup validation errors:", result.error.errors);
+        throw new Error(`Backup validation failed: ${errorMessages}`);
       }
 
       storage.importBackup(result.data, importMode);

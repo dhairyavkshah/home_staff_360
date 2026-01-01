@@ -1,22 +1,13 @@
-import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 import { storage } from '@/lib/storage';
 import { formatCurrency as formatCurrencyFn, getCurrencySymbol as getSymbolFn } from '@/lib/currency';
 import type { Currency } from '@shared/schema';
 
 const CURRENCY_CHANGE_EVENT = 'currency-settings-changed';
 
-let currencyListeners: Set<() => void> = new Set();
-
 function subscribeToCurrency(callback: () => void) {
-  currencyListeners.add(callback);
-  
-  const handleEvent = () => callback();
-  window.addEventListener(CURRENCY_CHANGE_EVENT, handleEvent);
-  
-  return () => {
-    currencyListeners.delete(callback);
-    window.removeEventListener(CURRENCY_CHANGE_EVENT, handleEvent);
-  };
+  window.addEventListener(CURRENCY_CHANGE_EVENT, callback);
+  return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, callback);
 }
 
 function getCurrencySnapshot(): { currency: Currency; customSymbol: string | undefined } {
