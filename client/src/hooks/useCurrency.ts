@@ -1,33 +1,39 @@
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useSyncExternalStore, useMemo } from 'react';
 import { storage } from '@/lib/storage';
 import { formatCurrency as formatCurrencyFn, getCurrencySymbol as getSymbolFn } from '@/lib/currency';
 import type { Currency } from '@shared/schema';
 
-const CURRENCY_CHANGE_EVENT = 'currency-settings-changed';
+let currencyVersion = 0;
+const currencyListeners = new Set<() => void>();
 
 function subscribeToCurrency(callback: () => void) {
-  window.addEventListener(CURRENCY_CHANGE_EVENT, callback);
-  return () => window.removeEventListener(CURRENCY_CHANGE_EVENT, callback);
+  currencyListeners.add(callback);
+  return () => currencyListeners.delete(callback);
 }
 
-function getCurrencySnapshot(): { currency: Currency; customSymbol: string | undefined } {
-  const modeSettings = storage.getModeSettings();
-  return {
-    currency: modeSettings.currency,
-    customSymbol: modeSettings.customCurrencySymbol,
-  };
+function getCurrencySnapshot(): number {
+  return currencyVersion;
 }
 
 export function notifyCurrencyChange() {
-  window.dispatchEvent(new CustomEvent(CURRENCY_CHANGE_EVENT));
+  currencyVersion++;
+  currencyListeners.forEach((listener) => listener());
 }
 
 export function useCurrency() {
-  const { currency, customSymbol } = useSyncExternalStore(
+  const version = useSyncExternalStore(
     subscribeToCurrency,
     getCurrencySnapshot,
     getCurrencySnapshot
   );
+  
+  const { currency, customSymbol } = useMemo(() => {
+    const modeSettings = storage.getModeSettings();
+    return {
+      currency: modeSettings.currency,
+      customSymbol: modeSettings.customCurrencySymbol,
+    };
+  }, [version]);
 
   const formatCurrency = useCallback(
     (amount: number) => formatCurrencyFn(amount, currency, customSymbol),
