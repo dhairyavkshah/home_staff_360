@@ -276,13 +276,13 @@
     @apply min-h-[48px] min-w-[48px];
   }
   
-  /* Safe area padding */
+  /* Safe area padding using CSS environment variables for device notches/status bars */
   .safe-area-top {
-    @apply pt-6;
+    padding-top: max(env(safe-area-inset-top, 0px), 24px);
   }
   
   .safe-area-bottom {
-    @apply pb-6;
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
   }
   
   /* Content container with standard 16px horizontal padding */

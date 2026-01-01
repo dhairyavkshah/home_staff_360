@@ -1,52 +1,18 @@
-const CLICK_SOUND_FREQUENCY = 1800;
-const CLICK_SOUND_DURATION = 15;
-const CLICK_SOUND_VOLUME = 0.08;
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
-let audioContext: AudioContext | null = null;
 let isEnabled = true;
 let lastPlayTime = 0;
-const MIN_INTERVAL = 30;
+const MIN_INTERVAL = 50;
 
-function getAudioContext(): AudioContext | null {
-  if (!audioContext) {
-    try {
-      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    } catch {
-      return null;
-    }
-  }
-  if (audioContext.state === 'suspended') {
-    audioContext.resume().catch(() => {});
-  }
-  return audioContext;
-}
-
-export function playClickSound(): void {
+export async function playClickSound(): Promise<void> {
   if (!isEnabled) return;
   
   const now = Date.now();
   if (now - lastPlayTime < MIN_INTERVAL) return;
   lastPlayTime = now;
   
-  const ctx = getAudioContext();
-  if (!ctx) return;
-
   try {
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(CLICK_SOUND_FREQUENCY, ctx.currentTime);
-    
-    gainNode.gain.setValueAtTime(0, ctx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(CLICK_SOUND_VOLUME, ctx.currentTime + 0.001);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + CLICK_SOUND_DURATION / 1000);
-    
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + CLICK_SOUND_DURATION / 1000);
+    await Haptics.impact({ style: ImpactStyle.Light });
   } catch {
   }
 }
@@ -90,13 +56,4 @@ export function initSoundService(): void {
   };
 
   document.addEventListener('pointerdown', handleInteraction, { passive: true, capture: true });
-  
-  const initAudioContext = () => {
-    getAudioContext();
-    document.removeEventListener('touchstart', initAudioContext);
-    document.removeEventListener('click', initAudioContext);
-  };
-  
-  document.addEventListener('touchstart', initAudioContext, { once: true, passive: true });
-  document.addEventListener('click', initAudioContext, { once: true, passive: true });
 }

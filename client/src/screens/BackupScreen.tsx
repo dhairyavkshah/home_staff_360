@@ -23,12 +23,12 @@ export function BackupScreen() {
   const handleExport = () => {
     const backup = storage.exportBackup();
     const json = JSON.stringify(backup, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
+    const blob = new Blob([json], { type: "application/octet-stream" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.json`;
+    a.download = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
     a.click();
 
     URL.revokeObjectURL(url);
@@ -114,7 +114,7 @@ export function BackupScreen() {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".json"
+              accept=".hs360,.json"
               onChange={handleFileChange}
               className="hidden"
               data-testid="input-file"

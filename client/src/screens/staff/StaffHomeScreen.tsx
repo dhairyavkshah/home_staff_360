@@ -8,7 +8,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
@@ -277,24 +276,12 @@ export function StaffHomeScreen() {
                 >
                   <Briefcase className="w-3.5 h-3.5" />
                   <span className="truncate max-w-[180px]">
-                    {showAllContexts ? tLabel('allBusinesses', 'All Businesses') : (activeAccount?.name || tLabel('selectBusiness', 'Select'))}
+                    {activeAccount?.name || tLabel('selectBusiness', 'Select')}
                   </span>
                   <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem
-                  onClick={() => handleSwitchAccount(null)}
-                  className="flex items-center gap-2"
-                  data-testid="menu-item-all-businesses"
-                >
-                  <Building2 className="w-4 h-4" />
-                  <span className="flex-1">{tLabel('allBusinesses', 'All Businesses')}</span>
-                  {showAllContexts && (
-                    <Check className="w-4 h-4 text-primary" />
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 {accounts.map((account) => (
                   <DropdownMenuItem
                     key={account.id}
@@ -304,7 +291,7 @@ export function StaffHomeScreen() {
                   >
                     <Briefcase className="w-4 h-4" />
                     <span className="flex-1">{account.name}</span>
-                    {!showAllContexts && account.id === activeAccountId && (
+                    {account.id === activeAccountId && (
                       <Check className="w-4 h-4 text-primary" />
                     )}
                   </DropdownMenuItem>

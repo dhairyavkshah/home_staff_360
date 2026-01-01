@@ -7,7 +7,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
@@ -218,24 +217,12 @@ export function HomeScreen() {
                 >
                   <Home className="w-3.5 h-3.5" />
                   <span className="truncate max-w-[180px]">
-                    {showAllContexts ? tLabel('allHouseholds', 'All Households') : (activeAccount?.name || tLabel('selectHousehold', 'Select'))}
+                    {activeAccount?.name || tLabel('selectHousehold', 'Select')}
                   </span>
                   <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem
-                  onClick={() => handleSwitchAccount(null)}
-                  className="flex items-center gap-2"
-                  data-testid="menu-item-all-households"
-                >
-                  <Building2 className="w-4 h-4" />
-                  <span className="flex-1">{tLabel('allHouseholds', 'All Households')}</span>
-                  {showAllContexts && (
-                    <Check className="w-4 h-4 text-primary" />
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 {accounts.map((account) => (
                   <DropdownMenuItem
                     key={account.id}
@@ -245,7 +232,7 @@ export function HomeScreen() {
                   >
                     <Home className="w-4 h-4" />
                     <span className="flex-1">{account.name}</span>
-                    {!showAllContexts && account.id === activeAccountId && (
+                    {account.id === activeAccountId && (
                       <Check className="w-4 h-4 text-primary" />
                     )}
                   </DropdownMenuItem>
