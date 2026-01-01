@@ -54,11 +54,10 @@ export function RoleSelectionScreen() {
   const { navigate } = useNavigation();
 
   const handleSelectRole = (type: UserType) => {
-    if (permissionsService.hasCompletedPermissionsFlow()) {
-      navigate("onboarding", { userType: type });
-    } else {
-      navigate("permissions", { userType: type });
-    }
+    // Always show permissions screen for first-time users from role selection
+    // This ensures new users go through the permissions flow even if localStorage has stale data
+    permissionsService.clearPermissionsGranted();
+    navigate("permissions", { userType: type });
   };
 
   return (
