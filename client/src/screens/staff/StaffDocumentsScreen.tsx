@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from "react";
-import { FolderOpen, FileText, Image, File, Trash2, Eye } from "lucide-react";
+import { FolderOpen, FileText, Image, File, Trash2, Eye, Download } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { compressImage, formatBytes } from "@/lib/imageCompression";
 import { Button } from "@/components/ui/button";
@@ -235,6 +235,16 @@ export function StaffDocumentsScreen() {
                       data-testid={`button-view-${doc.id}`}
                     >
                       <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      asChild
+                      data-testid={`button-download-${doc.id}`}
+                    >
+                      <a href={doc.fileData} download={doc.fileName}>
+                        <Download className="w-4 h-4" />
+                      </a>
                     </Button>
                     <Button
                       variant="ghost"
