@@ -314,7 +314,7 @@ export function StaffHomeScreen() {
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         <StorageWarningBanner />
-        <div className="content-container pb-20 flex flex-col gap-4">
+        <div className="content-container pb-6 flex flex-col gap-4">
           <section className="grid grid-cols-2 gap-2" data-testid="section-modules">
             {modules.map((module) => {
               const Icon = module.icon;
