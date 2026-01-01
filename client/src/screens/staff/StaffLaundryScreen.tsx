@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Shirt, ChevronLeft, ChevronRight, Edit2, Trash2, Calendar, Building2 } from "lucide-react";
+import { Shirt, ChevronLeft, ChevronRight, Eye, Trash2, Calendar, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
@@ -100,7 +100,7 @@ export function StaffLaundryScreen() {
     return clientHome?.name || "Unknown Client";
   };
 
-  const handleEdit = (job: StaffLaundryJob) => {
+  const handleView = (job: StaffLaundryJob) => {
     navigate("staff-edit-laundry", { laundryId: job.id });
   };
 
@@ -259,10 +259,10 @@ export function StaffLaundryScreen() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleEdit(job)}
-                          data-testid={`button-edit-${job.id}`}
+                          onClick={() => handleView(job)}
+                          data-testid={`button-view-${job.id}`}
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Eye className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"

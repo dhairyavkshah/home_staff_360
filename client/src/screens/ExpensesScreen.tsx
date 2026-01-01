@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Receipt, Check, Clock, AlertCircle, Pencil, Trash2, Banknote, Plus, MoreVertical } from "lucide-react";
+import { Receipt, Check, Clock, AlertCircle, Eye, Trash2, Banknote, Plus, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -259,10 +259,10 @@ export function ExpensesScreen() {
                         )}
                         <DropdownMenuItem 
                           onClick={() => navigate("add-expense", { expenseId: expense.id, editMode: true })}
-                          data-testid={`button-edit-${expense.id}`}
+                          data-testid={`button-view-${expense.id}`}
                         >
-                          <Pencil className="w-4 h-4 mr-2" />
-                          {t("edit")}
+                          <Eye className="w-4 h-4 mr-2" />
+                          {t("view")}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => setDeleteId(expense.id)}

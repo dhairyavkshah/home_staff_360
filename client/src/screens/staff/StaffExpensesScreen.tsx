@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Receipt, Check, Clock, AlertCircle, MoreVertical, Edit, Trash2, Banknote, Plus } from "lucide-react";
+import { Receipt, Check, Clock, AlertCircle, MoreVertical, Eye, Trash2, Banknote, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -263,8 +263,8 @@ export function StaffExpensesScreen() {
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onClick={() => navigate("staff-add-expense", { expenseId: expense.id, editMode: true })}>
-                            <Edit className="w-4 h-4 mr-2" />
-                            {t("edit")}
+                            <Eye className="w-4 h-4 mr-2" />
+                            {t("view")}
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => togglePaid(expense.id, expense.isPaid)}>
                             <Check className="w-4 h-4 mr-2" />

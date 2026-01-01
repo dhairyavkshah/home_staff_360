@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle, MinusCircle, XCircle, Home, Edit, Trash2, MoreVertical } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, CheckCircle, MinusCircle, XCircle, Home, Eye, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -228,8 +228,8 @@ export function StaffAttendanceScreen() {
                         <DropdownMenuItem 
                           onClick={() => navigate("staff-edit-attendance", { attendanceId: entry.id })}
                         >
-                          <Edit className="w-4 h-4 mr-2" />
-                          {t("edit")}
+                          <Eye className="w-4 h-4 mr-2" />
+                          {t("view")}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-destructive"

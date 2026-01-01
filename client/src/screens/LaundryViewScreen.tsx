@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Shirt, ChevronLeft, ChevronRight, Pencil, Trash2, Check, Clock, Plus } from "lucide-react";
+import { Shirt, ChevronLeft, ChevronRight, Eye, Trash2, Check, Clock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -161,7 +161,7 @@ export function LaundryViewScreen() {
     }, 0);
   }, [filteredBatches]);
 
-  const handleEdit = (batch: LaundryBatch) => {
+  const handleView = (batch: LaundryBatch) => {
     navigate("add-laundry", { laundryId: batch.id });
   };
 
@@ -353,10 +353,10 @@ export function LaundryViewScreen() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleEdit(batch)}
-                        data-testid={`button-edit-${batch.id}`}
+                        onClick={() => handleView(batch)}
+                        data-testid={`button-view-${batch.id}`}
                       >
-                        <Pencil className="w-4 h-4" />
+                        <Eye className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
