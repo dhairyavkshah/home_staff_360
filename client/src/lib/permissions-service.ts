@@ -26,25 +26,25 @@ const isTestBypassEnabled = (): boolean => {
 
 export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
   {
-    id: "camera",
-    name: "Camera Access",
-    description: "Take photos for staff profiles and document scanning. This helps you quickly capture and store important information.",
-    icon: "camera",
-    required: true,
-  },
-  {
     id: "storage",
     name: "Storage Access",
     description: "Save and access your data, photos, and backup files. All data stays on your device for complete privacy.",
     icon: "folder",
-    required: isNativePlatform,
+    required: true,
   },
   {
     id: "notifications",
     name: "Notifications",
     description: "Receive reminders for pending payments, attendance tracking, and important updates.",
     icon: "bell",
-    required: false,
+    required: true,
+  },
+  {
+    id: "camera",
+    name: "Camera Access",
+    description: "Take photos for staff profiles and document scanning. This helps you quickly capture and store important information.",
+    icon: "camera",
+    required: true,
   },
 ];
 

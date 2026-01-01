@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Camera, FolderOpen, Bell, Check, X, ChevronRight, ChevronLeft, Shield } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
@@ -66,18 +66,14 @@ export function PermissionsScreen() {
     
     setIsRequesting(false);
     
-    if (result === "granted" || !currentPermission.required) {
-      if (currentIndex < permissions.length - 1) {
-        emblaApi?.scrollNext();
-      } else {
-        checkAllAndProceed();
-      }
-    }
-  };
-
-  const handleSkip = () => {
-    if (!currentPermission.required && currentIndex < permissions.length - 1) {
-      emblaApi?.scrollNext();
+    if (result === "granted") {
+      setTimeout(() => {
+        if (currentIndex < permissions.length - 1) {
+          emblaApi?.scrollNext();
+        } else {
+          checkAllAndProceed();
+        }
+      }, 800);
     }
   };
 
@@ -175,9 +171,7 @@ export function PermissionsScreen() {
                       <div className="text-center space-y-2">
                         <div className="flex items-center justify-center gap-2">
                           <h2 className="text-xl font-semibold">{permission.name}</h2>
-                          {permission.required && (
-                            <Badge variant="secondary">Required</Badge>
-                          )}
+                          <Badge variant="secondary">Required</Badge>
                         </div>
                         <p className="text-muted-foreground text-sm leading-relaxed">
                           {permission.description}
@@ -215,16 +209,6 @@ export function PermissionsScreen() {
                         </Button>
                       )}
 
-                      {!permission.required && !isGranted && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleSkip}
-                          data-testid={`button-skip-${permission.id}`}
-                        >
-                          Skip for now
-                        </Button>
-                      )}
                     </Card>
                   </div>
                 );

@@ -138,7 +138,7 @@ export function loadFeedbackSettings(): void {
 export function initSoundService(): void {
   loadFeedbackSettings();
 
-  const handleInteraction = (e: Event) => {
+  const handleInteraction = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
     if (!target) return;
 
@@ -167,5 +167,5 @@ export function initSoundService(): void {
     }
   };
 
-  document.addEventListener('pointerdown', handleInteraction, { passive: true, capture: true });
+  document.addEventListener('click', handleInteraction, { passive: true, capture: true });
 }
