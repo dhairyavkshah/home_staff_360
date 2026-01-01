@@ -1,9 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
+import { Trash2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -11,6 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
@@ -20,6 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
 import { getTodayString } from "@/lib/calculations";
 import { useTranslation } from "@/lib/i18n/i18n-context";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const CATEGORY_OPTIONS = [
   { value: "supplies", label: "Supplies" },
@@ -31,19 +45,29 @@ const CATEGORY_OPTIONS = [
   { value: "other", label: "Other" },
 ] as const;
 
+const RECURRENCE_LABELS: Record<string, string> = {
+  "one-time": "One-time",
+  "weekly": "Weekly",
+  "monthly": "Monthly",
+  "yearly": "Yearly",
+};
+
 export function StaffAddExpenseScreen() {
   const { navigate, goBack, data } = useNavigation();
   const { toast } = useToast();
   const { t } = useTranslation();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  const { getCurrencySymbol } = useCurrency();
   
-  const expenseId = data.expenseId as string | undefined;
-  const isEditMode = !!expenseId;
+  const isViewMode = data?.editMode && data?.expenseId;
+  const expenseId = data?.expenseId as string | undefined;
   
   const existingExpense = useMemo(() => {
     if (!expenseId) return null;
     return storage.getStaffExpense(expenseId);
   }, [expenseId]);
+
+  const displaySymbol = existingExpense?.recordCurrencySymbol || getCurrencySymbol();
 
   const [refreshKey] = useState(0);
   const activeAccountId = useMemo(() => storage.getActiveAccountId(), [refreshKey]);
@@ -66,6 +90,7 @@ export function StaffAddExpenseScreen() {
   const [recurrence, setRecurrence] = useState<"one-time" | "weekly" | "monthly" | "yearly">("one-time");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     if (existingExpense) {
@@ -109,6 +134,7 @@ export function StaffAddExpenseScreen() {
   };
 
   const handleSubmit = () => {
+    if (isViewMode) return;
     if (!validate()) return;
 
     const expenseData = {
@@ -124,17 +150,170 @@ export function StaffAddExpenseScreen() {
       staffUserId: storage.getProfile()?.id || 'unknown',
     };
 
-    if (isEditMode && expenseId) {
-      storage.updateStaffExpense(expenseId, expenseData);
-      toast({ title: t("expenseUpdated") });
-    } else {
-      storage.addStaffExpense(expenseData);
-      toast({ title: t("expenseAdded") });
-    }
+    storage.addStaffExpense(expenseData);
+    toast({ title: t("expenseAdded") });
 
     markClean();
     navigate("staff-expenses");
   };
+
+  const handleDelete = () => {
+    if (!expenseId) return;
+    
+    storage.deleteStaffExpense(expenseId);
+    toast({ title: t("expenseDeleted") || "Expense deleted successfully" });
+    navigate("staff-expenses");
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getCategoryLabel = (categoryValue: string): string => {
+    const cat = CATEGORY_OPTIONS.find(c => c.value === categoryValue);
+    return cat ? cat.label : categoryValue;
+  };
+
+  const getClientHomeName = (homeId: string | undefined): string => {
+    if (!homeId || homeId === "none") return t("noSpecificClient") || "No specific client";
+    const home = clientHomes.find(h => h.id === homeId);
+    return home?.name || homeId;
+  };
+
+  if (isViewMode && existingExpense) {
+    return (
+      <AppLayout>
+        <Header
+          title={"View Expense"}
+          onBack={() => navigate("staff-expenses")}
+          onHome={() => navigate("staff-home")}
+        />
+
+        <ScrollContent>
+          <Card className="p-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 mb-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  {"This record cannot be edited"}
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                  {"Financial records are locked after creation. If you need to make changes, delete this record and create a new one."}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">{t("expenseDetails")}</h2>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{t("title")}</Label>
+              <p className="font-medium" data-testid="view-title">{existingExpense.title}</p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{t("category")}</Label>
+              <p className="font-medium" data-testid="view-category">
+                {getCategoryLabel(existingExpense.category)}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{t("amount")}</Label>
+              <p className="font-medium text-lg" data-testid="view-amount">
+                {displaySymbol}{existingExpense.amount.toLocaleString()}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{t("dueDate")}</Label>
+              <p className="font-medium" data-testid="view-due-date">{formatDate(existingExpense.dueDate)}</p>
+            </div>
+
+            {existingExpense.vendor && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{t("vendor")}</Label>
+                <p className="font-medium" data-testid="view-vendor">{existingExpense.vendor}</p>
+              </div>
+            )}
+
+            {existingExpense.clientHomeId && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{t("relatedClient")}</Label>
+                <p className="font-medium" data-testid="view-client-home">
+                  {getClientHomeName(existingExpense.clientHomeId)}
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{t("recurrence")}</Label>
+              <p className="font-medium" data-testid="view-recurrence">
+                {RECURRENCE_LABELS[existingExpense.recurrence] || existingExpense.recurrence}
+              </p>
+            </div>
+
+            {existingExpense.notes && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{t("notes")}</Label>
+                <p className="font-medium" data-testid="view-notes">{existingExpense.notes}</p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between py-2">
+              <Label className="text-muted-foreground text-sm">{"Payment Status"}</Label>
+              <Badge variant={existingExpense.isPaid ? "default" : "secondary"} data-testid="view-status">
+                {existingExpense.isPaid ? t("paid") : t("unpaid") || "Unpaid"}
+              </Badge>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{"Recorded On"}</Label>
+              <p className="text-sm text-muted-foreground" data-testid="view-created">
+                {formatDate(existingExpense.createdAt)}
+              </p>
+            </div>
+          </section>
+
+          <Button 
+            variant="destructive" 
+            className="w-full" 
+            onClick={() => setShowDeleteDialog(true)} 
+            data-testid="button-delete"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            {t("deleteExpense") || "Delete Expense"}
+          </Button>
+        </ScrollContent>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("deleteExpense") || "Delete Expense"}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("deleteExpenseConfirm") || "Are you sure you want to delete this expense? This action cannot be undone."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                {t("delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -274,7 +453,7 @@ export function StaffAddExpenseScreen() {
         </section>
 
         <Button className="w-full" onClick={handleSubmit} data-testid="button-save">
-          {isEditMode ? t("save") : t("addExpense")}
+          {t("addExpense")}
         </Button>
       </ScrollContent>
 

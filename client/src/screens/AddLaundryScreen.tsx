@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
-import { X, FileText, Truck, Info, Edit2, Shirt, User } from "lucide-react";
+import { X, FileText, Truck, Info, Edit2, Shirt, User, Trash2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -17,6 +18,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
@@ -25,6 +36,7 @@ import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
 import { useActiveContext } from "@/hooks/use-active-context";
+import { useCurrency } from "@/hooks/useCurrency";
 import { getTodayString, formatCurrency } from "@/lib/calculations";
 import { QuickAddClothModal } from "@/components/laundry/QuickAddClothModal";
 import { LAUNDRY_SERVICE_TYPES, type LaundryItem, type LaundryServiceType, currencySymbols } from "@shared/schema";
@@ -40,10 +52,19 @@ export function AddLaundryScreen() {
   const { toast } = useToast();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
   const { contextLabel, contextMode } = useActiveContext();
+  const { getCurrencySymbol } = useCurrency();
   const settings = useMemo(() => storage.getSettings(), []);
   const symbol = settings.customCurrencySymbol || currencySymbols[settings.currency];
   
   const isEditMode = !!navData.laundryId;
+  const isViewMode = isEditMode;
+  
+  const existingBatch = useMemo(() => {
+    if (!navData.laundryId) return null;
+    return storage.getLaundryById(navData.laundryId);
+  }, [navData.laundryId]);
+
+  const displaySymbol = existingBatch?.recordCurrencySymbol || getCurrencySymbol();
   
   const [serviceType, setServiceType] = useState<LaundryServiceType>("Ironing");
   const [date, setDate] = useState(getTodayString());
@@ -57,6 +78,7 @@ export function AddLaundryScreen() {
   const [editingItem, setEditingItem] = useState<LaundryItem | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const laundryStaff = useMemo(() => {
     const activeAccountId = storage.getActiveAccountId();
@@ -65,17 +87,23 @@ export function AddLaundryScreen() {
     return people.filter((p: Person) => p.role === 'Laundry' && p.isActive);
   }, []);
 
+  const getStaffName = (staffId: string | undefined) => {
+    if (!staffId) return null;
+    const staff = laundryStaff.find((s) => s.id === staffId);
+    return staff?.name || null;
+  };
+
   useEffect(() => {
     if (navData.laundryId && !isLoaded) {
-      const existingBatch = storage.getLaundryById(navData.laundryId);
-      if (existingBatch) {
-        setServiceType((existingBatch.serviceType as LaundryServiceType) || "Ironing");
-        setDate(existingBatch.date);
-        setProvider(existingBatch.provider || "");
-        setSelectedStaffId(existingBatch.staffId || "");
-        setItems(existingBatch.items || []);
-        setPickupDelivery(!!existingBatch.pickupDelivery);
-        setPickupDeliveryCharge(existingBatch.pickupDeliveryCharge?.toString() || "");
+      const batch = storage.getLaundryById(navData.laundryId);
+      if (batch) {
+        setServiceType((batch.serviceType as LaundryServiceType) || "Ironing");
+        setDate(batch.date);
+        setProvider(batch.provider || "");
+        setSelectedStaffId(batch.staffId || "");
+        setItems(batch.items || []);
+        setPickupDelivery(!!batch.pickupDelivery);
+        setPickupDeliveryCharge(batch.pickupDeliveryCharge?.toString() || "");
       }
       setIsLoaded(true);
     }
@@ -87,6 +115,18 @@ export function AddLaundryScreen() {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   
   const defaultBaseRate = 10;
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch {
+      return dateStr;
+    }
+  };
 
   const handleAddItem = (newItem: { type: string; quantity: number; rate: number; details?: string }) => {
     const existingIndex = items.findIndex(i => i.type === newItem.type && i.rate === newItem.rate);
@@ -159,6 +199,7 @@ export function AddLaundryScreen() {
   };
 
   const handleSubmit = () => {
+    if (isViewMode) return;
     if (!validate()) return;
 
     let accountId: string;
@@ -183,14 +224,17 @@ export function AddLaundryScreen() {
       isPaid: false,
     };
 
-    if (isEditMode && navData.laundryId) {
-      storage.updateLaundry(navData.laundryId, laundryData);
-      toast({ title: "Laundry batch updated successfully" });
-    } else {
-      storage.addLaundry(laundryData);
-      toast({ title: "Laundry batch added successfully" });
-    }
+    storage.addLaundry(laundryData);
+    toast({ title: "Laundry batch added successfully" });
     markClean();
+    navigate("laundry-view");
+  };
+
+  const handleDelete = () => {
+    if (!navData.laundryId) return;
+    
+    storage.deleteLaundry(navData.laundryId);
+    toast({ title: "Laundry batch deleted successfully" });
     navigate("laundry-view");
   };
 
@@ -207,6 +251,183 @@ export function AddLaundryScreen() {
     markClean();
     navigate("home");
   };
+
+  if (isViewMode && existingBatch) {
+    const staffName = getStaffName(existingBatch.staffId);
+    const viewItemsTotal = existingBatch.items?.reduce((sum, item) => sum + item.subtotal, 0) || 0;
+    const viewTotalItems = existingBatch.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+    const viewDeliveryCharge = existingBatch.pickupDelivery ? (existingBatch.pickupDeliveryCharge || 0) : 0;
+
+    return (
+      <AppLayout>
+        <Header
+          title="View Laundry"
+          subtitle="Laundry record details"
+          onBack={() => navigate("laundry-view")}
+          onHome={() => navigate("home")}
+          contextLabel={contextLabel}
+          contextMode={contextMode}
+        />
+
+        <ScrollContent>
+          <Card className="p-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 mb-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  This record cannot be edited
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                  Financial records are locked after creation. If you need to make changes, delete this record and create a new one.
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">Basic Information</h2>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">Service Type</Label>
+              <p className="font-medium" data-testid="view-service-type">{existingBatch.serviceType}</p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">Date</Label>
+              <p className="font-medium" data-testid="view-date">{formatDate(existingBatch.date)}</p>
+            </div>
+
+            {staffName && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">Staff</Label>
+                <p className="font-medium" data-testid="view-staff">{staffName}</p>
+              </div>
+            )}
+
+            {existingBatch.provider && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">Provider</Label>
+                <p className="font-medium" data-testid="view-provider">{existingBatch.provider}</p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between py-2">
+              <Label className="text-muted-foreground text-sm">Payment Status</Label>
+              <Badge variant={existingBatch.isPaid ? "default" : "secondary"} data-testid="view-status">
+                {existingBatch.isPaid ? "Paid" : "Unpaid"}
+              </Badge>
+            </div>
+          </section>
+
+          {existingBatch.items && existingBatch.items.length > 0 && (
+            <section className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-lg font-semibold">Items</h2>
+                <span className="text-sm text-muted-foreground">
+                  {viewTotalItems} item{viewTotalItems !== 1 ? 's' : ''}
+                </span>
+              </div>
+              
+              <Card className="divide-y">
+                {existingBatch.items.map((item, index) => (
+                  <div key={item.id || index} className="p-3 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <div className="icon-halo-primary w-9 h-9 flex-shrink-0">
+                        <Shirt className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{item.type}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {displaySymbol}{item.rate.toLocaleString()} each x {item.quantity}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-medium text-right">
+                      {displaySymbol}{item.subtotal.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </Card>
+            </section>
+          )}
+
+          {existingBatch.pickupDelivery && (
+            <section className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold">Additional Services</h2>
+              <Card className="p-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="icon-halo-muted w-9 h-9">
+                    <Truck className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Pick-up & Delivery</p>
+                  </div>
+                </div>
+                <span className="font-medium">{displaySymbol}{viewDeliveryCharge.toLocaleString()}</span>
+              </Card>
+            </section>
+          )}
+
+          <Card className="p-3 bg-primary/5 border-primary/20">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Items ({viewTotalItems})</span>
+                <span>{displaySymbol}{viewItemsTotal.toLocaleString()}</span>
+              </div>
+              {existingBatch.pickupDelivery && viewDeliveryCharge > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Pick-up & Delivery</span>
+                  <span>{displaySymbol}{viewDeliveryCharge.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between pt-2 border-t">
+                <span className="font-semibold">Total</span>
+                <span className="text-xl font-bold" data-testid="view-total">
+                  {displaySymbol}{existingBatch.total.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          {existingBatch.createdAt && (
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">Recorded On</Label>
+              <p className="text-sm text-muted-foreground" data-testid="view-created">
+                {formatDate(existingBatch.createdAt)}
+              </p>
+            </div>
+          )}
+
+          <Button 
+            variant="destructive" 
+            className="w-full" 
+            onClick={() => setShowDeleteDialog(true)} 
+            data-testid="button-delete"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Laundry Batch
+          </Button>
+        </ScrollContent>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Laundry Batch</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this laundry batch? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -424,7 +645,7 @@ export function AddLaundryScreen() {
         </Card>
 
         <Button className="w-full button-press" onClick={handleSubmit} data-testid="button-save">
-          {isEditMode ? "Update Laundry Batch" : "Save Laundry Batch"}
+          Save Laundry Batch
         </Button>
       </ScrollContent>
 

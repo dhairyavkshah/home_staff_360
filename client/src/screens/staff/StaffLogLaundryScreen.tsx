@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
-import { X, Truck, Shirt, Briefcase } from "lucide-react";
+import { X, Truck, Shirt, Briefcase, Trash2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -12,6 +13,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
@@ -20,6 +31,7 @@ import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
 import { useTranslation } from "@/lib/i18n/i18n-context";
+import { useCurrency } from "@/hooks/useCurrency";
 import { QuickAddClothModal } from "@/components/laundry/QuickAddClothModal";
 import { currencySymbols, LAUNDRY_SERVICE_TYPES } from "@shared/schema";
 import type { LaundryServiceType, Account } from "@shared/schema";
@@ -42,6 +54,7 @@ export function StaffLogLaundryScreen() {
   const { toast } = useToast();
   const { t } = useTranslation();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  const { getCurrencySymbol } = useCurrency();
   const data = useNavigationData<{ laundryJobId?: string }>();
 
   const profile = useMemo(() => storage.getProfile(), []);
@@ -58,11 +71,13 @@ export function StaffLogLaundryScreen() {
     return laundryBusinesses.find(a => a.id === activeAccountId);
   }, [laundryBusinesses, activeAccountId]);
 
-  const editMode = !!data.laundryJobId;
+  const isViewMode = !!data.laundryJobId;
   const existingJob = useMemo(() => {
     if (!data.laundryJobId) return null;
-    return storage.getStaffLaundryJobs().find(j => j.id === data.laundryJobId);
+    return storage.getStaffLaundryJobs().find(j => j.id === data.laundryJobId) || null;
   }, [data.laundryJobId]);
+
+  const displaySymbol = existingJob?.recordCurrencySymbol || getCurrencySymbol();
 
   const today = new Date().toISOString().split('T')[0];
   const [selectedBusinessId, setSelectedBusinessId] = useState<string>(activeAccount?.id || "");
@@ -76,6 +91,7 @@ export function StaffLogLaundryScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const clientHomes = useMemo(() => {
     if (selectedBusinessId) {
@@ -198,44 +214,238 @@ export function StaffLogLaundryScreen() {
     if (!validate()) return;
     if (!profile) return;
 
-    if (editMode && data.laundryJobId) {
-      storage.updateStaffLaundryJob(data.laundryJobId, {
-        accountId: selectedBusinessId,
-        clientHomeId: selectedHome,
-        date,
-        itemCount: totalItems,
-        ratePerItem: items.length > 0 ? items[0].rate : 0,
-        totalEarned: total,
-        items: items,
-        serviceType,
-        pickupDelivery,
-        pickupDeliveryCharge: deliveryCharge,
-        note: provider.trim() || undefined,
-      });
-      toast({ title: t("laundryJobUpdated") || "Laundry job updated" });
-    } else {
-      storage.addStaffLaundryJob({
-        staffUserId: profile.id,
-        accountId: selectedBusinessId,
-        clientHomeId: selectedHome,
-        date,
-        itemCount: totalItems,
-        ratePerItem: items.length > 0 ? items[0].rate : 0,
-        totalEarned: total,
-        items: items,
-        serviceType,
-        pickupDelivery,
-        pickupDeliveryCharge: deliveryCharge,
-        note: provider.trim() || undefined,
-      });
-      toast({ title: t("laundryJobLogged") });
-    }
+    storage.addStaffLaundryJob({
+      staffUserId: profile.id,
+      accountId: selectedBusinessId,
+      clientHomeId: selectedHome,
+      date,
+      itemCount: totalItems,
+      ratePerItem: items.length > 0 ? items[0].rate : 0,
+      totalEarned: total,
+      items: items,
+      serviceType,
+      pickupDelivery,
+      pickupDeliveryCharge: deliveryCharge,
+      note: provider.trim() || undefined,
+    });
+    toast({ title: t("laundryJobLogged") });
 
     markClean();
     navigate("staff-laundry");
   };
 
+  const handleDelete = () => {
+    if (!data.laundryJobId) return;
+    
+    storage.deleteStaffLaundryJob(data.laundryJobId);
+    toast({ title: t("laundryJobDeleted") || "Laundry job deleted successfully" });
+    navigate("staff-laundry");
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getClientHomeName = (clientHomeId: string | undefined) => {
+    if (!clientHomeId) return null;
+    const homes = storage.getClientHomes();
+    const home = homes.find(h => h.id === clientHomeId);
+    return home?.name || null;
+  };
+
+  const getBusinessName = (accountId: string | undefined) => {
+    if (!accountId) return null;
+    const business = laundryBusinesses.find(b => b.id === accountId);
+    return business?.name || null;
+  };
+
   const formatCurrency = (amount: number) => `${symbol}${amount.toLocaleString()}`;
+
+  if (isViewMode && existingJob) {
+    const clientHomeName = getClientHomeName(existingJob.clientHomeId);
+    const businessName = getBusinessName(existingJob.accountId);
+    const viewItemsTotal = existingJob.items?.reduce((sum, item) => sum + item.subtotal, 0) || 0;
+    const viewTotalItems = existingJob.items?.reduce((sum, item) => sum + item.quantity, 0) || existingJob.itemCount || 0;
+    const viewDeliveryCharge = existingJob.pickupDelivery ? (existingJob.pickupDeliveryCharge || 0) : 0;
+
+    return (
+      <AppLayout>
+        <Header
+          title={"View Laundry Job"}
+          subtitle={"Laundry record details"}
+          onBack={() => navigate("staff-laundry")}
+          onHome={() => navigate("staff-home")}
+        />
+
+        <ScrollContent>
+          <Card className="p-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 mb-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  {"This record cannot be edited"}
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                  {"Financial records are locked after creation. If you need to make changes, delete this record and create a new one."}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">{t("basicInformation") || "Basic Information"}</h2>
+
+            {businessName && laundryBusinesses.length > 1 && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{"Business"}</Label>
+                <p className="font-medium" data-testid="view-business">{businessName}</p>
+              </div>
+            )}
+
+            {clientHomeName && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{"Client Home"}</Label>
+                <p className="font-medium" data-testid="view-client-home">{clientHomeName}</p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{t("date") || "Date"}</Label>
+              <p className="font-medium" data-testid="view-date">{formatDate(existingJob.date)}</p>
+            </div>
+
+            {existingJob.serviceType && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{t("serviceType") || "Service Type"}</Label>
+                <p className="font-medium" data-testid="view-service-type">{existingJob.serviceType}</p>
+              </div>
+            )}
+
+            {existingJob.note && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{t("notes") || "Notes"}</Label>
+                <p className="font-medium" data-testid="view-notes">{existingJob.note}</p>
+              </div>
+            )}
+          </section>
+
+          {existingJob.items && existingJob.items.length > 0 && (
+            <section className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-lg font-semibold">{t("items") || "Items"}</h2>
+                <span className="text-sm text-muted-foreground">
+                  {viewTotalItems} {t("item") || "item"}{viewTotalItems !== 1 ? 's' : ''}
+                </span>
+              </div>
+              
+              <Card className="divide-y">
+                {existingJob.items.map((item, index) => (
+                  <div key={item.id || index} className="p-3 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <div className="icon-halo-primary w-9 h-9 flex-shrink-0">
+                        <Shirt className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{item.type}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {displaySymbol}{item.rate.toLocaleString()} {t("each") || "each"} x {item.quantity}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-medium text-right">
+                      {displaySymbol}{item.subtotal.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </Card>
+            </section>
+          )}
+
+          {existingJob.pickupDelivery && (
+            <section className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold">{t("additionalServices") || "Additional Services"}</h2>
+              <Card className="p-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="icon-halo-muted w-9 h-9">
+                    <Truck className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{t("pickupDelivery") || "Pick-up & Delivery"}</p>
+                  </div>
+                </div>
+                <span className="font-medium">{displaySymbol}{viewDeliveryCharge.toLocaleString()}</span>
+              </Card>
+            </section>
+          )}
+
+          <Card className="p-3 bg-primary/5 border-primary/20">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t("items") || "Items"} ({viewTotalItems})</span>
+                <span>{displaySymbol}{viewItemsTotal.toLocaleString()}</span>
+              </div>
+              {existingJob.pickupDelivery && viewDeliveryCharge > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t("pickupDelivery") || "Pick-up & Delivery"}</span>
+                  <span>{displaySymbol}{viewDeliveryCharge.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between pt-2 border-t">
+                <span className="font-semibold">{t("totalEarnings") || "Total Earnings"}</span>
+                <span className="text-xl font-bold" data-testid="view-total">
+                  {displaySymbol}{existingJob.totalEarned.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          {existingJob.createdAt && (
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{"Recorded On"}</Label>
+              <p className="text-sm text-muted-foreground" data-testid="view-created">
+                {formatDate(existingJob.createdAt)}
+              </p>
+            </div>
+          )}
+
+          <Button 
+            variant="destructive" 
+            className="w-full" 
+            onClick={() => setShowDeleteDialog(true)} 
+            data-testid="button-delete"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            {t("deleteLaundryJob") || "Delete Laundry Job"}
+          </Button>
+        </ScrollContent>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("deleteLaundryJob") || "Delete Laundry Job"}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {"Are you sure you want to delete this laundry job? This action cannot be undone."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel") || "Cancel"}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                {t("delete") || "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -463,7 +673,7 @@ export function StaffLogLaundryScreen() {
         </Card>
 
         <Button className="w-full button-press" onClick={handleSave} data-testid="button-save">
-          {editMode ? t("update") : t("logLaundryJob")}
+          {t("logLaundryJob")}
         </Button>
       </ScrollContent>
 

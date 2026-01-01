@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
-import { Info, Paperclip, X, Image as ImageIcon, FileText } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Info, Paperclip, X, Image as ImageIcon, FileText, Trash2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -12,6 +13,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
@@ -21,6 +32,8 @@ import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
 import { useTranslation } from "@/lib/i18n/i18n-context";
+import { useActiveContext } from "@/hooks/use-active-context";
+import { useCurrency } from "@/hooks/useCurrency";
 import { getTodayString, calculatePersonBalance, formatCurrency } from "@/lib/calculations";
 import { HOME_DOCUMENT_CATEGORIES } from "@shared/schema";
 
@@ -29,11 +42,29 @@ interface PendingAttachment {
   preview: string;
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  payment: "Payment",
+  advance: "Advance",
+  deduction: "Deduction",
+  other: "Other",
+};
+
 export function AddTransactionScreen() {
   const { navigate, goBack, data } = useNavigation();
   const { toast } = useToast();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
   const { tLabel } = useTranslation();
+  const { contextLabel, contextMode } = useActiveContext();
+  const { getCurrencySymbol } = useCurrency();
+  
+  const isViewMode = data?.editMode && data?.transactionId;
+  const existingTransaction = useMemo(() => {
+    if (!data?.transactionId) return null;
+    return storage.getTransactions().find(t => t.id === data.transactionId);
+  }, [data?.transactionId]);
+
+  const displaySymbol = existingTransaction?.recordCurrencySymbol || getCurrencySymbol();
+
   const personId = data.personId as string;
   const presetAmount = data.presetAmount as number | undefined;
   const defaultDescription = data.defaultDescription as string | undefined;
@@ -77,10 +108,30 @@ export function AddTransactionScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showAttachmentChooser, setShowAttachmentChooser] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<PendingAttachment[]>([]);
+  const [attachmentRefreshKey, setAttachmentRefreshKey] = useState(0);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const existingAttachments = useMemo(() => {
+    if (!data?.transactionId) return [];
+    return storage.getDocumentsByLinkedRecord('TRANSACTION', data.transactionId);
+  }, [data?.transactionId, attachmentRefreshKey]);
+
+  useEffect(() => {
+    if (existingTransaction) {
+      setCategory(existingTransaction.category);
+      setDescription(existingTransaction.description);
+      setTransactionNo(existingTransaction.transactionNo || "");
+      setAmount(existingTransaction.amount.toString());
+      setDate(existingTransaction.date);
+      setIsPaid(existingTransaction.isPaid);
+    }
+  }, [existingTransaction]);
 
   const handleBack = () => {
-    if (source === "payables") {
+    if (isViewMode) {
+      navigate("person-detail", { personId, source });
+    } else if (source === "payables") {
       navigate("payables");
     } else {
       navigate("person-detail", { personId, source });
@@ -129,6 +180,7 @@ export function AddTransactionScreen() {
   };
 
   const handleSubmit = () => {
+    if (isViewMode) return;
     if (!validate()) return;
 
     const newTransaction = storage.addTransaction({
@@ -168,6 +220,18 @@ export function AddTransactionScreen() {
     navigate("person-detail", { personId, source });
   };
 
+  const handleDelete = () => {
+    if (!data?.transactionId) return;
+    
+    existingAttachments.forEach(doc => {
+      storage.deleteDocument(doc.id);
+    });
+    
+    storage.deleteTransaction(data.transactionId);
+    toast({ title: tLabel('transactionDeleted', 'Transaction deleted successfully') });
+    navigate("person-detail", { personId, source });
+  };
+
   const handleHomePress = () => {
     if (isDirty) {
       setShowUnsavedDialog(true);
@@ -182,6 +246,151 @@ export function AddTransactionScreen() {
     navigate("home");
   };
 
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  if (isViewMode && existingTransaction) {
+    return (
+      <AppLayout>
+        <Header
+          title={tLabel('viewTransaction', 'View Transaction')}
+          subtitle={`${tLabel('for', 'for')} ${person.name}`}
+          onBack={handleBack}
+          onHome={() => navigate("home")}
+          contextLabel={contextLabel}
+          contextMode={contextMode}
+        />
+
+        <ScrollContent>
+          <Card className="p-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 mb-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  {tLabel('recordNotEditable', 'This record cannot be edited')}
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                  {tLabel('recordNotEditableHint', 'Financial records are locked after creation. If you need to make changes, delete this record and create a new one.')}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">{tLabel('transactionDetails', 'Transaction Details')}</h2>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{tLabel('category', 'Category')}</Label>
+              <p className="font-medium" data-testid="view-category">
+                {CATEGORY_LABELS[existingTransaction.category] || existingTransaction.category}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{tLabel('description', 'Description')}</Label>
+              <p className="font-medium" data-testid="view-description">{existingTransaction.description}</p>
+            </div>
+
+            {existingTransaction.transactionNo && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{tLabel('transactionNo', 'Transaction No.')}</Label>
+                <p className="font-medium" data-testid="view-transaction-no">{existingTransaction.transactionNo}</p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{tLabel('amount', 'Amount')}</Label>
+              <p className="font-medium text-lg" data-testid="view-amount">
+                {displaySymbol}{existingTransaction.amount.toLocaleString()}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-muted-foreground text-sm">{tLabel('date', 'Date')}</Label>
+              <p className="font-medium" data-testid="view-date">{formatDate(existingTransaction.date)}</p>
+            </div>
+
+            <div className="flex items-center justify-between py-2">
+              <Label className="text-muted-foreground text-sm">{tLabel('paymentStatus', 'Payment Status')}</Label>
+              <Badge variant={existingTransaction.isPaid ? "default" : "secondary"} data-testid="view-status">
+                {existingTransaction.isPaid ? tLabel('paid', 'Paid') : tLabel('unpaid', 'Unpaid')}
+              </Badge>
+            </div>
+
+            {existingTransaction.createdAt && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{tLabel('createdAt', 'Created At')}</Label>
+                <p className="text-sm text-muted-foreground" data-testid="view-created-at">
+                  {formatDate(existingTransaction.createdAt)}
+                </p>
+              </div>
+            )}
+          </section>
+
+          {existingAttachments.length > 0 && (
+            <section className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold">{tLabel('attachments', 'Attachments')}</h2>
+              <div className="flex flex-col gap-2">
+                {existingAttachments.map((doc) => (
+                  <Card key={doc.id} className="p-3 flex items-center gap-3">
+                    {doc.fileType.startsWith('image/') ? (
+                      <ImageIcon className="w-5 h-5 text-primary" />
+                    ) : (
+                      <FileText className="w-5 h-5 text-primary" />
+                    )}
+                    <span className="flex-1 text-sm truncate">{doc.fileName}</span>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <Button 
+            variant="destructive" 
+            className="w-full" 
+            onClick={() => setShowDeleteDialog(true)}
+            data-testid="button-delete"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            {tLabel('deleteTransaction', 'Delete Transaction')}
+          </Button>
+        </ScrollContent>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{tLabel('confirmDelete', 'Confirm Delete')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {tLabel('deleteTransactionConfirm', 'Are you sure you want to delete this transaction? This action cannot be undone.')}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel data-testid="button-cancel-delete">
+                {tLabel('cancel', 'Cancel')}
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                data-testid="button-confirm-delete"
+              >
+                {tLabel('delete', 'Delete')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
       <Header
@@ -189,6 +398,8 @@ export function AddTransactionScreen() {
         subtitle={`${tLabel('for', 'for')} ${person.name}`}
         onBack={handleBack}
         onHome={handleHomePress}
+        contextLabel={contextLabel}
+        contextMode={contextMode}
       />
 
       <ScrollContent>
