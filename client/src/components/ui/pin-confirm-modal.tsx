@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { pinService } from "@/lib/pin-service";
 import { Button } from "@/components/ui/button";
 import { Lock, X } from "lucide-react";
+import { NumericKeypad } from "@/components/ui/numeric-keypad";
 
 interface PinConfirmModalProps {
   isOpen: boolean;
@@ -21,60 +22,47 @@ export function PinConfirmModal({
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [attempts, setAttempts] = useState(0);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     if (isOpen) {
       setPin("");
       setError("");
       setAttempts(0);
-      setTimeout(() => {
-        inputRefs.current[0]?.focus();
-      }, 100);
     }
   }, [isOpen]);
 
-  const handleDigitInput = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
+  const handleDigitPress = (digit: string) => {
+    if (pin.length >= 4 || attempts >= 3) return;
     
-    const newPin = pin.split("");
-    newPin[index] = value.slice(-1);
-    const updatedPin = newPin.join("").slice(0, 4);
+    const updatedPin = pin + digit;
     setPin(updatedPin);
     setError("");
 
-    if (value && index < 3) {
-      inputRefs.current[index + 1]?.focus();
-    }
-
     if (updatedPin.length === 4) {
-      if (pinService.validatePin(updatedPin)) {
-        onConfirm();
-        onClose();
-      } else {
-        setAttempts((prev) => prev + 1);
-        if (attempts >= 2) {
-          setError("Too many failed attempts");
-          setTimeout(() => {
-            onClose();
-          }, 1500);
+      setTimeout(() => {
+        if (pinService.validatePin(updatedPin)) {
+          onConfirm();
+          onClose();
         } else {
-          setError(`Incorrect PIN. ${2 - attempts} attempts remaining.`);
+          setAttempts((prev) => prev + 1);
+          if (attempts >= 2) {
+            setError("Too many failed attempts");
+            setTimeout(() => {
+              onClose();
+            }, 1500);
+          } else {
+            setError(`Incorrect PIN. ${2 - attempts} attempts remaining.`);
+          }
           setPin("");
-          setTimeout(() => {
-            inputRefs.current[0]?.focus();
-          }, 100);
         }
-      }
+      }, 150);
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !pin[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-    if (e.key === "Escape") {
-      onClose();
+  const handleBackspace = () => {
+    if (pin.length > 0) {
+      setPin(pin.slice(0, -1));
+      setError("");
     }
   };
 
@@ -108,18 +96,14 @@ export function PinConfirmModal({
 
         <div className="flex gap-3">
           {[0, 1, 2, 3].map((index) => (
-            <input
+            <div
               key={index}
-              ref={(el) => (inputRefs.current[index] = el)}
-              type="password"
-              inputMode="numeric"
-              maxLength={1}
-              value={pin[index] || ""}
-              onChange={(e) => handleDigitInput(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              disabled={attempts >= 3}
-              className="w-12 h-12 text-center text-xl font-bold border-2 rounded-xl bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:opacity-50"
-              data-testid={`input-pin-confirm-${index}`}
+              className={`w-4 h-4 rounded-full border-2 transition-all ${
+                pin[index] 
+                  ? "bg-primary border-primary" 
+                  : "border-muted-foreground/50"
+              }`}
+              data-testid={`pin-dot-${index}`}
             />
           ))}
         </div>
@@ -130,6 +114,12 @@ export function PinConfirmModal({
             <span>{error}</span>
           </div>
         )}
+
+        <NumericKeypad
+          onDigitPress={handleDigitPress}
+          onBackspace={handleBackspace}
+          disabled={attempts >= 3}
+        />
 
         <Button
           variant="ghost"

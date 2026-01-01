@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "@/lib/navigation";
 import { pinService } from "@/lib/pin-service";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Lock, Check, X, Fingerprint } from "lucide-react";
+import { ArrowLeft, Lock, X, Fingerprint } from "lucide-react";
+import { NumericKeypad } from "@/components/ui/numeric-keypad";
 
 type Step = "enter" | "confirm" | "biometric";
 
@@ -29,16 +30,9 @@ export function PinSetupScreen() {
   const [error, setError] = useState("");
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [enrollingBiometric, setEnrollingBiometric] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const currentPin = step === "enter" ? pin : confirmPin;
   const setCurrentPin = step === "enter" ? setPin : setConfirmPin;
-
-  useEffect(() => {
-    if (step !== "biometric") {
-      inputRefs.current[0]?.focus();
-    }
-  }, [step]);
 
   useEffect(() => {
     async function checkBiometric() {
@@ -48,51 +42,45 @@ export function PinSetupScreen() {
     checkBiometric();
   }, []);
 
-  const handleDigitInput = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
+  const handleDigitPress = (digit: string) => {
+    if (currentPin.length >= 4) return;
     
-    const newPin = currentPin.split("");
-    newPin[index] = value.slice(-1);
-    const updatedPin = newPin.join("").slice(0, 4);
+    const updatedPin = currentPin + digit;
     setCurrentPin(updatedPin);
     setError("");
-
-    if (value && index < 3) {
-      inputRefs.current[index + 1]?.focus();
-    }
 
     if (updatedPin.length === 4) {
       if (step === "enter") {
         setTimeout(() => {
           setStep("confirm");
           setConfirmPin("");
-        }, 150);
+        }, 200);
       } else if (step === "confirm") {
-        if (updatedPin === pin) {
-          pinService.setPin(updatedPin);
-          if (biometricAvailable) {
-            setStep("biometric");
+        setTimeout(() => {
+          if (updatedPin === pin) {
+            pinService.setPin(updatedPin);
+            if (biometricAvailable) {
+              setStep("biometric");
+            } else {
+              toast({
+                title: "PIN Set Successfully",
+                description: "Your app is now protected with a PIN.",
+              });
+              navigateToReturn();
+            }
           } else {
-            toast({
-              title: "PIN Set Successfully",
-              description: "Your app is now protected with a PIN.",
-            });
-            navigateToReturn();
+            setError("PINs don't match. Try again.");
+            setConfirmPin("");
           }
-        } else {
-          setError("PINs don't match. Try again.");
-          setConfirmPin("");
-          setTimeout(() => {
-            inputRefs.current[0]?.focus();
-          }, 100);
-        }
+        }, 200);
       }
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !currentPin[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
+  const handleBackspace = () => {
+    if (currentPin.length > 0) {
+      setCurrentPin(currentPin.slice(0, -1));
+      setError("");
     }
   };
 
@@ -222,19 +210,16 @@ export function PinSetupScreen() {
               </p>
             </div>
 
-            <div className="flex gap-2.5">
+            <div className="flex gap-3">
               {[0, 1, 2, 3].map((index) => (
-                <input
+                <div
                   key={index}
-                  ref={(el) => (inputRefs.current[index] = el)}
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={currentPin[index] || ""}
-                  onChange={(e) => handleDigitInput(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-12 h-12 text-center text-xl font-bold border-2 rounded-lg bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                  data-testid={`input-pin-${index}`}
+                  className={`w-4 h-4 rounded-full border-2 transition-all ${
+                    currentPin[index] 
+                      ? "bg-primary border-primary" 
+                      : "border-muted-foreground/50"
+                  }`}
+                  data-testid={`pin-dot-${index}`}
                 />
               ))}
             </div>
@@ -250,6 +235,11 @@ export function PinSetupScreen() {
               <div className={`w-2 h-2 rounded-full ${step === "enter" ? "bg-primary" : "bg-muted"}`} />
               <div className={`w-2 h-2 rounded-full ${step === "confirm" ? "bg-primary" : "bg-muted"}`} />
             </div>
+
+            <NumericKeypad
+              onDigitPress={handleDigitPress}
+              onBackspace={handleBackspace}
+            />
           </Card>
         )}
       </main>
