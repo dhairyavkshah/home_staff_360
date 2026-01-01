@@ -163,24 +163,24 @@ export function OnboardingScreen() {
 
       <div className="flex-1 overflow-y-auto">
         <div className="content-container py-4 flex flex-col gap-4">
-          <div className="flex flex-col items-center text-center gap-3 fade-in-up">
-            <div className="icon-halo-primary w-14 h-14">
-              <Icon className="w-7 h-7 text-primary" />
+          <div className="flex flex-col items-center text-center gap-2">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Icon className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold" data-testid="text-welcome-title">
+              <h1 className="text-lg font-semibold" data-testid="text-welcome-title">
                 {isHome ? "Home User Setup" : "Professional Setup"}
               </h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-sm text-muted-foreground">
                 {isHome ? "Let's set up your household staff manager" : "Let's set up your business management"}
               </p>
             </div>
           </div>
 
-          <Card className="p-3 flex flex-col gap-2.5 fade-in-up" style={{ animationDelay: "50ms" }}>
-            <h2 className="text-base font-semibold flex items-center gap-2">
-              <div className="icon-halo-primary w-7 h-7">
-                <User className="w-3.5 h-3.5 text-primary" />
+          <Card className="p-4 flex flex-col gap-3">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+                <User className="w-4 h-4 text-primary" />
               </div>
               Your Profile
             </h2>
@@ -222,10 +222,10 @@ export function OnboardingScreen() {
             </div>
           </Card>
 
-          <Card className="p-3 flex flex-col gap-2.5 fade-in-up" style={{ animationDelay: "100ms" }}>
-            <h2 className="text-base font-semibold flex items-center gap-2">
-              <div className="icon-halo-info w-7 h-7">
-                <Globe className="w-3.5 h-3.5 text-info" />
+          <Card className="p-4 flex flex-col gap-3">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-info/10 flex items-center justify-center">
+                <Globe className="w-4 h-4 text-info" />
               </div>
               Regional Settings
             </h2>
@@ -320,10 +320,10 @@ export function OnboardingScreen() {
             </div>
           </Card>
 
-          <Card className="p-3 flex flex-col gap-2.5 fade-in-up" style={{ animationDelay: "200ms" }}>
-            <h2 className="text-base font-semibold flex items-center gap-2">
-              <div className="icon-halo-success w-7 h-7">
-                <Lock className="w-3.5 h-3.5 text-success" />
+          <Card className="p-4 flex flex-col gap-3">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-success/10 flex items-center justify-center">
+                <Lock className="w-4 h-4 text-success" />
               </div>
               Security
             </h2>
@@ -352,11 +352,13 @@ export function OnboardingScreen() {
             )}
           </Card>
 
-          <Card className="p-3 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 fade-in-up" style={{ animationDelay: "300ms" }}>
-            <div className="flex items-start gap-2">
-              <Shield className="w-5 h-5 text-primary flex-shrink-0" />
+          <Card className="p-4 bg-primary/5 border-primary/20">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-4 h-4 text-primary" />
+              </div>
               <div>
-                <h3 className="text-sm font-semibold text-primary">100% Private</h3>
+                <h3 className="text-sm font-semibold">100% Private</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   All your data stays on your device. No cloud, no accounts, complete privacy.
                 </p>
@@ -365,8 +367,7 @@ export function OnboardingScreen() {
           </Card>
 
           <Button
-            className="w-full button-press fade-in-up"
-            style={{ animationDelay: "400ms" }}
+            className="w-full"
             onClick={handleSubmit}
             data-testid="button-get-started"
           >
