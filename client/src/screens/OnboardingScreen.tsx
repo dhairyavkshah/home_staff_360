@@ -149,26 +149,29 @@ export function OnboardingScreen() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background page-enter" data-testid="screen-onboarding">
+    <div className="h-screen flex flex-col bg-background" data-testid="screen-onboarding">
       <div className="safe-area-top" />
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="content-container py-4 flex flex-col gap-4">
-          <div className="flex flex-col items-center text-center gap-3 fade-in-up">
-            <div className="icon-halo-primary w-14 h-14">
-              <Icon className="w-7 h-7 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold" data-testid="text-welcome-title">
-                {isHome ? "Home User Setup" : "Professional Setup"}
-              </h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {isHome ? "Let's set up your household staff manager" : "Let's set up your business management"}
-              </p>
-            </div>
+      <header className="content-container py-3 min-h-14 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="icon-halo-primary w-10 h-10">
+            <Icon className="w-5 h-5 text-primary" />
           </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-semibold" data-testid="text-welcome-title">
+              {isHome ? "Home User Setup" : "Staff User Setup"}
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              {isHome ? "Set up your household staff manager" : "Set up your business management"}
+            </p>
+          </div>
+        </div>
+      </header>
 
-          <Card className="p-3 flex flex-col gap-2.5 fade-in-up" style={{ animationDelay: "50ms" }}>
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="content-container pb-20 flex flex-col gap-4">
+
+          <Card className="p-3 flex flex-col gap-2.5">
             <h2 className="text-base font-semibold flex items-center gap-2">
               <div className="icon-halo-primary w-7 h-7">
                 <User className="w-3.5 h-3.5 text-primary" />
@@ -177,7 +180,9 @@ export function OnboardingScreen() {
             </h2>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="displayName">Your Name</Label>
+              <Label htmlFor="displayName">
+                Your Name <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="displayName"
                 type="text"
@@ -194,7 +199,7 @@ export function OnboardingScreen() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="accountName" className="flex items-center gap-1.5">
                 <Icon className="w-3.5 h-3.5" />
-                {accountLabel} Name
+                {accountLabel} Name <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="accountName"
@@ -213,7 +218,7 @@ export function OnboardingScreen() {
             </div>
           </Card>
 
-          <Card className="p-3 flex flex-col gap-2.5 fade-in-up" style={{ animationDelay: "100ms" }}>
+          <Card className="p-3 flex flex-col gap-2.5">
             <h2 className="text-base font-semibold flex items-center gap-2">
               <div className="icon-halo-info w-7 h-7">
                 <Globe className="w-3.5 h-3.5 text-info" />
@@ -224,7 +229,7 @@ export function OnboardingScreen() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="country" className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
-                Country
+                Country <span className="text-destructive">*</span>
               </Label>
               <Select value={country} onValueChange={(v) => {
                 setCountry(v);
@@ -311,7 +316,7 @@ export function OnboardingScreen() {
             </div>
           </Card>
 
-          <Card className="p-3 flex flex-col gap-2.5 fade-in-up" style={{ animationDelay: "200ms" }}>
+          <Card className="p-3 flex flex-col gap-2.5">
             <h2 className="text-base font-semibold flex items-center gap-2">
               <div className="icon-halo-success w-7 h-7">
                 <Lock className="w-3.5 h-3.5 text-success" />
@@ -337,13 +342,13 @@ export function OnboardingScreen() {
               />
             </div>
             {enableAppLock && (
-              <p className="text-xs text-primary fade-in-up">
+              <p className="text-xs text-primary">
                 You'll set up your PIN after completing setup
               </p>
             )}
           </Card>
 
-          <Card className="p-3 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 fade-in-up" style={{ animationDelay: "300ms" }}>
+          <Card className="p-3 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
             <div className="flex items-start gap-2">
               <Shield className="w-5 h-5 text-primary flex-shrink-0" />
               <div>
@@ -356,8 +361,7 @@ export function OnboardingScreen() {
           </Card>
 
           <Button
-            className="w-full button-press fade-in-up"
-            style={{ animationDelay: "400ms" }}
+            className="w-full"
             onClick={handleSubmit}
             data-testid="button-get-started"
           >
