@@ -26,6 +26,15 @@ const currencyOptions: { value: Currency; label: string; symbol: string }[] = [
   { value: "EUR", label: "Euro", symbol: "€" },
   { value: "GBP", label: "British Pound", symbol: "£" },
   { value: "AED", label: "UAE Dirham", symbol: "د.إ" },
+  { value: "JPY", label: "Japanese Yen", symbol: "¥" },
+  { value: "CNY", label: "Chinese Yuan", symbol: "¥" },
+  { value: "CAD", label: "Canadian Dollar", symbol: "C$" },
+  { value: "AUD", label: "Australian Dollar", symbol: "A$" },
+  { value: "CHF", label: "Swiss Franc", symbol: "CHF" },
+  { value: "SGD", label: "Singapore Dollar", symbol: "S$" },
+  { value: "MXN", label: "Mexican Peso", symbol: "MX$" },
+  { value: "BRL", label: "Brazilian Real", symbol: "R$" },
+  { value: "ZAR", label: "South African Rand", symbol: "R" },
   { value: "OTHER", label: "Other", symbol: "$" },
 ];
 
@@ -177,7 +186,7 @@ export function OnboardingScreen() {
             </h2>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="displayName">Your Name</Label>
+              <Label htmlFor="displayName">Your Name <span className="text-destructive">*</span></Label>
               <Input
                 id="displayName"
                 type="text"
@@ -194,7 +203,7 @@ export function OnboardingScreen() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="accountName" className="flex items-center gap-1.5">
                 <Icon className="w-3.5 h-3.5" />
-                {accountLabel} Name
+                {accountLabel} Name <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="accountName"
@@ -224,7 +233,7 @@ export function OnboardingScreen() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="country" className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
-                Country
+                Country <span className="text-destructive">*</span>
               </Label>
               <Select value={country} onValueChange={(v) => {
                 setCountry(v);
@@ -269,7 +278,7 @@ export function OnboardingScreen() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="salaryDay" className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
-                Salary Cycle Start Day (1-31)
+                Salary Cycle Start Day (1-31) <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="salaryDay"
@@ -291,7 +300,7 @@ export function OnboardingScreen() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="halfDay" className="flex items-center gap-1.5">
                 <Percent className="w-3.5 h-3.5" />
-                Half-Day Percentage
+                Half-Day Percentage <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="halfDay"
