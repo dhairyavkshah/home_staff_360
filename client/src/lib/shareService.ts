@@ -1,17 +1,43 @@
 import { type Currency } from "@shared/schema";
+import { Share } from "@capacitor/share";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Capacitor } from "@capacitor/core";
 
-export function downloadAsFile(content: string, filename: string) {
-  // Add UTF-8 BOM for Excel to properly recognize special characters like ₹, €, £
+export async function downloadAsFile(content: string, filename: string): Promise<boolean> {
   const BOM = '\uFEFF';
-  const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  const fileContent = BOM + content;
+
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const result = await Filesystem.writeFile({
+        path: filename,
+        data: fileContent,
+        directory: Directory.Documents,
+        encoding: 'utf8' as any,
+      });
+      console.log('File saved to:', result.uri);
+      return true;
+    } catch (error) {
+      console.error('Failed to save file:', error);
+      return false;
+    }
+  } else {
+    try {
+      const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      return true;
+    } catch (error) {
+      console.error('Failed to download file:', error);
+      return false;
+    }
+  }
 }
 
 export async function shareReport(options: {
@@ -19,22 +45,45 @@ export async function shareReport(options: {
   text: string;
   filename: string;
 }): Promise<boolean> {
-  if (navigator.share) {
+  if (Capacitor.isNativePlatform()) {
     try {
-      await navigator.share({
+      const canShare = await Share.canShare();
+      if (!canShare.value) {
+        console.log('Share not available, falling back to download');
+        return await downloadAsFile(options.text, options.filename);
+      }
+
+      await Share.share({
         title: options.title,
         text: options.text,
+        dialogTitle: options.title,
       });
       return true;
     } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Share failed:', error);
+      if ((error as Error).message?.includes('canceled') || 
+          (error as Error).message?.includes('cancelled')) {
+        return false;
+      }
+      console.error('Share failed:', error);
+      return await downloadAsFile(options.text, options.filename);
+    }
+  } else {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: options.title,
+          text: options.text,
+        });
+        return true;
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') {
+          return false;
+        }
+        console.error('Web share failed:', error);
       }
     }
+    return await downloadAsFile(options.text, options.filename);
   }
-  
-  downloadAsFile(options.text, options.filename);
-  return true;
 }
 
 export function generateStaffEarningsReport(
@@ -140,7 +189,16 @@ function getCurrencySymbol(currency: Currency): string {
     EUR: '€',
     GBP: '£',
     AED: 'د.إ',
+    JPY: '¥',
+    CNY: '¥',
+    CAD: 'C$',
+    AUD: 'A$',
+    CHF: 'CHF',
+    SGD: 'S$',
+    MXN: 'MX$',
+    BRL: 'R$',
+    ZAR: 'R',
     OTHER: '$',
   };
-  return symbols[currency];
+  return symbols[currency] || '$';
 }

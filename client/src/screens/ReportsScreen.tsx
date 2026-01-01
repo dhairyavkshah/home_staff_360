@@ -219,7 +219,7 @@ export function ReportsScreen() {
     return { records, summary };
   }, [startDate, endDate, people]);
 
-  const handleExportLedger = () => {
+  const handleExportLedger = async () => {
     const lines: string[] = [];
     lines.push("Home Staff 360 - Ledger Report");
     lines.push(`Period: ${monthName}`);
@@ -239,8 +239,12 @@ export function ReportsScreen() {
     });
 
     const content = lines.join("\n");
-    downloadAsFile(content, `homestaff360-ledger-${year}-${String(month + 1).padStart(2, "0")}.csv`);
-    toast({ title: t("success"), description: t("reportExported") });
+    const success = await downloadAsFile(content, `homestaff360-ledger-${year}-${String(month + 1).padStart(2, "0")}.csv`);
+    if (success) {
+      toast({ title: t("success"), description: t("reportExported") });
+    } else {
+      toast({ title: t("error"), description: "Export failed", variant: "destructive" });
+    }
   };
 
   const handleShareLedger = async () => {
@@ -272,10 +276,14 @@ export function ReportsScreen() {
     }
   };
 
-  const handleExportAttendance = () => {
+  const handleExportAttendance = async () => {
     const content = generateAttendanceCSV(attendanceData.records, startDate, endDate);
-    downloadAsFile(content, `homestaff360-attendance-${year}-${String(month + 1).padStart(2, "0")}.csv`);
-    toast({ title: t("success"), description: t("reportExported") });
+    const success = await downloadAsFile(content, `homestaff360-attendance-${year}-${String(month + 1).padStart(2, "0")}.csv`);
+    if (success) {
+      toast({ title: t("success"), description: t("reportExported") });
+    } else {
+      toast({ title: t("error"), description: "Export failed", variant: "destructive" });
+    }
   };
 
   const handleShareAttendance = async () => {

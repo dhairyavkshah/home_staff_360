@@ -164,14 +164,22 @@ export function StaffReportsScreen() {
     }
   };
 
-  const handleExport = (type: ReportType) => {
+  const handleExport = async (type: ReportType) => {
     const content = generateReport(type);
     const filename = `homestaff360-${type}-${year}-${String(month + 1).padStart(2, "0")}.csv`;
-    downloadAsFile(content, filename);
-    toast({
-      title: t("success"),
-      description: t("reportExported"),
-    });
+    const success = await downloadAsFile(content, filename);
+    if (success) {
+      toast({
+        title: t("success"),
+        description: t("reportExported"),
+      });
+    } else {
+      toast({
+        title: t("error"),
+        description: "Export failed",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleShare = async (type: ReportType) => {

@@ -161,7 +161,7 @@ export function BusinessesScreen() {
       />
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="content-container pb-8 flex flex-col gap-2.5">
+        <div className="content-container pt-4 pb-8 flex flex-col gap-2.5">
           {accounts.length === 0 ? (
             <Card className="p-4 flex flex-col items-center gap-2" data-testid="empty-state">
               <div className="icon-halo-muted w-10 h-10">
