@@ -287,6 +287,9 @@ export const attendanceEntrySchema = z.object({
   hours: z.number().positive().optional(),
   note: z.string().optional(),
   createdAt: z.string(),
+  recordSalaryType: z.enum(salaryTypes).optional(),
+  recordBaseRate: z.number().optional(),
+  recordHalfDayPercentage: z.number().optional(),
 });
 
 export type AttendanceEntry = z.infer<typeof attendanceEntrySchema>;
@@ -450,6 +453,8 @@ export const selfAttendanceSchema = z.object({
   hoursWorked: z.number().optional(),
   note: z.string().optional(),
   createdAt: z.string(),
+  recordSalaryType: z.enum(salaryTypes).optional(),
+  recordRate: z.number().optional(),
 });
 
 export type SelfAttendance = z.infer<typeof selfAttendanceSchema>;

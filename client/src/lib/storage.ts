@@ -384,10 +384,15 @@ export const storage = {
 
   addAttendance(data: InsertAttendance): AttendanceEntry {
     const attendance = this.getAttendance();
+    const person = this.getPerson(data.personId);
+    const settings = this.getSettings();
     const entry: AttendanceEntry = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
+      recordSalaryType: data.recordSalaryType || person?.salaryType,
+      recordBaseRate: data.recordBaseRate ?? person?.baseRate,
+      recordHalfDayPercentage: data.recordHalfDayPercentage ?? person?.halfDayPercentage ?? settings.halfDayPercentage,
     };
     attendance.push(entry);
     setItem(STORAGE_KEYS.ATTENDANCE, attendance);
@@ -727,10 +732,13 @@ export const storage = {
 
   addSelfAttendance(data: InsertSelfAttendance): SelfAttendance {
     const attendance = this.getSelfAttendance();
+    const clientHome = this.getClientHome(data.clientHomeId);
     const entry: SelfAttendance = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
+      recordSalaryType: data.recordSalaryType || clientHome?.salaryType,
+      recordRate: data.recordRate ?? clientHome?.rate,
     };
     attendance.push(entry);
     setItem(STAFF_STORAGE_KEYS.SELF_ATTENDANCE, attendance);
