@@ -1,6 +1,6 @@
-import { CURRENCIES } from "@shared/schema";
+import { CURRENCIES, type Currency } from "@shared/schema";
 
-export type CurrencyCode = keyof typeof CURRENCIES;
+export type CurrencyCode = Currency;
 
 export function formatCurrency(
   amount: number,
@@ -12,8 +12,8 @@ export function formatCurrency(
   
   try {
     const formatter = new Intl.NumberFormat(config.locale, {
-      minimumFractionDigits: currency === "JPY" ? 0 : 2,
-      maximumFractionDigits: currency === "JPY" ? 0 : 2,
+      minimumFractionDigits: config.decimals,
+      maximumFractionDigits: config.decimals,
     });
     
     const formattedNumber = formatter.format(Math.abs(amount));
@@ -21,7 +21,7 @@ export function formatCurrency(
     
     return `${sign}${symbol}${formattedNumber}`;
   } catch {
-    return `${symbol}${amount.toFixed(2)}`;
+    return `${symbol}${amount.toFixed(config.decimals)}`;
   }
 }
 

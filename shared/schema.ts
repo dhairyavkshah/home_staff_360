@@ -61,19 +61,40 @@ export const BUSINESS_PROFESSIONS = [
   'Other',
 ] as const;
 
-export const currencies = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'OTHER'] as const;
+export const currencies = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'JPY', 'CNY', 'CAD', 'AUD', 'CHF', 'SGD', 'MXN', 'BRL', 'ZAR', 'OTHER'] as const;
 export type Currency = typeof currencies[number];
 
-export const getCurrencySymbol = (currency: Currency): string => {
-  const symbols: Record<Currency, string> = {
-    INR: '₹',
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    AED: 'د.إ',
-    OTHER: '$',
-  };
-  return symbols[currency];
+export interface CurrencyConfig {
+  code: Currency;
+  name: string;
+  symbol: string;
+  locale: string;
+  decimals: number;
+}
+
+export const CURRENCIES: Record<Currency, CurrencyConfig> = {
+  INR: { code: 'INR', name: 'Indian Rupee', symbol: '₹', locale: 'en-IN', decimals: 2 },
+  USD: { code: 'USD', name: 'US Dollar', symbol: '$', locale: 'en-US', decimals: 2 },
+  EUR: { code: 'EUR', name: 'Euro', symbol: '€', locale: 'de-DE', decimals: 2 },
+  GBP: { code: 'GBP', name: 'British Pound', symbol: '£', locale: 'en-GB', decimals: 2 },
+  AED: { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ', locale: 'ar-AE', decimals: 2 },
+  JPY: { code: 'JPY', name: 'Japanese Yen', symbol: '¥', locale: 'ja-JP', decimals: 0 },
+  CNY: { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', locale: 'zh-CN', decimals: 2 },
+  CAD: { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', locale: 'en-CA', decimals: 2 },
+  AUD: { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', locale: 'en-AU', decimals: 2 },
+  CHF: { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF', locale: 'de-CH', decimals: 2 },
+  SGD: { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', locale: 'en-SG', decimals: 2 },
+  MXN: { code: 'MXN', name: 'Mexican Peso', symbol: 'MX$', locale: 'es-MX', decimals: 2 },
+  BRL: { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', locale: 'pt-BR', decimals: 2 },
+  ZAR: { code: 'ZAR', name: 'South African Rand', symbol: 'R', locale: 'en-ZA', decimals: 2 },
+  OTHER: { code: 'OTHER', name: 'Custom', symbol: '$', locale: 'en-US', decimals: 2 },
+};
+
+export const getCurrencySymbol = (currency: Currency, customSymbol?: string): string => {
+  if (currency === 'OTHER' && customSymbol) {
+    return customSymbol;
+  }
+  return CURRENCIES[currency].symbol;
 };
 
 export const languages = ['en', 'hi', 'gu', 'kn', 'ml', 'es', 'fr', 'de', 'ar', 'zh', 'ja', 'pt'] as const;
@@ -381,6 +402,15 @@ export const currencySymbols: Record<Currency, string> = {
   EUR: '€',
   GBP: '£',
   AED: 'د.إ',
+  JPY: '¥',
+  CNY: '¥',
+  CAD: 'C$',
+  AUD: 'A$',
+  CHF: 'CHF',
+  SGD: 'S$',
+  MXN: 'MX$',
+  BRL: 'R$',
+  ZAR: 'R',
   OTHER: '$',
 };
 
