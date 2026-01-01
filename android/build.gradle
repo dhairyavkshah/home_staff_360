@@ -23,12 +23,15 @@ allprojects {
         mavenCentral()
     }
     
-    // Fix Kotlin stdlib version conflicts
+    // Fix Kotlin stdlib version conflicts and AndroidX core compatibility
     configurations.all {
         resolutionStrategy {
             force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
             force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22'
             force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22'
+            // Pin androidx.core to 1.15.0 to avoid requiring AGP 8.9.1+ and compileSdk 36
+            force 'androidx.core:core:1.15.0'
+            force 'androidx.core:core-ktx:1.15.0'
         }
     }
 }
