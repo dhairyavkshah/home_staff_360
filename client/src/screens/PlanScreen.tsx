@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Crown, Check, Home, Briefcase, Users, Building2, Clock, Sparkles, Info, FileText } from "lucide-react";
+import { Crown, Check, Home, Briefcase, Users, Building2, Sparkles, Info, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ import {
 
 export function PlanScreen() {
   const { navigate } = useNavigation();
-  const { planType, isPremium, status, daysRemaining } = usePlanStatus();
+  const { planType, isPremium, status } = usePlanStatus();
 
   const profile = useMemo(() => storage.getProfile(), []);
   const isHome = profile?.type === "HOME";
@@ -73,25 +73,6 @@ export function PlanScreen() {
                 </div>
               </div>
             </Card>
-          ) : status === "TRIAL" ? (
-            <Card className="p-4 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full flex items-center justify-center bg-amber-100 dark:bg-amber-900/50">
-                  <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-semibold text-sm text-amber-800 dark:text-amber-200">Free Trial</h2>
-                    <Badge variant="default" className="bg-amber-600">
-                      {daysRemaining} {daysRemaining === 1 ? 'DAY' : 'DAYS'} LEFT
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
-                    Enjoy full premium access during your trial period
-                  </p>
-                </div>
-              </div>
-            </Card>
           ) : (
             <Card className="p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
               <div className="flex items-center gap-3">
@@ -100,13 +81,13 @@ export function PlanScreen() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-semibold text-sm text-blue-800 dark:text-blue-200">Basic Plan</h2>
+                    <h2 className="font-semibold text-sm text-blue-800 dark:text-blue-200">Standard Plan</h2>
                     <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
                       FREE
                     </Badge>
                   </div>
                   <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
-                    Continue using with limited features, or upgrade anytime
+                    You are on the free Standard plan. Upgrade for more features!
                   </p>
                 </div>
               </div>
@@ -121,7 +102,7 @@ export function PlanScreen() {
             <Card className="overflow-hidden">
               <div className="grid grid-cols-3 bg-muted/50 p-3 border-b">
                 <div className="text-xs font-medium text-muted-foreground">Feature</div>
-                <div className="text-xs font-medium text-center text-blue-600 dark:text-blue-400">Basic (Free)</div>
+                <div className="text-xs font-medium text-center text-blue-600 dark:text-blue-400">Standard (Free)</div>
                 <div className="text-xs font-medium text-center text-amber-600 dark:text-amber-400">Premium</div>
               </div>
 
@@ -131,7 +112,7 @@ export function PlanScreen() {
                     <Home className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">Households</span>
                   </div>
-                  <div className="text-sm text-center font-medium">{homeLimits.FREE.maxHouseholds}</div>
+                  <div className="text-sm text-center font-medium">{homeLimits.STANDARD.maxHouseholds}</div>
                   <div className="text-sm text-center font-medium text-amber-600 dark:text-amber-400">{homeLimits.PREMIUM.maxHouseholds}</div>
                 </div>
 
@@ -140,7 +121,7 @@ export function PlanScreen() {
                     <Users className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">Total Staff</span>
                   </div>
-                  <div className="text-sm text-center font-medium">{homeLimits.FREE.maxStaffTotal}</div>
+                  <div className="text-sm text-center font-medium">{homeLimits.STANDARD.maxStaffTotal}</div>
                   <div className="text-sm text-center font-medium text-amber-600 dark:text-amber-400">{homeLimits.PREMIUM.maxStaffTotal}</div>
                 </div>
 
@@ -149,7 +130,7 @@ export function PlanScreen() {
                     <Briefcase className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">Businesses</span>
                   </div>
-                  <div className="text-sm text-center font-medium">{staffLimits.FREE.maxBusinesses}</div>
+                  <div className="text-sm text-center font-medium">{staffLimits.STANDARD.maxBusinesses}</div>
                   <div className="text-sm text-center font-medium text-amber-600 dark:text-amber-400">{staffLimits.PREMIUM.maxBusinesses}</div>
                 </div>
 
@@ -158,7 +139,7 @@ export function PlanScreen() {
                     <Building2 className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">Total Clients</span>
                   </div>
-                  <div className="text-sm text-center font-medium">{staffLimits.FREE.maxClientsTotal}</div>
+                  <div className="text-sm text-center font-medium">{staffLimits.STANDARD.maxClientsTotal}</div>
                   <div className="text-sm text-center font-medium text-amber-600 dark:text-amber-400">{staffLimits.PREMIUM.maxClientsTotal}</div>
                 </div>
 
@@ -167,7 +148,7 @@ export function PlanScreen() {
                     <FileText className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">Documents</span>
                   </div>
-                  <div className="text-sm text-center font-medium">{homeLimits.FREE.maxDocuments}</div>
+                  <div className="text-sm text-center font-medium">{homeLimits.STANDARD.maxDocuments}</div>
                   <div className="text-sm text-center font-medium text-amber-600 dark:text-amber-400">{homeLimits.PREMIUM.maxDocuments}</div>
                 </div>
               </div>
@@ -185,14 +166,14 @@ export function PlanScreen() {
                   <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
                     <Users className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <h4 className="font-medium text-sm text-blue-800 dark:text-blue-200">Basic Plan</h4>
+                  <h4 className="font-medium text-sm text-blue-800 dark:text-blue-200">Standard Plan</h4>
                   <Badge variant="secondary" className="ml-auto text-xs">FREE</Badge>
                 </div>
                 <ul className="space-y-2">
                   {[
-                    `${homeLimits.FREE.maxHouseholds} households, ${homeLimits.FREE.maxStaffTotal} staff (Home Mode)`,
-                    `${staffLimits.FREE.maxBusinesses} businesses, ${staffLimits.FREE.maxClientsTotal} clients (Staff Mode)`,
-                    `Up to ${homeLimits.FREE.maxDocuments} document uploads`,
+                    `${homeLimits.STANDARD.maxHouseholds} households, ${homeLimits.STANDARD.maxStaffTotal} staff (Home Mode)`,
+                    `${staffLimits.STANDARD.maxBusinesses} businesses, ${staffLimits.STANDARD.maxClientsTotal} clients (Staff Mode)`,
+                    `Up to ${homeLimits.STANDARD.maxDocuments} document uploads`,
                     "Attendance & payment tracking",
                     "Expense management",
                     "Data backup & restore",
@@ -219,7 +200,7 @@ export function PlanScreen() {
                     `${homeLimits.PREMIUM.maxHouseholds} households, ${homeLimits.PREMIUM.maxStaffTotal} staff (Home Mode)`,
                     `${staffLimits.PREMIUM.maxBusinesses} businesses, ${staffLimits.PREMIUM.maxClientsTotal} clients (Staff Mode)`,
                     `Up to ${homeLimits.PREMIUM.maxDocuments} document uploads`,
-                    "All Basic Plan features included",
+                    "All Standard Plan features included",
                     "One-time purchase, lifetime access",
                     "No recurring fees or subscriptions"
                   ].map((item, i) => (

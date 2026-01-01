@@ -167,15 +167,15 @@ export const appSettingsSchema = z.object({
   pinCode: z.string().optional(),
   householdName: z.string().optional(),
   darkMode: z.boolean().optional(),
-  planType: z.enum(['FREE', 'PREMIUM']).optional(),
+  planType: z.enum(['STANDARD', 'PREMIUM']).optional(),
   showAllContexts: z.boolean().optional(),
   defaultAppMode: z.enum(['HOME', 'STAFF']).optional(),
   // Guided tour completion tracking
   homeTourCompleted: z.boolean().optional(),
   staffTourCompleted: z.boolean().optional(),
-  // Trial & Purchase tracking
+  // Purchase tracking
   trialStartedAt: z.string().optional(),
-  purchaseStatus: z.enum(['TRIAL', 'EXPIRED', 'PURCHASED']).optional(),
+  purchaseStatus: z.enum(['STANDARD', 'PURCHASED']).optional(),
   purchaseDate: z.string().optional(),
   purchaseCountry: z.string().optional(),
   // Feedback settings
@@ -196,12 +196,12 @@ export const defaultSettings: AppSettings = {
   hasCompletedOnboarding: false,
   pinEnabled: false,
   darkMode: false,
-  planType: 'FREE',
+  planType: 'STANDARD',
   showAllContexts: false,
   defaultAppMode: 'HOME',
   homeTourCompleted: false,
   staffTourCompleted: false,
-  purchaseStatus: 'TRIAL',
+  purchaseStatus: 'STANDARD',
   hapticFeedbackEnabled: true,
   soundEffectsEnabled: true,
 };
@@ -528,13 +528,11 @@ export const STAFF_STORAGE_KEYS = {
 
 // ============ PLAN TYPES AND LIMITS ============
 
-export const planTypes = ['FREE', 'PREMIUM'] as const;
+export const planTypes = ['STANDARD', 'PREMIUM'] as const;
 export type PlanType = typeof planTypes[number];
 
-export const purchaseStatuses = ['TRIAL', 'EXPIRED', 'PURCHASED'] as const;
+export const purchaseStatuses = ['STANDARD', 'PURCHASED'] as const;
 export type PurchaseStatus = typeof purchaseStatuses[number];
-
-export const TRIAL_DURATION_DAYS = 30;
 
 export const PRICING = {
   INR: { amount: 299, symbol: '₹', label: '₹299' },
@@ -547,7 +545,7 @@ export const PRICING = {
 
 export const PLAN_LIMITS = {
   HOME: {
-    FREE: {
+    STANDARD: {
       maxHouseholds: 2,
       maxStaffTotal: 10,
       maxDocuments: 25,
@@ -559,7 +557,7 @@ export const PLAN_LIMITS = {
     },
   },
   STAFF: {
-    FREE: {
+    STANDARD: {
       maxBusinesses: 2,
       maxClientsTotal: 10,
       maxDocuments: 25,

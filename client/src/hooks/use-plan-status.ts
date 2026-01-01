@@ -27,14 +27,13 @@ export function usePlanStatus() {
   
   return useMemo(() => {
     const planType = storage.getPlanType();
-    const trialInfo = storage.getTrialInfo();
+    const planInfo = storage.getPlanInfo();
     
     return {
       planType,
       isPremium: planType === "PREMIUM",
-      status: trialInfo.status,
-      daysRemaining: trialInfo.daysRemaining,
-      trialInfo,
+      status: planInfo.status,
+      planInfo,
     };
   }, [version]);
 }

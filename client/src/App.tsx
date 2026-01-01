@@ -159,8 +159,7 @@ function MobileAppWithSplash() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    storage.initializeTrial();
-    storage.updateTrialStatusIfExpired();
+    storage.initializePlan();
   }, []);
 
   if (showSplash) {

@@ -359,13 +359,11 @@ export function SettingsScreen() {
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-sm">{t("subscriptionPlan")}</p>
                     <Badge variant="default" className="text-[10px] px-1.5 py-0">
-                      {storage.getTrialInfo().status === "PURCHASED" ? "PREMIUM" : 
-                       storage.getTrialInfo().status === "TRIAL" ? `${storage.getTrialInfo().daysRemaining} DAYS LEFT` : "EXPIRED"}
+                      {storage.getPlanInfo().status === "PURCHASED" ? "PREMIUM" : "STANDARD"}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {storage.getTrialInfo().status === "PURCHASED" ? "Lifetime premium access" : 
-                     storage.getTrialInfo().status === "TRIAL" ? "Free trial - all features unlocked" : "Upgrade to unlock all features"}
+                    {storage.getPlanInfo().status === "PURCHASED" ? "Lifetime premium access" : "Free plan with basic features"}
                   </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />

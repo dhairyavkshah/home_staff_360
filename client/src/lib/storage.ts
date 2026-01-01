@@ -953,101 +953,40 @@ export const storage = {
     };
   },
 
-  // ============ TRIAL & PURCHASE HELPERS ============
+  // ============ PLAN & PURCHASE HELPERS ============
 
-  initializeTrial(): void {
+  initializePlan(): void {
     const settings = this.getSettings();
-    if (!settings.trialStartedAt) {
-      settings.trialStartedAt = new Date().toISOString();
-      settings.purchaseStatus = 'TRIAL';
-      settings.planType = 'PREMIUM';
+    if (!settings.purchaseStatus) {
+      settings.purchaseStatus = 'STANDARD';
+      settings.planType = 'STANDARD';
       this.saveSettings(settings);
       this.notifyPlanChange();
     }
   },
 
-  getTrialInfo(): { 
-    status: 'TRIAL' | 'EXPIRED' | 'PURCHASED';
-    daysRemaining: number;
-    trialStartedAt: string | null;
-    isActive: boolean;
+  getPlanInfo(): { 
+    status: 'STANDARD' | 'PURCHASED';
+    isPremium: boolean;
   } {
     const settings = this.getSettings();
     
     if (settings.purchaseStatus === 'PURCHASED') {
       return { 
         status: 'PURCHASED', 
-        daysRemaining: 0, 
-        trialStartedAt: settings.trialStartedAt || null,
-        isActive: true 
-      };
-    }
-    
-    if (!settings.trialStartedAt) {
-      return { 
-        status: 'TRIAL', 
-        daysRemaining: 30, 
-        trialStartedAt: null,
-        isActive: false 
-      };
-    }
-    
-    const trialStart = new Date(settings.trialStartedAt);
-    const now = new Date();
-    const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
-    const daysRemaining = Math.max(0, 30 - daysPassed);
-    
-    if (daysPassed >= 30) {
-      return { 
-        status: 'EXPIRED', 
-        daysRemaining: 0, 
-        trialStartedAt: settings.trialStartedAt,
-        isActive: false 
+        isPremium: true 
       };
     }
     
     return { 
-      status: 'TRIAL', 
-      daysRemaining, 
-      trialStartedAt: settings.trialStartedAt,
-      isActive: true 
+      status: 'STANDARD', 
+      isPremium: false 
     };
-  },
-
-  updateTrialStatusIfExpired(): void {
-    const settings = this.getSettings();
-    if (settings.purchaseStatus === 'PURCHASED') return;
-    
-    if (settings.trialStartedAt) {
-      const trialStart = new Date(settings.trialStartedAt);
-      const now = new Date();
-      const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (daysPassed >= 30 && settings.purchaseStatus !== 'EXPIRED') {
-        settings.purchaseStatus = 'EXPIRED';
-        settings.planType = 'FREE';
-        this.saveSettings(settings);
-        this.notifyPlanChange();
-      }
-    }
   },
 
   isPremiumUnlocked(): boolean {
     const settings = this.getSettings();
-    
-    if (settings.purchaseStatus === 'PURCHASED') {
-      return true;
-    }
-    
-    if (!settings.trialStartedAt) {
-      return false;
-    }
-    
-    const trialStart = new Date(settings.trialStartedAt);
-    const now = new Date();
-    const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
-    
-    return daysPassed < 30;
+    return settings.purchaseStatus === 'PURCHASED';
   },
 
   markPurchased(): void {
@@ -1079,19 +1018,7 @@ export const storage = {
       return 'PREMIUM';
     }
     
-    if (!settings.trialStartedAt) {
-      return 'PREMIUM';
-    }
-    
-    const trialStart = new Date(settings.trialStartedAt);
-    const now = new Date();
-    const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (daysPassed >= 30) {
-      return 'FREE';
-    }
-    
-    return 'PREMIUM';
+    return 'STANDARD';
   },
 
   setPlanType(planType: PlanType): void {
