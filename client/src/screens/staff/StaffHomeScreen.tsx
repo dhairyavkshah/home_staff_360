@@ -17,6 +17,7 @@ import { notifyActiveContextChange } from "@/hooks/use-active-context";
 import { usePlanStatus } from "@/hooks/use-plan-status";
 import { useTour, shouldShowTour } from "@/lib/guided-tour";
 import { useToast } from "@/hooks/use-toast";
+import { StorageWarningBanner } from "@/components/StorageWarningBanner";
 
 export function StaffHomeScreen() {
   const { navigate, data } = useNavigation();
@@ -312,6 +313,7 @@ export function StaffHomeScreen() {
       </header>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <StorageWarningBanner />
         <div className="content-container pb-20 flex flex-col gap-4">
           <section className="grid grid-cols-2 gap-2" data-testid="section-modules">
             {modules.map((module) => {

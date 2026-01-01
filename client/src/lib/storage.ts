@@ -1214,6 +1214,7 @@ export const storage = {
       staffAttendance: number;
       staffLaundry: number;
       staffExpenses: number;
+      staffEarnings: number;
       staffInvoices: number;
       documents: number;
     };
@@ -1225,11 +1226,13 @@ export const storage = {
     const staffAttendance = this.getSelfAttendance().length;
     const staffLaundry = this.getStaffLaundryJobs().length;
     const staffExpenses = this.getStaffExpenses().length;
+    const staffEarnings = this.getStaffEarnings().length;
     const staffInvoices = this.getStaffInvoices().length;
     const documents = this.getDocuments().length;
     
     const total = homeAttendance + homeTransactions + homeLaundry + homeExpenses + 
-                  staffAttendance + staffLaundry + staffExpenses + staffInvoices + documents;
+                  staffAttendance + staffLaundry + staffExpenses + staffEarnings + 
+                  staffInvoices + documents;
     
     return {
       total,
@@ -1241,6 +1244,7 @@ export const storage = {
         staffAttendance,
         staffLaundry,
         staffExpenses,
+        staffEarnings,
         staffInvoices,
         documents,
       },
