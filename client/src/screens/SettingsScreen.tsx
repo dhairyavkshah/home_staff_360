@@ -63,6 +63,8 @@ export function SettingsScreen() {
   const [showExitCover, setShowExitCover] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
 
+  const [appMode, setAppMode] = useState<UserType>(profile?.type || "HOME");
+  
   const initialCountry = useMemo(() => appSettings.country || "", []);
   const initialCurrency = useMemo(() => modeSettings.currency, []);
   const initialCustomSymbol = useMemo(() => modeSettings.customCurrencySymbol || "", []);
@@ -110,7 +112,6 @@ export function SettingsScreen() {
     await new Promise(resolve => setTimeout(resolve, 300));
     throw new Error("exit_blocked");
   }, []);
-  const [appMode, setAppMode] = useState<UserType>(profile?.type || "HOME");
   const isPinEnabled = pinService.isPinEnabled();
   const { startTour } = useTour();
   const [hapticFeedback, setHapticFeedback] = useState(isHapticEnabled());
