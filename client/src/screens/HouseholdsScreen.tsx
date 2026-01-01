@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Home, Trash2, Edit2, Check, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
@@ -12,6 +12,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigation } from "@/lib/navigation";
@@ -20,6 +27,7 @@ import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useToast } from "@/hooks/use-toast";
 import { notifyActiveContextChange } from "@/hooks/use-active-context";
 import { usePlanStatus } from "@/hooks/use-plan-status";
+import { COUNTRIES } from "@shared/schema";
 
 export function HouseholdsScreen() {
   const { navigate } = useNavigation();
@@ -30,7 +38,15 @@ export function HouseholdsScreen() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [householdName, setHouseholdName] = useState("");
+  const [householdCountry, setHouseholdCountry] = useState("");
   const { planType } = usePlanStatus();
+
+  useEffect(() => {
+    const settings = storage.getSettings();
+    if (settings.userCountry && !householdCountry) {
+      setHouseholdCountry(settings.userCountry);
+    }
+  }, []);
 
   const profile = useMemo(() => storage.getProfile(), [refreshKey]);
   const accounts = useMemo(() => storage.getAccounts().filter(a => a.ownerType === 'HOME'), [refreshKey]);
@@ -51,12 +67,16 @@ export function HouseholdsScreen() {
       return;
     }
     setHouseholdName("");
+    const settings = storage.getSettings();
+    setHouseholdCountry(settings.userCountry || "");
     setEditingId(null);
     setShowAddDialog(true);
   };
 
   const handleEdit = (id: string, name: string) => {
+    const account = accounts.find(a => a.id === id);
     setHouseholdName(name);
+    setHouseholdCountry(account?.country || storage.getSettings().userCountry || "");
     setEditingId(id);
     setShowAddDialog(true);
   };
@@ -71,8 +91,17 @@ export function HouseholdsScreen() {
       return;
     }
 
+    if (!householdCountry) {
+      toast({
+        title: tLabel('error', 'Error'),
+        description: tLabel('selectCountryRequired', 'Please select a country'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (editingId) {
-      storage.updateAccount(editingId, { name: householdName.trim() });
+      storage.updateAccount(editingId, { name: householdName.trim(), country: householdCountry });
       toast({
         title: tLabel('updated', 'Updated'),
         description: tLabel('householdUpdated', 'Household updated successfully'),
@@ -82,6 +111,7 @@ export function HouseholdsScreen() {
         ownerId: profile?.id || '',
         ownerType: 'HOME',
         name: householdName.trim(),
+        country: householdCountry,
       });
       storage.setActiveAccount(newAccount.id);
       notifyActiveContextChange();
@@ -93,6 +123,7 @@ export function HouseholdsScreen() {
 
     setShowAddDialog(false);
     setHouseholdName("");
+    setHouseholdCountry("");
     setEditingId(null);
     setRefreshKey(k => k + 1);
   };
@@ -212,6 +243,21 @@ export function HouseholdsScreen() {
                 placeholder={tLabel('enterHouseholdName', 'Enter household name...')}
                 data-testid="input-household-name"
               />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>{tLabel('country', 'Country')} *</Label>
+              <Select value={householdCountry} onValueChange={setHouseholdCountry}>
+                <SelectTrigger data-testid="select-household-country">
+                  <SelectValue placeholder={tLabel('selectCountry', 'Select country...')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
