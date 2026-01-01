@@ -61,6 +61,38 @@ export function SettingsScreen() {
   const [showPinConfirmModal, setShowPinConfirmModal] = useState(false);
   const [showDisablePinModal, setShowDisablePinModal] = useState(false);
   const [showExitCover, setShowExitCover] = useState(false);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
+
+  const initialCountry = useMemo(() => appSettings.country || "", []);
+  const initialCurrency = useMemo(() => modeSettings.currency, []);
+  const initialCustomSymbol = useMemo(() => modeSettings.customCurrencySymbol || "", []);
+  const initialSalaryStartDay = useMemo(() => isHome ? homeSettings.salaryStartDay : 1, []);
+  const initialHalfDayPercentage = useMemo(() => isHome ? homeSettings.halfDayPercentage : 50, []);
+  const initialLanguage = useMemo(() => modeSettings.language || 'en', []);
+
+  const isDirty = useMemo(() => {
+    return (
+      country !== initialCountry ||
+      currency !== initialCurrency ||
+      customSymbol !== initialCustomSymbol ||
+      salaryStartDay !== initialSalaryStartDay ||
+      halfDayPercentage !== initialHalfDayPercentage ||
+      language !== initialLanguage
+    );
+  }, [country, currency, customSymbol, salaryStartDay, halfDayPercentage, language, initialCountry, initialCurrency, initialCustomSymbol, initialSalaryStartDay, initialHalfDayPercentage, initialLanguage]);
+
+  const handleBack = useCallback(() => {
+    if (isDirty) {
+      setShowUnsavedChangesModal(true);
+    } else {
+      navigate(appMode === "STAFF" ? "staff-home" : "home");
+    }
+  }, [isDirty, navigate, appMode]);
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedChangesModal(false);
+    navigate(appMode === "STAFF" ? "staff-home" : "home");
+  };
 
   const handleCloseApp = useCallback(() => {
     setShowExitCover(true);
@@ -209,7 +241,7 @@ export function SettingsScreen() {
       <Header
         title={t("settingsTitle")}
         subtitle=""
-        onBack={() => navigate(appMode === "STAFF" ? "staff-home" : "home")}
+        onBack={handleBack}
       />
 
       <ScrollContent>
@@ -642,6 +674,21 @@ export function SettingsScreen() {
         description="Are you sure you want to disable the PIN lock? Your app will no longer be protected."
         confirmText="Disable"
         variant="destructive"
+      />
+
+      <ConfirmModal
+        open={showUnsavedChangesModal}
+        onOpenChange={setShowUnsavedChangesModal}
+        onConfirm={() => {
+          setShowUnsavedChangesModal(false);
+          handleSave();
+          navigate(appMode === "STAFF" ? "staff-home" : "home");
+        }}
+        title="Unsaved Changes"
+        description="You have unsaved changes. Would you like to save them before leaving?"
+        confirmText="Save"
+        cancelText="Discard"
+        onCancel={handleDiscardChanges}
       />
 
       <ExitCoverScreen 
