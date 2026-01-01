@@ -29,6 +29,7 @@ import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useTour } from "@/lib/guided-tour";
 import { setHapticEnabled, setSoundEnabled, isHapticEnabled, isSoundEnabled } from "@/lib/sound-service";
 import { COUNTRIES, getCurrencyForCountry } from "@/lib/geolocation-service";
+import { notifyCurrencyChange } from "@/hooks/useCurrency";
 
 export function SettingsScreen() {
   const { navigate, goBack } = useNavigation();
@@ -150,6 +151,7 @@ export function SettingsScreen() {
       });
     }
 
+    notifyCurrencyChange();
     toast({ title: t("settingsSaved") });
   };
 
@@ -249,7 +251,16 @@ export function SettingsScreen() {
                 <SelectItem value="EUR">EUR - Euro</SelectItem>
                 <SelectItem value="GBP">GBP - British Pound</SelectItem>
                 <SelectItem value="AED">AED - UAE Dirham</SelectItem>
-                <SelectItem value="OTHER">Other</SelectItem>
+                <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
+                <SelectItem value="CNY">CNY - Chinese Yuan</SelectItem>
+                <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
+                <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>
+                <SelectItem value="CHF">CHF - Swiss Franc</SelectItem>
+                <SelectItem value="SGD">SGD - Singapore Dollar</SelectItem>
+                <SelectItem value="MXN">MXN - Mexican Peso</SelectItem>
+                <SelectItem value="BRL">BRL - Brazilian Real</SelectItem>
+                <SelectItem value="ZAR">ZAR - South African Rand</SelectItem>
+                <SelectItem value="OTHER">Other (Custom)</SelectItem>
               </SelectContent>
             </Select>
 
