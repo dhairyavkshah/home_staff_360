@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Home, Briefcase, Globe, Calendar, Percent, Shield, Lock, ArrowRight, Fingerprint, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Home, Briefcase, Globe, Calendar, Percent, Shield, Lock, ArrowRight, Fingerprint, User, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { type Currency, type UserType } from "@shared/schema";
 import { pinService } from "@/lib/pin-service";
 import { useTour } from "@/lib/guided-tour";
+import { COUNTRIES, getCurrencyForCountry, getUserCountry } from "@/lib/geolocation-service";
 
 const currencyOptions: { value: Currency; label: string; symbol: string }[] = [
   { value: "INR", label: "Indian Rupee", symbol: "₹" },
@@ -40,11 +41,21 @@ export function OnboardingScreen() {
 
   const [displayName, setDisplayName] = useState("");
   const [accountName, setAccountName] = useState("");
-  const [currency, setCurrency] = useState<Currency>("INR");
+  const [country, setCountry] = useState("");
+  const [currency, setCurrency] = useState<Currency>("USD");
   const [salaryStartDay, setSalaryStartDay] = useState("1");
   const [halfDayPercentage, setHalfDayPercentage] = useState("50");
   const [enableAppLock, setEnableAppLock] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const detectedCountry = getUserCountry();
+    if (detectedCountry) {
+      setCountry(detectedCountry);
+      const detectedCurrency = getCurrencyForCountry(detectedCountry);
+      setCurrency(detectedCurrency);
+    }
+  }, []);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -55,6 +66,10 @@ export function OnboardingScreen() {
 
     if (!accountName.trim()) {
       newErrors.accountName = `Please enter a ${accountLabel.toLowerCase()} name`;
+    }
+
+    if (!country) {
+      newErrors.country = "Please select your country";
     }
 
     const day = parseInt(salaryStartDay);
@@ -97,6 +112,7 @@ export function OnboardingScreen() {
     storage.saveSettings({
       ...settings,
       currency,
+      country,
       salaryStartDay: parseInt(salaryStartDay),
       halfDayPercentage: parseInt(halfDayPercentage),
       hasCompletedOnboarding: true,
@@ -202,8 +218,34 @@ export function OnboardingScreen() {
               <div className="icon-halo-info w-7 h-7">
                 <Globe className="w-3.5 h-3.5 text-info" />
               </div>
-              Settings
+              Regional Settings
             </h2>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="country" className="flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5" />
+                Country
+              </Label>
+              <Select value={country} onValueChange={(v) => {
+                setCountry(v);
+                const newCurrency = getCurrencyForCountry(v);
+                setCurrency(newCurrency);
+              }}>
+                <SelectTrigger id="country" data-testid="select-country">
+                  <SelectValue placeholder="Select your country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.country && (
+                <p className="text-xs text-destructive" role="alert">{errors.country}</p>
+              )}
+            </div>
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="currency">Currency</Label>
@@ -219,6 +261,9 @@ export function OnboardingScreen() {
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Auto-set based on country, but you can change it
+              </p>
             </div>
 
             <div className="flex flex-col gap-1.5">

@@ -1,12 +1,13 @@
 import { Capacitor } from "@capacitor/core";
 import { Camera, CameraResultType } from "@capacitor/camera";
 
-export type PermissionType = "camera" | "storage" | "notifications";
+export type PermissionType = "camera" | "storage" | "notifications" | "location";
 
 export interface PermissionStatus {
   camera: "granted" | "denied" | "prompt" | "unavailable";
   storage: "granted" | "denied" | "prompt" | "unavailable";
   notifications: "granted" | "denied" | "prompt" | "unavailable";
+  location: "granted" | "denied" | "prompt" | "unavailable";
 }
 
 export interface PermissionInfo {
@@ -25,6 +26,13 @@ const isTestBypassEnabled = (): boolean => {
 };
 
 export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
+  {
+    id: "location",
+    name: "Location Access",
+    description: "Detect your country to set the correct currency and regional settings automatically.",
+    icon: "map-pin",
+    required: true,
+  },
   {
     id: "storage",
     name: "Storage Access",
@@ -56,7 +64,10 @@ class PermissionsService {
       camera: "unavailable",
       storage: "unavailable",
       notifications: "unavailable",
+      location: "prompt",
     };
+
+    status.location = await this.checkLocationPermission();
 
     if (this.isNative) {
       try {
@@ -89,6 +100,26 @@ class PermissionsService {
     }
 
     return status;
+  }
+
+  private async checkLocationPermission(): Promise<"granted" | "denied" | "prompt" | "unavailable"> {
+    if (!navigator.permissions) {
+      return "prompt";
+    }
+    
+    try {
+      const result = await navigator.permissions.query({ name: "geolocation" });
+      switch (result.state) {
+        case "granted":
+          return "granted";
+        case "denied":
+          return "denied";
+        default:
+          return "prompt";
+      }
+    } catch {
+      return "prompt";
+    }
   }
 
   private saveLastCheckedStatus(status: PermissionStatus): void {
@@ -157,6 +188,20 @@ class PermissionsService {
     }
   }
 
+  async requestLocationPermission(): Promise<"granted" | "denied"> {
+    if (!("geolocation" in navigator)) {
+      return "denied";
+    }
+    
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        () => resolve("granted"),
+        () => resolve("denied"),
+        { timeout: 10000 }
+      );
+    });
+  }
+
   async requestPermission(type: PermissionType): Promise<"granted" | "denied"> {
     switch (type) {
       case "camera":
@@ -165,6 +210,8 @@ class PermissionsService {
         return this.requestStoragePermission();
       case "notifications":
         return this.requestNotificationPermission();
+      case "location":
+        return this.requestLocationPermission();
       default:
         return "denied";
     }

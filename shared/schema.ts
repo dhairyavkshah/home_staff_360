@@ -181,6 +181,9 @@ export const appSettingsSchema = z.object({
   // Feedback settings
   hapticFeedbackEnabled: z.boolean().optional(),
   soundEffectsEnabled: z.boolean().optional(),
+  // Location & Country settings
+  country: z.string().optional(),
+  detectedCountry: z.string().optional(),
 });
 
 export type AppSettings = z.infer<typeof appSettingsSchema>;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Camera, FolderOpen, Bell, Check, X, ChevronRight, ChevronLeft, Shield } from "lucide-react";
+import { Camera, FolderOpen, Bell, Check, X, ChevronRight, ChevronLeft, Shield, MapPin } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,11 +11,13 @@ import {
   type PermissionStatus, 
   type PermissionType 
 } from "@/lib/permissions-service";
+import { detectAndSaveCountry } from "@/lib/geolocation-service";
 
 const iconMap: Record<string, typeof Camera> = {
   camera: Camera,
   folder: FolderOpen,
   bell: Bell,
+  "map-pin": MapPin,
 };
 
 export function PermissionsScreen() {
@@ -26,6 +28,7 @@ export function PermissionsScreen() {
     camera: "prompt",
     storage: "prompt",
     notifications: "prompt",
+    location: "prompt",
   });
   const [isRequesting, setIsRequesting] = useState(false);
 
@@ -63,6 +66,10 @@ export function PermissionsScreen() {
       ...prev,
       [currentPermission.id]: result,
     }));
+    
+    if (currentPermission.id === "location" && result === "granted") {
+      detectAndSaveCountry().catch(() => {});
+    }
     
     setIsRequesting(false);
     

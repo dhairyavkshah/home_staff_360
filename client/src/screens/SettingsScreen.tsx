@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Database, Trash2, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle, Volume2, Vibrate } from "lucide-react";
+import { Database, Trash2, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle, Volume2, Vibrate, MapPin } from "lucide-react";
 import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import { pinService } from "@/lib/pin-service";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useTour } from "@/lib/guided-tour";
 import { setHapticEnabled, setSoundEnabled, isHapticEnabled, isSoundEnabled } from "@/lib/sound-service";
+import { COUNTRIES, getCurrencyForCountry } from "@/lib/geolocation-service";
 
 export function SettingsScreen() {
   const { navigate, goBack } = useNavigation();
@@ -47,7 +48,9 @@ export function SettingsScreen() {
     return activeId ? storage.getAccount(activeId) : null;
   }, []);
   
+  const appSettings = useMemo(() => storage.getSettings(), []);
   const [selectedAccountId, setSelectedAccountId] = useState(activeAccount?.id || "");
+  const [country, setCountry] = useState(appSettings.country || "");
   const [currency, setCurrency] = useState<Currency>(modeSettings.currency);
   const [customSymbol, setCustomSymbol] = useState(modeSettings.customCurrencySymbol || "");
   const [salaryStartDay, setSalaryStartDay] = useState(isHome ? homeSettings.salaryStartDay : 1);
@@ -120,6 +123,7 @@ export function SettingsScreen() {
       storage.saveSettings({
         ...currentSettings,
         householdName: selectedAccount?.name || undefined,
+        country,
         currency,
         customCurrencySymbol: currency === "OTHER" ? customSymbol : undefined,
         language,
@@ -138,6 +142,7 @@ export function SettingsScreen() {
       
       storage.saveSettings({
         ...currentSettings,
+        country,
         currency,
         customCurrencySymbol: currency === "OTHER" ? customSymbol : undefined,
         language,
@@ -210,6 +215,29 @@ export function SettingsScreen() {
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("general")}</h2>
 
           <Card className="p-3 flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="country" className="flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5" />
+                Country
+              </Label>
+              <Select value={country} onValueChange={(v) => {
+                setCountry(v);
+                const newCurrency = getCurrencyForCountry(v);
+                setCurrency(newCurrency);
+              }}>
+                <SelectTrigger id="country" data-testid="select-country">
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <Label htmlFor="currency">{t("currency")}</Label>
             <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
               <SelectTrigger id="currency" data-testid="select-currency">
