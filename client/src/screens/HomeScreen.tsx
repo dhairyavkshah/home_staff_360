@@ -140,7 +140,9 @@ export function HomeScreen() {
       icon: Wallet,
       color: 'warning',
       screen: 'payables' as const,
-      subtitle: formatCurrency(stats.totalPayable, settings.currency, settings.customCurrencySymbol),
+      subtitle: stats.totalPayableByCurrency.length > 0 
+        ? formatCurrencyTotals(stats.totalPayableByCurrency)
+        : formatCurrency(0, settings.currency, settings.customCurrencySymbol),
     },
     {
       id: 'expenses',
@@ -308,7 +310,9 @@ export function HomeScreen() {
                 data-testid="card-overview-payable"
               >
                 <p className="text-xl font-bold text-warning">
-                  {formatCurrency(stats.totalPayable, settings.currency, settings.customCurrencySymbol)}
+                  {stats.totalPayableByCurrency.length > 0 
+                    ? formatCurrencyTotals(stats.totalPayableByCurrency)
+                    : formatCurrency(0, settings.currency, settings.customCurrencySymbol)}
                 </p>
                 <p className="text-[10px] text-muted-foreground">{tLabel('payable', 'Payable')}</p>
               </Card>

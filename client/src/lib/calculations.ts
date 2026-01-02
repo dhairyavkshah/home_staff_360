@@ -143,6 +143,125 @@ export function getUnpaidLaundryTotal(personId: string): number {
     .reduce((sum, batch) => sum + batch.total, 0);
 }
 
+// Get unpaid laundry grouped by currency for a person
+export function getUnpaidLaundryByCurrency(personId: string, fallbackSymbol: string): CurrencyTotal[] {
+  const laundry = storage.getLaundryByPerson(personId);
+  const unpaid = laundry.filter((batch) => !batch.isPaid);
+  return groupTotalsByCurrency(
+    unpaid,
+    (l) => l.total,
+    (l) => l.recordCurrencySymbol,
+    fallbackSymbol,
+    (l) => l.recordCurrency
+  );
+}
+
+// Calculate person balance grouped by currency (wages earned)
+export function calculatePersonBalanceByCurrency(personId: string, fallbackSymbol: string): CurrencyTotal[] {
+  const person = storage.getPerson(personId);
+  if (!person) return [];
+
+  const settings = storage.getSettings();
+  const attendance = storage.getAttendanceByPerson(personId);
+  const transactions = storage.getTransactionsByPerson(personId);
+  const laundry = storage.getLaundryByPerson(personId);
+  const defaultCurrency = person.currency || settings.currency;
+
+  // Helper to create unique key from code and symbol
+  const makeCurrencyKey = (code: string | undefined, symbol: string): string => {
+    return code ? `${code}:${symbol}` : symbol;
+  };
+
+  // Group attendance earnings by currency (using unique keys)
+  const earningsMap = new Map<string, { symbol: string; amount: number }>();
+  
+  for (const entry of attendance) {
+    const symbol = entry.recordCurrencySymbol || fallbackSymbol;
+    const code = entry.recordCurrency || defaultCurrency;
+    const key = makeCurrencyKey(code, symbol);
+    const salaryType = entry.recordSalaryType ?? person.salaryType;
+    const baseRate = entry.recordBaseRate ?? person.baseRate;
+    const halfDayPercentage = entry.recordHalfDayPercentage ?? person.halfDayPercentage ?? settings.halfDayPercentage;
+    
+    let wage = 0;
+    if (entry.status === "FULL") {
+      if (salaryType === "HOURLY" && entry.hours) {
+        wage = baseRate * entry.hours;
+      } else if (salaryType === "DAILY") {
+        wage = baseRate;
+      } else if (salaryType === "MONTHLY") {
+        wage = baseRate / 30;
+      }
+    } else if (entry.status === "HALF") {
+      const multiplier = halfDayPercentage / 100;
+      if (salaryType === "HOURLY" && entry.hours) {
+        wage = baseRate * entry.hours * multiplier;
+      } else if (salaryType === "DAILY") {
+        wage = baseRate * multiplier;
+      } else if (salaryType === "MONTHLY") {
+        wage = (baseRate / 30) * multiplier;
+      }
+    }
+    const existing = earningsMap.get(key);
+    if (existing) {
+      existing.amount += wage;
+    } else {
+      earningsMap.set(key, { symbol, amount: wage });
+    }
+  }
+
+  // Subtract paid transactions by currency
+  for (const t of transactions.filter(t => t.isPaid)) {
+    const symbol = t.recordCurrencySymbol || fallbackSymbol;
+    const code = t.recordCurrency || defaultCurrency;
+    const key = makeCurrencyKey(code, symbol);
+    let adjustment = 0;
+    if (t.category === "payment") {
+      adjustment = -t.amount;
+    } else if (t.category === "advance") {
+      adjustment = -t.amount;
+    } else if (t.category === "deduction") {
+      adjustment = t.amount;
+    }
+    const existing = earningsMap.get(key);
+    if (existing) {
+      existing.amount += adjustment;
+    } else {
+      earningsMap.set(key, { symbol, amount: adjustment });
+    }
+  }
+
+  // Subtract paid laundry by currency
+  for (const batch of laundry.filter(l => l.isPaid)) {
+    const symbol = batch.recordCurrencySymbol || fallbackSymbol;
+    const code = batch.recordCurrency || defaultCurrency;
+    const key = makeCurrencyKey(code, symbol);
+    const existing = earningsMap.get(key);
+    if (existing) {
+      existing.amount -= batch.total;
+    } else {
+      earningsMap.set(key, { symbol, amount: -batch.total });
+    }
+  }
+
+  return Array.from(earningsMap.entries())
+    .map(([key, { symbol, amount }]) => ({ symbol, amount, currencyKey: key }))
+    .filter(t => t.amount !== 0)
+    .sort((a, b) => b.amount - a.amount);
+}
+
+// Get total payable for a person grouped by currency
+export function calculateTotalPayableByCurrency(personId: string, fallbackSymbol: string): CurrencyTotal[] {
+  const wagesByCurrency = calculatePersonBalanceByCurrency(personId, fallbackSymbol);
+  const unpaidLaundryByCurrency = getUnpaidLaundryByCurrency(personId, fallbackSymbol);
+  
+  // Merge wages and unpaid laundry (both are owed to staff)
+  const merged = mergeCurrencyTotals(wagesByCurrency, unpaidLaundryByCurrency);
+  
+  // Filter to only positive amounts (owed to staff)
+  return merged.filter(t => t.amount > 0);
+}
+
 // Get total payable including unpaid laundry
 export function calculateTotalPayable(personId: string): number {
   const balance = calculatePersonBalance(personId);
@@ -183,24 +302,44 @@ export function formatRecordCurrency(
 export interface CurrencyTotal {
   symbol: string;
   amount: number;
+  currencyKey?: string; // Unique key for grouping (currency code or symbol-based key)
+}
+
+// Creates a unique key from currency code and symbol to prevent collisions
+function getCurrencyKey(currencyCode: string | undefined, symbol: string): string {
+  // If we have a currency code, use it as the key (more reliable)
+  if (currencyCode) {
+    return `${currencyCode}:${symbol}`;
+  }
+  // Fallback to just the symbol if no code available
+  return symbol;
 }
 
 export function groupTotalsByCurrency<T>(
   records: T[],
   getAmount: (record: T) => number,
   getCurrencySymbol: (record: T) => string | undefined,
-  fallbackSymbol: string
+  fallbackSymbol: string,
+  getCurrencyCode?: (record: T) => string | undefined
 ): CurrencyTotal[] {
-  const totalsMap = new Map<string, number>();
+  const totalsMap = new Map<string, { symbol: string; amount: number }>();
   
   for (const record of records) {
     const symbol = getCurrencySymbol(record) || fallbackSymbol;
+    const currencyCode = getCurrencyCode ? getCurrencyCode(record) : undefined;
+    const key = getCurrencyKey(currencyCode, symbol);
     const amount = getAmount(record);
-    totalsMap.set(symbol, (totalsMap.get(symbol) || 0) + amount);
+    
+    const existing = totalsMap.get(key);
+    if (existing) {
+      existing.amount += amount;
+    } else {
+      totalsMap.set(key, { symbol, amount });
+    }
   }
   
   return Array.from(totalsMap.entries())
-    .map(([symbol, amount]) => ({ symbol, amount }))
+    .map(([key, { symbol, amount }]) => ({ symbol, amount, currencyKey: key }))
     .filter(t => t.amount !== 0)
     .sort((a, b) => b.amount - a.amount);
 }
@@ -222,16 +361,23 @@ export function formatCurrencyTotals(totals: CurrencyTotal[]): string {
 }
 
 export function mergeCurrencyTotals(...totalsArrays: CurrencyTotal[][]): CurrencyTotal[] {
-  const mergedMap = new Map<string, number>();
+  const mergedMap = new Map<string, { symbol: string; amount: number }>();
   
   for (const totals of totalsArrays) {
-    for (const { symbol, amount } of totals) {
-      mergedMap.set(symbol, (mergedMap.get(symbol) || 0) + amount);
+    for (const { symbol, amount, currencyKey } of totals) {
+      // Use currencyKey if available, otherwise fall back to symbol
+      const key = currencyKey || symbol;
+      const existing = mergedMap.get(key);
+      if (existing) {
+        existing.amount += amount;
+      } else {
+        mergedMap.set(key, { symbol, amount });
+      }
     }
   }
   
   return Array.from(mergedMap.entries())
-    .map(([symbol, amount]) => ({ symbol, amount }))
+    .map(([key, { symbol, amount }]) => ({ symbol, amount, currencyKey: key }))
     .filter(t => t.amount !== 0)
     .sort((a, b) => b.amount - a.amount);
 }
@@ -316,13 +462,20 @@ export function getDashboardStats() {
     unpaidLaundry,
     (l) => l.total,
     (l) => l.recordCurrencySymbol,
-    fallbackSymbol
+    fallbackSymbol,
+    (l) => l.recordCurrency
   );
   const unpaidLaundryAmount = unpaidLaundry.reduce((sum, l) => sum + l.total, 0);
   
-  // Calculate total payables by summing person balances (for backward compat)
+  // Calculate total payables grouped by currency
+  let allPayableTotals: CurrencyTotal[] = [];
   let totalPayable = 0;
+  
   for (const person of people) {
+    const personPayableByCurrency = calculateTotalPayableByCurrency(person.id, fallbackSymbol);
+    allPayableTotals = mergeCurrencyTotals(allPayableTotals, personPayableByCurrency);
+    
+    // Also calculate scalar for backward compat
     const wageBalance = calculatePersonBalance(person.id);
     const unpaidLaundryTotal = getUnpaidLaundryTotal(person.id);
     const netBalance = wageBalance + unpaidLaundryTotal;
@@ -331,13 +484,23 @@ export function getDashboardStats() {
     }
   }
   
-  // Add account-level unpaid laundry (not linked to specific person)
-  totalPayable += unpaidLaundryAmount;
+  // Add account-level unpaid laundry (not linked to specific person) by currency
+  const accountLevelLaundry = unpaidLaundry.filter(l => !l.personId);
+  const accountLevelLaundryByCurrency = groupTotalsByCurrency(
+    accountLevelLaundry,
+    (l) => l.total,
+    (l) => l.recordCurrencySymbol,
+    fallbackSymbol,
+    (l) => l.recordCurrency
+  );
+  allPayableTotals = mergeCurrencyTotals(allPayableTotals, accountLevelLaundryByCurrency);
   
-  // Subtract person-linked unpaid laundry to avoid double-counting
-  for (const person of people) {
-    totalPayable -= getUnpaidLaundryTotal(person.id);
-  }
+  // Add account-level unpaid laundry scalar for backward compat
+  const accountLevelUnpaidAmount = accountLevelLaundry.reduce((sum, l) => sum + l.total, 0);
+  totalPayable += accountLevelUnpaidAmount;
+  
+  // Final payables by currency (positive only)
+  const totalPayableByCurrency = allPayableTotals.filter(t => t.amount > 0);
 
   const today = getTodayString();
   const unpaidBills = expenses.filter(
@@ -350,7 +513,8 @@ export function getDashboardStats() {
     unpaidExpenses,
     (e) => e.amount,
     (e) => e.recordCurrencySymbol,
-    fallbackSymbol
+    fallbackSymbol,
+    (e) => e.recordCurrency
   );
   const totalExpenses = unpaidExpenses.reduce((sum, e) => sum + e.amount, 0);
   
@@ -368,11 +532,12 @@ export function getDashboardStats() {
   return {
     activeStaff,
     totalPayable,
+    totalPayableByCurrency,
     unpaidBills,
     totalExpenses,
     totalLaundryAmount,
     unpaidLaundryAmount,
-    // New: currency-grouped totals for display on dashboard
+    // Currency-grouped totals for display on dashboard
     unpaidLaundryByCurrency,
     expensesByCurrency,
     todayAttendance: {

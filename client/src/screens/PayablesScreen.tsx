@@ -7,8 +7,8 @@ import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
-import { calculatePersonBalanceWithCurrency, getUnpaidLaundryTotal, formatCurrency, getCurrencyIcon, formatRecordCurrency, groupTotalsByCurrency, formatCurrencyTotals } from "@/lib/calculations";
-import { getCurrencySymbol } from "@shared/schema";
+import { calculatePersonBalanceWithCurrency, getUnpaidLaundryTotal, formatCurrency, getCurrencyIcon, formatRecordCurrency, groupTotalsByCurrency, formatCurrencyTotals, mergeCurrencyTotals, CurrencyTotal, calculateTotalPayableByCurrency } from "@/lib/calculations";
+import { getCurrencySymbol, currencySymbols } from "@shared/schema";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
 
@@ -18,15 +18,24 @@ export function PayablesScreen() {
   const { contextLabel, contextMode } = useActiveContext();
   const settings = useMemo(() => storage.getSettings(), []);
   
+  const fallbackSymbol = currencySymbols[settings.currency] || settings.customCurrencySymbol || '$';
+  
   // Get account-level unpaid laundry (not linked to specific person)
-  const accountLevelUnpaidLaundry = useMemo(() => {
+  const { accountLevelUnpaidLaundry, accountLevelUnpaidLaundryByCurrency } = useMemo(() => {
     const accountId = storage.getActiveAccountId();
     const laundry = accountId ? storage.getLaundryByAccount(accountId) : storage.getLaundry();
     // Get all unpaid laundry that doesn't have a personId
-    return laundry
-      .filter((l) => !l.isPaid && !l.personId)
-      .reduce((sum, l) => sum + l.total, 0);
-  }, []);
+    const unpaidAccountLaundry = laundry.filter((l) => !l.isPaid && !l.personId);
+    const total = unpaidAccountLaundry.reduce((sum, l) => sum + l.total, 0);
+    const byCurrency = groupTotalsByCurrency(
+      unpaidAccountLaundry,
+      (l) => l.total,
+      (l) => l.recordCurrencySymbol,
+      fallbackSymbol,
+      (l) => l.recordCurrency
+    );
+    return { accountLevelUnpaidLaundry: total, accountLevelUnpaidLaundryByCurrency: byCurrency };
+  }, [fallbackSymbol]);
   
   const peopleWithBalances = useMemo(() => {
     const accountId = storage.getActiveAccountId();
@@ -39,6 +48,10 @@ export function PayablesScreen() {
         const unpaidLaundry = getUnpaidLaundryTotal(p.id);
         // Total payable = wages owed PLUS unpaid laundry (employer owes staff for laundry service)
         const balance = balanceResult.amount + unpaidLaundry;
+        
+        // Get currency-grouped payables for this person
+        const payableByCurrency = calculateTotalPayableByCurrency(p.id, fallbackSymbol);
+        
         const transactions = storage.getTransactionsByPerson(p.id);
         const lastPayment = transactions
           .filter(t => t.category === "payment")
@@ -53,27 +66,39 @@ export function PayablesScreen() {
           ...p,
           balance,
           unpaidLaundry,
+          payableByCurrency,
           lastPaymentDate,
           daysSincePayment,
           isOverdue: balance > 0 && daysSincePayment > settings.salaryStartDay,
-          hasMixedCurrencies: balanceResult.hasMixedCurrencies,
+          hasMixedCurrencies: balanceResult.hasMixedCurrencies || payableByCurrency.length > 1,
           primaryCurrencySymbol: balanceResult.primaryCurrencySymbol,
         };
       })
-      .filter((p) => p.balance > 0)
+      .filter((p) => p.balance > 0 || p.payableByCurrency.length > 0)
       .sort((a, b) => b.balance - a.balance);
-  }, [settings.salaryStartDay]);
+  }, [settings.salaryStartDay, fallbackSymbol]);
 
-  // Total payable includes staff balances + account-level unpaid laundry
+  // Total payable by currency (staff balances + account-level unpaid laundry)
+  const totalPayableByCurrency = useMemo(() => {
+    let allTotals: CurrencyTotal[] = [];
+    for (const p of peopleWithBalances) {
+      allTotals = mergeCurrencyTotals(allTotals, p.payableByCurrency);
+    }
+    // Add account-level unpaid laundry
+    allTotals = mergeCurrencyTotals(allTotals, accountLevelUnpaidLaundryByCurrency);
+    return allTotals.filter(t => t.amount > 0);
+  }, [peopleWithBalances, accountLevelUnpaidLaundryByCurrency]);
+
+  // Scalar total for backward compat
   const totalPayable = useMemo(() => 
     peopleWithBalances.reduce((sum, p) => sum + p.balance, 0) + accountLevelUnpaidLaundry, 
     [peopleWithBalances, accountLevelUnpaidLaundry]
   );
 
-  // Check if there are mixed currencies across all balances
-  const hasMixedCurrenciesOverall = useMemo(() => {
-    return peopleWithBalances.some(p => p.hasMixedCurrencies);
-  }, [peopleWithBalances]);
+  // Check if there are multiple currencies across all balances
+  const hasMultipleCurrencies = useMemo(() => {
+    return totalPayableByCurrency.length > 1;
+  }, [totalPayableByCurrency]);
 
   const overdueCount = peopleWithBalances.filter(p => p.isOverdue).length;
   
@@ -112,11 +137,10 @@ export function PayablesScreen() {
                 <div>
                   <p className="text-sm text-muted-foreground">Total Outstanding</p>
                   <p className="text-2xl font-bold" data-testid="text-total-payable">
-                    {formatCurrency(totalPayable, settings.currency, settings.customCurrencySymbol)}
+                    {totalPayableByCurrency.length > 0 
+                      ? formatCurrencyTotals(totalPayableByCurrency)
+                      : formatCurrency(0, settings.currency, settings.customCurrencySymbol)}
                   </p>
-                  {hasMixedCurrenciesOverall && (
-                    <p className="text-xs text-muted-foreground italic">Mixed currencies in records</p>
-                  )}
                 </div>
               </div>
               <div className="text-right">
@@ -136,7 +160,7 @@ export function PayablesScreen() {
               </div>
               <p className="text-lg font-semibold mt-1">
                 {dueThisWeek > 0 
-                  ? formatCurrency(dueThisWeek, settings.currency, settings.customCurrencySymbol)
+                  ? formatCurrencyTotals(totalPayableByCurrency)
                   : "None"}
               </p>
             </Card>
@@ -174,7 +198,7 @@ export function PayablesScreen() {
                   <div className="flex items-center gap-2">
                     <div className="text-right">
                       <p className="font-semibold text-warning">
-                        {formatCurrency(accountLevelUnpaidLaundry, settings.currency, settings.customCurrencySymbol)}
+                        {formatCurrencyTotals(accountLevelUnpaidLaundryByCurrency)}
                       </p>
                       <p className="text-xs text-muted-foreground">unpaid</p>
                     </div>
@@ -237,11 +261,11 @@ export function PayablesScreen() {
                       <div className="flex items-center gap-2">
                         <div className="text-right">
                           <p className="font-semibold text-warning">
-                            {formatRecordCurrency(person.balance, person.primaryCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
+                            {person.payableByCurrency.length > 0 
+                              ? formatCurrencyTotals(person.payableByCurrency)
+                              : formatRecordCurrency(person.balance, person.primaryCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                           </p>
-                          <p className="text-xs text-muted-foreground">
-                            {person.hasMixedCurrencies ? "owed (mixed)" : "owed"}
-                          </p>
+                          <p className="text-xs text-muted-foreground">owed</p>
                         </div>
                         <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       </div>
