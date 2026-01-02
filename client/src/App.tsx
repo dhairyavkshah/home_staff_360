@@ -29,6 +29,7 @@ import { ExpensesScreen } from "@/screens/ExpensesScreen";
 import { AddExpenseScreen } from "@/screens/AddExpenseScreen";
 import { ExpenseCalendarScreen } from "@/screens/ExpenseCalendarScreen";
 import { ReportsScreen } from "@/screens/ReportsScreen";
+import { ReportPreviewScreen } from "@/screens/ReportPreviewScreen";
 import { SettingsScreen } from "@/screens/SettingsScreen";
 import { SupportDeveloperScreen } from "@/screens/SupportDeveloperScreen";
 import { BackupScreen } from "@/screens/BackupScreen";
@@ -107,6 +108,8 @@ function MobileAppRouter() {
       return <ExpenseCalendarScreen />;
     case "reports":
       return <ReportsScreen />;
+    case "report-preview":
+      return <ReportPreviewScreen />;
     case "settings":
       return <SettingsScreen />;
     case "support-developer":

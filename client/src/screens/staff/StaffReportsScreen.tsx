@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Download, Share2, Calendar, TrendingUp, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, Share2, Calendar, TrendingUp, FileText, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
@@ -201,6 +201,83 @@ export function StaffReportsScreen() {
     }
   };
 
+  const handleViewEarningsReport = () => {
+    const entries: Array<{
+      date: string;
+      clientName: string;
+      description: string;
+      earnings: number;
+      formattedEarnings: string;
+      type: "attendance" | "laundry" | "bonus";
+    }> = [];
+
+    attendance
+      .filter((a) => a.status !== "ABSENT")
+      .forEach((a) => {
+        const client = clientHomes.find((c) => c.id === a.clientHomeId);
+        const rate = a.recordRate ?? client?.rate ?? 0;
+        const earned = a.status === "FULL" ? rate : rate * 0.5;
+        entries.push({
+          date: a.date,
+          clientName: homeNames.get(a.clientHomeId) || "Unknown",
+          description: a.status === "FULL" ? "Full Day Work" : "Half Day Work",
+          earnings: earned,
+          formattedEarnings: `${symbol}${earned.toLocaleString()}`,
+          type: "attendance",
+        });
+      });
+
+    laundryJobs.forEach((job) => {
+      entries.push({
+        date: job.date,
+        clientName: homeNames.get(job.clientHomeId) || "Unknown",
+        description: `Laundry (${job.itemCount} items)`,
+        earnings: job.totalEarned,
+        formattedEarnings: `${symbol}${job.totalEarned.toLocaleString()}`,
+        type: "laundry",
+      });
+    });
+
+    entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    navigate("report-preview", {
+      reportType: "staff-earnings",
+      reportTitle: t("earningsReport"),
+      subtitle: monthName,
+      summary: {
+        "Work Earnings": `${symbol}${earnings.fromAttendance.toLocaleString()}`,
+        "Laundry Earnings": `${symbol}${earnings.fromLaundry.toLocaleString()}`,
+        "Tips & Bonus": `${symbol}${earnings.bonusAndTips.toLocaleString()}`,
+        "Total Earnings": `${symbol}${earnings.total.toLocaleString()}`,
+      },
+      entries,
+    });
+  };
+
+  const handleViewAttendanceReport = () => {
+    const entries = attendance.map((a) => ({
+      date: a.date,
+      clientName: homeNames.get(a.clientHomeId) || "Unknown",
+      status: a.status === "FULL" ? "Full Day" : a.status === "HALF" ? "Half Day" : "Absent",
+      hoursWorked: a.hoursWorked,
+      note: a.note,
+    }));
+
+    entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    navigate("report-preview", {
+      reportType: "staff-attendance",
+      reportTitle: t("attendanceReport"),
+      subtitle: monthName,
+      summary: {
+        "Full Days": String(attendanceSummary.fullDays),
+        "Half Days": String(attendanceSummary.halfDays),
+        "Total Days": String(attendanceSummary.totalDays),
+      },
+      entries,
+    });
+  };
+
   return (
     <AppLayout>
       <Header title={t("reports")} subtitle={t("viewAndShareReports")} onBack={() => navigate("staff-home")} contextLabel={contextLabel} contextMode={contextMode} />
@@ -250,6 +327,15 @@ export function StaffReportsScreen() {
                 <p className="text-xs text-muted-foreground">{t("earningsReportDesc")}</p>
               </div>
             </div>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={handleViewEarningsReport}
+              data-testid="button-view-earnings"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              {t("view")} Report
+            </Button>
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -281,6 +367,15 @@ export function StaffReportsScreen() {
                 <p className="text-xs text-muted-foreground">{t("attendanceReportDesc")}</p>
               </div>
             </div>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={handleViewAttendanceReport}
+              data-testid="button-view-attendance"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              {t("view")} Report
+            </Button>
             <div className="flex gap-2">
               <Button
                 variant="outline"

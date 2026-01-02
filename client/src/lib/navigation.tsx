@@ -52,6 +52,7 @@ export type Screen =
   | "staff-invoices"
   | "staff-add-invoice"
   | "staff-invoice-view"
+  | "report-preview"
   | "feedback";
 
 interface NavigationData {
@@ -69,6 +70,9 @@ interface NavigationData {
   attendanceId?: string;
   userType?: string;
   invoiceId?: string;
+  reportType?: string;
+  reportTitle?: string;
+  reportData?: unknown;
   [key: string]: unknown;
 }
 

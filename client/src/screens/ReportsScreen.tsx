@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Download, Share2, FileText, Calendar, ChevronLeft, ChevronRight, Receipt, Users } from "lucide-react";
+import { Download, Share2, FileText, Calendar, ChevronLeft, ChevronRight, Receipt, Users, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header";
@@ -299,6 +299,40 @@ export function ReportsScreen() {
     }
   };
 
+  const handleViewLedgerReport = () => {
+    const entries = reportData.ledgerEntries.map(entry => ({
+      ...entry,
+      formattedAmount: formatCurrency(entry.amount, settings.currency, settings.customCurrencySymbol),
+    }));
+    
+    navigate("report-preview", {
+      reportType: "ledger",
+      reportTitle: "Ledger Report",
+      subtitle: monthName,
+      summary: {
+        "Total Wages": formatCurrency(reportData.totalWages, settings.currency, settings.customCurrencySymbol),
+        "Total Expenses": formatCurrency(reportData.totalExpenses, settings.currency, settings.customCurrencySymbol),
+        "Total Transactions": formatCurrency(reportData.totalTransactions, settings.currency, settings.customCurrencySymbol),
+        "Grand Total": formatCurrency(reportData.grandTotal, settings.currency, settings.customCurrencySymbol),
+      },
+      entries,
+    });
+  };
+
+  const handleViewAttendanceReport = () => {
+    navigate("report-preview", {
+      reportType: "attendance",
+      reportTitle: t("attendanceReport"),
+      subtitle: monthName,
+      summary: {
+        "Full Days": String(attendanceData.summary.fullDays),
+        "Half Days": String(attendanceData.summary.halfDays),
+        "Total Records": String(attendanceData.summary.totalDays),
+      },
+      entries: attendanceData.records,
+    });
+  };
+
   return (
     <AppLayout>
       <Header 
@@ -354,6 +388,15 @@ export function ReportsScreen() {
                 <p className="text-xs text-muted-foreground">Wages, expenses, and transactions</p>
               </div>
             </div>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={handleViewLedgerReport}
+              data-testid="button-view-ledger"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              {t("view")} Report
+            </Button>
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -385,6 +428,15 @@ export function ReportsScreen() {
                 <p className="text-xs text-muted-foreground">{t("attendanceReportDesc")}</p>
               </div>
             </div>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={handleViewAttendanceReport}
+              data-testid="button-view-attendance"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              {t("view")} Report
+            </Button>
             <div className="flex gap-2">
               <Button
                 variant="outline"
