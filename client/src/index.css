@@ -284,6 +284,19 @@
     bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
   }
   
+  /* Global safe area for portals and overlays */
+  [data-radix-popper-content-wrapper],
+  [data-radix-select-content],
+  [data-radix-popover-content],
+  [data-radix-dropdown-menu-content] {
+    margin-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) !important;
+  }
+  
+  /* Ensure Select content respects safe area */
+  [role="listbox"] {
+    max-height: calc(100vh - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) - 100px) !important;
+  }
+  
   /* Content container */
   .content-container {
     @apply px-4;

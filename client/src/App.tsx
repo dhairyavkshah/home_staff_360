@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { NavigationProvider, useNavigation } from "@/lib/navigation";
 import { I18nProvider } from "@/lib/i18n/i18n-context";
 import { GuidedTourProvider } from "@/lib/guided-tour";
+import { SafeAreaProvider } from "@/lib/safe-area-provider";
 import { storage } from "@/lib/storage";
 
 import { SplashScreen } from "@/screens/SplashScreen";
@@ -178,13 +179,15 @@ function MobileAppWithSplash() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="homestaff360-theme">
-      <I18nProvider>
-        <TooltipProvider>
-          <MobileAppWithSplash />
-        </TooltipProvider>
-      </I18nProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider defaultTheme="light" storageKey="homestaff360-theme">
+        <I18nProvider>
+          <TooltipProvider>
+            <MobileAppWithSplash />
+          </TooltipProvider>
+        </I18nProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 
