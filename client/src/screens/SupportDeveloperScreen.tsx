@@ -238,8 +238,8 @@ export function SupportDeveloperScreen() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            I'm a solo developer passionate about creating useful, privacy-focused apps. 
-            Home Staff 360 is built with love and dedication to help people manage their household staff efficiently. 
+            Built by a solo-preneur passionate about creating useful and individuals-focused apps. 
+            Home Staff 360 is crafted with love and dedication to help households manage their domestic staff seamlessly, while also empowering professionals in household service industries to organize their work and earnings with ease. 
             Your support keeps this project alive and growing!
           </p>
         </Card>
