@@ -96,6 +96,10 @@ function getPersonCurrencyInfo(personId: string): { currency: string; symbol: st
     return { currency, symbol };
   }
   
+  const migrations = getItem<Migrations>(MIGRATION_KEY, {});
+  if (migrations.entityCurrencyBackfill) {
+    console.warn(`Person ${personId} missing currency after migration, using global default`);
+  }
   return getCurrentCurrencyInfo();
 }
 
@@ -111,6 +115,10 @@ function getClientHomeCurrencyInfo(clientHomeId: string): { currency: string; sy
     return { currency, symbol };
   }
   
+  const migrations = getItem<Migrations>(MIGRATION_KEY, {});
+  if (migrations.entityCurrencyBackfill) {
+    console.warn(`ClientHome ${clientHomeId} missing currency after migration, using global default`);
+  }
   return getCurrentCurrencyInfo();
 }
 
