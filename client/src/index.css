@@ -58,15 +58,27 @@
   /* Status Colors - Fluent 2 (#107C10, #FFB900, #0078D4, #D13438) */
   --success: 120 77% 27%;
   --success-foreground: 0 0% 100%;
+  --success-hover: 120 77% 24%;
+  --success-pressed: 120 77% 20%;
   
   --warning: 43 100% 50%;
   --warning-foreground: 0 0% 14%;
+  --warning-hover: 43 100% 45%;
+  --warning-pressed: 43 100% 40%;
   
   --info: 206 100% 42%;
   --info-foreground: 0 0% 100%;
+  --info-hover: 206 100% 37%;
+  --info-pressed: 206 100% 31%;
   
   --destructive: 358 65% 51%;
   --destructive-foreground: 0 0% 100%;
+  --destructive-hover: 358 65% 46%;
+  --destructive-pressed: 358 65% 40%;
+  
+  /* Primary hover/pressed states - Fluent 2 */
+  --primary-hover: 206 100% 37%;
+  --primary-pressed: 206 100% 31%;
   
   /* Charts */
   --chart-1: 206 100% 42%;
@@ -163,15 +175,27 @@
   /* Status Colors - Fluent 2 Dark (brighter for visibility) */
   --success: 120 75% 35%;
   --success-foreground: 0 0% 100%;
+  --success-hover: 120 75% 40%;
+  --success-pressed: 120 75% 30%;
   
   --warning: 43 100% 55%;
   --warning-foreground: 0 0% 14%;
+  --warning-hover: 43 100% 60%;
+  --warning-pressed: 43 100% 50%;
   
   --info: 206 90% 56%;
   --info-foreground: 0 0% 100%;
+  --info-hover: 206 90% 62%;
+  --info-pressed: 206 90% 50%;
   
   --destructive: 358 60% 55%;
   --destructive-foreground: 0 0% 100%;
+  --destructive-hover: 358 60% 60%;
+  --destructive-pressed: 358 60% 48%;
+  
+  /* Primary hover/pressed states - Fluent 2 Dark */
+  --primary-hover: 206 90% 62%;
+  --primary-pressed: 206 100% 42%;
   
   /* Charts */
   --chart-1: 206 90% 56%;
