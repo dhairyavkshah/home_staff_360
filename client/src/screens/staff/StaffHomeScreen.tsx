@@ -403,7 +403,7 @@ export function StaffHomeScreen() {
                 onClick={() => handleModuleClick('reports', 'staff-reports')}
                 data-testid="card-overview-wage-earnings"
               >
-                <p className="text-xl font-bold text-success">{symbol}{(earnings.total - earnings.fromLaundry).toLocaleString()}</p>
+                <p className="text-xl font-bold text-success">{formatCurrencyTotals(earnings.earningsByCurrency)}</p>
                 <p className="text-[10px] text-muted-foreground">{tLabel('thisMonthWageEarnings', 'Wage/Salary')}</p>
               </Card>
               <Card 
@@ -411,7 +411,7 @@ export function StaffHomeScreen() {
                 onClick={() => handleModuleClick('laundry', 'staff-laundry')}
                 data-testid="card-overview-laundry-earnings"
               >
-                <p className="text-xl font-bold text-info">{symbol}{earnings.fromLaundry.toLocaleString()}</p>
+                <p className="text-xl font-bold text-info">{formatCurrencyTotals(earnings.laundryByCurrency)}</p>
                 <p className="text-[10px] text-muted-foreground">{tLabel('thisMonthLaundryEarnings', 'Laundry Jobs')}</p>
               </Card>
             </div>
