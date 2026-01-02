@@ -272,6 +272,8 @@ export const personSchema = z.object({
   photoData: z.string().optional(),
   isActive: z.boolean().default(true),
   createdAt: z.string(),
+  currency: z.enum(currencies).optional(),
+  customCurrencySymbol: z.string().optional(),
 });
 
 export type Person = z.infer<typeof personSchema>;
@@ -439,6 +441,8 @@ export const clientHomeSchema = z.object({
   rate: z.number().positive(),
   isActive: z.boolean(),
   createdAt: z.string(),
+  currency: z.enum(currencies).optional(),
+  customCurrencySymbol: z.string().optional(),
 });
 
 export type ClientHome = z.infer<typeof clientHomeSchema>;
