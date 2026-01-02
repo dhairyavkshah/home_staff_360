@@ -33,13 +33,35 @@ export function BackupScreen() {
       const filename = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
 
       if (isNative) {
-        const result = await Filesystem.writeFile({
+        await Filesystem.writeFile({
           path: filename,
           data: json,
-          directory: Directory.Documents,
+          directory: Directory.Cache,
           encoding: Encoding.UTF8,
         });
-        toast({ title: "Backup saved", description: `Saved to Documents/${filename}` });
+
+        const uriResult = await Filesystem.getUri({
+          directory: Directory.Cache,
+          path: filename,
+        });
+
+        try {
+          await Share.share({
+            title: "Save Backup",
+            files: [uriResult.uri],
+            dialogTitle: "Save or Share Backup",
+          });
+          toast({ title: "Backup saved successfully" });
+        } catch (shareError) {
+          if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
+            toast({ title: "Backup file ready", description: "Tap Share to save it" });
+            return;
+          }
+          toast({
+            title: "Backup file created",
+            description: `Tap the Share button to save ${filename}`,
+          });
+        }
       } else {
         const blob = new Blob([json], { type: "application/octet-stream" });
         const url = URL.createObjectURL(blob);
@@ -51,6 +73,10 @@ export function BackupScreen() {
         toast({ title: "Backup downloaded successfully" });
       }
     } catch (error) {
+      if ((error as Error).message?.includes("cancel") || (error as Error).message?.includes("Cancel")) {
+        setIsExporting(false);
+        return;
+      }
       console.error("Export error:", error);
       toast({
         title: "Export Failed",
@@ -70,18 +96,35 @@ export function BackupScreen() {
       const filename = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
 
       if (isNative) {
-        const result = await Filesystem.writeFile({
+        await Filesystem.writeFile({
           path: filename,
           data: json,
           directory: Directory.Cache,
           encoding: Encoding.UTF8,
         });
 
-        await Share.share({
-          title: "Home Staff 360 Backup",
-          url: result.uri,
-          dialogTitle: "Share Backup File",
+        const uriResult = await Filesystem.getUri({
+          directory: Directory.Cache,
+          path: filename,
         });
+
+        try {
+          await Share.share({
+            title: "Home Staff 360 Backup",
+            files: [uriResult.uri],
+            dialogTitle: "Share Backup File",
+          });
+          toast({ title: "Backup shared successfully" });
+        } catch (shareError) {
+          if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
+            toast({ title: "Backup file ready", description: "Tap Share to send it" });
+            return;
+          }
+          toast({
+            title: "Backup file created",
+            description: `Tap Share again to send ${filename}`,
+          });
+        }
       } else {
         if (navigator.share) {
           const file = new File([json], filename, { type: "application/octet-stream" });
@@ -101,7 +144,8 @@ export function BackupScreen() {
         }
       }
     } catch (error) {
-      if ((error as Error).message?.includes("cancel")) {
+      if ((error as Error).message?.includes("cancel") || (error as Error).message?.includes("Cancel")) {
+        setIsExporting(false);
         return;
       }
       console.error("Share error:", error);

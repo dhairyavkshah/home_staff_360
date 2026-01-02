@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { type Currency, type UserType } from "@shared/schema";
 import { pinService } from "@/lib/pin-service";
 import { useTour } from "@/lib/guided-tour";
-import { COUNTRIES, getCurrencyForCountry, getUserCountry } from "@/lib/geolocation-service";
+import { COUNTRIES, getCurrencyForCountry, getUserCountry, detectCountryFromIP } from "@/lib/geolocation-service";
 
 const currencyOptions: { value: Currency; label: string; symbol: string }[] = [
   { value: "INR", label: "Indian Rupee", symbol: "₹" },
@@ -58,12 +58,21 @@ export function OnboardingScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const detectedCountry = getUserCountry();
-    if (detectedCountry) {
-      setCountry(detectedCountry);
-      const detectedCurrency = getCurrencyForCountry(detectedCountry);
-      setCurrency(detectedCurrency);
+    async function detectCountry() {
+      const existingCountry = getUserCountry();
+      if (existingCountry) {
+        setCountry(existingCountry);
+        setCurrency(getCurrencyForCountry(existingCountry));
+        return;
+      }
+
+      const detectedCode = await detectCountryFromIP();
+      if (detectedCode) {
+        setCountry(detectedCode);
+        setCurrency(getCurrencyForCountry(detectedCode));
+      }
     }
+    detectCountry();
   }, []);
 
   const validate = (): boolean => {

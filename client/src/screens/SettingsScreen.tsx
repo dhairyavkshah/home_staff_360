@@ -388,26 +388,21 @@ export function SettingsScreen() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("subscriptionPlan")}</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Support</h2>
           <button
             className="w-full text-left hover-elevate"
-            onClick={() => navigate("plan")}
-            data-testid="button-plan"
+            onClick={() => navigate("support-developer")}
+            data-testid="button-support"
           >
             <Card className="p-3">
               <div className="flex items-center gap-3">
                 <div className="icon-halo-warning w-10 h-10">
-                  <Crown className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  <Crown className="w-5 h-5 text-pink-500 dark:text-pink-400" />
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-sm">{t("subscriptionPlan")}</p>
-                    <Badge variant="default" className="text-[10px] px-1.5 py-0">
-                      {storage.getPlanInfo().status === "PURCHASED" ? "PREMIUM" : "STANDARD"}
-                    </Badge>
-                  </div>
+                  <p className="font-semibold text-sm">Support the Developer</p>
                   <p className="text-xs text-muted-foreground">
-                    {storage.getPlanInfo().status === "PURCHASED" ? "Lifetime premium access" : "Free plan with basic features"}
+                    Help keep this app free and ad-free
                   </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />

@@ -64,7 +64,52 @@ export function getCurrencyForCountry(countryCode: string): Currency {
   return country?.currency || "USD";
 }
 
+let cachedCountryCode: string | null = null;
+
+export async function detectCountryFromIP(): Promise<string | null> {
+  if (cachedCountryCode) {
+    return cachedCountryCode;
+  }
+
+  const apis = [
+    async () => {
+      const response = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
+      const data = await response.json();
+      return data.country_code?.toUpperCase();
+    },
+    async () => {
+      const response = await fetch('https://api.country.is/', { signal: AbortSignal.timeout(5000) });
+      const data = await response.json();
+      return data.country?.toUpperCase();
+    },
+    async () => {
+      const response = await fetch('https://freeipapi.com/api/json/', { signal: AbortSignal.timeout(5000) });
+      const data = await response.json();
+      return data.countryCode?.toUpperCase();
+    },
+  ];
+
+  for (const apiFn of apis) {
+    try {
+      const countryCode = await apiFn();
+      if (countryCode && COUNTRIES.some(c => c.code === countryCode)) {
+        cachedCountryCode = countryCode;
+        return countryCode;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
+}
+
 export async function detectCountryFromLocation(): Promise<string | null> {
+  const ipCountry = await detectCountryFromIP();
+  if (ipCountry) {
+    return ipCountry;
+  }
+
   return new Promise((resolve) => {
     if (!("geolocation" in navigator)) {
       resolve(null);

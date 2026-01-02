@@ -9,16 +9,30 @@ export async function downloadAsFile(content: string, filename: string): Promise
 
   if (Capacitor.isNativePlatform()) {
     try {
-      const result = await Filesystem.writeFile({
+      await Filesystem.writeFile({
         path: filename,
         data: fileContent,
-        directory: Directory.Documents,
+        directory: Directory.Cache,
         encoding: Encoding.UTF8,
       });
-      console.log('File saved to:', result.uri);
+
+      const uriResult = await Filesystem.getUri({
+        directory: Directory.Cache,
+        path: filename,
+      });
+
+      await Share.share({
+        title: 'Save File',
+        files: [uriResult.uri],
+        dialogTitle: 'Save or Share File',
+      });
       return true;
     } catch (error) {
-      console.error('Failed to save file:', error);
+      if ((error as Error).message?.includes('cancel') || 
+          (error as Error).message?.includes('Cancel')) {
+        return false;
+      }
+      console.error('Failed to save/share file:', error);
       return false;
     }
   } else {
@@ -45,33 +59,41 @@ export async function shareReport(options: {
   text: string;
   filename: string;
 }): Promise<boolean> {
+  const BOM = '\uFEFF';
+  const fileContent = BOM + options.text;
+
   if (Capacitor.isNativePlatform()) {
     try {
-      const result = await Filesystem.writeFile({
+      await Filesystem.writeFile({
         path: options.filename,
-        data: options.text,
+        data: fileContent,
         directory: Directory.Cache,
         encoding: Encoding.UTF8,
       });
 
+      const uriResult = await Filesystem.getUri({
+        directory: Directory.Cache,
+        path: options.filename,
+      });
+
       await Share.share({
         title: options.title,
-        url: result.uri,
+        files: [uriResult.uri],
         dialogTitle: options.title,
       });
       return true;
     } catch (error) {
-      if ((error as Error).message?.includes('canceled') || 
-          (error as Error).message?.includes('cancelled')) {
+      if ((error as Error).message?.includes('cancel') || 
+          (error as Error).message?.includes('Cancel')) {
         return false;
       }
       console.error('Share failed:', error);
-      return await downloadAsFile(options.text, options.filename);
+      return false;
     }
   } else {
     if (navigator.share) {
       try {
-        const file = new File([options.text], options.filename, { type: 'text/csv' });
+        const file = new File([fileContent], options.filename, { type: 'text/csv' });
         await navigator.share({
           title: options.title,
           files: [file],
