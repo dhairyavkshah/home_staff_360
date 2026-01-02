@@ -1,5 +1,8 @@
 import { useState, useRef, useMemo } from "react";
-import { Download, Upload } from "lucide-react";
+import { Download, Upload, Share2 } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -16,23 +19,100 @@ export function BackupScreen() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const profile = useMemo(() => storage.getProfile(), []);
+  const isNative = Capacitor.isNativePlatform();
 
   const [importMode, setImportMode] = useState<"replace" | "merge" | "keep">("replace");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = () => {
-    const backup = storage.exportBackup();
-    const json = JSON.stringify(backup, null, 2);
-    const blob = new Blob([json], { type: "application/octet-stream" });
-    const url = URL.createObjectURL(blob);
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const backup = storage.exportBackup();
+      const json = JSON.stringify(backup, null, 2);
+      const filename = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
-    a.click();
+      if (isNative) {
+        const result = await Filesystem.writeFile({
+          path: filename,
+          data: json,
+          directory: Directory.Documents,
+          encoding: Encoding.UTF8,
+        });
+        toast({ title: "Backup saved", description: `Saved to Documents/${filename}` });
+      } else {
+        const blob = new Blob([json], { type: "application/octet-stream" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast({ title: "Backup downloaded successfully" });
+      }
+    } catch (error) {
+      console.error("Export error:", error);
+      toast({
+        title: "Export Failed",
+        description: error instanceof Error ? error.message : "Could not save backup file",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
-    URL.revokeObjectURL(url);
-    toast({ title: "Backup downloaded successfully" });
+  const handleShareBackup = async () => {
+    setIsExporting(true);
+    try {
+      const backup = storage.exportBackup();
+      const json = JSON.stringify(backup, null, 2);
+      const filename = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
+
+      if (isNative) {
+        const result = await Filesystem.writeFile({
+          path: filename,
+          data: json,
+          directory: Directory.Cache,
+          encoding: Encoding.UTF8,
+        });
+
+        await Share.share({
+          title: "Home Staff 360 Backup",
+          url: result.uri,
+          dialogTitle: "Share Backup File",
+        });
+      } else {
+        if (navigator.share) {
+          const file = new File([json], filename, { type: "application/octet-stream" });
+          await navigator.share({
+            title: "Home Staff 360 Backup",
+            files: [file],
+          });
+        } else {
+          const blob = new Blob([json], { type: "application/octet-stream" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+          toast({ title: "Backup downloaded" });
+        }
+      }
+    } catch (error) {
+      if ((error as Error).message?.includes("cancel")) {
+        return;
+      }
+      console.error("Share error:", error);
+      toast({
+        title: "Share Failed",
+        description: error instanceof Error ? error.message : "Could not share backup",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,10 +234,25 @@ export function BackupScreen() {
                 </p>
               </div>
             </div>
-            <Button onClick={handleExport} data-testid="button-download-backup">
-              <Download className="w-4 h-4 mr-2" />
-              Download Backup
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleExport} 
+                disabled={isExporting}
+                className="flex-1"
+                data-testid="button-download-backup"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {isNative ? "Save Backup" : "Download Backup"}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleShareBackup}
+                disabled={isExporting}
+                data-testid="button-share-backup"
+              >
+                <Share2 className="w-4 h-4" />
+              </Button>
+            </div>
           </Card>
         </section>
 

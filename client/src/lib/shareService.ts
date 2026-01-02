@@ -1,6 +1,6 @@
 import { type Currency } from "@shared/schema";
 import { Share } from "@capacitor/share";
-import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Capacitor } from "@capacitor/core";
 
 export async function downloadAsFile(content: string, filename: string): Promise<boolean> {
@@ -13,7 +13,7 @@ export async function downloadAsFile(content: string, filename: string): Promise
         path: filename,
         data: fileContent,
         directory: Directory.Documents,
-        encoding: 'utf8' as any,
+        encoding: Encoding.UTF8,
       });
       console.log('File saved to:', result.uri);
       return true;
@@ -47,15 +47,16 @@ export async function shareReport(options: {
 }): Promise<boolean> {
   if (Capacitor.isNativePlatform()) {
     try {
-      const canShare = await Share.canShare();
-      if (!canShare.value) {
-        console.log('Share not available, falling back to download');
-        return await downloadAsFile(options.text, options.filename);
-      }
+      const result = await Filesystem.writeFile({
+        path: options.filename,
+        data: options.text,
+        directory: Directory.Cache,
+        encoding: Encoding.UTF8,
+      });
 
       await Share.share({
         title: options.title,
-        text: options.text,
+        url: result.uri,
         dialogTitle: options.title,
       });
       return true;
@@ -70,9 +71,10 @@ export async function shareReport(options: {
   } else {
     if (navigator.share) {
       try {
+        const file = new File([options.text], options.filename, { type: 'text/csv' });
         await navigator.share({
           title: options.title,
-          text: options.text,
+          files: [file],
         });
         return true;
       } catch (error) {
