@@ -46,7 +46,7 @@ export function OnboardingScreen() {
   
   const userType = (data.userType as UserType) || "HOME";
   const isHome = userType === "HOME";
-  const accountLabel = isHome ? "Home" : "Business";
+  const accountLabel = isHome ? "Household" : "Business";
   const Icon = isHome ? Home : Briefcase;
 
   const [displayName, setDisplayName] = useState("");
