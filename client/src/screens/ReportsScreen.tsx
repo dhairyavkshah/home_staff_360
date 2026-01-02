@@ -381,7 +381,7 @@ export function ReportsScreen() {
       />
 
       <ScrollContent>
-        <section className="flex items-center justify-between">
+        <section className="flex items-center justify-between gap-2">
           <Button size="icon" variant="ghost" onClick={prevMonth} data-testid="button-prev-month">
             <ChevronLeft className="w-5 h-5" />
           </Button>

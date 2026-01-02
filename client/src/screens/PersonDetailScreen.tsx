@@ -175,18 +175,18 @@ export function PersonDetailScreen() {
             <section className="flex flex-col gap-3">
               <h3 className="font-semibold">Details</h3>
               <Card className="divide-y">
-                <div className="p-4 flex justify-between">
+                <div className="p-4 flex justify-between gap-2">
                   <span className="text-muted-foreground">Salary Type</span>
                   <span className="font-medium">{person.salaryType}</span>
                 </div>
-                <div className="p-4 flex justify-between">
+                <div className="p-4 flex justify-between gap-2">
                   <span className="text-muted-foreground">Base Rate</span>
                   <span className="font-medium">
                     {formatCurrency(person.baseRate, settings.currency, settings.customCurrencySymbol)}
                     {person.salaryType === "MONTHLY" ? "/mo" : person.salaryType === "DAILY" ? "/day" : "/hr"}
                   </span>
                 </div>
-                <div className="p-4 flex justify-between">
+                <div className="p-4 flex justify-between gap-2">
                   <span className="text-muted-foreground">Half Day</span>
                   <span className="font-medium">
                     {person.halfDayPercentage ?? settings.halfDayPercentage}%

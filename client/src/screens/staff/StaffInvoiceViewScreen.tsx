@@ -152,7 +152,7 @@ export function StaffInvoiceViewScreen() {
           <h3 className="font-semibold mb-3">Items</h3>
           <div className="space-y-3">
             {invoice.items.map((item, index) => (
-              <div key={item.id} className="flex justify-between text-sm">
+              <div key={item.id} className="flex justify-between gap-2 text-sm">
                 <div className="flex-1">
                   <p className="font-medium">{item.description}</p>
                   <p className="text-muted-foreground">
@@ -169,17 +169,17 @@ export function StaffInvoiceViewScreen() {
           <Separator className="my-4" />
 
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-2">
               <span className="text-muted-foreground">Subtotal</span>
               <span>{formatRecordCurrency(invoice.subtotal, invoice.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}</span>
             </div>
             {invoice.taxRate && invoice.taxAmount && (
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 <span className="text-muted-foreground">Tax ({invoice.taxRate}%)</span>
                 <span>{formatRecordCurrency(invoice.taxAmount, invoice.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}</span>
               </div>
             )}
-            <div className="flex justify-between font-semibold text-base pt-2 border-t">
+            <div className="flex justify-between gap-2 font-semibold text-base pt-2 border-t">
               <span>Total</span>
               <span>{formatRecordCurrency(invoice.total, invoice.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}</span>
             </div>

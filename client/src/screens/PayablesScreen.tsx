@@ -129,7 +129,7 @@ export function PayablesScreen() {
 
       <ScrollContent>
           <Card className="p-4 bg-gradient-to-br from-warning/10 via-warning/5 to-transparent border-warning/20">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="icon-halo-warning w-9 h-9">
                   <Receipt className="w-4.5 h-4.5 text-warning" />

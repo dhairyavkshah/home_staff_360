@@ -241,7 +241,7 @@ export function LaundryViewScreen() {
 
       <ScrollContent>
         <Card className="p-3">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between gap-2 mb-3">
             <Button
               variant="ghost"
               size="icon"
@@ -263,7 +263,7 @@ export function LaundryViewScreen() {
             </Button>
           </div>
 
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between gap-2 text-sm">
             <div className="text-muted-foreground">
               {filteredBatches.length} {filteredBatches.length === 1 ? "entry" : "entries"}
               {monthItemCount > 0 && (
