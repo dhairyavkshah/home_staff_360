@@ -180,6 +180,62 @@ export function formatRecordCurrency(
   return formatCurrency(amount, fallbackCurrency, fallbackCustomSymbol);
 }
 
+export interface CurrencyTotal {
+  symbol: string;
+  amount: number;
+}
+
+export function groupTotalsByCurrency<T>(
+  records: T[],
+  getAmount: (record: T) => number,
+  getCurrencySymbol: (record: T) => string | undefined,
+  fallbackSymbol: string
+): CurrencyTotal[] {
+  const totalsMap = new Map<string, number>();
+  
+  for (const record of records) {
+    const symbol = getCurrencySymbol(record) || fallbackSymbol;
+    const amount = getAmount(record);
+    totalsMap.set(symbol, (totalsMap.get(symbol) || 0) + amount);
+  }
+  
+  return Array.from(totalsMap.entries())
+    .map(([symbol, amount]) => ({ symbol, amount }))
+    .filter(t => t.amount !== 0)
+    .sort((a, b) => b.amount - a.amount);
+}
+
+export function formatCurrencyTotals(totals: CurrencyTotal[]): string {
+  if (totals.length === 0) {
+    return "$0.00";
+  }
+  
+  return totals
+    .map(t => {
+      const formatted = Math.abs(t.amount).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      return t.amount < 0 ? `-${t.symbol}${formatted}` : `${t.symbol}${formatted}`;
+    })
+    .join(", ");
+}
+
+export function mergeCurrencyTotals(...totalsArrays: CurrencyTotal[][]): CurrencyTotal[] {
+  const mergedMap = new Map<string, number>();
+  
+  for (const totals of totalsArrays) {
+    for (const { symbol, amount } of totals) {
+      mergedMap.set(symbol, (mergedMap.get(symbol) || 0) + amount);
+    }
+  }
+  
+  return Array.from(mergedMap.entries())
+    .map(([symbol, amount]) => ({ symbol, amount }))
+    .filter(t => t.amount !== 0)
+    .sort((a, b) => b.amount - a.amount);
+}
+
 export function getTodayString(): string {
   return new Date().toISOString().split("T")[0];
 }

@@ -457,6 +457,8 @@ export const selfAttendanceSchema = z.object({
   createdAt: z.string(),
   recordSalaryType: z.enum(salaryTypes).optional(),
   recordRate: z.number().optional(),
+  recordCurrency: z.string().optional(),
+  recordCurrencySymbol: z.string().optional(),
 });
 
 export type SelfAttendance = z.infer<typeof selfAttendanceSchema>;
