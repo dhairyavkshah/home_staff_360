@@ -13,6 +13,7 @@ import {
   calculateWages,
   formatCurrency,
   formatShortDate,
+  formatRecordCurrency,
 } from "@/lib/calculations";
 import {
   shareReport,
@@ -79,6 +80,7 @@ export function ReportsScreen() {
       description: string;
       amount: number;
       type: "wage" | "expense" | "transaction" | "laundry";
+      recordCurrencySymbol?: string;
     }> = [];
 
     people.forEach((person) => {
@@ -89,12 +91,15 @@ export function ReportsScreen() {
       const wages = calculateWages(person, personAttendance, settings);
       if (wages > 0) {
         totalWages += wages;
+        const attendanceCurrencies = personAttendance.map(a => a.recordCurrencySymbol).filter((s): s is string => !!s);
+        const uniqueCurrencies = Array.from(new Set(attendanceCurrencies));
         ledgerEntries.push({
           date: startDate,
           person: person.name,
           description: `Wages for ${personAttendance.length} day(s)`,
           amount: wages,
           type: "wage",
+          recordCurrencySymbol: uniqueCurrencies.length === 1 ? uniqueCurrencies[0] : undefined,
         });
       }
 
@@ -111,6 +116,7 @@ export function ReportsScreen() {
           description: `${tx.category}: ${tx.description}`,
           amount: txAmount,
           type: "transaction",
+          recordCurrencySymbol: tx.recordCurrencySymbol,
         });
       });
 
@@ -127,6 +133,7 @@ export function ReportsScreen() {
           description: `Laundry (${itemCount} items)${l.serviceType ? ` - ${l.serviceType}` : ""}`,
           amount: l.total,
           type: "laundry",
+          recordCurrencySymbol: l.recordCurrencySymbol,
         });
       });
     });
@@ -147,6 +154,7 @@ export function ReportsScreen() {
         description: `Laundry (${itemCount} items)${l.serviceType ? ` - ${l.serviceType}` : ""}`,
         amount: l.total,
         type: "laundry",
+        recordCurrencySymbol: l.recordCurrencySymbol,
       });
     });
 
@@ -164,6 +172,7 @@ export function ReportsScreen() {
         description: `${e.title}${e.vendor ? ` - ${e.vendor}` : ""}`,
         amount: e.amount,
         type: "expense",
+        recordCurrencySymbol: e.recordCurrencySymbol,
       });
     });
 
@@ -234,7 +243,7 @@ export function ReportsScreen() {
 
     reportData.ledgerEntries.forEach((entry) => {
       const description = entry.description.replace(/"/g, '""');
-      const formattedAmount = formatCurrency(entry.amount, settings.currency, settings.customCurrencySymbol);
+      const formattedAmount = formatRecordCurrency(entry.amount, entry.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol);
       lines.push(`${entry.date},${entry.person},"${description}","${formattedAmount}",${entry.type}`);
     });
 
@@ -259,7 +268,7 @@ export function ReportsScreen() {
     lines.push(`Grand Total: ${formatCurrency(reportData.grandTotal, settings.currency, settings.customCurrencySymbol)}`);
     lines.push("");
     reportData.ledgerEntries.slice(0, 10).forEach((entry) => {
-      lines.push(`${formatShortDate(entry.date)} - ${entry.person}: ${entry.description} (${formatCurrency(entry.amount, settings.currency, settings.customCurrencySymbol)})`);
+      lines.push(`${formatShortDate(entry.date)} - ${entry.person}: ${entry.description} (${formatRecordCurrency(entry.amount, entry.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)})`);
     });
     if (reportData.ledgerEntries.length > 10) {
       lines.push(`... and ${reportData.ledgerEntries.length - 10} more entries`);
@@ -302,7 +311,7 @@ export function ReportsScreen() {
   const handleViewLedgerReport = () => {
     const entries = reportData.ledgerEntries.map(entry => ({
       ...entry,
-      formattedAmount: formatCurrency(entry.amount, settings.currency, settings.customCurrencySymbol),
+      formattedAmount: formatRecordCurrency(entry.amount, entry.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol),
     }));
     
     navigate("report-preview", {

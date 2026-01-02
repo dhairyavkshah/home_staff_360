@@ -7,7 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
-import { calculatePersonBalance, getUnpaidLaundryTotal, formatCurrency, getCurrencyIcon } from "@/lib/calculations";
+import { calculatePersonBalanceWithCurrency, getUnpaidLaundryTotal, formatCurrency, getCurrencyIcon, formatRecordCurrency } from "@/lib/calculations";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
 
@@ -34,10 +34,10 @@ export function PayablesScreen() {
     
     return all
       .map((p) => {
-        const wageBalance = calculatePersonBalance(p.id);
+        const balanceResult = calculatePersonBalanceWithCurrency(p.id);
         const unpaidLaundry = getUnpaidLaundryTotal(p.id);
         // Total payable = wages owed PLUS unpaid laundry (employer owes staff for laundry service)
-        const balance = wageBalance + unpaidLaundry;
+        const balance = balanceResult.amount + unpaidLaundry;
         const transactions = storage.getTransactionsByPerson(p.id);
         const lastPayment = transactions
           .filter(t => t.category === "payment")
@@ -55,6 +55,8 @@ export function PayablesScreen() {
           lastPaymentDate,
           daysSincePayment,
           isOverdue: balance > 0 && daysSincePayment > settings.salaryStartDay,
+          hasMixedCurrencies: balanceResult.hasMixedCurrencies,
+          primaryCurrencySymbol: balanceResult.primaryCurrencySymbol,
         };
       })
       .filter((p) => p.balance > 0)
@@ -66,6 +68,11 @@ export function PayablesScreen() {
     peopleWithBalances.reduce((sum, p) => sum + p.balance, 0) + accountLevelUnpaidLaundry, 
     [peopleWithBalances, accountLevelUnpaidLaundry]
   );
+
+  // Check if there are mixed currencies across all balances
+  const hasMixedCurrenciesOverall = useMemo(() => {
+    return peopleWithBalances.some(p => p.hasMixedCurrencies);
+  }, [peopleWithBalances]);
 
   const overdueCount = peopleWithBalances.filter(p => p.isOverdue).length;
   
@@ -106,6 +113,9 @@ export function PayablesScreen() {
                   <p className="text-2xl font-bold" data-testid="text-total-payable">
                     {formatCurrency(totalPayable, settings.currency, settings.customCurrencySymbol)}
                   </p>
+                  {hasMixedCurrenciesOverall && (
+                    <p className="text-xs text-muted-foreground italic">Mixed currencies in records</p>
+                  )}
                 </div>
               </div>
               <div className="text-right">
@@ -226,9 +236,11 @@ export function PayablesScreen() {
                       <div className="flex items-center gap-2">
                         <div className="text-right">
                           <p className="font-semibold text-warning">
-                            {formatCurrency(person.balance, settings.currency, settings.customCurrencySymbol)}
+                            {formatRecordCurrency(person.balance, person.primaryCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                           </p>
-                          <p className="text-xs text-muted-foreground">owed</p>
+                          <p className="text-xs text-muted-foreground">
+                            {person.hasMixedCurrencies ? "owed (mixed)" : "owed"}
+                          </p>
                         </div>
                         <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       </div>

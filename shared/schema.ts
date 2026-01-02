@@ -290,6 +290,8 @@ export const attendanceEntrySchema = z.object({
   recordSalaryType: z.enum(salaryTypes).optional(),
   recordBaseRate: z.number().optional(),
   recordHalfDayPercentage: z.number().optional(),
+  recordCurrency: z.string().optional(),
+  recordCurrencySymbol: z.string().optional(),
 });
 
 export type AttendanceEntry = z.infer<typeof attendanceEntrySchema>;

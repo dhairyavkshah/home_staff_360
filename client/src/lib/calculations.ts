@@ -72,9 +72,19 @@ export function calculateWages(
   return totalWages;
 }
 
+export interface BalanceResult {
+  amount: number;
+  hasMixedCurrencies: boolean;
+  primaryCurrencySymbol?: string;
+}
+
 export function calculatePersonBalance(personId: string): number {
+  return calculatePersonBalanceWithCurrency(personId).amount;
+}
+
+export function calculatePersonBalanceWithCurrency(personId: string): BalanceResult {
   const person = storage.getPerson(personId);
-  if (!person) return 0;
+  if (!person) return { amount: 0, hasMixedCurrencies: false };
 
   const settings = storage.getSettings();
   const attendance = storage.getAttendanceByPerson(personId);
@@ -101,7 +111,28 @@ export function calculatePersonBalance(personId: string): number {
     .filter((batch) => batch.isPaid)
     .reduce((sum, batch) => sum + batch.total, 0);
 
-  return earnings + paidTransactions - paidLaundryCharges;
+  // Check for mixed currencies across all records
+  const currencySymbols = new Set<string>();
+  attendance.forEach(a => {
+    if (a.recordCurrencySymbol) currencySymbols.add(a.recordCurrencySymbol);
+  });
+  transactions.forEach(t => {
+    if (t.recordCurrencySymbol) currencySymbols.add(t.recordCurrencySymbol);
+  });
+  laundry.forEach(l => {
+    if (l.recordCurrencySymbol) currencySymbols.add(l.recordCurrencySymbol);
+  });
+
+  const hasMixedCurrencies = currencySymbols.size > 1;
+  const primaryCurrencySymbol = currencySymbols.size === 1 
+    ? Array.from(currencySymbols)[0] 
+    : undefined;
+
+  return {
+    amount: earnings + paidTransactions - paidLaundryCharges,
+    hasMixedCurrencies,
+    primaryCurrencySymbol,
+  };
 }
 
 // Get unpaid laundry total for a person (adds to payables)

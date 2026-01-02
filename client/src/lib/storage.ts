@@ -387,6 +387,7 @@ export const storage = {
     const attendance = this.getAttendance();
     const person = this.getPerson(data.personId);
     const settings = this.getSettings();
+    const currencyInfo = getCurrentCurrencyInfo();
     const entry: AttendanceEntry = {
       ...data,
       id: generateId(),
@@ -394,6 +395,8 @@ export const storage = {
       recordSalaryType: data.recordSalaryType || person?.salaryType,
       recordBaseRate: data.recordBaseRate ?? person?.baseRate,
       recordHalfDayPercentage: data.recordHalfDayPercentage ?? person?.halfDayPercentage ?? settings.halfDayPercentage,
+      recordCurrency: data.recordCurrency || currencyInfo.currency,
+      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
     };
     attendance.push(entry);
     setItem(STORAGE_KEYS.ATTENDANCE, attendance);
