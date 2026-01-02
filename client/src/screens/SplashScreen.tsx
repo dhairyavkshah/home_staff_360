@@ -45,7 +45,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             Home Staff 360
           </h1>
           <p className="text-white/70 text-xs" data-testid="text-tagline">
-            Offline-first household and staff profession management app
+            An offline-first household and household profession app
           </p>
         </div>
       </div>
