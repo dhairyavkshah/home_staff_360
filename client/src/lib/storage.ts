@@ -84,6 +84,36 @@ function getCurrentCurrencyInfo(): { currency: string; symbol: string } {
   }
 }
 
+function getPersonCurrencyInfo(personId: string): { currency: string; symbol: string } {
+  const people = getItem<Person[]>(STORAGE_KEYS.PEOPLE, []);
+  const person = people.find(p => p.id === personId);
+  
+  if (person?.currency) {
+    const currency = person.currency;
+    const symbol = currency === 'OTHER' && person.customCurrencySymbol 
+      ? person.customCurrencySymbol 
+      : CURRENCIES[currency as Currency]?.symbol || '$';
+    return { currency, symbol };
+  }
+  
+  return getCurrentCurrencyInfo();
+}
+
+function getClientHomeCurrencyInfo(clientHomeId: string): { currency: string; symbol: string } {
+  const clientHomes = getItem<ClientHome[]>(STORAGE_KEYS.CLIENT_HOMES, []);
+  const clientHome = clientHomes.find(c => c.id === clientHomeId);
+  
+  if (clientHome?.currency) {
+    const currency = clientHome.currency;
+    const symbol = currency === 'OTHER' && clientHome.customCurrencySymbol 
+      ? clientHome.customCurrencySymbol 
+      : CURRENCIES[currency as Currency]?.symbol || '$';
+    return { currency, symbol };
+  }
+  
+  return getCurrentCurrencyInfo();
+}
+
 export const storage = {
   getSettings(): AppSettings {
     return getItem(STORAGE_KEYS.SETTINGS, defaultSettings);
@@ -387,7 +417,7 @@ export const storage = {
     const attendance = this.getAttendance();
     const person = this.getPerson(data.personId);
     const settings = this.getSettings();
-    const currencyInfo = getCurrentCurrencyInfo();
+    const currencyInfo = getPersonCurrencyInfo(data.personId);
     const entry: AttendanceEntry = {
       ...data,
       id: generateId(),
@@ -427,7 +457,7 @@ export const storage = {
 
   addTransaction(data: InsertTransaction): Transaction {
     const transactions = this.getTransactions();
-    const currencyInfo = getCurrentCurrencyInfo();
+    const currencyInfo = getPersonCurrencyInfo(data.personId);
     const transaction: Transaction = {
       ...data,
       id: generateId(),
@@ -478,7 +508,7 @@ export const storage = {
 
   addLaundry(data: InsertLaundryBatch): LaundryBatch {
     const laundry = this.getLaundry();
-    const currencyInfo = getCurrentCurrencyInfo();
+    const currencyInfo = getPersonCurrencyInfo(data.personId);
     const batch: LaundryBatch = {
       ...data,
       id: generateId(),
@@ -737,7 +767,7 @@ export const storage = {
   addSelfAttendance(data: InsertSelfAttendance): SelfAttendance {
     const attendance = this.getSelfAttendance();
     const clientHome = this.getClientHome(data.clientHomeId);
-    const currencyInfo = getCurrentCurrencyInfo();
+    const currencyInfo = getClientHomeCurrencyInfo(data.clientHomeId);
     const entry: SelfAttendance = {
       ...data,
       id: generateId(),
@@ -781,7 +811,7 @@ export const storage = {
 
   addStaffLaundryJob(data: InsertStaffLaundryJob): StaffLaundryJob {
     const jobs = this.getStaffLaundryJobs();
-    const currencyInfo = getCurrentCurrencyInfo();
+    const currencyInfo = getClientHomeCurrencyInfo(data.clientHomeId);
     const job: StaffLaundryJob = {
       ...data,
       id: generateId(),
@@ -827,7 +857,9 @@ export const storage = {
 
   addStaffEarning(data: InsertStaffEarning): StaffEarning {
     const earnings = this.getStaffEarnings();
-    const currencyInfo = getCurrentCurrencyInfo();
+    const currencyInfo = data.clientHomeId 
+      ? getClientHomeCurrencyInfo(data.clientHomeId) 
+      : getCurrentCurrencyInfo();
     const earning: StaffEarning = {
       ...data,
       id: generateId(),
@@ -869,7 +901,9 @@ export const storage = {
 
   addStaffExpense(data: InsertStaffExpense): StaffExpense {
     const expenses = this.getStaffExpenses();
-    const currencyInfo = getCurrentCurrencyInfo();
+    const currencyInfo = data.clientHomeId 
+      ? getClientHomeCurrencyInfo(data.clientHomeId) 
+      : getCurrentCurrencyInfo();
     const expense: StaffExpense = {
       ...data,
       id: generateId(),
@@ -929,7 +963,7 @@ export const storage = {
 
   addStaffInvoice(data: InsertStaffInvoice): StaffInvoice {
     const invoices = this.getStaffInvoices();
-    const currencyInfo = getCurrentCurrencyInfo();
+    const currencyInfo = getClientHomeCurrencyInfo(data.clientHomeId);
     const invoice: StaffInvoice = {
       ...data,
       id: generateId(),
