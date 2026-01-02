@@ -114,33 +114,29 @@ export function generateStaffEarningsReport(
   data: {
     staffName: string;
     period: string;
-    workEarnings: number;
-    laundryEarnings: number;
-    otherEarnings: number;
-    totalEarnings: number;
-    attendance: Array<{ date: string; clientName: string; status: string; earnings: number }>;
-    laundryJobs: Array<{ date: string; clientName: string; items: number; earned: number }>;
-  },
-  currency: Currency,
-  customSymbol?: string
+    workEarnings: string;
+    laundryEarnings: string;
+    otherEarnings: string;
+    totalEarnings: string;
+    attendance: Array<{ date: string; clientName: string; status: string; formattedEarnings: string }>;
+    laundryJobs: Array<{ date: string; clientName: string; items: number; formattedEarned: string }>;
+  }
 ): string {
-  const symbol = customSymbol || getCurrencySymbol(currency);
-  
   let report = `Home Staff 360 - Earnings Report\n`;
   report += `Staff: ${data.staffName}\n`;
   report += `Period: ${data.period}\n\n`;
   
   report += `SUMMARY\n`;
-  report += `Work Earnings: ${symbol}${data.workEarnings.toLocaleString()}\n`;
-  report += `Laundry Earnings: ${symbol}${data.laundryEarnings.toLocaleString()}\n`;
-  report += `Tips & Bonus: ${symbol}${data.otherEarnings.toLocaleString()}\n`;
-  report += `Total: ${symbol}${data.totalEarnings.toLocaleString()}\n\n`;
+  report += `Work Earnings: ${data.workEarnings}\n`;
+  report += `Laundry Earnings: ${data.laundryEarnings}\n`;
+  report += `Tips & Bonus: ${data.otherEarnings}\n`;
+  report += `Total: ${data.totalEarnings}\n\n`;
   
   if (data.attendance.length > 0) {
     report += `WORK ATTENDANCE\n`;
     report += `Date,Client,Status,Earned\n`;
     data.attendance.forEach(a => {
-      report += `${a.date},${a.clientName},${a.status},${symbol}${a.earnings}\n`;
+      report += `${a.date},${a.clientName},${a.status},${a.formattedEarnings}\n`;
     });
     report += `\n`;
   }
@@ -149,7 +145,7 @@ export function generateStaffEarningsReport(
     report += `LAUNDRY JOBS\n`;
     report += `Date,Client,Items,Earned\n`;
     data.laundryJobs.forEach(j => {
-      report += `${j.date},${j.clientName},${j.items},${symbol}${j.earned}\n`;
+      report += `${j.date},${j.clientName},${j.items},${j.formattedEarned}\n`;
     });
   }
   

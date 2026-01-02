@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Calendar, ClipboardList, Building2, Settings, Shirt, Briefcase, ChevronDown, Check, Users, FolderOpen, Receipt, FileText } from "lucide-react";
-import { getCurrencyIcon } from "@/lib/calculations";
+import { getCurrencyIcon, groupTotalsByCurrency, formatCurrencyTotals, mergeCurrencyTotals } from "@/lib/calculations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -145,26 +145,47 @@ export function StaffHomeScreen() {
       return date.getMonth() === month && date.getFullYear() === year;
     });
     
-    const fromLaundry = monthlyLaundry.reduce((sum, j) => sum + j.totalEarned, 0);
-    const fromOther = monthlyEarnings.reduce((sum, e) => sum + e.amount, 0);
+    const laundryByCurrency = groupTotalsByCurrency(
+      monthlyLaundry,
+      j => j.totalEarned,
+      j => j.recordCurrencySymbol,
+      symbol
+    );
+    
+    const earningsByCurrency = groupTotalsByCurrency(
+      monthlyEarnings,
+      e => e.amount,
+      e => e.recordCurrencySymbol,
+      symbol
+    );
     
     return {
-      total: fromLaundry + fromOther,
-      fromLaundry,
+      laundryByCurrency,
+      earningsByCurrency,
     };
-  }, [refreshKey, showAllContexts, activeAccountId]);
+  }, [refreshKey, showAllContexts, activeAccountId, symbol]);
 
-  const staffExpenses = useMemo(() => {
+  const staffExpensesByCurrency = useMemo(() => {
     const month = now.getMonth();
     const year = now.getFullYear();
     const expenses = !showAllContexts && activeAccountId
       ? storage.getStaffExpensesByAccount(activeAccountId)
       : storage.getStaffExpenses();
-    return expenses.filter(e => {
+    const monthlyExpenses = expenses.filter(e => {
       const date = new Date(e.createdAt);
       return date.getMonth() === month && date.getFullYear() === year;
-    }).reduce((sum, e) => sum + e.amount, 0);
-  }, [refreshKey, showAllContexts, activeAccountId]);
+    });
+    return groupTotalsByCurrency(
+      monthlyExpenses,
+      e => e.amount,
+      e => e.recordCurrencySymbol,
+      symbol
+    );
+  }, [refreshKey, showAllContexts, activeAccountId, symbol]);
+
+  const totalEarningsByCurrency = useMemo(() => {
+    return mergeCurrencyTotals(earnings.laundryByCurrency, earnings.earningsByCurrency);
+  }, [earnings]);
 
   const allModules = [
     {
@@ -197,7 +218,7 @@ export function StaffHomeScreen() {
       icon: Shirt,
       color: 'info',
       screen: 'staff-laundry' as const,
-      subtitle: `${symbol}${earnings.fromLaundry.toLocaleString()}`,
+      subtitle: formatCurrencyTotals(earnings.laundryByCurrency),
     },
     {
       id: 'expenses',
@@ -205,7 +226,7 @@ export function StaffHomeScreen() {
       icon: Receipt,
       color: 'destructive',
       screen: 'staff-expenses' as const,
-      subtitle: `${symbol}${staffExpenses.toLocaleString()}`,
+      subtitle: formatCurrencyTotals(staffExpensesByCurrency),
     },
     {
       id: 'reports',
@@ -213,7 +234,7 @@ export function StaffHomeScreen() {
       icon: ClipboardList,
       color: 'muted',
       screen: 'staff-reports' as const,
-      subtitle: `${symbol}${earnings.total.toLocaleString()}`,
+      subtitle: formatCurrencyTotals(totalEarningsByCurrency),
     },
     {
       id: 'documents',

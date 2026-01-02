@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
-import { getDashboardStats, formatCurrency } from "@/lib/calculations";
+import { getDashboardStats, formatCurrency, formatCurrencyTotals } from "@/lib/calculations";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { notifyActiveContextChange } from "@/hooks/use-active-context";
 import { usePlanStatus } from "@/hooks/use-plan-status";
@@ -130,8 +130,8 @@ export function HomeScreen() {
       icon: Shirt,
       color: 'info',
       screen: 'laundry-view' as const,
-      subtitle: stats.unpaidLaundryAmount > 0 
-        ? `${formatCurrency(stats.unpaidLaundryAmount, settings.currency, settings.customCurrencySymbol)} ${tLabel('unpaid', 'Unpaid')}`
+      subtitle: stats.unpaidLaundryByCurrency.length > 0 
+        ? `${formatCurrencyTotals(stats.unpaidLaundryByCurrency)} ${tLabel('unpaid', 'Unpaid')}`
         : tLabel('allPaid', 'All Paid'),
     },
     {
@@ -148,7 +148,9 @@ export function HomeScreen() {
       icon: Receipt,
       color: 'destructive',
       screen: 'expenses' as const,
-      subtitle: formatCurrency(stats.totalExpenses, settings.currency, settings.customCurrencySymbol),
+      subtitle: stats.expensesByCurrency.length > 0 
+        ? formatCurrencyTotals(stats.expensesByCurrency)
+        : formatCurrency(0, settings.currency, settings.customCurrencySymbol),
     },
     {
       id: 'transactions',

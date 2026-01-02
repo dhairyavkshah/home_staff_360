@@ -737,12 +737,15 @@ export const storage = {
   addSelfAttendance(data: InsertSelfAttendance): SelfAttendance {
     const attendance = this.getSelfAttendance();
     const clientHome = this.getClientHome(data.clientHomeId);
+    const currencyInfo = getCurrentCurrencyInfo();
     const entry: SelfAttendance = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
       recordSalaryType: data.recordSalaryType || clientHome?.salaryType,
       recordRate: data.recordRate ?? clientHome?.rate,
+      recordCurrency: data.recordCurrency || currencyInfo.currency,
+      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
     };
     attendance.push(entry);
     setItem(STAFF_STORAGE_KEYS.SELF_ATTENDANCE, attendance);

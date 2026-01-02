@@ -305,28 +305,33 @@ export function getDashboardStats() {
   const laundry = accountId ? storage.getLaundryByAccount(accountId) : storage.getLaundry();
   const attendance = accountId ? storage.getAttendanceByAccount(accountId) : storage.getAttendance();
   const settings = storage.getSettings();
+  const fallbackSymbol = currencySymbols[settings.currency] || settings.customCurrencySymbol || '$';
 
   const activeStaff = people.filter(p => p.isActive !== false).length;
   const activePeople = people.filter(p => p.isActive !== false);
   
-  // Calculate unpaid laundry amount (all unpaid batches at account level)
-  const unpaidLaundryAmount = laundry
-    .filter((l) => !l.isPaid)
-    .reduce((sum, l) => sum + l.total, 0);
+  // Calculate unpaid laundry grouped by currency
+  const unpaidLaundry = laundry.filter((l) => !l.isPaid);
+  const unpaidLaundryByCurrency = groupTotalsByCurrency(
+    unpaidLaundry,
+    (l) => l.total,
+    (l) => l.recordCurrencySymbol,
+    fallbackSymbol
+  );
+  const unpaidLaundryAmount = unpaidLaundry.reduce((sum, l) => sum + l.total, 0);
   
+  // Calculate total payables by summing person balances (for backward compat)
   let totalPayable = 0;
   for (const person of people) {
     const wageBalance = calculatePersonBalance(person.id);
-    const unpaidLaundry = getUnpaidLaundryTotal(person.id);
-    // Net payable = wages owed PLUS unpaid laundry linked to this person
-    const netBalance = wageBalance + unpaidLaundry;
+    const unpaidLaundryTotal = getUnpaidLaundryTotal(person.id);
+    const netBalance = wageBalance + unpaidLaundryTotal;
     if (netBalance > 0) {
       totalPayable += netBalance;
     }
   }
   
-  // Add account-level unpaid laundry (not linked to specific person) to total payables
-  // This includes all unpaid laundry since laundry records may not have personId set
+  // Add account-level unpaid laundry (not linked to specific person)
   totalPayable += unpaidLaundryAmount;
   
   // Subtract person-linked unpaid laundry to avoid double-counting
@@ -339,9 +344,15 @@ export function getDashboardStats() {
     (e) => !e.isPaid && e.dueDate <= today
   ).length;
 
-  const totalExpenses = expenses
-    .filter((e) => !e.isPaid)
-    .reduce((sum, e) => sum + e.amount, 0);
+  // Calculate expenses grouped by currency
+  const unpaidExpenses = expenses.filter((e) => !e.isPaid);
+  const expensesByCurrency = groupTotalsByCurrency(
+    unpaidExpenses,
+    (e) => e.amount,
+    (e) => e.recordCurrencySymbol,
+    fallbackSymbol
+  );
+  const totalExpenses = unpaidExpenses.reduce((sum, e) => sum + e.amount, 0);
   
   // Calculate total laundry amount (all batches for display)
   const totalLaundryAmount = laundry.reduce((sum, l) => sum + l.total, 0);
@@ -361,6 +372,9 @@ export function getDashboardStats() {
     totalExpenses,
     totalLaundryAmount,
     unpaidLaundryAmount,
+    // New: currency-grouped totals for display on dashboard
+    unpaidLaundryByCurrency,
+    expensesByCurrency,
     todayAttendance: {
       present: presentCount,
       halfDay: halfDayCount,

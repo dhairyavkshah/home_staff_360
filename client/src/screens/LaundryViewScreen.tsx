@@ -9,7 +9,8 @@ import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
-import { formatCurrency, formatRecordCurrency } from "@/lib/calculations";
+import { formatCurrency, formatRecordCurrency, groupTotalsByCurrency, formatCurrencyTotals } from "@/lib/calculations";
+import { getCurrencySymbol } from "@shared/schema";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveContext } from "@/hooks/use-active-context";
@@ -151,9 +152,16 @@ export function LaundryViewScreen() {
     return result;
   }, [laundryBatches, currentMonth, filters, searchQuery, people]);
 
-  const monthTotal = useMemo(() => {
-    return filteredBatches.reduce((sum, b) => sum + b.total, 0);
-  }, [filteredBatches]);
+  const fallbackSymbol = getCurrencySymbol(settings.currency, settings.customCurrencySymbol);
+  
+  const monthTotalsByCurrency = useMemo(() => {
+    return groupTotalsByCurrency(
+      filteredBatches,
+      (b) => b.total,
+      (b) => b.recordCurrencySymbol,
+      fallbackSymbol
+    );
+  }, [filteredBatches, fallbackSymbol]);
 
   const monthItemCount = useMemo(() => {
     return filteredBatches.reduce((sum, b) => {
@@ -253,7 +261,7 @@ export function LaundryViewScreen() {
               )}
             </div>
             <div className="font-semibold" data-testid="text-month-total">
-              {formatCurrency(monthTotal, settings.currency, settings.customCurrencySymbol)}
+              {formatCurrencyTotals(monthTotalsByCurrency)}
             </div>
           </div>
         </Card>

@@ -7,7 +7,8 @@ import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
-import { calculatePersonBalanceWithCurrency, getUnpaidLaundryTotal, formatCurrency, getCurrencyIcon, formatRecordCurrency } from "@/lib/calculations";
+import { calculatePersonBalanceWithCurrency, getUnpaidLaundryTotal, formatCurrency, getCurrencyIcon, formatRecordCurrency, groupTotalsByCurrency, formatCurrencyTotals } from "@/lib/calculations";
+import { getCurrencySymbol } from "@shared/schema";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
 

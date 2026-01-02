@@ -14,7 +14,10 @@ import {
   formatCurrency,
   formatShortDate,
   formatRecordCurrency,
+  groupTotalsByCurrency,
+  formatCurrencyTotals,
 } from "@/lib/calculations";
+import { getCurrencySymbol } from "@shared/schema";
 import {
   shareReport,
   downloadAsFile,
@@ -178,6 +181,29 @@ export function ReportsScreen() {
 
     ledgerEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+    const fallbackSymbol = getCurrencySymbol(settings.currency, settings.customCurrencySymbol);
+    
+    const wagesByCurrency = groupTotalsByCurrency(
+      ledgerEntries.filter(e => e.type === "wage"),
+      (e) => e.amount,
+      (e) => e.recordCurrencySymbol,
+      fallbackSymbol
+    );
+    
+    const expensesByCurrency = groupTotalsByCurrency(
+      ledgerEntries.filter(e => e.type === "expense"),
+      (e) => e.amount,
+      (e) => e.recordCurrencySymbol,
+      fallbackSymbol
+    );
+    
+    const allEntriesByCurrency = groupTotalsByCurrency(
+      ledgerEntries,
+      (e) => e.amount,
+      (e) => e.recordCurrencySymbol,
+      fallbackSymbol
+    );
+
     return {
       totalWages,
       totalTransactions,
@@ -185,6 +211,9 @@ export function ReportsScreen() {
       totalExpenses,
       grandTotal: totalWages + totalTransactions + totalLaundry + totalExpenses,
       ledgerEntries,
+      wagesByCurrency,
+      expensesByCurrency,
+      allEntriesByCurrency,
     };
   }, [startDate, endDate, people, settings, activeAccountId, showAllContexts]);
 
@@ -319,10 +348,9 @@ export function ReportsScreen() {
       reportTitle: "Ledger Report",
       subtitle: monthName,
       summary: {
-        "Total Wages": formatCurrency(reportData.totalWages, settings.currency, settings.customCurrencySymbol),
-        "Total Expenses": formatCurrency(reportData.totalExpenses, settings.currency, settings.customCurrencySymbol),
-        "Total Transactions": formatCurrency(reportData.totalTransactions, settings.currency, settings.customCurrencySymbol),
-        "Grand Total": formatCurrency(reportData.grandTotal, settings.currency, settings.customCurrencySymbol),
+        "Total Wages": formatCurrencyTotals(reportData.wagesByCurrency),
+        "Total Expenses": formatCurrencyTotals(reportData.expensesByCurrency),
+        "Grand Total": formatCurrencyTotals(reportData.allEntriesByCurrency),
       },
       entries,
     });
@@ -368,8 +396,8 @@ export function ReportsScreen() {
             <div className="icon-halo-primary w-9 h-9 mb-2">
               <Users className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-xl font-bold" data-testid="text-total-wages">
-              {formatCurrency(reportData.totalWages, settings.currency, settings.customCurrencySymbol)}
+            <p className="text-xl font-bold text-center" data-testid="text-total-wages">
+              {formatCurrencyTotals(reportData.wagesByCurrency)}
             </p>
             <p className="text-xs text-muted-foreground">{t("wages")}</p>
           </Card>
@@ -377,8 +405,8 @@ export function ReportsScreen() {
             <div className="icon-halo-warning w-9 h-9 mb-2">
               <Receipt className="w-4 h-4 text-warning" />
             </div>
-            <p className="text-xl font-bold" data-testid="text-total-expenses">
-              {formatCurrency(reportData.totalExpenses, settings.currency, settings.customCurrencySymbol)}
+            <p className="text-xl font-bold text-center" data-testid="text-total-expenses">
+              {formatCurrencyTotals(reportData.expensesByCurrency)}
             </p>
             <p className="text-xs text-muted-foreground">{t("expenses")}</p>
           </Card>
@@ -471,17 +499,17 @@ export function ReportsScreen() {
         <section className="flex flex-col gap-3">
           <h3 className="font-semibold">Summary</h3>
           <Card className="divide-y">
-            <div className="p-3 flex items-center justify-between">
+            <div className="p-3 flex items-center justify-between gap-2">
               <span className="text-sm text-muted-foreground">Staff Wages</span>
-              <span className="font-medium text-sm">{formatCurrency(reportData.totalWages, settings.currency, settings.customCurrencySymbol)}</span>
+              <span className="font-medium text-sm text-right">{formatCurrencyTotals(reportData.wagesByCurrency)}</span>
             </div>
-            <div className="p-3 flex items-center justify-between">
+            <div className="p-3 flex items-center justify-between gap-2">
               <span className="text-sm text-muted-foreground">Household Expenses</span>
-              <span className="font-medium text-sm">{formatCurrency(reportData.totalExpenses, settings.currency, settings.customCurrencySymbol)}</span>
+              <span className="font-medium text-sm text-right">{formatCurrencyTotals(reportData.expensesByCurrency)}</span>
             </div>
-            <div className="p-3 flex items-center justify-between bg-primary/5">
+            <div className="p-3 flex items-center justify-between gap-2 bg-primary/5">
               <span className="font-semibold">{t("grandTotal")}</span>
-              <span className="font-bold text-lg">{formatCurrency(reportData.grandTotal, settings.currency, settings.customCurrencySymbol)}</span>
+              <span className="font-bold text-lg text-right">{formatCurrencyTotals(reportData.allEntriesByCurrency)}</span>
             </div>
           </Card>
         </section>

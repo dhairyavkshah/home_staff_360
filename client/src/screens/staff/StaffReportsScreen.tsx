@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { currencySymbols } from "@shared/schema";
 import { useActiveContext } from "@/hooks/use-active-context";
+import { groupTotalsByCurrency, formatCurrencyTotals, mergeCurrencyTotals, formatRecordCurrency } from "@/lib/calculations";
 import {
   shareReport,
   downloadAsFile,
@@ -69,11 +70,6 @@ export function StaffReportsScreen() {
   }, [activeAccountId, showAllContexts, refreshKey]);
   const homeNames = new Map(clientHomes.map((h) => [h.id, h.name]));
 
-  const earnings = useMemo(
-    () => storage.calculateStaffMonthlyEarnings(year, month, accountIdForFilter),
-    [year, month, accountIdForFilter, refreshKey]
-  );
-
   const attendance = useMemo(() => {
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
@@ -108,42 +104,91 @@ export function StaffReportsScreen() {
     };
   }, [attendance]);
 
+  const earningsByCurrency = useMemo(() => {
+    const attendanceWithEarnings = attendance
+      .filter((a) => a.status !== "ABSENT")
+      .map((a) => {
+        const client = clientHomes.find((c) => c.id === a.clientHomeId);
+        const rate = a.recordRate ?? client?.rate ?? 0;
+        return {
+          amount: a.status === "FULL" ? rate : rate * 0.5,
+          recordCurrencySymbol: a.recordCurrencySymbol,
+        };
+      });
+    
+    const attendanceByCurrency = groupTotalsByCurrency(
+      attendanceWithEarnings,
+      a => a.amount,
+      a => a.recordCurrencySymbol,
+      symbol
+    );
+    
+    const laundryByCurrency = groupTotalsByCurrency(
+      laundryJobs,
+      j => j.totalEarned,
+      j => j.recordCurrencySymbol,
+      symbol
+    );
+    
+    const allEarnings = !showAllContexts && activeAccountId
+      ? storage.getStaffEarningsByAccount(activeAccountId)
+      : storage.getStaffEarnings();
+    const monthlyEarnings = allEarnings.filter(e => {
+      const date = new Date(e.date);
+      return date >= new Date(year, month, 1) && date <= new Date(year, month + 1, 0);
+    });
+    const bonusTipsByCurrency = groupTotalsByCurrency(
+      monthlyEarnings.filter(e => e.type === 'bonus' || e.type === 'tip'),
+      e => e.amount,
+      e => e.recordCurrencySymbol,
+      symbol
+    );
+    
+    const totalByCurrency = mergeCurrencyTotals(
+      mergeCurrencyTotals(attendanceByCurrency, laundryByCurrency),
+      bonusTipsByCurrency
+    );
+    
+    return {
+      attendanceByCurrency,
+      laundryByCurrency,
+      bonusTipsByCurrency,
+      totalByCurrency,
+    };
+  }, [attendance, laundryJobs, clientHomes, symbol, showAllContexts, activeAccountId, year, month]);
+
   const generateReport = (type: ReportType): string => {
     const staffName = profile?.displayName || "Staff";
     const period = monthName;
 
     if (type === "earnings") {
-      return generateStaffEarningsReport(
-        {
-          staffName,
-          period,
-          workEarnings: earnings.fromAttendance,
-          laundryEarnings: earnings.fromLaundry,
-          otherEarnings: earnings.bonusAndTips,
-          totalEarnings: earnings.total,
-          attendance: attendance
-            .filter((a) => a.status !== "ABSENT")
-            .map((a) => {
-              const client = clientHomes.find((c) => c.id === a.clientHomeId);
-              const rate = a.recordRate ?? client?.rate ?? 0;
-              const earned = a.status === "FULL" ? rate : rate * 0.5;
-              return {
-                date: a.date,
-                clientName: homeNames.get(a.clientHomeId) || "Unknown",
-                status: a.status === "FULL" ? "Full Day" : "Half Day",
-                earnings: earned,
-              };
-            }),
-          laundryJobs: laundryJobs.map((job) => ({
-            date: job.date,
-            clientName: homeNames.get(job.clientHomeId) || "Unknown",
-            items: job.itemCount,
-            earned: job.totalEarned,
-          })),
-        },
-        settings.currency,
-        settings.customCurrencySymbol
-      );
+      return generateStaffEarningsReport({
+        staffName,
+        period,
+        workEarnings: formatCurrencyTotals(earningsByCurrency.attendanceByCurrency),
+        laundryEarnings: formatCurrencyTotals(earningsByCurrency.laundryByCurrency),
+        otherEarnings: formatCurrencyTotals(earningsByCurrency.bonusTipsByCurrency),
+        totalEarnings: formatCurrencyTotals(earningsByCurrency.totalByCurrency),
+        attendance: attendance
+          .filter((a) => a.status !== "ABSENT")
+          .map((a) => {
+            const client = clientHomes.find((c) => c.id === a.clientHomeId);
+            const rate = a.recordRate ?? client?.rate ?? 0;
+            const earned = a.status === "FULL" ? rate : rate * 0.5;
+            return {
+              date: a.date,
+              clientName: homeNames.get(a.clientHomeId) || "Unknown",
+              status: a.status === "FULL" ? "Full Day" : "Half Day",
+              formattedEarnings: formatRecordCurrency(earned, a.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol),
+            };
+          }),
+        laundryJobs: laundryJobs.map((job) => ({
+          date: job.date,
+          clientName: homeNames.get(job.clientHomeId) || "Unknown",
+          items: job.itemCount,
+          formattedEarned: formatRecordCurrency(job.totalEarned, job.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol),
+        })),
+      });
     } else {
       return generateStaffAttendanceReport({
         staffName,
@@ -222,7 +267,7 @@ export function StaffReportsScreen() {
           clientName: homeNames.get(a.clientHomeId) || "Unknown",
           description: a.status === "FULL" ? "Full Day Work" : "Half Day Work",
           earnings: earned,
-          formattedEarnings: `${symbol}${earned.toLocaleString()}`,
+          formattedEarnings: formatRecordCurrency(earned, a.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol),
           type: "attendance",
         });
       });
@@ -233,7 +278,7 @@ export function StaffReportsScreen() {
         clientName: homeNames.get(job.clientHomeId) || "Unknown",
         description: `Laundry (${job.itemCount} items)`,
         earnings: job.totalEarned,
-        formattedEarnings: `${symbol}${job.totalEarned.toLocaleString()}`,
+        formattedEarnings: formatRecordCurrency(job.totalEarned, job.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol),
         type: "laundry",
       });
     });
@@ -245,10 +290,10 @@ export function StaffReportsScreen() {
       reportTitle: t("earningsReport"),
       subtitle: monthName,
       summary: {
-        "Work Earnings": `${symbol}${earnings.fromAttendance.toLocaleString()}`,
-        "Laundry Earnings": `${symbol}${earnings.fromLaundry.toLocaleString()}`,
-        "Tips & Bonus": `${symbol}${earnings.bonusAndTips.toLocaleString()}`,
-        "Total Earnings": `${symbol}${earnings.total.toLocaleString()}`,
+        "Work Earnings": formatCurrencyTotals(earningsByCurrency.attendanceByCurrency),
+        "Laundry Earnings": formatCurrencyTotals(earningsByCurrency.laundryByCurrency),
+        "Tips & Bonus": formatCurrencyTotals(earningsByCurrency.bonusTipsByCurrency),
+        "Total Earnings": formatCurrencyTotals(earningsByCurrency.totalByCurrency),
       },
       entries,
     });
@@ -298,8 +343,8 @@ export function StaffReportsScreen() {
             <div className="icon-halo-primary w-9 h-9 mb-2">
               <TrendingUp className="w-4.5 h-4.5 text-primary" />
             </div>
-            <p className="text-xl font-bold" data-testid="text-total-earnings">
-              {symbol}{earnings.total.toLocaleString()}
+            <p className="text-xl font-bold text-center" data-testid="text-total-earnings">
+              {formatCurrencyTotals(earningsByCurrency.totalByCurrency)}
             </p>
             <p className="text-xs text-muted-foreground">{t("totalEarnings")}</p>
           </Card>
@@ -401,17 +446,17 @@ export function StaffReportsScreen() {
         <section className="flex flex-col gap-3">
           <h3 className="font-semibold">{t("earnings")}</h3>
           <Card className="divide-y">
-            <div className="p-3 flex items-center justify-between">
+            <div className="p-3 flex items-center justify-between gap-2">
               <span className="text-sm text-muted-foreground">{t("work")}</span>
-              <span className="font-medium text-sm">{symbol}{earnings.fromAttendance.toLocaleString()}</span>
+              <span className="font-medium text-sm text-right">{formatCurrencyTotals(earningsByCurrency.attendanceByCurrency)}</span>
             </div>
-            <div className="p-3 flex items-center justify-between">
+            <div className="p-3 flex items-center justify-between gap-2">
               <span className="text-sm text-muted-foreground">{t("laundry")}</span>
-              <span className="font-medium text-sm">{symbol}{earnings.fromLaundry.toLocaleString()}</span>
+              <span className="font-medium text-sm text-right">{formatCurrencyTotals(earningsByCurrency.laundryByCurrency)}</span>
             </div>
-            <div className="p-3 flex items-center justify-between">
+            <div className="p-3 flex items-center justify-between gap-2">
               <span className="text-sm text-muted-foreground">{t("tipsAndBonus")}</span>
-              <span className="font-medium text-sm">{symbol}{earnings.bonusAndTips.toLocaleString()}</span>
+              <span className="font-medium text-sm text-right">{formatCurrencyTotals(earningsByCurrency.bonusTipsByCurrency)}</span>
             </div>
           </Card>
         </section>
