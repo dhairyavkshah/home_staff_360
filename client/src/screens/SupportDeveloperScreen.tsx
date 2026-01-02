@@ -84,8 +84,9 @@ const CURRENCY_SYMBOLS: { [key: string]: string } = {
   ZAR: "R",
 };
 
-const UPI_ID = "developer@upi";
-const PAYPAL_USERNAME = "homestaff360";
+const UPI_ID = "dhairyavkshah@icici";
+const UPI_PHONE = "+919722523691";
+const PAYPAL_USERNAME = "dhairyavkshah";
 
 export function SupportDeveloperScreen() {
   const { navigate } = useNavigation();
@@ -101,18 +102,23 @@ export function SupportDeveloperScreen() {
   const [customAmount, setCustomAmount] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
 
+  const isIndian = userCountry === "IN" || userCountry === "NP" || userCountry === "BT";
+
   const handleUpiPayment = (amount: number) => {
-    const payeeName = "Home Staff 360 Developer";
-    const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent("Support Home Staff 360")}`;
-    window.open(upiUrl, "_blank");
+    const payeeName = "Dhairya Shah";
+    const transactionNote = "Support Home Staff 360";
+    const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+    
+    window.location.href = upiUrl;
+    
     toast({
-      title: "Opening UPI app",
-      description: "Complete the payment in your UPI app",
+      title: "Opening payment app",
+      description: "Choose your preferred UPI app to complete payment",
     });
   };
 
   const handlePayPalPayment = (amount: number, currencyCode: string) => {
-    const paypalUrl = `https://www.paypal.com/paypalme/${PAYPAL_USERNAME}/${amount}${currencyCode}`;
+    const paypalUrl = `https://www.paypal.me/${PAYPAL_USERNAME}/${amount}${currencyCode}`;
     window.open(paypalUrl, "_blank");
     toast({
       title: "Opening PayPal",
@@ -120,54 +126,50 @@ export function SupportDeveloperScreen() {
     });
   };
 
-  const handleGenericPayment = (methodName: string) => {
+  const handleGooglePayPayment = (amount: number) => {
+    const payeeName = "Dhairya Shah";
+    const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent("Support Home Staff 360")}`;
+    window.location.href = upiUrl;
     toast({
-      title: `${methodName} Payment`,
-      description: "Please use the copied details to complete your payment manually",
+      title: "Opening Google Pay",
+      description: "Complete the payment in Google Pay",
     });
   };
 
-  const paymentMethods: PaymentMethod[] = [
+  const paymentMethods: PaymentMethod[] = isIndian ? [
     {
       id: "upi",
-      name: "UPI",
+      name: "UPI Apps",
       icon: Smartphone,
-      description: "Google Pay, PhonePe, Paytm, BHIM",
+      description: "Google Pay, PhonePe, Paytm, BHIM & more",
       countries: ["IN", "NP", "BT"],
       action: (amount) => handleUpiPayment(amount),
-    },
-    {
-      id: "paypal",
-      name: "PayPal",
-      icon: CreditCard,
-      description: "Pay with PayPal account or card",
-      countries: ["US", "GB", "DE", "FR", "IT", "ES", "NL", "BE", "AT", "IE", "PT", "GR", "CA", "AU", "SG", "JP", "KR", "HK", "ZA", "BR", "MX", "AR", "CL", "CO"],
-      action: (amount, curr) => handlePayPalPayment(amount, curr),
     },
     {
       id: "gpay",
       name: "Google Pay",
       icon: Wallet,
-      description: "Pay using Google Pay",
-      countries: ["US", "GB", "SG", "AU", "CA"],
-      action: () => handleGenericPayment("Google Pay"),
+      description: "Pay directly with Google Pay",
+      countries: ["IN"],
+      action: (amount) => handleGooglePayPayment(amount),
     },
-  ];
-
-  const availablePaymentMethods = paymentMethods.filter(
-    (method) => method.countries.includes(userCountry || "US")
-  );
-
-  if (availablePaymentMethods.length === 0) {
-    availablePaymentMethods.push({
+  ] : [
+    {
       id: "paypal",
       name: "PayPal",
       icon: CreditCard,
-      description: "International payments accepted",
-      countries: [],
+      description: "Pay securely with PayPal",
+      countries: ["US", "GB", "DE", "FR", "IT", "ES", "NL", "BE", "AT", "IE", "PT", "GR", "CA", "AU", "SG", "JP", "KR", "HK", "ZA", "BR", "MX", "AR", "CL", "CO", "AE", "SA", "QA", "KW", "OM", "BH"],
       action: (amount, curr) => handlePayPalPayment(amount, curr),
-    });
-  }
+    },
+  ];
+
+  const availablePaymentMethods = paymentMethods;
+
+  const copyPaymentId = (id: string, label: string) => {
+    navigator.clipboard.writeText(id);
+    toast({ title: `${label} copied to clipboard` });
+  };
 
   const handleDonate = () => {
     const amount = selectedAmount || parseInt(customAmount) || 0;
@@ -180,18 +182,12 @@ export function SupportDeveloperScreen() {
       return;
     }
 
-    const method = availablePaymentMethods.find((m) => m.id === selectedPaymentMethod) || availablePaymentMethods[0];
+    const methodId = selectedPaymentMethod || (isIndian ? "upi" : "paypal");
+    const method = paymentMethods.find((m) => m.id === methodId) || paymentMethods[0];
     if (method) {
       method.action(amount, currency);
     }
   };
-
-  const copyPaymentId = (id: string, label: string) => {
-    navigator.clipboard.writeText(id);
-    toast({ title: `${label} copied to clipboard` });
-  };
-
-  const isIndian = userCountry === "IN" || userCountry === "NP" || userCountry === "BT";
 
   return (
     <AppLayout>
@@ -352,12 +348,12 @@ export function SupportDeveloperScreen() {
               <div>
                 <p className="font-medium text-sm text-green-800 dark:text-green-200">UPI ID</p>
                 <p className="text-xs text-green-600 dark:text-green-400">
-                  Scan QR or copy ID to pay directly
+                  Copy and pay via any UPI app
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-white dark:bg-green-950/50 px-3 py-2 rounded text-sm font-mono">
+              <code className="flex-1 bg-white dark:bg-green-950/50 px-3 py-2 rounded text-sm font-mono text-xs">
                 {UPI_ID}
               </code>
               <Button 
@@ -365,6 +361,19 @@ export function SupportDeveloperScreen() {
                 variant="outline" 
                 onClick={() => copyPaymentId(UPI_ID, "UPI ID")} 
                 data-testid="button-copy-upi"
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 bg-white dark:bg-green-950/50 px-3 py-2 rounded text-sm font-mono text-xs">
+                {UPI_PHONE}
+              </code>
+              <Button 
+                size="icon" 
+                variant="outline" 
+                onClick={() => copyPaymentId(UPI_PHONE, "Phone number")} 
+                data-testid="button-copy-phone"
               >
                 <Copy className="w-4 h-4" />
               </Button>
