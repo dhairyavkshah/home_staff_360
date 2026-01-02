@@ -137,6 +137,18 @@ export function formatCurrency(
   return `${symbol}${formatted}`;
 }
 
+export function formatRecordCurrency(
+  amount: number,
+  recordCurrencySymbol: string | undefined,
+  fallbackCurrency: Currency,
+  fallbackCustomSymbol?: string
+): string {
+  if (recordCurrencySymbol) {
+    return formatCurrency(amount, "OTHER", recordCurrencySymbol);
+  }
+  return formatCurrency(amount, fallbackCurrency, fallbackCustomSymbol);
+}
+
 export function getTodayString(): string {
   return new Date().toISOString().split("T")[0];
 }

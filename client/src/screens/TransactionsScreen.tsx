@@ -19,7 +19,7 @@ import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/lib/i18n/i18n-context";
-import { formatCurrency, formatDate, getTodayString, getCategoryLabel } from "@/lib/calculations";
+import { formatCurrency, formatRecordCurrency, formatDate, getTodayString, getCategoryLabel } from "@/lib/calculations";
 import { useActiveContext } from "@/hooks/use-active-context";
 
 export function TransactionsScreen() {
@@ -345,7 +345,7 @@ export function TransactionsScreen() {
                         )}
                       </div>
                       <p className="font-semibold text-sm whitespace-nowrap">
-                        {formatCurrency(tx.amount, settings.currency, settings.customCurrencySymbol)}
+                        {formatRecordCurrency(tx.amount, tx.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                       </p>
                       <Button
                         size="icon"

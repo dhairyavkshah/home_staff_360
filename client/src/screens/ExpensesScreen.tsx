@@ -17,7 +17,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency, formatShortDate } from "@/lib/calculations";
+import { formatCurrency, formatRecordCurrency, formatShortDate } from "@/lib/calculations";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
 import { parseISO, startOfDay, addDays, isBefore, isToday } from "date-fns";
@@ -224,7 +224,7 @@ export function ExpensesScreen() {
                       <div className="flex items-center justify-between gap-2">
                         <p className="font-medium text-sm truncate">{expense.title}</p>
                         <p className="font-semibold text-sm shrink-0">
-                          {formatCurrency(expense.amount, settings.currency, settings.customCurrencySymbol)}
+                          {formatRecordCurrency(expense.amount, expense.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                         </p>
                       </div>
                       <div className="flex items-center justify-between gap-2 mt-0.5">

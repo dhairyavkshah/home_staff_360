@@ -14,6 +14,7 @@ import { useActiveContext } from "@/hooks/use-active-context";
 import {
   calculatePersonBalance,
   formatCurrency,
+  formatRecordCurrency,
   formatShortDate,
   getAttendanceSummary,
   getCategoryLabel,
@@ -292,7 +293,7 @@ export function PersonDetailScreen() {
                       <div className="text-right shrink-0">
                         <p className={`font-semibold text-sm ${tx.category === "deduction" ? "text-destructive" : ""}`}>
                           {tx.category === "deduction" ? "-" : ""}
-                          {formatCurrency(tx.amount, settings.currency, settings.customCurrencySymbol)}
+                          {formatRecordCurrency(tx.amount, tx.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {tx.isPaid ? "Paid" : "Pending"}

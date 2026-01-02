@@ -17,7 +17,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency, formatShortDate } from "@/lib/calculations";
+import { formatCurrency, formatRecordCurrency, formatShortDate } from "@/lib/calculations";
 import { parseISO, startOfDay, addDays, isBefore, isToday } from "date-fns";
 import type { StaffExpense } from "@shared/schema";
 import { useTranslation } from "@/lib/i18n/i18n-context";
@@ -240,7 +240,7 @@ export function StaffExpensesScreen() {
                     <div className="flex items-center gap-2 shrink-0">
                       <div className="text-right">
                         <p className="font-semibold text-sm">
-                          {formatCurrency(expense.amount, settings.currency, settings.customCurrencySymbol)}
+                          {formatRecordCurrency(expense.amount, expense.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                         </p>
                         <Badge 
                           variant={status === "overdue" ? "destructive" : "secondary"} 

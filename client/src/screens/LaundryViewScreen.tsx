@@ -9,7 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
-import { formatCurrency } from "@/lib/calculations";
+import { formatCurrency, formatRecordCurrency } from "@/lib/calculations";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveContext } from "@/hooks/use-active-context";
@@ -335,7 +335,7 @@ export function LaundryViewScreen() {
 
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <span className="font-semibold" data-testid={`text-total-${batch.id}`}>
-                      {formatCurrency(batch.total, settings.currency, settings.customCurrencySymbol)}
+                      {formatRecordCurrency(batch.total, batch.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                     </span>
                     <Badge 
                       variant={batch.isPaid ? "secondary" : "destructive"} 

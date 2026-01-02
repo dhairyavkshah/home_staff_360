@@ -10,7 +10,7 @@ import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation, useNavigationData } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/calculations";
+import { formatCurrency, formatRecordCurrency } from "@/lib/calculations";
 import { currencySymbols, type InvoiceStatus } from "@shared/schema";
 
 const STATUS_CONFIG: Record<InvoiceStatus, { icon: typeof CheckCircle; color: string; label: string }> = {
@@ -156,11 +156,11 @@ export function StaffInvoiceViewScreen() {
                 <div className="flex-1">
                   <p className="font-medium">{item.description}</p>
                   <p className="text-muted-foreground">
-                    {item.quantity} x {symbol}{item.rate.toFixed(2)}
+                    {item.quantity} x {invoice.recordCurrencySymbol || symbol}{item.rate.toFixed(2)}
                   </p>
                 </div>
                 <p className="font-medium">
-                  {formatCurrency(item.amount, settings.currency, settings.customCurrencySymbol)}
+                  {formatRecordCurrency(item.amount, invoice.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                 </p>
               </div>
             ))}
@@ -171,17 +171,17 @@ export function StaffInvoiceViewScreen() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Subtotal</span>
-              <span>{formatCurrency(invoice.subtotal, settings.currency, settings.customCurrencySymbol)}</span>
+              <span>{formatRecordCurrency(invoice.subtotal, invoice.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}</span>
             </div>
             {invoice.taxRate && invoice.taxAmount && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tax ({invoice.taxRate}%)</span>
-                <span>{formatCurrency(invoice.taxAmount, settings.currency, settings.customCurrencySymbol)}</span>
+                <span>{formatRecordCurrency(invoice.taxAmount, invoice.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}</span>
               </div>
             )}
             <div className="flex justify-between font-semibold text-base pt-2 border-t">
               <span>Total</span>
-              <span>{formatCurrency(invoice.total, settings.currency, settings.customCurrencySymbol)}</span>
+              <span>{formatRecordCurrency(invoice.total, invoice.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}</span>
             </div>
           </div>
         </Card>

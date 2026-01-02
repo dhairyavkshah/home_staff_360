@@ -14,7 +14,7 @@ import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
-import { formatCurrency } from "@/lib/calculations";
+import { formatCurrency, formatRecordCurrency } from "@/lib/calculations";
 import { currencySymbols, type InvoiceStatus } from "@shared/schema";
 import { useActiveContext } from "@/hooks/use-active-context";
 
@@ -192,7 +192,7 @@ export function StaffInvoicesScreen() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-semibold">
-                        {formatCurrency(invoice.total, settings.currency, settings.customCurrencySymbol)}
+                        {formatRecordCurrency(invoice.total, invoice.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {invoice.items.length} {invoice.items.length === 1 ? "item" : "items"}
