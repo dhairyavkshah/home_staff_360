@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Heart, Coffee, Gift, Star, Copy, User, MapPin, Globe, Smartphone, CreditCard, Wallet, Check, X, Sparkles } from "lucide-react";
+import { Heart, Coffee, Gift, Star, User, MapPin, Globe, Smartphone, CreditCard, Wallet, Check, X, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,7 @@ import {
   validateAmount, 
   markAsDonor, 
   getDonorStatus,
-  isIndianUser,
-  paymentConfig 
+  isIndianUser
 } from "@/lib/payment-handler";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -221,11 +220,6 @@ export function SupportDeveloperScreen() {
         variant: "destructive",
       });
     }
-  };
-
-  const copyPaymentId = (id: string, label: string) => {
-    navigator.clipboard.writeText(id);
-    toast({ title: `${label} copied to clipboard` });
   };
 
   const handleDonate = () => {
@@ -528,72 +522,6 @@ export function SupportDeveloperScreen() {
             )}
           </div>
         </section>
-
-        {isIndian && (
-          <Card className="p-4 flex flex-col gap-3 bg-muted/50">
-            <div className="flex items-center gap-2">
-              <Copy className="w-4 h-4 text-muted-foreground" />
-              <p className="font-medium text-sm">Manual Payment Fallback</p>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              If the app chooser doesn't open, copy and pay via any UPI app
-            </p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 bg-background px-3 py-2 rounded text-sm font-mono">
-                {paymentConfig.upiId}
-              </code>
-              <Button 
-                size="icon" 
-                variant="ghost"
-                className="min-w-[44px] min-h-[44px]"
-                onClick={() => copyPaymentId(paymentConfig.upiId, "UPI ID")} 
-                data-testid="button-copy-upi"
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 bg-background px-3 py-2 rounded text-sm font-mono">
-                +919722523691
-              </code>
-              <Button 
-                size="icon" 
-                variant="ghost"
-                className="min-w-[44px] min-h-[44px]"
-                onClick={() => copyPaymentId("+919722523691", "Phone number")} 
-                data-testid="button-copy-phone"
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {!isIndian && (
-          <Card className="p-4 flex flex-col gap-3 bg-muted/50">
-            <div className="flex items-center gap-2">
-              <Copy className="w-4 h-4 text-muted-foreground" />
-              <p className="font-medium text-sm">Manual Payment Fallback</p>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Copy the PayPal link and paste in your browser
-            </p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 bg-background px-3 py-2 rounded text-sm font-mono truncate">
-                paypal.me/{paymentConfig.paypalUsername}
-              </code>
-              <Button 
-                size="icon" 
-                variant="ghost"
-                className="min-w-[44px] min-h-[44px]"
-                onClick={() => copyPaymentId(`https://paypal.me/${paymentConfig.paypalUsername}`, "PayPal link")} 
-                data-testid="button-copy-paypal"
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
-          </Card>
-        )}
 
         <Button
           className="w-full"
