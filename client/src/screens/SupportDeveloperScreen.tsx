@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Heart, Coffee, Gift, Star, Copy, User, MapPin, Globe, Smartphone, CreditCard, Wallet } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Heart, Coffee, Gift, Star, Copy, User, MapPin, Globe, Smartphone, CreditCard, Wallet, Check, X, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,21 +8,29 @@ import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { getUserCountry, getCurrencyForCountry, getCountryByCode } from "@/lib/geolocation-service";
-import { Capacitor } from "@capacitor/core";
+import { 
+  openUpiPayment, 
+  openPayPalPayment, 
+  validateAmount, 
+  markAsDonor, 
+  getDonorStatus,
+  isIndianUser,
+  paymentConfig 
+} from "@/lib/payment-handler";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+} from "@/components/ui/drawer";
 
 interface DonationTier {
   amount: number;
   label: string;
   icon: typeof Coffee;
-}
-
-interface PaymentMethod {
-  id: string;
-  name: string;
-  icon: typeof Smartphone;
-  description: string;
-  countries: string[];
-  action: (amount: number, currency: string) => void;
 }
 
 const DONATION_TIERS: { [key: string]: DonationTier[] } = {
@@ -85,9 +93,38 @@ const CURRENCY_SYMBOLS: { [key: string]: string } = {
   ZAR: "R",
 };
 
-const UPI_ID = "dhairyavkshah@icici";
-const UPI_PHONE = "+919722523691";
-const PAYPAL_USERNAME = "dhairyavkshah";
+function ConfettiParticle({ delay }: { delay: number }) {
+  const colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#98D8C8"];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const x = Math.random() * 100;
+  
+  return (
+    <motion.div
+      className="absolute w-2 h-2 rounded-full"
+      style={{ backgroundColor: color, left: `${x}%` }}
+      initial={{ y: -10, opacity: 1, rotate: 0 }}
+      animate={{ 
+        y: 400, 
+        opacity: 0, 
+        rotate: 360 * (Math.random() > 0.5 ? 1 : -1),
+        x: (Math.random() - 0.5) * 100
+      }}
+      transition={{ duration: 2 + Math.random(), delay, ease: "easeOut" }}
+    />
+  );
+}
+
+function Confetti() {
+  const particles = Array.from({ length: 50 }, (_, i) => i);
+  
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+      {particles.map((i) => (
+        <ConfettiParticle key={i} delay={Math.random() * 0.5} />
+      ))}
+    </div>
+  );
+}
 
 export function SupportDeveloperScreen() {
   const { navigate } = useNavigation();
@@ -102,77 +139,89 @@ export function SupportDeveloperScreen() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
+  const [pendingPaymentAmount, setPendingPaymentAmount] = useState<number>(0);
+  const [paymentInProgress, setPaymentInProgress] = useState(false);
 
-  const isIndian = userCountry === "IN" || userCountry === "NP" || userCountry === "BT";
+  const isIndian = isIndianUser(userCountry);
+  const donorStatus = getDonorStatus();
 
-  const openUpiUrl = (upiUrl: string, appName: string) => {
-    if (Capacitor.isNativePlatform()) {
-      window.open(upiUrl, "_system");
+  const handleVisibilityChange = useCallback(() => {
+    if (document.visibilityState === "visible" && paymentInProgress) {
+      setTimeout(() => {
+        setShowConfirmation(true);
+        setPaymentInProgress(false);
+      }, 500);
+    }
+  }, [paymentInProgress]);
+
+  useEffect(() => {
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [handleVisibilityChange]);
+
+  const handleUpiPayment = (amount: number) => {
+    const validAmount = validateAmount(amount);
+    if (!validAmount) {
       toast({
-        title: `Opening ${appName}`,
+        title: "Invalid amount",
+        description: "Please enter a valid amount",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setPendingPaymentAmount(validAmount);
+    setPaymentInProgress(true);
+    
+    const success = openUpiPayment(validAmount);
+    if (success) {
+      toast({
+        title: "Opening UPI App",
         description: "Choose your preferred UPI app to complete payment",
       });
     } else {
-      window.location.href = upiUrl;
+      setPaymentInProgress(false);
       toast({
-        title: "Opening payment app",
-        description: "If no app opens, please use the UPI ID below to pay manually",
+        title: "Unable to open UPI",
+        description: "Please use the UPI ID below to pay manually",
+        variant: "destructive",
       });
     }
   };
 
-  const handleUpiPayment = (amount: number) => {
-    const payeeName = "Dhairya Shah";
-    const transactionNote = "Support Home Staff 360";
-    const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
-    
-    openUpiUrl(upiUrl, "UPI Apps");
-  };
-
   const handlePayPalPayment = (amount: number, currencyCode: string) => {
-    const paypalUrl = `https://www.paypal.me/${PAYPAL_USERNAME}/${amount}${currencyCode}`;
-    window.open(paypalUrl, "_blank");
-    toast({
-      title: "Opening PayPal",
-      description: "Complete the payment on PayPal",
-    });
+    const validAmount = validateAmount(amount);
+    if (!validAmount) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid amount",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setPendingPaymentAmount(validAmount);
+    setPaymentInProgress(true);
+    
+    const success = openPayPalPayment(validAmount, currencyCode);
+    if (success) {
+      toast({
+        title: "Opening PayPal",
+        description: "Complete the payment on PayPal",
+      });
+    } else {
+      setPaymentInProgress(false);
+      toast({
+        title: "Unable to open PayPal",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
-
-  const handleGooglePayPayment = (amount: number) => {
-    const payeeName = "Dhairya Shah";
-    const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent("Support Home Staff 360")}`;
-    openUpiUrl(upiUrl, "Google Pay");
-  };
-
-  const paymentMethods: PaymentMethod[] = isIndian ? [
-    {
-      id: "upi",
-      name: "UPI Apps",
-      icon: Smartphone,
-      description: "Google Pay, PhonePe, Paytm, BHIM & more",
-      countries: ["IN", "NP", "BT"],
-      action: (amount) => handleUpiPayment(amount),
-    },
-    {
-      id: "gpay",
-      name: "Google Pay",
-      icon: Wallet,
-      description: "Pay directly with Google Pay",
-      countries: ["IN"],
-      action: (amount) => handleGooglePayPayment(amount),
-    },
-  ] : [
-    {
-      id: "paypal",
-      name: "PayPal",
-      icon: CreditCard,
-      description: "Pay securely with PayPal",
-      countries: ["US", "GB", "DE", "FR", "IT", "ES", "NL", "BE", "AT", "IE", "PT", "GR", "CA", "AU", "SG", "JP", "KR", "HK", "ZA", "BR", "MX", "AR", "CL", "CO", "AE", "SA", "QA", "KW", "OM", "BH"],
-      action: (amount, curr) => handlePayPalPayment(amount, curr),
-    },
-  ];
-
-  const availablePaymentMethods = paymentMethods;
 
   const copyPaymentId = (id: string, label: string) => {
     navigator.clipboard.writeText(id);
@@ -180,8 +229,10 @@ export function SupportDeveloperScreen() {
   };
 
   const handleDonate = () => {
-    const amount = selectedAmount || parseInt(customAmount) || 0;
-    if (amount <= 0) {
+    const amount = selectedAmount || parseFloat(customAmount) || 0;
+    const validAmount = validateAmount(amount);
+    
+    if (!validAmount) {
       toast({
         title: "Please select an amount",
         description: "Choose a donation amount to continue",
@@ -191,10 +242,23 @@ export function SupportDeveloperScreen() {
     }
 
     const methodId = selectedPaymentMethod || (isIndian ? "upi" : "paypal");
-    const method = paymentMethods.find((m) => m.id === methodId) || paymentMethods[0];
-    if (method) {
-      method.action(amount, currency);
+    
+    if (methodId === "upi" || methodId === "gpay") {
+      handleUpiPayment(validAmount);
+    } else {
+      handlePayPalPayment(validAmount, currency);
     }
+  };
+
+  const handleConfirmDonation = () => {
+    setShowConfirmation(false);
+    markAsDonor();
+    setShowThankYou(true);
+    setTimeout(() => setShowThankYou(false), 5000);
+  };
+
+  const handleDeclineDonation = () => {
+    setShowConfirmation(false);
   };
 
   return (
@@ -203,6 +267,76 @@ export function SupportDeveloperScreen() {
         title="Support the Developer"
         onBack={() => navigate("settings")}
       />
+
+      <AnimatePresence>
+        {showThankYou && <Confetti />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showThankYou && (
+          <motion.div
+            className="fixed inset-0 z-40 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-card p-8 rounded-3xl shadow-xl flex flex-col items-center gap-4 max-w-xs mx-4"
+              initial={{ scale: 0.8, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 20 }}
+            >
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                <Sparkles className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-center">Thank You!</h2>
+              <p className="text-sm text-muted-foreground text-center">
+                Your generous support means the world to me. It helps keep this project alive and growing!
+              </p>
+              <Badge className="bg-primary/10 text-primary border-primary/20">
+                You are now a supporter!
+              </Badge>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Drawer open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DrawerContent>
+          <DrawerHeader className="text-center">
+            <DrawerTitle className="text-lg">Payment Verification</DrawerTitle>
+            <DrawerDescription>
+              Did your support transaction of {currencySymbol}{pendingPaymentAmount} go through?
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="px-4 py-6 flex flex-col gap-4">
+            <Button
+              size="lg"
+              className="w-full min-h-[52px] gap-2"
+              onClick={handleConfirmDonation}
+              data-testid="button-confirm-donation"
+            >
+              <Check className="w-5 h-5" />
+              Yes, I contributed
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full min-h-[52px] gap-2"
+              onClick={handleDeclineDonation}
+              data-testid="button-decline-donation"
+            >
+              <X className="w-5 h-5" />
+              No / Not yet
+            </Button>
+          </div>
+          <DrawerFooter className="pt-0">
+            <p className="text-xs text-center text-muted-foreground">
+              We cannot automatically verify UPI payments. Please confirm manually.
+            </p>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       <ScrollContent className="pb-24">
         <section className="flex flex-col items-center text-center gap-3">
@@ -219,6 +353,12 @@ export function SupportDeveloperScreen() {
             <Badge variant="outline" className="gap-1">
               <Globe className="w-3 h-3" />
               {countryInfo.name}
+            </Badge>
+          )}
+          {donorStatus.isDonor && (
+            <Badge className="gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
+              <Star className="w-3 h-3" />
+              Supporter
             </Badge>
           )}
         </section>
@@ -257,9 +397,8 @@ export function SupportDeveloperScreen() {
             Choose an Amount ({currency})
           </h3>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-3">
             {donations.map((donation) => {
-              const Icon = donation.icon;
               const isSelected = selectedAmount === donation.amount;
               return (
                 <button
@@ -268,26 +407,25 @@ export function SupportDeveloperScreen() {
                     setSelectedAmount(donation.amount);
                     setCustomAmount("");
                   }}
-                  className={`p-3 rounded-lg border text-left transition-all ${
-                    isSelected
-                      ? "border-primary bg-primary/10"
-                      : "border-border hover-elevate"
-                  }`}
+                  className="flex flex-col items-center gap-2 p-3"
                   data-testid={`button-donate-${donation.amount}`}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Icon className={`w-4 h-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                    <span className="font-semibold">
-                      {currencySymbol}{donation.amount}
-                    </span>
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center text-base font-medium transition-all ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                      : "bg-muted hover:bg-muted/80"
+                  }`}>
+                    {currencySymbol}{donation.amount}
                   </div>
-                  <p className="text-xs text-muted-foreground">{donation.label}</p>
+                  <span className="text-xs text-muted-foreground text-center leading-tight">
+                    {donation.label}
+                  </span>
                 </button>
               );
             })}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 mt-2">
             <label className="text-sm font-medium">Or enter custom amount ({currency})</label>
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -302,7 +440,7 @@ export function SupportDeveloperScreen() {
                     setSelectedAmount(null);
                   }}
                   placeholder="Amount"
-                  className="w-full pl-8 pr-4 py-2 rounded-md border bg-background text-sm"
+                  className="w-full pl-8 pr-4 py-2 rounded-md border bg-background text-sm min-h-[44px]"
                   data-testid="input-custom-amount"
                 />
               </div>
@@ -316,71 +454,113 @@ export function SupportDeveloperScreen() {
           </h3>
 
           <div className="flex flex-col gap-2">
-            {availablePaymentMethods.map((method, index) => {
-              const Icon = method.icon;
-              const isSelected = selectedPaymentMethod === method.id || (selectedPaymentMethod === null && index === 0);
-              return (
+            {isIndian ? (
+              <>
                 <button
-                  key={method.id}
-                  onClick={() => setSelectedPaymentMethod(method.id)}
-                  className={`p-3 rounded-lg border text-left transition-all flex items-center gap-3 ${
-                    isSelected
+                  onClick={() => setSelectedPaymentMethod("upi")}
+                  className={`p-3 rounded-lg border text-left transition-all flex items-center gap-3 min-h-[60px] ${
+                    selectedPaymentMethod === "upi" || selectedPaymentMethod === null
                       ? "border-primary bg-primary/10"
                       : "border-border hover-elevate"
                   }`}
-                  data-testid={`button-payment-${method.id}`}
+                  data-testid="button-payment-upi"
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    isSelected ? "bg-primary text-primary-foreground" : "bg-muted"
+                    selectedPaymentMethod === "upi" || selectedPaymentMethod === null
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
                   }`}>
-                    <Icon className="w-5 h-5" />
+                    <Smartphone className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-sm">{method.name}</p>
-                    <p className="text-xs text-muted-foreground">{method.description}</p>
+                    <p className="font-medium text-sm">UPI Apps</p>
+                    <p className="text-xs text-muted-foreground">Google Pay, PhonePe, Paytm, BHIM & more</p>
                   </div>
-                  {index === 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      Recommended
-                    </Badge>
-                  )}
+                  <Badge variant="secondary" className="text-xs">
+                    Recommended
+                  </Badge>
                 </button>
-              );
-            })}
+                <button
+                  onClick={() => setSelectedPaymentMethod("gpay")}
+                  className={`p-3 rounded-lg border text-left transition-all flex items-center gap-3 min-h-[60px] ${
+                    selectedPaymentMethod === "gpay"
+                      ? "border-primary bg-primary/10"
+                      : "border-border hover-elevate"
+                  }`}
+                  data-testid="button-payment-gpay"
+                >
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    selectedPaymentMethod === "gpay" ? "bg-primary text-primary-foreground" : "bg-muted"
+                  }`}>
+                    <Wallet className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Google Pay</p>
+                    <p className="text-xs text-muted-foreground">Pay directly with Google Pay</p>
+                  </div>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setSelectedPaymentMethod("paypal")}
+                className={`p-3 rounded-lg border text-left transition-all flex items-center gap-3 min-h-[60px] ${
+                  selectedPaymentMethod === "paypal" || selectedPaymentMethod === null
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover-elevate"
+                }`}
+                data-testid="button-payment-paypal"
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  selectedPaymentMethod === "paypal" || selectedPaymentMethod === null
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                }`}>
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">PayPal</p>
+                  <p className="text-xs text-muted-foreground">Pay securely with PayPal</p>
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  Recommended
+                </Badge>
+              </button>
+            )}
           </div>
         </section>
 
         {isIndian && (
-          <Card className="p-4 flex flex-col gap-3 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="font-medium text-sm text-green-800 dark:text-green-200">UPI ID</p>
-                <p className="text-xs text-green-600 dark:text-green-400">
-                  Copy and pay via any UPI app
-                </p>
-              </div>
-            </div>
+          <Card className="p-4 flex flex-col gap-3 bg-muted/50">
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-white dark:bg-green-950/50 px-3 py-2 rounded text-sm font-mono text-xs">
-                {UPI_ID}
+              <Copy className="w-4 h-4 text-muted-foreground" />
+              <p className="font-medium text-sm">Manual Payment Fallback</p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              If the app chooser doesn't open, copy and pay via any UPI app
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 bg-background px-3 py-2 rounded text-sm font-mono">
+                {paymentConfig.upiId}
               </code>
               <Button 
                 size="icon" 
-                variant="outline" 
-                onClick={() => copyPaymentId(UPI_ID, "UPI ID")} 
+                variant="ghost"
+                className="min-w-[44px] min-h-[44px]"
+                onClick={() => copyPaymentId(paymentConfig.upiId, "UPI ID")} 
                 data-testid="button-copy-upi"
               >
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-white dark:bg-green-950/50 px-3 py-2 rounded text-sm font-mono text-xs">
-                {UPI_PHONE}
+              <code className="flex-1 bg-background px-3 py-2 rounded text-sm font-mono">
+                +919722523691
               </code>
               <Button 
                 size="icon" 
-                variant="outline" 
-                onClick={() => copyPaymentId(UPI_PHONE, "Phone number")} 
+                variant="ghost"
+                className="min-w-[44px] min-h-[44px]"
+                onClick={() => copyPaymentId("+919722523691", "Phone number")} 
                 data-testid="button-copy-phone"
               >
                 <Copy className="w-4 h-4" />
@@ -390,23 +570,23 @@ export function SupportDeveloperScreen() {
         )}
 
         {!isIndian && (
-          <Card className="p-4 flex flex-col gap-3 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="font-medium text-sm text-blue-800 dark:text-blue-200">PayPal</p>
-                <p className="text-xs text-blue-600 dark:text-blue-400">
-                  Pay securely with PayPal
-                </p>
-              </div>
-            </div>
+          <Card className="p-4 flex flex-col gap-3 bg-muted/50">
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-white dark:bg-blue-950/50 px-3 py-2 rounded text-sm font-mono">
-                paypal.me/{PAYPAL_USERNAME}
+              <Copy className="w-4 h-4 text-muted-foreground" />
+              <p className="font-medium text-sm">Manual Payment Fallback</p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Copy the PayPal link and paste in your browser
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 bg-background px-3 py-2 rounded text-sm font-mono truncate">
+                paypal.me/{paymentConfig.paypalUsername}
               </code>
               <Button 
                 size="icon" 
-                variant="outline" 
-                onClick={() => copyPaymentId(`https://paypal.me/${PAYPAL_USERNAME}`, "PayPal link")} 
+                variant="ghost"
+                className="min-w-[44px] min-h-[44px]"
+                onClick={() => copyPaymentId(`https://paypal.me/${paymentConfig.paypalUsername}`, "PayPal link")} 
                 data-testid="button-copy-paypal"
               >
                 <Copy className="w-4 h-4" />
