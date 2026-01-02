@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const iconImage = "/icon.png";
+import appIconPath from "@/assets/app-icon.png";
 
 interface ExitCoverScreenProps {
   isVisible: boolean;
@@ -57,7 +56,7 @@ export function ExitCoverScreen({ isVisible, onComplete, onCancel }: ExitCoverSc
             className="flex flex-col items-center gap-6"
           >
             <motion.img
-              src={iconImage}
+              src={appIconPath}
               alt="Home Staff 360"
               className="w-32 h-32 rounded-3xl shadow-lg"
               initial={{ y: -20 }}
