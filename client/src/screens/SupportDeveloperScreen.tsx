@@ -8,6 +8,7 @@ import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { getUserCountry, getCurrencyForCountry, getCountryByCode } from "@/lib/geolocation-service";
+import { Capacitor } from "@capacitor/core";
 
 interface DonationTier {
   amount: number;
@@ -104,17 +105,28 @@ export function SupportDeveloperScreen() {
 
   const isIndian = userCountry === "IN" || userCountry === "NP" || userCountry === "BT";
 
+  const openUpiUrl = (upiUrl: string, appName: string) => {
+    if (Capacitor.isNativePlatform()) {
+      window.open(upiUrl, "_system");
+      toast({
+        title: `Opening ${appName}`,
+        description: "Choose your preferred UPI app to complete payment",
+      });
+    } else {
+      window.location.href = upiUrl;
+      toast({
+        title: "Opening payment app",
+        description: "If no app opens, please use the UPI ID below to pay manually",
+      });
+    }
+  };
+
   const handleUpiPayment = (amount: number) => {
     const payeeName = "Dhairya Shah";
     const transactionNote = "Support Home Staff 360";
     const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
     
-    window.location.href = upiUrl;
-    
-    toast({
-      title: "Opening payment app",
-      description: "Choose your preferred UPI app to complete payment",
-    });
+    openUpiUrl(upiUrl, "UPI Apps");
   };
 
   const handlePayPalPayment = (amount: number, currencyCode: string) => {
@@ -129,11 +141,7 @@ export function SupportDeveloperScreen() {
   const handleGooglePayPayment = (amount: number) => {
     const payeeName = "Dhairya Shah";
     const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent("Support Home Staff 360")}`;
-    window.location.href = upiUrl;
-    toast({
-      title: "Opening Google Pay",
-      description: "Complete the payment in Google Pay",
-    });
+    openUpiUrl(upiUrl, "Google Pay");
   };
 
   const paymentMethods: PaymentMethod[] = isIndian ? [
