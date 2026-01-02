@@ -27,7 +27,7 @@ interface PaymentMethod {
 
 const DONATION_TIERS: { [key: string]: DonationTier[] } = {
   INR: [
-    { amount: 9, label: "A small coffee", icon: Coffee },
+    { amount: 9, label: "A small tea/coffee", icon: Coffee },
     { amount: 29, label: "A thank you", icon: Heart },
     { amount: 99, label: "Show appreciation", icon: Star },
     { amount: 299, label: "Generous support", icon: Gift },
@@ -35,7 +35,7 @@ const DONATION_TIERS: { [key: string]: DonationTier[] } = {
     { amount: 999, label: "Champion supporter", icon: Star },
   ],
   USD: [
-    { amount: 1, label: "A small coffee", icon: Coffee },
+    { amount: 1, label: "A small tea/coffee", icon: Coffee },
     { amount: 3, label: "A thank you", icon: Heart },
     { amount: 5, label: "Show appreciation", icon: Star },
     { amount: 10, label: "Generous support", icon: Gift },
@@ -43,7 +43,7 @@ const DONATION_TIERS: { [key: string]: DonationTier[] } = {
     { amount: 50, label: "Champion supporter", icon: Star },
   ],
   EUR: [
-    { amount: 1, label: "A small coffee", icon: Coffee },
+    { amount: 1, label: "A small tea/coffee", icon: Coffee },
     { amount: 3, label: "A thank you", icon: Heart },
     { amount: 5, label: "Show appreciation", icon: Star },
     { amount: 10, label: "Generous support", icon: Gift },
@@ -51,7 +51,7 @@ const DONATION_TIERS: { [key: string]: DonationTier[] } = {
     { amount: 50, label: "Champion supporter", icon: Star },
   ],
   GBP: [
-    { amount: 1, label: "A small coffee", icon: Coffee },
+    { amount: 1, label: "A small tea/coffee", icon: Coffee },
     { amount: 2, label: "A thank you", icon: Heart },
     { amount: 4, label: "Show appreciation", icon: Star },
     { amount: 8, label: "Generous support", icon: Gift },
@@ -59,7 +59,7 @@ const DONATION_TIERS: { [key: string]: DonationTier[] } = {
     { amount: 40, label: "Champion supporter", icon: Star },
   ],
   AED: [
-    { amount: 5, label: "A small coffee", icon: Coffee },
+    { amount: 5, label: "A small tea/coffee", icon: Coffee },
     { amount: 10, label: "A thank you", icon: Heart },
     { amount: 20, label: "Show appreciation", icon: Star },
     { amount: 40, label: "Generous support", icon: Gift },
