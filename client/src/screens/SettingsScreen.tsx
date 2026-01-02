@@ -267,7 +267,14 @@ export function SettingsScreen() {
               />
             </div>
 
-            <Label htmlFor="currency">{t("currency")}</Label>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="currency">{t("currency")}</Label>
+              <p className="text-xs text-muted-foreground">
+                {isHome 
+                  ? "Default currency for new staff members. Each staff member can have their own currency."
+                  : "Default currency for new clients. Each client can have their own currency."}
+              </p>
+            </div>
             <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
               <SelectTrigger id="currency" data-testid="select-currency">
                 <SelectValue />
