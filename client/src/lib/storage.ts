@@ -100,7 +100,7 @@ function getPersonCurrencyInfo(personId: string): { currency: string; symbol: st
 }
 
 function getClientHomeCurrencyInfo(clientHomeId: string): { currency: string; symbol: string } {
-  const clientHomes = getItem<ClientHome[]>(STORAGE_KEYS.CLIENT_HOMES, []);
+  const clientHomes = getItem<ClientHome[]>(STAFF_STORAGE_KEYS.CLIENT_HOMES, []);
   const clientHome = clientHomes.find(c => c.id === clientHomeId);
   
   if (clientHome?.currency) {
@@ -113,6 +113,62 @@ function getClientHomeCurrencyInfo(clientHomeId: string): { currency: string; sy
   
   return getCurrentCurrencyInfo();
 }
+
+const MIGRATION_KEY = 'hm_migrations';
+
+interface Migrations {
+  entityCurrencyBackfill?: boolean;
+}
+
+function getMigrations(): Migrations {
+  return getItem<Migrations>(MIGRATION_KEY, {});
+}
+
+function setMigrations(migrations: Migrations): void {
+  setItem(MIGRATION_KEY, migrations);
+}
+
+function runEntityCurrencyBackfill(): void {
+  const migrations = getMigrations();
+  if (migrations.entityCurrencyBackfill) return;
+  
+  const homeSettings = getItem(STORAGE_KEYS.HOME_SETTINGS, defaultHomeSettings);
+  const staffSettings = getItem(STORAGE_KEYS.STAFF_SETTINGS, defaultStaffSettings);
+  
+  const people = getItem<Person[]>(STORAGE_KEYS.PEOPLE, []);
+  let peopleUpdated = false;
+  for (const person of people) {
+    if (!person.currency) {
+      person.currency = homeSettings.currency || 'USD';
+      person.customCurrencySymbol = homeSettings.currency === 'OTHER' 
+        ? homeSettings.customCurrencySymbol 
+        : undefined;
+      peopleUpdated = true;
+    }
+  }
+  if (peopleUpdated) {
+    setItem(STORAGE_KEYS.PEOPLE, people);
+  }
+  
+  const clientHomes = getItem<ClientHome[]>(STAFF_STORAGE_KEYS.CLIENT_HOMES, []);
+  let clientHomesUpdated = false;
+  for (const clientHome of clientHomes) {
+    if (!clientHome.currency) {
+      clientHome.currency = staffSettings.currency || 'USD';
+      clientHome.customCurrencySymbol = staffSettings.currency === 'OTHER' 
+        ? staffSettings.customCurrencySymbol 
+        : undefined;
+      clientHomesUpdated = true;
+    }
+  }
+  if (clientHomesUpdated) {
+    setItem(STAFF_STORAGE_KEYS.CLIENT_HOMES, clientHomes);
+  }
+  
+  setMigrations({ ...migrations, entityCurrencyBackfill: true });
+}
+
+runEntityCurrencyBackfill();
 
 export const storage = {
   getSettings(): AppSettings {
@@ -425,8 +481,8 @@ export const storage = {
       recordSalaryType: data.recordSalaryType || person?.salaryType,
       recordBaseRate: data.recordBaseRate ?? person?.baseRate,
       recordHalfDayPercentage: data.recordHalfDayPercentage ?? person?.halfDayPercentage ?? settings.halfDayPercentage,
-      recordCurrency: data.recordCurrency || currencyInfo.currency,
-      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
+      recordCurrency: currencyInfo.currency,
+      recordCurrencySymbol: currencyInfo.symbol,
     };
     attendance.push(entry);
     setItem(STORAGE_KEYS.ATTENDANCE, attendance);
@@ -462,8 +518,8 @@ export const storage = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
-      recordCurrency: data.recordCurrency || currencyInfo.currency,
-      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
+      recordCurrency: currencyInfo.currency,
+      recordCurrencySymbol: currencyInfo.symbol,
     };
     transactions.push(transaction);
     setItem(STORAGE_KEYS.TRANSACTIONS, transactions);
@@ -508,13 +564,15 @@ export const storage = {
 
   addLaundry(data: InsertLaundryBatch): LaundryBatch {
     const laundry = this.getLaundry();
-    const currencyInfo = getPersonCurrencyInfo(data.personId);
+    const currencyInfo = data.personId 
+      ? getPersonCurrencyInfo(data.personId) 
+      : getCurrentCurrencyInfo();
     const batch: LaundryBatch = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
-      recordCurrency: data.recordCurrency || currencyInfo.currency,
-      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
+      recordCurrency: currencyInfo.currency,
+      recordCurrencySymbol: currencyInfo.symbol,
     };
     laundry.push(batch);
     setItem(STORAGE_KEYS.LAUNDRY, laundry);
@@ -585,8 +643,8 @@ export const storage = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
-      recordCurrency: data.recordCurrency || currencyInfo.currency,
-      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
+      recordCurrency: currencyInfo.currency,
+      recordCurrencySymbol: currencyInfo.symbol,
     };
     expenses.push(expense);
     setItem(STORAGE_KEYS.EXPENSES, expenses);
@@ -774,8 +832,8 @@ export const storage = {
       createdAt: new Date().toISOString(),
       recordSalaryType: data.recordSalaryType || clientHome?.salaryType,
       recordRate: data.recordRate ?? clientHome?.rate,
-      recordCurrency: data.recordCurrency || currencyInfo.currency,
-      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
+      recordCurrency: currencyInfo.currency,
+      recordCurrencySymbol: currencyInfo.symbol,
     };
     attendance.push(entry);
     setItem(STAFF_STORAGE_KEYS.SELF_ATTENDANCE, attendance);
@@ -816,8 +874,8 @@ export const storage = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
-      recordCurrency: data.recordCurrency || currencyInfo.currency,
-      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
+      recordCurrency: currencyInfo.currency,
+      recordCurrencySymbol: currencyInfo.symbol,
     };
     jobs.push(job);
     setItem(STAFF_STORAGE_KEYS.LAUNDRY_JOBS, jobs);
@@ -864,8 +922,8 @@ export const storage = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
-      recordCurrency: data.recordCurrency || currencyInfo.currency,
-      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
+      recordCurrency: currencyInfo.currency,
+      recordCurrencySymbol: currencyInfo.symbol,
     };
     earnings.push(earning);
     setItem(STAFF_STORAGE_KEYS.EARNINGS, earnings);
@@ -908,8 +966,8 @@ export const storage = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
-      recordCurrency: data.recordCurrency || currencyInfo.currency,
-      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
+      recordCurrency: currencyInfo.currency,
+      recordCurrencySymbol: currencyInfo.symbol,
     };
     expenses.push(expense);
     setItem(STAFF_STORAGE_KEYS.EXPENSES, expenses);
@@ -968,8 +1026,8 @@ export const storage = {
       ...data,
       id: generateId(),
       createdAt: new Date().toISOString(),
-      recordCurrency: data.recordCurrency || currencyInfo.currency,
-      recordCurrencySymbol: data.recordCurrencySymbol || currencyInfo.symbol,
+      recordCurrency: currencyInfo.currency,
+      recordCurrencySymbol: currencyInfo.symbol,
     };
     invoices.push(invoice);
     setItem(STAFF_STORAGE_KEYS.INVOICES, invoices);
