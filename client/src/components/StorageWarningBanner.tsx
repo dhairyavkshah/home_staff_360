@@ -50,11 +50,11 @@ export function StorageWarningBanner() {
   const title = isLimit ? t('storageLimitReached') : t('storageAlmostFull');
   const message = isLimit 
     ? t('storageLimitMessage')
-        .replace('{limit}', String(storageStatus.limitThreshold))
+        .replace('{limit}', String(storageStatus.softLimitThreshold))
     : t('storageWarningMessage')
         .replace('{percent}', String(storageStatus.percentUsed))
         .replace('{current}', String(storageStatus.totalRecords))
-        .replace('{limit}', String(storageStatus.limitThreshold));
+        .replace('{limit}', String(storageStatus.softLimitThreshold));
 
   return (
     <div 
@@ -100,7 +100,7 @@ export function StorageWarningBanner() {
               className={`h-1.5 flex-1 ${isLimit ? '[&>div]:bg-destructive' : '[&>div]:bg-amber-500 dark:[&>div]:bg-amber-600'}`}
             />
             <span className="text-xs text-muted-foreground whitespace-nowrap">
-              {storageStatus.totalRecords}/{storageStatus.limitThreshold}
+              {storageStatus.totalRecords}/{storageStatus.softLimitThreshold}
             </span>
           </div>
         </div>

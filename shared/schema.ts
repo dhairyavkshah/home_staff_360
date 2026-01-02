@@ -594,34 +594,16 @@ export const PRICING = {
 
 export const PLAN_LIMITS = {
   HOME: {
-    STANDARD: {
-      maxHouseholds: 2,
-      maxStaffTotal: 10,
-      maxDocuments: 25,
-    },
-    PREMIUM: {
-      maxHouseholds: 10,
-      maxStaffTotal: 100,
-      maxDocuments: 250,
-    },
+    maxHouseholds: 10,
   },
   STAFF: {
-    STANDARD: {
-      maxBusinesses: 2,
-      maxClientsTotal: 10,
-      maxDocuments: 25,
-    },
-    PREMIUM: {
-      maxBusinesses: 10,
-      maxClientsTotal: 100,
-      maxDocuments: 250,
-    },
+    maxBusinesses: 10,
   },
 } as const;
 
 export const STORAGE_LIMITS = {
-  totalRecordsWarning: 800,
-  totalRecordsLimit: 1000,
+  totalRecordsWarning: 900,
+  totalRecordsSoftLimit: 1000,
 } as const;
 
 // ============ DOCUMENT CATEGORIES ============

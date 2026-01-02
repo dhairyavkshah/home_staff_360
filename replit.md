@@ -19,7 +19,11 @@ The application features a modern UI inspired by Samsung One UI and Material 3, 
 - **Data Scoping**: All data is properly filtered by active account ID, with helper methods for both HOME and STAFF modes. A "Show All Contexts" toggle allows viewing data across all accounts.
 - **Cascade Deletes**: Deleting records automatically cleans up all related data (e.g., deleting a person also removes their attendance, transactions, etc.).
 - **Document Management**: Documents can be linked to various records (expenses, transactions, people, laundry, client homes). Images are automatically resized (max 1920x1920) and compressed (80% JPEG) to optimize storage, with a 5MB per file limit. Documents are stored as Base64-encoded strings in `localStorage`.
-- **Plan Management**: Includes a 30-day free trial with full premium access, transitioning to a limited FREE plan if not purchased. A one-time purchase unlocks lifetime premium access. Reactive plan status is managed via a `useSyncExternalStore` hook.
+- **Plan Management**: The app is fully free with the following limits:
+  - **Home User Mode**: Maximum 10 households
+  - **Staff User Mode**: Maximum 10 businesses
+  - **No hard limits** on staff, clients, or documents
+  - **Soft limit of 1000 total records**: When reached, users are prompted to delete dormant records to add more. Warning shows at 900 records.
 - **Invoicing System (STAFF Mode)**: Allows creation of itemized invoices with sequential numbering, tax rate support, and five statuses (draft, sent, paid, overdue, cancelled).
 
 ### Feature Specifications

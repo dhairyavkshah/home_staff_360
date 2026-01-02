@@ -48,8 +48,8 @@ export function StaffClientHomesScreen() {
   const handleAddClient = () => {
     if (!clientLimit.allowed) {
       toast({
-        title: "Limit Reached",
-        description: `You've reached the maximum of ${clientLimit.max} clients. Upgrade to Premium for more capacity.`,
+        title: "Storage Full",
+        description: "You've reached 1000 total records. Please delete some dormant records to add more clients.",
         variant: "destructive",
       });
       return;

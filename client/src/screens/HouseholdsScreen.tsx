@@ -45,7 +45,7 @@ export function HouseholdsScreen() {
     if (!planLimit.allowed) {
       toast({
         title: tLabel('limitReached', 'Limit Reached'),
-        description: `${tLabel('maxHouseholds', 'Maximum households')}: ${planLimit.max}. ${tLabel('upgradeToPremium', 'Upgrade to Premium for more.')}`,
+        description: `${tLabel('maxHouseholds', 'Maximum households')}: ${planLimit.max}. ${tLabel('deleteToAddMore', 'Delete an existing household to add a new one.')}`,
         variant: 'destructive',
       });
       return;

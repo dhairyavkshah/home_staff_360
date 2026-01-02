@@ -31,8 +31,8 @@ export function PeopleScreen() {
   const handleAddStaff = () => {
     if (!staffLimitTotal.allowed) {
       toast({
-        title: "Limit Reached",
-        description: `You've reached the maximum of ${staffLimitTotal.max} staff members. Upgrade to Premium for more capacity.`,
+        title: "Storage Full",
+        description: "You've reached 1000 total records. Please delete some dormant records to add more staff.",
         variant: "destructive",
       });
       return;

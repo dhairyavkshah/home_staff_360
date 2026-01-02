@@ -1088,9 +1088,8 @@ export const storage = {
     this.saveSettings(settings);
   },
 
-  checkHomePlanLimit(type: 'households' | 'staff'): { allowed: boolean; current: number; max: number } {
-    const planType = this.getPlanType();
-    const limits = PLAN_LIMITS.HOME[planType];
+  checkHomePlanLimit(type: 'households' | 'staff'): { allowed: boolean; current: number; max: number | null } {
+    const limits = PLAN_LIMITS.HOME;
     
     if (type === 'households') {
       const current = this.getAccounts().filter(a => a.ownerType === 'HOME').length;
@@ -1098,14 +1097,18 @@ export const storage = {
     }
     if (type === 'staff') {
       const current = this.getPeople().length;
-      return { allowed: current < limits.maxStaffTotal, current, max: limits.maxStaffTotal };
+      const storageStatus = this.getStorageStatus();
+      return { 
+        allowed: storageStatus.status !== 'limit', 
+        current, 
+        max: null 
+      };
     }
-    return { allowed: true, current: 0, max: 0 };
+    return { allowed: true, current: 0, max: null };
   },
 
-  checkStaffPlanLimit(type: 'businesses' | 'clients'): { allowed: boolean; current: number; max: number } {
-    const planType = this.getPlanType();
-    const limits = PLAN_LIMITS.STAFF[planType];
+  checkStaffPlanLimit(type: 'businesses' | 'clients'): { allowed: boolean; current: number; max: number | null } {
+    const limits = PLAN_LIMITS.STAFF;
     
     if (type === 'businesses') {
       const current = this.getAccounts().filter(a => a.ownerType === 'STAFF').length;
@@ -1113,9 +1116,14 @@ export const storage = {
     }
     if (type === 'clients') {
       const current = this.getClientHomes().length;
-      return { allowed: current < limits.maxClientsTotal, current, max: limits.maxClientsTotal };
+      const storageStatus = this.getStorageStatus();
+      return { 
+        allowed: storageStatus.status !== 'limit', 
+        current, 
+        max: null 
+      };
     }
-    return { allowed: true, current: 0, max: 0 };
+    return { allowed: true, current: 0, max: null };
   },
 
   // ============ DOCUMENT METHODS ============
@@ -1183,16 +1191,15 @@ export const storage = {
     return this.getExpenses().find(e => e.id === id);
   },
 
-  checkDocumentLimit(): { allowed: boolean; current: number; max: number } {
+  checkDocumentLimit(): { allowed: boolean; current: number; max: number | null } {
     const profile = this.getProfile();
-    const planType = this.getPlanType();
     const userType = profile?.type || 'HOME';
-    const limits = PLAN_LIMITS[userType][planType];
     const current = this.getDocumentsByOwnerType(userType).length;
+    const storageStatus = this.getStorageStatus();
     return { 
-      allowed: current < limits.maxDocuments, 
+      allowed: storageStatus.status !== 'limit', 
       current, 
-      max: limits.maxDocuments 
+      max: null 
     };
   },
 
@@ -1254,15 +1261,15 @@ export const storage = {
   getStorageStatus(): {
     totalRecords: number;
     warningThreshold: number;
-    limitThreshold: number;
+    softLimitThreshold: number;
     status: 'ok' | 'warning' | 'limit';
     percentUsed: number;
   } {
     const { total } = this.getTotalRecordsCount();
-    const { totalRecordsWarning, totalRecordsLimit } = STORAGE_LIMITS;
+    const { totalRecordsWarning, totalRecordsSoftLimit } = STORAGE_LIMITS;
     
     let status: 'ok' | 'warning' | 'limit' = 'ok';
-    if (total >= totalRecordsLimit) {
+    if (total >= totalRecordsSoftLimit) {
       status = 'limit';
     } else if (total >= totalRecordsWarning) {
       status = 'warning';
@@ -1271,9 +1278,9 @@ export const storage = {
     return {
       totalRecords: total,
       warningThreshold: totalRecordsWarning,
-      limitThreshold: totalRecordsLimit,
+      softLimitThreshold: totalRecordsSoftLimit,
       status,
-      percentUsed: Math.min(100, Math.round((total / totalRecordsLimit) * 100)),
+      percentUsed: Math.min(100, Math.round((total / totalRecordsSoftLimit) * 100)),
     };
   },
 };

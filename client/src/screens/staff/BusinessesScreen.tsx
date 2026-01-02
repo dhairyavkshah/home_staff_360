@@ -52,7 +52,7 @@ export function BusinessesScreen() {
     if (!planLimit.allowed) {
       toast({
         title: tLabel('limitReached', 'Limit Reached'),
-        description: `${tLabel('maxBusinesses', 'Maximum businesses')}: ${planLimit.max}. ${tLabel('upgradeToPremium', 'Upgrade to Premium for more.')}`,
+        description: `${tLabel('maxBusinesses', 'Maximum businesses')}: ${planLimit.max}. ${tLabel('deleteToAddMore', 'Delete an existing business to add a new one.')}`,
         variant: 'destructive',
       });
       return;

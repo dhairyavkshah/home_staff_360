@@ -54,8 +54,8 @@ export function StaffDocumentsScreen() {
   const handleAddClick = () => {
     if (!documentLimit.allowed) {
       toast({
-        title: tLabel('limitReached', 'Limit Reached'),
-        description: tLabel('documentLimitReached', `You've reached the maximum of ${documentLimit.max} documents. Upgrade to Premium for more.`),
+        title: tLabel('limitReached', 'Storage Full'),
+        description: tLabel('documentLimitReached', "You've reached 1000 total records. Please delete some dormant records to add more documents."),
         variant: 'destructive',
       });
       return;
