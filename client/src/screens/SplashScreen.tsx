@@ -58,7 +58,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           Version 1.0.0
         </p>
         <p className="text-white/40 text-xs" data-testid="text-branding">
-          Crafted by The Team 360
+          Crafted by Dhairya Shah (The Team 360)
         </p>
       </div>
     </div>
