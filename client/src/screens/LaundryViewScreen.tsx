@@ -64,8 +64,10 @@ export function LaundryViewScreen() {
 
   const laundryStaff = useMemo(() => {
     return people.filter(p => 
-      p.role?.toLowerCase() === 'laundry' || 
-      p.role?.toLowerCase().includes('laundry')
+      p.isActive && (
+        p.role?.toLowerCase() === 'laundry' || 
+        p.role?.toLowerCase().includes('laundry')
+      )
     );
   }, [people]);
 
@@ -187,6 +189,14 @@ export function LaundryViewScreen() {
   };
 
   const handleAddNew = () => {
+    if (laundryStaff.length === 0) {
+      toast({
+        title: t("noLaundryStaff") || "No Laundry Staff",
+        description: t("addLaundryStaffFirst") || "Please add a laundry staff member first before creating laundry entries.",
+        variant: "destructive",
+      });
+      return;
+    }
     navigate("add-laundry");
   };
 

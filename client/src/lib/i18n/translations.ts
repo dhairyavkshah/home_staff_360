@@ -478,6 +478,8 @@ const en = {
   totalRecords: "Total Records",
   deleteOldRecords: "Delete Old Records",
   storageAlmostFull: "Storage Almost Full",
+  noLaundryStaff: "No Laundry Staff",
+  addLaundryStaffFirst: "Please add a laundry staff member first before creating laundry entries.",
 };
 
 const hi: typeof en = {
@@ -936,6 +938,8 @@ const hi: typeof en = {
   totalRecords: "कुल रिकॉर्ड",
   deleteOldRecords: "पुराने रिकॉर्ड हटाएं",
   storageAlmostFull: "स्टोरेज लगभग भर गया",
+  noLaundryStaff: "कोई लॉन्ड्री स्टाफ नहीं",
+  addLaundryStaffFirst: "कृपया लॉन्ड्री प्रविष्टियां बनाने से पहले एक लॉन्ड्री स्टाफ जोड़ें।",
 };
 
 const gu: typeof en = {
@@ -1200,6 +1204,8 @@ const gu: typeof en = {
   totalRecords: "કુલ રેકોર્ડ્સ",
   deleteOldRecords: "જૂના રેકોર્ડ્સ કાઢી નાખો",
   storageAlmostFull: "સ્ટોરેજ લગભગ ભરેલું છે",
+  noLaundryStaff: "કોઈ લોન્ડ્રી સ્ટાફ નથી",
+  addLaundryStaffFirst: "કૃપા કરીને લોન્ડ્રી એન્ટ્રી બનાવતા પહેલા લોન્ડ્રી સ્ટાફ ઉમેરો.",
 };
 
 const kn: typeof en = {
@@ -1464,6 +1470,8 @@ const kn: typeof en = {
   totalRecords: "ಒಟ್ಟು ದಾಖಲೆಗಳು",
   deleteOldRecords: "ಹಳೆಯ ದಾಖಲೆಗಳನ್ನು ಅಳಿಸಿ",
   storageAlmostFull: "ಸಂಗ್ರಹಣೆ ಬಹುತೇಕ ತುಂಬಿದೆ",
+  noLaundryStaff: "ಲಾಂಡ್ರಿ ಸಿಬ್ಬಂದಿ ಇಲ್ಲ",
+  addLaundryStaffFirst: "ದಯವಿಟ್ಟು ಲಾಂಡ್ರಿ ಎಂಟ್ರಿಗಳನ್ನು ರಚಿಸುವ ಮೊದಲು ಲಾಂಡ್ರಿ ಸಿಬ್ಬಂದಿಯನ್ನು ಸೇರಿಸಿ.",
 };
 
 const ml: typeof en = {
@@ -1728,6 +1736,8 @@ const ml: typeof en = {
   totalRecords: "മൊത്തം റെക്കോർഡുകൾ",
   deleteOldRecords: "പഴയ റെക്കോർഡുകൾ ഇല്ലാതാക്കുക",
   storageAlmostFull: "സ്റ്റോറേജ് ഏതാണ്ട് നിറഞ്ഞിരിക്കുന്നു",
+  noLaundryStaff: "ലോൺഡ്രി സ്റ്റാഫ് ഇല്ല",
+  addLaundryStaffFirst: "ലോൺഡ്രി എൻട്രികൾ സൃഷ്ടിക്കുന്നതിന് മുമ്പ് ദയവായി ഒരു ലോൺഡ്രി സ്റ്റാഫിനെ ചേർക്കുക.",
 };
 
 // For brevity, other languages will fall back to English with key translations
