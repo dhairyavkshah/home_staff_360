@@ -23,7 +23,10 @@ import {
   type SalaryType, 
   STAFF_ROLES, 
   salaryTypes, 
-  SALARY_TYPE_LABELS 
+  SALARY_TYPE_LABELS,
+  currencies,
+  type Currency,
+  CURRENCIES,
 } from "@shared/schema";
 
 export function StaffAddClientHomeScreen() {
@@ -52,6 +55,10 @@ export function StaffAddClientHomeScreen() {
   const [sameAsClientName, setSameAsClientName] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  const defaultCurrency = storage.getStaffSettings().currency || "USD";
+  const [currency, setCurrency] = useState<Currency>(defaultCurrency);
+  const [customCurrencySymbol, setCustomCurrencySymbol] = useState("");
 
   useEffect(() => {
     if (existingHome) {
@@ -64,6 +71,10 @@ export function StaffAddClientHomeScreen() {
       setRate(existingHome.rate.toString());
       setIsActive(existingHome.isActive);
       setSameAsClientName(existingHome.contactName === existingHome.name || !existingHome.contactName);
+      if (existingHome.currency) {
+        setCurrency(existingHome.currency);
+        setCustomCurrencySymbol(existingHome.customCurrencySymbol || "");
+      }
     }
   }, [existingHome]);
 
@@ -72,6 +83,9 @@ export function StaffAddClientHomeScreen() {
     if (!name.trim()) newErrors.name = t("nameRequired");
     if (!role.trim()) newErrors.role = t("roleRequired");
     if (!rate || parseFloat(rate) <= 0) newErrors.rate = t("baseRateRequired");
+    if (currency === "OTHER" && !customCurrencySymbol.trim()) {
+      newErrors.customCurrencySymbol = "Custom symbol required";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -105,6 +119,8 @@ export function StaffAddClientHomeScreen() {
         salaryType,
         rate: parseFloat(rate),
         isActive,
+        currency,
+        customCurrencySymbol: currency === "OTHER" ? customCurrencySymbol.trim() : undefined,
       });
       toast({ title: t("clientHomeUpdated") });
       markClean();
@@ -119,6 +135,8 @@ export function StaffAddClientHomeScreen() {
         salaryType,
         rate: parseFloat(rate),
         isActive,
+        currency,
+        customCurrencySymbol: currency === "OTHER" ? customCurrencySymbol.trim() : undefined,
       });
       toast({ title: t("clientHomeAdded") });
       markClean();
@@ -210,6 +228,46 @@ export function StaffAddClientHomeScreen() {
           </Select>
           {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
         </div>
+
+        <div className="flex flex-col gap-2">
+          <Label>{t("currency")} <span className="text-destructive">*</span></Label>
+          <Select value={currency} onValueChange={(v) => { setCurrency(v as Currency); markDirty(); }}>
+            <SelectTrigger data-testid="select-currency">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="INR">INR - Indian Rupee</SelectItem>
+              <SelectItem value="USD">USD - US Dollar</SelectItem>
+              <SelectItem value="EUR">EUR - Euro</SelectItem>
+              <SelectItem value="GBP">GBP - British Pound</SelectItem>
+              <SelectItem value="AED">AED - UAE Dirham</SelectItem>
+              <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
+              <SelectItem value="CNY">CNY - Chinese Yuan</SelectItem>
+              <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
+              <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>
+              <SelectItem value="CHF">CHF - Swiss Franc</SelectItem>
+              <SelectItem value="SGD">SGD - Singapore Dollar</SelectItem>
+              <SelectItem value="MXN">MXN - Mexican Peso</SelectItem>
+              <SelectItem value="BRL">BRL - Brazilian Real</SelectItem>
+              <SelectItem value="ZAR">ZAR - South African Rand</SelectItem>
+              <SelectItem value="OTHER">Other (Custom)</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">{tLabel("allRecordsUseCurrency", "All records for this client will use this currency")}</p>
+        </div>
+
+        {currency === "OTHER" && (
+          <div className="flex flex-col gap-2">
+            <Label>{t("currencySymbol")} <span className="text-destructive">*</span></Label>
+            <Input
+              value={customCurrencySymbol}
+              onChange={(e) => { setCustomCurrencySymbol(e.target.value); markDirty(); }}
+              placeholder="e.g., Fr, kr"
+              data-testid="input-custom-currency"
+            />
+            {errors.customCurrencySymbol && <p className="text-xs text-destructive">{errors.customCurrencySymbol}</p>}
+          </div>
+        )}
 
         {role !== 'Laundry' && (
           <div className="flex flex-col gap-2">

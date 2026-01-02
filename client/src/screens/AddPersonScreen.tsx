@@ -34,7 +34,10 @@ import {
   salaryTypes, 
   type SalaryType, 
   STAFF_ROLES,
-  SALARY_TYPE_LABELS 
+  SALARY_TYPE_LABELS,
+  currencies,
+  type Currency,
+  CURRENCIES,
 } from "@shared/schema";
 
 export function AddPersonScreen() {
@@ -56,6 +59,10 @@ export function AddPersonScreen() {
   const [showPhotoDialog, setShowPhotoDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  
+  const defaultCurrency = storage.getHomeSettings().currency || "USD";
+  const [currency, setCurrency] = useState<Currency>(defaultCurrency);
+  const [customCurrencySymbol, setCustomCurrencySymbol] = useState("");
 
   useEffect(() => {
     if (editMode && data.personId) {
@@ -69,6 +76,10 @@ export function AddPersonScreen() {
         setHalfDayPercentage(person.halfDayPercentage?.toString() || "");
         setNotes(person.notes || "");
         setPhotoData(person.photoData || null);
+        if (person.currency) {
+          setCurrency(person.currency);
+          setCustomCurrencySymbol(person.customCurrencySymbol || "");
+        }
       }
     }
   }, [editMode, data.personId]);
@@ -87,6 +98,9 @@ export function AddPersonScreen() {
     if (halfDayPercentage && (parseFloat(halfDayPercentage) < 0 || parseFloat(halfDayPercentage) > 100)) {
       newErrors.halfDayPercentage = "Must be between 0 and 100";
     }
+    if (currency === "OTHER" && !customCurrencySymbol.trim()) {
+      newErrors.customCurrencySymbol = "Custom symbol required for OTHER currency";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -104,6 +118,8 @@ export function AddPersonScreen() {
       halfDayPercentage: halfDayPercentage ? parseFloat(halfDayPercentage) : undefined,
       notes: notes.trim() || undefined,
       photoData: photoData || undefined,
+      currency,
+      customCurrencySymbol: currency === "OTHER" ? customCurrencySymbol.trim() : undefined,
     };
 
     if (editMode && data.personId) {
@@ -292,6 +308,47 @@ export function AddPersonScreen() {
           <h2 className="text-lg font-semibold">
             {role === "Laundry" ? "Pay Details" : "Salary Details"}
           </h2>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="currency">Currency <span className="text-destructive">*</span></Label>
+            <Select value={currency} onValueChange={(v) => { setCurrency(v as Currency); markDirty(); }}>
+              <SelectTrigger id="currency" data-testid="select-currency">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="INR">INR - Indian Rupee</SelectItem>
+                <SelectItem value="USD">USD - US Dollar</SelectItem>
+                <SelectItem value="EUR">EUR - Euro</SelectItem>
+                <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                <SelectItem value="AED">AED - UAE Dirham</SelectItem>
+                <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
+                <SelectItem value="CNY">CNY - Chinese Yuan</SelectItem>
+                <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
+                <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>
+                <SelectItem value="CHF">CHF - Swiss Franc</SelectItem>
+                <SelectItem value="SGD">SGD - Singapore Dollar</SelectItem>
+                <SelectItem value="MXN">MXN - Mexican Peso</SelectItem>
+                <SelectItem value="BRL">BRL - Brazilian Real</SelectItem>
+                <SelectItem value="ZAR">ZAR - South African Rand</SelectItem>
+                <SelectItem value="OTHER">Other (Custom)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">All records for this staff will use this currency</p>
+          </div>
+
+          {currency === "OTHER" && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="customSymbol">Custom Currency Symbol <span className="text-destructive">*</span></Label>
+              <Input
+                id="customSymbol"
+                value={customCurrencySymbol}
+                onChange={(e) => { setCustomCurrencySymbol(e.target.value); markDirty(); }}
+                placeholder="e.g., Fr, kr"
+                data-testid="input-custom-currency"
+              />
+              {errors.customCurrencySymbol && <p className="text-xs text-destructive">{errors.customCurrencySymbol}</p>}
+            </div>
+          )}
 
           {role !== "Laundry" && (
             <div className="flex flex-col gap-2">
