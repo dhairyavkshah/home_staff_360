@@ -141,7 +141,7 @@ export function PersonDetailScreen() {
         contextMode={contextMode}
       />
 
-      <div className="content-container pb-2">
+      <div className="content-container pt-4 pb-2">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full">
             <TabsTrigger value="overview" className="flex-1" data-testid="tab-overview">

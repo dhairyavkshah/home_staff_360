@@ -204,7 +204,7 @@ export function TransactionsScreen() {
       />
 
       {showAddForm && (
-        <div className="content-container pb-4 flex-shrink-0 border-b">
+        <div className="content-container pt-4 pb-4 flex-shrink-0 border-b">
           <Card className="p-4 flex flex-col gap-4">
             <h2 className="text-base font-semibold">
               {tLabel('addTransaction', 'Add Transaction')}

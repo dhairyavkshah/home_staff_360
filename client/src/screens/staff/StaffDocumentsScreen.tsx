@@ -175,7 +175,7 @@ export function StaffDocumentsScreen() {
         data-testid="input-file"
       />
 
-      <div className="content-container pb-2">
+      <div className="content-container pt-4 pb-2">
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger data-testid="select-category">
             <SelectValue placeholder={tLabel('allCategories', 'All Categories')} />
