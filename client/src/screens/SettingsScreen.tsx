@@ -620,7 +620,7 @@ export function SettingsScreen() {
                 <p className="text-xs text-muted-foreground">Version 1.0.0</p>
               </div>
               <p className="text-sm text-muted-foreground">A private household and staff profession management app</p>
-              <p className="text-xs text-muted-foreground/70 pt-1">Crafted by The Team 360</p>
+              <p className="text-xs text-muted-foreground/70 pt-1">Crafted by Dhairya Shah (The Team 360)</p>
             </div>
           </Card>
         </section>
