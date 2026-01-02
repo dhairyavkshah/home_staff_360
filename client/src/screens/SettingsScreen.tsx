@@ -28,7 +28,8 @@ import { pinService } from "@/lib/pin-service";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useTour } from "@/lib/guided-tour";
 import { setHapticEnabled, setSoundEnabled, isHapticEnabled, isSoundEnabled } from "@/lib/sound-service";
-import { COUNTRIES, getCurrencyForCountry } from "@/lib/geolocation-service";
+import { getCurrencyForCountry } from "@/lib/geolocation-service";
+import { CountrySelector } from "@/components/ui/country-selector";
 import { notifyCurrencyChange } from "@/hooks/useCurrency";
 
 export function SettingsScreen() {
@@ -255,22 +256,15 @@ export function SettingsScreen() {
                 <MapPin className="w-3.5 h-3.5" />
                 Country
               </Label>
-              <Select value={country} onValueChange={(v) => {
-                setCountry(v);
-                const newCurrency = getCurrencyForCountry(v);
-                setCurrency(newCurrency);
-              }}>
-                <SelectTrigger id="country" data-testid="select-country">
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CountrySelector
+                value={country}
+                onValueChange={(v) => {
+                  setCountry(v);
+                  const newCurrency = getCurrencyForCountry(v);
+                  setCurrency(newCurrency);
+                }}
+                data-testid="select-country"
+              />
             </div>
 
             <Label htmlFor="currency">{t("currency")}</Label>

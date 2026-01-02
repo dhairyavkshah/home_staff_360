@@ -18,7 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { type Currency, type UserType } from "@shared/schema";
 import { pinService } from "@/lib/pin-service";
 import { useTour } from "@/lib/guided-tour";
-import { COUNTRIES, getCurrencyForCountry, getUserCountry, detectCountryFromIP } from "@/lib/geolocation-service";
+import { getCurrencyForCountry, getUserCountry, detectCountryFromIP } from "@/lib/geolocation-service";
+import { CountrySelector } from "@/components/ui/country-selector";
 
 const currencyOptions: { value: Currency; label: string; symbol: string }[] = [
   { value: "INR", label: "Indian Rupee", symbol: "₹" },
@@ -244,22 +245,16 @@ export function OnboardingScreen() {
                 <MapPin className="w-3.5 h-3.5" />
                 Country <span className="text-destructive">*</span>
               </Label>
-              <Select value={country} onValueChange={(v) => {
-                setCountry(v);
-                const newCurrency = getCurrencyForCountry(v);
-                setCurrency(newCurrency);
-              }}>
-                <SelectTrigger id="country" data-testid="select-country">
-                  <SelectValue placeholder="Select your country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CountrySelector
+                value={country}
+                onValueChange={(v) => {
+                  setCountry(v);
+                  const newCurrency = getCurrencyForCountry(v);
+                  setCurrency(newCurrency);
+                }}
+                placeholder="Select your country"
+                data-testid="select-country"
+              />
               {errors.country && (
                 <p className="text-xs text-destructive" role="alert">{errors.country}</p>
               )}
