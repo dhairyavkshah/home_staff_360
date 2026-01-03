@@ -80,14 +80,15 @@ Located in Settings > Support the Developer, this optional feature allows users 
 - **Document Management**: Images resized (max 1920x1920), compressed (80% JPEG), stored as Base64
 - **Invoicing System (STAFF Mode)**: Itemized invoices with sequential numbering, tax rates, 5 statuses
 
-### Multi-Language Support (20 Languages)
+### Multi-Language Support (21 Languages)
 **Complete translations (100% coverage ~250 keys)**:
 - English (en), Hindi (hi), Gujarati (gu), Kannada (kn), Malayalam (ml)
-- Spanish (es), French (fr), German (de), Arabic (ar), Chinese (zh)
-- Japanese (ja), Portuguese (pt), Marathi (mr), Punjabi (pa)
+- Spanish (es), Marathi (mr), Punjabi (pa), Tamil (ta)
+- Telugu (te), Urdu (ur), Bengali (bn), Odia (or), Assamese (as)
+- Russian (ru) - NEW
 
-**Partial translations (onboarding keys only, remaining ~720 translations pending)**:
-- Telugu (te), Tamil (ta), Urdu (ur), Bengali (bn), Odia (or), Assamese (as)
+**Partial translations (onboarding keys only, ~40 keys translated)**:
+- French (fr), German (de), Arabic (ar), Chinese (zh), Japanese (ja), Portuguese (pt)
 
 **Language Selector Features**:
 - Typeahead search functionality
