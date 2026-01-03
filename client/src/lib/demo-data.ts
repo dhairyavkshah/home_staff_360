@@ -415,6 +415,11 @@ export function loadDemoData() {
   console.log("Transactions:", transactions.length);
   console.log("Expenses:", expenses.length);
   console.log("Laundry batches:", laundry.length);
+  console.log("Reloading page in 1 second...");
+  
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
   
   return {
     profile,
