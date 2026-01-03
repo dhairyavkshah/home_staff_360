@@ -58,6 +58,16 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       
+      - name: Build Release APK
+        if: inputs.build_type == 'release'
+        working-directory: android
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/android/app/homestaff360-release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      
       - name: Build Debug APK
         if: inputs.build_type == 'debug'
         working-directory: android
@@ -69,6 +79,13 @@ jobs:
         with:
           name: android-release-aab
           path: android/app/build/outputs/bundle/release/app-release.aab
+      
+      - name: Upload Release APK
+        if: inputs.build_type == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
       
       - name: Upload Debug APK
         if: inputs.build_type == 'debug'
