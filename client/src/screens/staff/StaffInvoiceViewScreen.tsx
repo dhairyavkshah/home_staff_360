@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Edit2, Trash2, FileText, Clock, CheckCircle, AlertCircle, XCircle, Share } from "lucide-react";
+import { Edit2, Trash2, FileText, Clock, CheckCircle, AlertCircle, XCircle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,9 @@ import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, formatRecordCurrency } from "@/lib/calculations";
 import { currencySymbols, type InvoiceStatus } from "@shared/schema";
+import { Share } from "@capacitor/share";
+import { Capacitor } from "@capacitor/core";
+import { useI18n } from "@/lib/i18n/i18n-context";
 
 const STATUS_CONFIG: Record<InvoiceStatus, { icon: typeof CheckCircle; color: string; label: string }> = {
   draft: { icon: FileText, color: "bg-muted text-muted-foreground", label: "Draft" },
@@ -24,12 +27,14 @@ const STATUS_CONFIG: Record<InvoiceStatus, { icon: typeof CheckCircle; color: st
 export function StaffInvoiceViewScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
+  const { t } = useI18n();
   const data = useNavigationData<{ invoiceId: string }>();
   
   const settings = useMemo(() => storage.getSettings(), []);
   const symbol = settings.customCurrencySymbol || currencySymbols[settings.currency];
   const [refreshKey] = useState(0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const activeAccountId = useMemo(() => storage.getActiveAccountId(), [refreshKey]);
   const showAllContexts = useMemo(() => storage.getShowAllContexts(), [refreshKey]);
   const clientHomes = useMemo(() => {
@@ -72,6 +77,88 @@ export function StaffInvoiceViewScreen() {
     });
     toast({ title: "Invoice marked as paid" });
     navigate("staff-invoices");
+  };
+
+  const generateInvoiceText = () => {
+    if (!invoice) return "";
+    const sym = invoice.recordCurrencySymbol || symbol;
+    
+    let text = `INVOICE: ${invoice.invoiceNumber}\n`;
+    text += `Date: ${formatDate(invoice.issueDate)}\n`;
+    text += `Due Date: ${formatDate(invoice.dueDate)}\n`;
+    text += `Status: ${statusConfig?.label || invoice.status}\n\n`;
+    
+    if (client) {
+      text += `CLIENT:\n`;
+      text += `${client.name}\n`;
+      if (client.address) text += `${client.address}\n`;
+      if (client.contactName) text += `${client.contactName}\n`;
+      if (client.contactPhone) text += `${client.contactPhone}\n`;
+      text += `\n`;
+    }
+    
+    text += `ITEMS:\n`;
+    text += `-`.repeat(40) + `\n`;
+    invoice.items.forEach((item) => {
+      text += `${item.description}\n`;
+      text += `${item.quantity} x ${sym}${item.rate.toFixed(2)} = ${sym}${item.amount.toFixed(2)}\n\n`;
+    });
+    
+    text += `-`.repeat(40) + `\n`;
+    text += `Subtotal: ${sym}${invoice.subtotal.toFixed(2)}\n`;
+    if (invoice.taxRate && invoice.taxAmount) {
+      text += `Tax (${invoice.taxRate}%): ${sym}${invoice.taxAmount.toFixed(2)}\n`;
+    }
+    text += `TOTAL: ${sym}${invoice.total.toFixed(2)}\n`;
+    
+    if (invoice.notes) {
+      text += `\nNotes: ${invoice.notes}\n`;
+    }
+    
+    return text;
+  };
+
+  const handleShareInvoice = async () => {
+    if (!invoice) return;
+    
+    setIsSharing(true);
+    try {
+      const invoiceText = generateInvoiceText();
+      const title = `Invoice ${invoice.invoiceNumber}`;
+      
+      if (Capacitor.isNativePlatform()) {
+        await Share.share({
+          title: title,
+          text: invoiceText,
+          dialogTitle: t("shareInvoice"),
+        });
+        toast({ title: t("invoiceShared") });
+      } else if (navigator.share) {
+        await navigator.share({
+          title: title,
+          text: invoiceText,
+        });
+        toast({ title: t("invoiceShared") });
+      } else {
+        await navigator.clipboard.writeText(invoiceText);
+        toast({ 
+          title: t("success"), 
+          description: "Invoice copied to clipboard" 
+        });
+      }
+    } catch (error) {
+      if ((error as Error).message?.includes("cancel") || (error as Error).message?.includes("Cancel")) {
+        return;
+      }
+      console.error("Share error:", error);
+      toast({
+        title: t("error"),
+        description: "Could not share invoice",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   if (!invoice) {
@@ -195,13 +282,26 @@ export function StaffInvoiceViewScreen() {
 
         <div className="flex gap-3 mt-4">
           <Button
+            variant="default"
+            className="flex-1"
+            onClick={handleShareInvoice}
+            disabled={isSharing}
+            data-testid="button-share-invoice"
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            {t("shareInvoice")}
+          </Button>
+        </div>
+
+        <div className="flex gap-3 mt-3">
+          <Button
             variant="outline"
             className="flex-1"
             onClick={() => navigate("staff-add-invoice", { invoiceId: invoice.id })}
             data-testid="button-edit-invoice"
           >
             <Edit2 className="w-4 h-4 mr-2" />
-            Edit
+            {t("edit")}
           </Button>
           <Button 
             variant="destructive" 
@@ -210,7 +310,7 @@ export function StaffInvoiceViewScreen() {
             onClick={() => setShowDeleteConfirm(true)}
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            Delete
+            {t("delete")}
           </Button>
         </div>
 

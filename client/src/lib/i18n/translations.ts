@@ -389,7 +389,7 @@ const en = {
   editClient: "Edit Client",
   updateClientDetails: "Update client details",
   addNewClient: "Add a new client home",
-  enterHomeName: "e.g., Smith Family",
+  homeNamePlaceholder: "e.g., Smith Family",
   clientName: "Client Name",
   enterClientName: "e.g., Smith Family",
   sameAsClientName: "Same as Client Name",
@@ -494,6 +494,224 @@ const en = {
   storageAlmostFull: "Storage Almost Full",
   noLaundryStaff: "No Laundry Staff",
   addLaundryStaffFirst: "Please add a laundry staff member first before creating laundry entries.",
+  
+  // Settings Section Titles
+  about: "About",
+  support: "Support",
+  supportTheDeveloper: "Support the Developer",
+  helpKeepAppFreeAdFree: "Help keep this app free and ad-free",
+  feedback: "Feedback",
+  feedbackAndSupport: "Feedback & Support",
+  
+  // Support Developer Screen
+  thankYou: "Thank You!",
+  backToSettings: "Back to Settings",
+  yourSupportMeansALot: "Your support means a lot to us!",
+  weAppreciateYourContribution: "We appreciate your contribution to keeping this app free and ad-free.",
+  selectAmount: "Select Amount",
+  customAmount: "Custom Amount",
+  enterCustomAmount: "Enter custom amount",
+  selectPaymentMethod: "Select Payment Method",
+  proceedToPayment: "Proceed to Payment",
+  paymentInstructions: "Payment Instructions",
+  didYouCompletePayment: "Did you complete the payment?",
+  yesPaymentCompleted: "Yes, Payment Completed",
+  noTryAgain: "No, Try Again",
+  invalidAmount: "Invalid amount",
+  pleaseEnterValidAmount: "Please enter a valid amount",
+  aSmallTeaCoffee: "A small tea/coffee",
+  aThankYou: "A thank you",
+  showAppreciation: "Show appreciation",
+  generousSupport: "Generous support",
+  amazingSupporter: "Amazing supporter",
+  championSupporter: "Champion supporter",
+  
+  // Permission Screens
+  permissions: "Permissions",
+  cameraPermission: "Camera Permission",
+  cameraPermissionDesc: "Allow camera access to capture photos for documents",
+  storagePermission: "Storage Permission",
+  storagePermissionDesc: "Allow storage access to save and load files",
+  notificationPermission: "Notification Permission",
+  notificationPermissionDesc: "Allow notifications to receive reminders",
+  allowAccess: "Allow Access",
+  deny: "Deny",
+  permissionRequired: "Permission Required",
+  pleaseGrantPermission: "Please grant permission to use this feature",
+  goToSettings: "Go to Settings",
+  
+  // Setup Screens
+  setupYourAccount: "Setup Your Account",
+  letsGetStarted: "Let's get started",
+  homeUserSetup: "Home User Setup",
+  professionalSetup: "Professional Setup",
+  setupComplete: "Setup Complete",
+  youAreAllSet: "You're all set!",
+  startUsingApp: "Start Using App",
+  enterYourName: "Enter your name",
+  enterHomeName: "Enter home name",
+  enterBusinessName: "Enter business name",
+  selectCountry: "Select Country",
+  selectCurrency: "Select Currency",
+  createAccount: "Create Account",
+  skipForNow: "Skip for now",
+  
+  // Validation Messages
+  fieldRequired: "This field is required",
+  invalidEmail: "Invalid email address",
+  invalidPhone: "Invalid phone number",
+  invalidAmount2: "Invalid amount",
+  minLength: "Minimum {min} characters required",
+  maxLength: "Maximum {max} characters allowed",
+  passwordsDoNotMatch: "Passwords do not match",
+  
+  // Notification Messages
+  reminderTitle: "Reminder",
+  paymentDueReminder: "Payment due for {name}",
+  billDueReminder: "Bill due: {title}",
+  attendanceReminder: "Don't forget to mark attendance",
+  
+  // Staff Details Screen
+  staffDetails: "Staff Details",
+  viewStaffMember: "View Staff Member",
+  basicInformationSection: "Basic Information",
+  salaryDetails: "Salary Details",
+  additionalNotes: "Additional Notes",
+  joinDate: "Join Date",
+  lastPayment: "Last Payment",
+  totalPaid: "Total Paid",
+  totalOwed: "Total Owed",
+  paymentHistory: "Payment History",
+  noPaymentHistory: "No payment history",
+  
+  // Transaction Details
+  transactionDetails: "Transaction Details",
+  transactionType: "Transaction Type",
+  recordedOn: "Recorded On",
+  editTransaction: "Edit Transaction",
+  deleteTransaction: "Delete Transaction",
+  deleteTransactionConfirm: "Are you sure you want to delete this transaction?",
+  transactionDeleted: "Transaction deleted",
+  transactionUpdated: "Transaction updated",
+  
+  // Calendar
+  calendar: "Calendar",
+  selectDate: "Select Date",
+  today: "Today",
+  thisMonth: "This Month",
+  noEventsOnThisDay: "No events on this day",
+  viewHistory: "View History",
+  
+  // Documents
+  documents: "Documents",
+  addDocument: "Add Document",
+  viewDocument: "View Document",
+  deleteDocument: "Delete Document",
+  deleteDocumentConfirm: "Are you sure you want to delete this document?",
+  documentDeleted: "Document deleted",
+  documentAdded: "Document added",
+  noDocuments: "No documents",
+  addDocumentsHere: "Add documents here for easy access",
+  takePhoto: "Take Photo",
+  chooseFromGallery: "Choose from Gallery",
+  documentName: "Document Name",
+  enterDocumentName: "Enter document name",
+  
+  // Invoices (Staff Mode)
+  invoices: "Invoices",
+  addInvoice: "Add Invoice",
+  viewInvoice: "View Invoice",
+  editInvoice: "Edit Invoice",
+  deleteInvoice: "Delete Invoice",
+  deleteInvoiceConfirm: "Are you sure you want to delete this invoice?",
+  invoiceDeleted: "Invoice deleted",
+  invoiceAdded: "Invoice added",
+  invoiceUpdated: "Invoice updated",
+  noInvoices: "No invoices",
+  createFirstInvoice: "Create your first invoice",
+  invoiceNumber: "Invoice Number",
+  invoiceDate: "Invoice Date",
+  dueAmount: "Due Amount",
+  taxRate: "Tax Rate",
+  taxAmount: "Tax Amount",
+  addItem2: "Add Item",
+  removeItem: "Remove Item",
+  itemDescription: "Item Description",
+  unitPrice: "Unit Price",
+  draft: "Draft",
+  sent: "Sent",
+  cancelled: "Cancelled",
+  invoiceStatus: "Invoice Status",
+  markAsSent: "Mark as Sent",
+  markAsPaidInvoice: "Mark as Paid",
+  markAsCancelled: "Mark as Cancelled",
+  shareInvoice: "Share Invoice",
+  sendInvoice: "Send Invoice",
+  shareVia: "Share via",
+  invoiceShared: "Invoice shared",
+  invoiceSent: "Invoice sent",
+  
+  // Businesses (Staff Mode)
+  businesses: "Businesses",
+  myBusinesses: "My Businesses",
+  businessDetails: "Business Details",
+  noBusinesses: "No businesses",
+  addYourFirstBusiness: "Add your first business",
+  
+  // Clients (Staff Mode)
+  clients: "Clients",
+  myClients: "My Clients",
+  clientDetails: "Client Details",
+  noClients: "No clients",
+  addYourFirstClient2: "Add your first client",
+  
+  // Currency descriptions
+  currencyDescHome: "Default currency for new staff members. Each staff member can have their own currency.",
+  currencyDescStaff: "Default currency for new clients. Each client can have their own currency.",
+  
+  // Currency Labels
+  inrIndianRupee: "INR - Indian Rupee",
+  usdUsDollar: "USD - US Dollar",
+  eurEuro: "EUR - Euro",
+  gbpBritishPound: "GBP - British Pound",
+  aedUaeDirham: "AED - UAE Dirham",
+  jpyJapaneseYen: "JPY - Japanese Yen",
+  cnyChinseYuan: "CNY - Chinese Yuan",
+  cadCanadianDollar: "CAD - Canadian Dollar",
+  audAustralianDollar: "AUD - Australian Dollar",
+  chfSwissFranc: "CHF - Swiss Franc",
+  sgdSingaporeDollar: "SGD - Singapore Dollar",
+  mxnMexicanPeso: "MXN - Mexican Peso",
+  brlBrazilianReal: "BRL - Brazilian Real",
+  zarSouthAfricanRand: "ZAR - South African Rand",
+  otherCustom: "Other (Custom)",
+  
+  // Report Templates
+  reportTemplate: "Report Template",
+  salaryReport: "Salary Report",
+  salaryReportDesc: "Staff salary summary and payment history",
+  expenseReport: "Expense Report",
+  expenseReportDesc: "Household expense summary",
+  laundryReport: "Laundry Report",
+  laundryReportDesc: "Laundry service records and costs",
+  summary: "Summary",
+  detailed: "Detailed",
+  byCategory: "By Category",
+  byStaff: "By Staff",
+  byClient: "By Client",
+  generatePdf: "Generate PDF",
+  downloadCsv: "Download CSV",
+  shareReport: "Share Report",
+  
+  // Guided Tour
+  tour: "Tour",
+  startTour: "Start Tour",
+  skipTour: "Skip Tour",
+  nextStep: "Next",
+  previousStep: "Previous",
+  finishTour: "Finish",
+  tourCompleted: "Tour Completed",
+  replayTour: "Replay Tour",
 };
 
 const hi: typeof en = {
@@ -871,7 +1089,7 @@ const hi: typeof en = {
   editClientHome: "ग्राहक घर संपादित करें",
   updateClientDetails: "ग्राहक विवरण अपडेट करें",
   addNewClient: "नया ग्राहक जोड़ें",
-  enterHomeName: "जैसे, शर्मा परिवार",
+  homeNamePlaceholder: "जैसे, शर्मा परिवार",
   address: "पता",
   enterAddress: "जैसे, 123 मुख्य सड़क",
   contactName: "संपर्क नाम",
@@ -968,6 +1186,224 @@ const hi: typeof en = {
   storageAlmostFull: "स्टोरेज लगभग भर गया",
   noLaundryStaff: "कोई लॉन्ड्री स्टाफ नहीं",
   addLaundryStaffFirst: "कृपया लॉन्ड्री प्रविष्टियां बनाने से पहले एक लॉन्ड्री स्टाफ जोड़ें।",
+  
+  // Settings Section Titles
+  about: "के बारे में",
+  support: "सहायता",
+  supportTheDeveloper: "डेवलपर का समर्थन करें",
+  helpKeepAppFreeAdFree: "इस ऐप को मुफ्त और विज्ञापन-मुक्त रखने में मदद करें",
+  feedback: "प्रतिक्रिया",
+  feedbackAndSupport: "प्रतिक्रिया और सहायता",
+  
+  // Support Developer Screen
+  thankYou: "धन्यवाद!",
+  backToSettings: "सेटिंग्स पर वापस जाएं",
+  yourSupportMeansALot: "आपका समर्थन हमारे लिए बहुत मायने रखता है!",
+  weAppreciateYourContribution: "इस ऐप को मुफ्त और विज्ञापन-मुक्त रखने में आपके योगदान की सराहना करते हैं।",
+  selectAmount: "राशि चुनें",
+  customAmount: "कस्टम राशि",
+  enterCustomAmount: "कस्टम राशि दर्ज करें",
+  selectPaymentMethod: "भुगतान विधि चुनें",
+  proceedToPayment: "भुगतान के लिए आगे बढ़ें",
+  paymentInstructions: "भुगतान निर्देश",
+  didYouCompletePayment: "क्या आपने भुगतान पूरा किया?",
+  yesPaymentCompleted: "हां, भुगतान पूरा हुआ",
+  noTryAgain: "नहीं, फिर से प्रयास करें",
+  invalidAmount: "अमान्य राशि",
+  pleaseEnterValidAmount: "कृपया एक वैध राशि दर्ज करें",
+  aSmallTeaCoffee: "एक छोटी चाय/कॉफी",
+  aThankYou: "एक धन्यवाद",
+  showAppreciation: "प्रशंसा दिखाएं",
+  generousSupport: "उदार समर्थन",
+  amazingSupporter: "अद्भुत समर्थक",
+  championSupporter: "चैंपियन समर्थक",
+  
+  // Permission Screens
+  permissions: "अनुमतियां",
+  cameraPermission: "कैमरा अनुमति",
+  cameraPermissionDesc: "दस्तावेजों के लिए फोटो लेने के लिए कैमरा एक्सेस की अनुमति दें",
+  storagePermission: "स्टोरेज अनुमति",
+  storagePermissionDesc: "फाइलें सहेजने और लोड करने के लिए स्टोरेज एक्सेस की अनुमति दें",
+  notificationPermission: "सूचना अनुमति",
+  notificationPermissionDesc: "रिमाइंडर प्राप्त करने के लिए सूचनाओं की अनुमति दें",
+  allowAccess: "एक्सेस की अनुमति दें",
+  deny: "अस्वीकार करें",
+  permissionRequired: "अनुमति आवश्यक",
+  pleaseGrantPermission: "इस सुविधा का उपयोग करने के लिए कृपया अनुमति दें",
+  goToSettings: "सेटिंग्स में जाएं",
+  
+  // Setup Screens
+  setupYourAccount: "अपना खाता सेट करें",
+  letsGetStarted: "चलिए शुरू करते हैं",
+  homeUserSetup: "होम यूजर सेटअप",
+  professionalSetup: "प्रोफेशनल सेटअप",
+  setupComplete: "सेटअप पूर्ण",
+  youAreAllSet: "आप तैयार हैं!",
+  startUsingApp: "ऐप का उपयोग शुरू करें",
+  enterYourName: "अपना नाम दर्ज करें",
+  enterHomeName: "घर का नाम दर्ज करें",
+  enterBusinessName: "व्यापार का नाम दर्ज करें",
+  selectCountry: "देश चुनें",
+  selectCurrency: "मुद्रा चुनें",
+  createAccount: "खाता बनाएं",
+  skipForNow: "अभी के लिए छोड़ें",
+  
+  // Validation Messages
+  fieldRequired: "यह फील्ड आवश्यक है",
+  invalidEmail: "अमान्य ईमेल पता",
+  invalidPhone: "अमान्य फोन नंबर",
+  invalidAmount2: "अमान्य राशि",
+  minLength: "न्यूनतम {min} अक्षर आवश्यक",
+  maxLength: "अधिकतम {max} अक्षर अनुमत",
+  passwordsDoNotMatch: "पासवर्ड मेल नहीं खाते",
+  
+  // Notification Messages
+  reminderTitle: "रिमाइंडर",
+  paymentDueReminder: "{name} के लिए भुगतान बकाया",
+  billDueReminder: "बिल बकाया: {title}",
+  attendanceReminder: "उपस्थिति दर्ज करना न भूलें",
+  
+  // Staff Details Screen
+  staffDetails: "स्टाफ विवरण",
+  viewStaffMember: "स्टाफ सदस्य देखें",
+  basicInformationSection: "मूल जानकारी",
+  salaryDetails: "वेतन विवरण",
+  additionalNotes: "अतिरिक्त नोट्स",
+  joinDate: "शामिल होने की तारीख",
+  lastPayment: "अंतिम भुगतान",
+  totalPaid: "कुल भुगतान",
+  totalOwed: "कुल बकाया",
+  paymentHistory: "भुगतान इतिहास",
+  noPaymentHistory: "कोई भुगतान इतिहास नहीं",
+  
+  // Transaction Details
+  transactionDetails: "लेनदेन विवरण",
+  transactionType: "लेनदेन प्रकार",
+  recordedOn: "रिकॉर्ड की गई तारीख",
+  editTransaction: "लेनदेन संपादित करें",
+  deleteTransaction: "लेनदेन हटाएं",
+  deleteTransactionConfirm: "क्या आप वाकई इस लेनदेन को हटाना चाहते हैं?",
+  transactionDeleted: "लेनदेन हटाया गया",
+  transactionUpdated: "लेनदेन अपडेट हुआ",
+  
+  // Calendar
+  calendar: "कैलेंडर",
+  selectDate: "तारीख चुनें",
+  today: "आज",
+  thisMonth: "इस महीने",
+  noEventsOnThisDay: "इस दिन कोई इवेंट नहीं",
+  viewHistory: "इतिहास देखें",
+  
+  // Documents
+  documents: "दस्तावेज़",
+  addDocument: "दस्तावेज़ जोड़ें",
+  viewDocument: "दस्तावेज़ देखें",
+  deleteDocument: "दस्तावेज़ हटाएं",
+  deleteDocumentConfirm: "क्या आप वाकई इस दस्तावेज़ को हटाना चाहते हैं?",
+  documentDeleted: "दस्तावेज़ हटाया गया",
+  documentAdded: "दस्तावेज़ जोड़ा गया",
+  noDocuments: "कोई दस्तावेज़ नहीं",
+  addDocumentsHere: "आसान पहुंच के लिए यहां दस्तावेज़ जोड़ें",
+  takePhoto: "फोटो लें",
+  chooseFromGallery: "गैलरी से चुनें",
+  documentName: "दस्तावेज़ का नाम",
+  enterDocumentName: "दस्तावेज़ का नाम दर्ज करें",
+  
+  // Invoices (Staff Mode)
+  invoices: "इनवॉइस",
+  addInvoice: "इनवॉइस जोड़ें",
+  viewInvoice: "इनवॉइस देखें",
+  editInvoice: "इनवॉइस संपादित करें",
+  deleteInvoice: "इनवॉइस हटाएं",
+  deleteInvoiceConfirm: "क्या आप वाकई इस इनवॉइस को हटाना चाहते हैं?",
+  invoiceDeleted: "इनवॉइस हटाया गया",
+  invoiceAdded: "इनवॉइस जोड़ा गया",
+  invoiceUpdated: "इनवॉइस अपडेट हुआ",
+  noInvoices: "कोई इनवॉइस नहीं",
+  createFirstInvoice: "अपना पहला इनवॉइस बनाएं",
+  invoiceNumber: "इनवॉइस नंबर",
+  invoiceDate: "इनवॉइस तारीख",
+  dueAmount: "बकाया राशि",
+  taxRate: "कर दर",
+  taxAmount: "कर राशि",
+  addItem2: "आइटम जोड़ें",
+  removeItem: "आइटम हटाएं",
+  itemDescription: "आइटम विवरण",
+  unitPrice: "यूनिट कीमत",
+  draft: "ड्राफ्ट",
+  sent: "भेजा गया",
+  cancelled: "रद्द किया गया",
+  invoiceStatus: "इनवॉइस स्थिति",
+  markAsSent: "भेजा गया चिह्नित करें",
+  markAsPaidInvoice: "भुगतान किया गया चिह्नित करें",
+  markAsCancelled: "रद्द किया गया चिह्नित करें",
+  shareInvoice: "इनवॉइस साझा करें",
+  sendInvoice: "इनवॉइस भेजें",
+  shareVia: "इसके द्वारा साझा करें",
+  invoiceShared: "इनवॉइस साझा किया गया",
+  invoiceSent: "इनवॉइस भेजा गया",
+  
+  // Businesses (Staff Mode)
+  businesses: "व्यवसाय",
+  myBusinesses: "मेरे व्यवसाय",
+  businessDetails: "व्यवसाय विवरण",
+  noBusinesses: "कोई व्यवसाय नहीं",
+  addYourFirstBusiness: "अपना पहला व्यवसाय जोड़ें",
+  
+  // Clients (Staff Mode)
+  clients: "ग्राहक",
+  myClients: "मेरे ग्राहक",
+  clientDetails: "ग्राहक विवरण",
+  noClients: "कोई ग्राहक नहीं",
+  addYourFirstClient2: "अपना पहला ग्राहक जोड़ें",
+  
+  // Currency descriptions
+  currencyDescHome: "नए स्टाफ सदस्यों के लिए डिफ़ॉल्ट मुद्रा। प्रत्येक स्टाफ की अपनी मुद्रा हो सकती है।",
+  currencyDescStaff: "नए ग्राहकों के लिए डिफ़ॉल्ट मुद्रा। प्रत्येक ग्राहक की अपनी मुद्रा हो सकती है।",
+  
+  // Currency Labels
+  inrIndianRupee: "INR - भारतीय रुपया",
+  usdUsDollar: "USD - अमेरिकी डॉलर",
+  eurEuro: "EUR - यूरो",
+  gbpBritishPound: "GBP - ब्रिटिश पाउंड",
+  aedUaeDirham: "AED - यूएई दिरहम",
+  jpyJapaneseYen: "JPY - जापानी येन",
+  cnyChinseYuan: "CNY - चीनी युआन",
+  cadCanadianDollar: "CAD - कैनेडियन डॉलर",
+  audAustralianDollar: "AUD - ऑस्ट्रेलियन डॉलर",
+  chfSwissFranc: "CHF - स्विस फ्रैंक",
+  sgdSingaporeDollar: "SGD - सिंगापुर डॉलर",
+  mxnMexicanPeso: "MXN - मैक्सिकन पेसो",
+  brlBrazilianReal: "BRL - ब्राज़ीलियन रियल",
+  zarSouthAfricanRand: "ZAR - दक्षिण अफ्रीकी रैंड",
+  otherCustom: "अन्य (कस्टम)",
+  
+  // Report Templates
+  reportTemplate: "रिपोर्ट टेम्पलेट",
+  salaryReport: "वेतन रिपोर्ट",
+  salaryReportDesc: "स्टाफ वेतन सारांश और भुगतान इतिहास",
+  expenseReport: "खर्च रिपोर्ट",
+  expenseReportDesc: "घरेलू खर्च सारांश",
+  laundryReport: "लॉन्ड्री रिपोर्ट",
+  laundryReportDesc: "लॉन्ड्री सेवा रिकॉर्ड और लागत",
+  summary: "सारांश",
+  detailed: "विस्तृत",
+  byCategory: "श्रेणी अनुसार",
+  byStaff: "स्टाफ अनुसार",
+  byClient: "ग्राहक अनुसार",
+  generatePdf: "PDF बनाएं",
+  downloadCsv: "CSV डाउनलोड करें",
+  shareReport: "रिपोर्ट साझा करें",
+  
+  // Guided Tour
+  tour: "टूर",
+  startTour: "टूर शुरू करें",
+  skipTour: "टूर छोड़ें",
+  nextStep: "आगे",
+  previousStep: "पीछे",
+  finishTour: "समाप्त करें",
+  tourCompleted: "टूर पूर्ण",
+  replayTour: "टूर दोहराएं",
 };
 
 const gu: typeof en = {
@@ -2307,3 +2743,43 @@ const es: typeof en = {
 const fr: typeof en = { ...en, home: "Accueil", staff: "Personnel", expenses: "Dépenses", reports: "Rapports", settings: "Paramètres", welcome: "Bienvenue", save: "Enregistrer", cancel: "Annuler", delete: "Supprimer", edit: "Modifier", add: "Ajouter", back: "Retour", confirm: "Confirmer", loading: "Chargement...", error: "Erreur", success: "Succès", name: "Nom", phone: "Téléphone", date: "Date", amount: "Montant", language: "Langue", currency: "Devise", security: "Sécurité", appearance: "Apparence", darkMode: "Mode Sombre", selectYourRole: "Sélectionnez votre mode par défaut", chooseHowYouWillUse: "Choisissez comment vous utiliserez principalement l'application.", homeUserDescription: "Pour les utilisateurs qui gèrent le personnel domestique et les affaires du foyer", staffProfessionalDescription: "Pour les professionnels de service qui gèrent leur travail", homeFeature1: "Suivre la présence et les paiements de salaire du personnel", homeFeature2: "Gérer les factures et les dépenses du foyer", homeFeature3: "Enregistrer les lots de linge avec les prix", homeFeature4: "Générer des rapports et exporter des données", staffFeature1: "Enregistrer la présence dans plusieurs foyers clients", staffFeature2: "Suivre les revenus et les dépenses personnelles", staffFeature3: "Gérer les travaux de blanchisserie et les factures", staffFeature4: "Générer des rapports d'entreprise", continueAsHome: "Continuer en tant qu'utilisateur domestique", continueAsStaff: "Continuer en tant qu'utilisateur personnel", canSwitchModes: "Vous pouvez basculer entre les modes et changer facilement le mode par défaut depuis les Paramètres.", hundredPercentPrivate: "100% Privé", privacyDescription: "Toutes vos données restent sur votre appareil. Pas de cloud, pas de comptes, confidentialité totale.", homeUser: "Utilisateur Domestique", staffProfessional: "Personnel/Professionnel" };
 const de: typeof en = { ...en, home: "Startseite", staff: "Personal", expenses: "Ausgaben", reports: "Berichte", settings: "Einstellungen", welcome: "Willkommen", save: "Speichern", cancel: "Abbrechen", delete: "Löschen", edit: "Bearbeiten", add: "Hinzufügen", back: "Zurück", confirm: "Bestätigen", loading: "Wird geladen...", error: "Fehler", success: "Erfolg", name: "Name", phone: "Telefon", date: "Datum", amount: "Betrag", language: "Sprache", currency: "Währung", security: "Sicherheit", appearance: "Aussehen", darkMode: "Dunkelmodus", selectYourRole: "Wählen Sie Ihren Standardmodus", chooseHowYouWillUse: "Wählen Sie, wie Sie die App hauptsächlich nutzen werden.", homeUserDescription: "Für Benutzer, die Haushaltspersonal und Haushaltsangelegenheiten verwalten", staffProfessionalDescription: "Für Serviceprofis, die ihre Arbeit verwalten", homeFeature1: "Anwesenheit und Gehaltszahlungen des Personals verfolgen", homeFeature2: "Haushaltsrechnungen und Ausgaben verwalten", homeFeature3: "Wäschepartien mit Preisen erfassen", homeFeature4: "Berichte generieren und Daten exportieren", staffFeature1: "Anwesenheit in mehreren Kundenhaushalten protokollieren", staffFeature2: "Einnahmen und persönliche Ausgaben verfolgen", staffFeature3: "Wäscheaufträge und Rechnungen verwalten", staffFeature4: "Geschäftsberichte generieren", continueAsHome: "Als Heimbenutzer fortfahren", continueAsStaff: "Als Personalbenutzer fortfahren", canSwitchModes: "Sie können zwischen den Modi wechseln und den Standardmodus in den Einstellungen einfach ändern.", hundredPercentPrivate: "100% Privat", privacyDescription: "Alle Ihre Daten bleiben auf Ihrem Gerät. Keine Cloud, keine Konten, vollständige Privatsphäre.", homeUser: "Heimbenutzer", staffProfessional: "Personal/Professionell" };
 const ar: typeof en = { ...en, home: "الرئيسية", staff: "الموظفون", expenses: "المصروفات", reports: "التقارير", settings: "الإعدادات", welcome: "مرحباً", save: "حفظ", cancel: "إلغاء", delete: "حذف", edit: "تعديل", add: "إضافة", back: "رجوع", confirm: "تأكيد", loading: "جاري التحميل...", error: "خطأ", success: "نجاح", name: "الاسم", phone: "الهاتف", date: "التاريخ", amount: "المبلغ", language: "اللغة", currency: "العملة", security: "الأمان", appearance: "المظهر", darkMode: "الوضع الداكن", selectYourRole: "اختر وضعك الافتراضي", chooseHowYouWillUse: "اختر كيف ستستخدم التطبيق بشكل أساسي.", homeUserDescription: "للمستخدمين الذين يديرون العمالة المنزلية وشؤون المنزل", staffProfessionalDescription: "لمحترفي الخدمة الذين يديرون عملهم", homeFeature1: "تتبع حضور الموظفين ومدفوعات الرواتب", homeFeature2: "إدارة فواتير ونفقات المنزل", homeFeature3: "تسجيل دفعات الغسيل مع الأسعار", homeFeature4: "إنشاء التقارير وتصدير البيانات", staffFeature1: "تسجيل الحضور في منازل عملاء متعددة", staffFeature2: "تتبع الأرباح والنفقات الشخصية", staffFeature3: "إدارة أعمال الغسيل والفواتير", staffFeature4: "إنشاء تقارير الأعمال", continueAsHome: "المتابعة كمستخدم منزلي", continueAsStaff: "المتابعة كمستخدم موظف", canSwitchModes: "يمكنك التبديل بين الأوضاع وتغيير الوضع الافتراضي من الإعدادات بسهولة.", hundredPercentPrivate: "100% خاص", privacyDescription: "جميع بياناتك تبقى على جهازك. لا سحابة، لا حسابات، خصوصية تامة.", homeUser: "مستخدم منزلي", staffProfessional: "موظف/محترف" };
+const zh: typeof en = { ...en, home: "首页", staff: "员工", expenses: "支出", reports: "报告", settings: "设置", welcome: "欢迎", save: "保存", cancel: "取消", delete: "删除", edit: "编辑", add: "添加", back: "返回", confirm: "确认", loading: "加载中...", error: "错误", success: "成功", name: "姓名", phone: "电话", date: "日期", amount: "金额", language: "语言", currency: "货币", security: "安全", appearance: "外观", darkMode: "深色模式", selectYourRole: "选择您的默认模式", chooseHowYouWillUse: "选择您主要使用应用的方式。", homeUserDescription: "适用于管理家庭员工和家庭事务的用户", staffProfessionalDescription: "适用于管理工作的服务专业人员", homeFeature1: "跟踪员工出勤和工资支付", homeFeature2: "管理家庭账单和支出", homeFeature3: "记录带价格的洗衣批次", homeFeature4: "生成报告并导出数据", staffFeature1: "在多个客户家庭记录出勤", staffFeature2: "跟踪收入和个人支出", staffFeature3: "管理洗衣工作和发票", staffFeature4: "生成业务报告", continueAsHome: "以家庭用户身份继续", continueAsStaff: "以员工用户身份继续", canSwitchModes: "您可以在模式之间切换，并从设置中轻松更改默认模式。", hundredPercentPrivate: "100% 私密", privacyDescription: "您的所有数据都保留在您的设备上。没有云，没有账户，完全隐私。", homeUser: "家庭用户", staffProfessional: "员工/专业人员" };
+const ja: typeof en = { ...en, home: "ホーム", staff: "スタッフ", expenses: "経費", reports: "レポート", settings: "設定", welcome: "ようこそ", save: "保存", cancel: "キャンセル", delete: "削除", edit: "編集", add: "追加", back: "戻る", confirm: "確認", loading: "読み込み中...", error: "エラー", success: "成功", name: "名前", phone: "電話", date: "日付", amount: "金額", language: "言語", currency: "通貨", security: "セキュリティ", appearance: "外観", darkMode: "ダークモード", selectYourRole: "デフォルトモードを選択", chooseHowYouWillUse: "主にアプリをどのように使用するかを選択してください。", homeUserDescription: "家庭のスタッフと家庭の事務を管理するユーザー向け", staffProfessionalDescription: "仕事を管理するサービス専門家向け", homeFeature1: "スタッフの出勤と給与支払いを追跡", homeFeature2: "家庭の請求書と経費を管理", homeFeature3: "価格付きの洗濯バッチを記録", homeFeature4: "レポートを生成してデータをエクスポート", staffFeature1: "複数のクライアント宅で出勤を記録", staffFeature2: "収入と個人的な経費を追跡", staffFeature3: "洗濯の仕事と請求書を管理", staffFeature4: "ビジネスレポートを生成", continueAsHome: "ホームユーザーとして続行", continueAsStaff: "スタッフユーザーとして続行", canSwitchModes: "モード間の切り替えや設定からデフォルトモードの変更が簡単にできます。", hundredPercentPrivate: "100% プライベート", privacyDescription: "すべてのデータはデバイスに保存されます。クラウドなし、アカウントなし、完全なプライバシー。", homeUser: "ホームユーザー", staffProfessional: "スタッフ/専門家" };
+const pt: typeof en = { ...en, home: "Início", staff: "Funcionários", expenses: "Despesas", reports: "Relatórios", settings: "Configurações", welcome: "Bem-vindo", save: "Salvar", cancel: "Cancelar", delete: "Excluir", edit: "Editar", add: "Adicionar", back: "Voltar", confirm: "Confirmar", loading: "Carregando...", error: "Erro", success: "Sucesso", name: "Nome", phone: "Telefone", date: "Data", amount: "Valor", language: "Idioma", currency: "Moeda", security: "Segurança", appearance: "Aparência", darkMode: "Modo Escuro", selectYourRole: "Selecione seu modo padrão", chooseHowYouWillUse: "Escolha como você usará o aplicativo principalmente.", homeUserDescription: "Para usuários que gerenciam funcionários domésticos e assuntos do lar", staffProfessionalDescription: "Para profissionais de serviço que gerenciam seu trabalho", homeFeature1: "Acompanhar presença e pagamentos de salário dos funcionários", homeFeature2: "Gerenciar contas e despesas domésticas", homeFeature3: "Registrar lotes de lavanderia com preços", homeFeature4: "Gerar relatórios e exportar dados", staffFeature1: "Registrar presença em várias casas de clientes", staffFeature2: "Acompanhar ganhos e despesas pessoais", staffFeature3: "Gerenciar trabalhos de lavanderia e faturas", staffFeature4: "Gerar relatórios de negócios", continueAsHome: "Continuar como Usuário Doméstico", continueAsStaff: "Continuar como Usuário Funcionário", canSwitchModes: "Você pode alternar entre os modos e alterar facilmente o modo padrão nas Configurações.", hundredPercentPrivate: "100% Privado", privacyDescription: "Todos os seus dados permanecem no seu dispositivo. Sem nuvem, sem contas, privacidade total.", homeUser: "Usuário Doméstico", staffProfessional: "Funcionário/Profissional" };
+
+// New Indian Languages with full onboarding translations
+const mr: typeof en = { ...en, home: "होम", staff: "कर्मचारी", expenses: "खर्च", reports: "अहवाल", settings: "सेटिंग्ज", welcome: "स्वागत", save: "जतन करा", cancel: "रद्द करा", delete: "हटवा", edit: "संपादित करा", add: "जोडा", back: "मागे", confirm: "पुष्टी करा", loading: "लोड होत आहे...", error: "त्रुटी", success: "यश", name: "नाव", phone: "फोन", date: "तारीख", amount: "रक्कम", language: "भाषा", currency: "चलन", security: "सुरक्षा", appearance: "स्वरूप", darkMode: "डार्क मोड", selectYourRole: "तुमचा डीफॉल्ट मोड निवडा", chooseHowYouWillUse: "तुम्ही मुख्यतः अॅप कसे वापराल ते निवडा.", homeUserDescription: "घरातील कर्मचारी आणि घरगुती बाबी व्यवस्थापित करणाऱ्या वापरकर्त्यांसाठी", staffProfessionalDescription: "त्यांचे काम व्यवस्थापित करणाऱ्या सेवा व्यावसायिकांसाठी", homeFeature1: "कर्मचारी उपस्थिती आणि पगार देयके ट्रॅक करा", homeFeature2: "घरगुती बिले आणि खर्च व्यवस्थापित करा", homeFeature3: "किंमतीसह लॉन्ड्री बॅच रेकॉर्ड करा", homeFeature4: "अहवाल तयार करा आणि डेटा निर्यात करा", staffFeature1: "अनेक क्लायंट घरांमध्ये उपस्थिती नोंदवा", staffFeature2: "कमाई आणि वैयक्तिक खर्च ट्रॅक करा", staffFeature3: "लॉन्ड्री जॉब आणि बीजक व्यवस्थापित करा", staffFeature4: "व्यवसाय अहवाल तयार करा", continueAsHome: "होम युजर म्हणून सुरू ठेवा", continueAsStaff: "स्टाफ युजर म्हणून सुरू ठेवा", canSwitchModes: "तुम्ही मोड्समध्ये स्विच करू शकता आणि सेटिंग्जमधून डीफॉल्ट मोड सहज बदलू शकता.", hundredPercentPrivate: "100% खाजगी", privacyDescription: "तुमचा सर्व डेटा तुमच्या डिव्हाइसवर राहतो. क्लाउड नाही, खाती नाही, पूर्ण गोपनीयता.", homeUser: "होम युजर", staffProfessional: "स्टाफ/व्यावसायिक" };
+const pa: typeof en = { ...en, home: "ਹੋਮ", staff: "ਸਟਾਫ", expenses: "ਖਰਚੇ", reports: "ਰਿਪੋਰਟਾਂ", settings: "ਸੈਟਿੰਗਜ਼", welcome: "ਸੁਆਗਤ ਹੈ", save: "ਸੇਵ ਕਰੋ", cancel: "ਰੱਦ ਕਰੋ", delete: "ਮਿਟਾਓ", edit: "ਸੋਧੋ", add: "ਜੋੜੋ", back: "ਪਿੱਛੇ", confirm: "ਪੁਸ਼ਟੀ ਕਰੋ", loading: "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...", error: "ਗਲਤੀ", success: "ਸਫਲਤਾ", name: "ਨਾਮ", phone: "ਫੋਨ", date: "ਮਿਤੀ", amount: "ਰਕਮ", language: "ਭਾਸ਼ਾ", currency: "ਮੁਦਰਾ", security: "ਸੁਰੱਖਿਆ", appearance: "ਦਿੱਖ", darkMode: "ਡਾਰਕ ਮੋਡ", selectYourRole: "ਆਪਣਾ ਡਿਫੌਲਟ ਮੋਡ ਚੁਣੋ", chooseHowYouWillUse: "ਚੁਣੋ ਕਿ ਤੁਸੀਂ ਮੁੱਖ ਤੌਰ ਤੇ ਐਪ ਕਿਵੇਂ ਵਰਤੋਗੇ।", homeUserDescription: "ਘਰੇਲੂ ਸਟਾਫ ਅਤੇ ਘਰ ਦੇ ਮਾਮਲੇ ਪ੍ਰਬੰਧਿਤ ਕਰਨ ਵਾਲੇ ਉਪਭੋਗਤਾਵਾਂ ਲਈ", staffProfessionalDescription: "ਆਪਣਾ ਕੰਮ ਪ੍ਰਬੰਧਿਤ ਕਰਨ ਵਾਲੇ ਸੇਵਾ ਪੇਸ਼ੇਵਰਾਂ ਲਈ", homeFeature1: "ਸਟਾਫ ਹਾਜ਼ਰੀ ਅਤੇ ਤਨਖਾਹ ਭੁਗਤਾਨ ਟ੍ਰੈਕ ਕਰੋ", homeFeature2: "ਘਰੇਲੂ ਬਿੱਲ ਅਤੇ ਖਰਚੇ ਪ੍ਰਬੰਧਿਤ ਕਰੋ", homeFeature3: "ਕੀਮਤਾਂ ਨਾਲ ਲਾਂਡਰੀ ਬੈਚ ਰਿਕਾਰਡ ਕਰੋ", homeFeature4: "ਰਿਪੋਰਟਾਂ ਬਣਾਓ ਅਤੇ ਡਾਟਾ ਐਕਸਪੋਰਟ ਕਰੋ", staffFeature1: "ਕਈ ਗਾਹਕ ਘਰਾਂ ਵਿੱਚ ਹਾਜ਼ਰੀ ਲੌਗ ਕਰੋ", staffFeature2: "ਕਮਾਈ ਅਤੇ ਨਿੱਜੀ ਖਰਚੇ ਟ੍ਰੈਕ ਕਰੋ", staffFeature3: "ਲਾਂਡਰੀ ਜੌਬ ਅਤੇ ਇਨਵੌਇਸ ਪ੍ਰਬੰਧਿਤ ਕਰੋ", staffFeature4: "ਕਾਰੋਬਾਰੀ ਰਿਪੋਰਟਾਂ ਬਣਾਓ", continueAsHome: "ਹੋਮ ਯੂਜ਼ਰ ਵਜੋਂ ਜਾਰੀ ਰੱਖੋ", continueAsStaff: "ਸਟਾਫ ਯੂਜ਼ਰ ਵਜੋਂ ਜਾਰੀ ਰੱਖੋ", canSwitchModes: "ਤੁਸੀਂ ਮੋਡਾਂ ਵਿਚਕਾਰ ਬਦਲ ਸਕਦੇ ਹੋ ਅਤੇ ਸੈਟਿੰਗਜ਼ ਤੋਂ ਡਿਫੌਲਟ ਮੋਡ ਆਸਾਨੀ ਨਾਲ ਬਦਲ ਸਕਦੇ ਹੋ।", hundredPercentPrivate: "100% ਨਿੱਜੀ", privacyDescription: "ਤੁਹਾਡਾ ਸਾਰਾ ਡਾਟਾ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਤੇ ਰਹਿੰਦਾ ਹੈ। ਕੋਈ ਕਲਾਊਡ ਨਹੀਂ, ਕੋਈ ਖਾਤੇ ਨਹੀਂ, ਪੂਰੀ ਗੋਪਨੀਯਤਾ।", homeUser: "ਹੋਮ ਯੂਜ਼ਰ", staffProfessional: "ਸਟਾਫ/ਪੇਸ਼ੇਵਰ" };
+const te: typeof en = { ...en, home: "హోమ్", staff: "సిబ్బంది", expenses: "ఖర్చులు", reports: "నివేదికలు", settings: "సెట్టింగ్‌లు", welcome: "స్వాగతం", save: "సేవ్ చేయండి", cancel: "రద్దు చేయండి", delete: "తొలగించు", edit: "సవరించు", add: "జోడించు", back: "వెనుకకు", confirm: "నిర్ధారించు", loading: "లోడ్ అవుతోంది...", error: "లోపం", success: "విజయం", name: "పేరు", phone: "ఫోన్", date: "తేదీ", amount: "మొత్తం", language: "భాష", currency: "కరెన్సీ", security: "భద్రత", appearance: "రూపం", darkMode: "డార్క్ మోడ్", selectYourRole: "మీ డిఫాల్ట్ మోడ్ ఎంచుకోండి", chooseHowYouWillUse: "మీరు ప్రధానంగా యాప్‌ను ఎలా ఉపయోగిస్తారో ఎంచుకోండి.", homeUserDescription: "ఇంట్లో గృహ సిబ్బంది మరియు గృహ వ్యవహారాలను నిర్వహించే వినియోగదారుల కోసం", staffProfessionalDescription: "తమ పనిని నిర్వహించే సేవా నిపుణుల కోసం", homeFeature1: "సిబ్బంది హాజరు & జీతం చెల్లింపులను ట్రాక్ చేయండి", homeFeature2: "గృహ బిల్లులు & ఖర్చులను నిర్వహించండి", homeFeature3: "ధరలతో లాండ్రీ బ్యాచ్‌లను రికార్డ్ చేయండి", homeFeature4: "నివేదికలు రూపొందించండి & డేటాను ఎగుమతి చేయండి", staffFeature1: "బహుళ క్లయింట్ ఇళ్లలో హాజరును లాగ్ చేయండి", staffFeature2: "ఆదాయం & వ్యక్తిగత ఖర్చులను ట్రాక్ చేయండి", staffFeature3: "లాండ్రీ జాబ్‌లు & ఇన్‌వాయిస్‌లను నిర్వహించండి", staffFeature4: "వ్యాపార నివేదికలు రూపొందించండి", continueAsHome: "హోమ్ యూజర్‌గా కొనసాగించు", continueAsStaff: "స్టాఫ్ యూజర్‌గా కొనసాగించు", canSwitchModes: "మీరు మోడ్‌ల మధ్య మారవచ్చు మరియు సెట్టింగ్‌ల నుండి డిఫాల్ట్ మోడ్‌ను సులభంగా మార్చవచ్చు.", hundredPercentPrivate: "100% ప్రైవేట్", privacyDescription: "మీ మొత్తం డేటా మీ పరికరంలో ఉంటుంది. క్లౌడ్ లేదు, ఖాతాలు లేవు, పూర్తి గోప్యత.", homeUser: "హోమ్ యూజర్", staffProfessional: "సిబ్బంది/ప్రొఫెషనల్" };
+const ta: typeof en = { ...en, home: "முகப்பு", staff: "ஊழியர்கள்", expenses: "செலவுகள்", reports: "அறிக்கைகள்", settings: "அமைப்புகள்", welcome: "வரவேற்கிறோம்", save: "சேமி", cancel: "ரத்து செய்", delete: "நீக்கு", edit: "திருத்து", add: "சேர்", back: "பின்", confirm: "உறுதிப்படுத்து", loading: "ஏற்றுகிறது...", error: "பிழை", success: "வெற்றி", name: "பெயர்", phone: "தொலைபேசி", date: "தேதி", amount: "தொகை", language: "மொழி", currency: "நாணயம்", security: "பாதுகாப்பு", appearance: "தோற்றம்", darkMode: "இருண்ட பயன்முறை", selectYourRole: "உங்கள் இயல்புநிலை பயன்முறையை தேர்ந்தெடுக்கவும்", chooseHowYouWillUse: "நீங்கள் முக்கியமாக செயலியை எவ்வாறு பயன்படுத்துவீர்கள் என்பதை தேர்ந்தெடுக்கவும்.", homeUserDescription: "வீட்டு ஊழியர்களையும் வீட்டு விவகாரங்களையும் நிர்வகிக்கும் பயனர்களுக்கு", staffProfessionalDescription: "தங்கள் வேலையை நிர்வகிக்கும் சேவை தொழில்முறை நிபுணர்களுக்கு", homeFeature1: "ஊழியர் வருகை & சம்பள பணம் செலுத்துதலை கண்காணிக்கவும்", homeFeature2: "வீட்டு பில்கள் & செலவுகளை நிர்வகிக்கவும்", homeFeature3: "விலைகளுடன் சலவை தொகுதிகளை பதிவு செய்யவும்", homeFeature4: "அறிக்கைகளை உருவாக்கி தரவை ஏற்றுமதி செய்யவும்", staffFeature1: "பல வாடிக்கையாளர் வீடுகளில் வருகையை பதிவு செய்யவும்", staffFeature2: "வருமானம் & தனிப்பட்ட செலவுகளை கண்காணிக்கவும்", staffFeature3: "சலவை வேலைகள் & விலைப்பட்டியல்களை நிர்வகிக்கவும்", staffFeature4: "வணிக அறிக்கைகளை உருவாக்கவும்", continueAsHome: "வீட்டு பயனராக தொடரவும்", continueAsStaff: "ஊழியர் பயனராக தொடரவும்", canSwitchModes: "நீங்கள் பயன்முறைகளுக்கு இடையில் மாறலாம் மற்றும் அமைப்புகளில் இருந்து இயல்புநிலை பயன்முறையை எளிதாக மாற்றலாம்.", hundredPercentPrivate: "100% தனிப்பட்ட", privacyDescription: "உங்கள் அனைத்து தரவும் உங்கள் சாதனத்தில் இருக்கும். கிளவுட் இல்லை, கணக்குகள் இல்லை, முழு தனியுரிமை.", homeUser: "வீட்டு பயனர்", staffProfessional: "ஊழியர்/தொழில்முறை" };
+const ur: typeof en = { ...en, home: "ہوم", staff: "عملہ", expenses: "اخراجات", reports: "رپورٹس", settings: "ترتیبات", welcome: "خوش آمدید", save: "محفوظ کریں", cancel: "منسوخ کریں", delete: "حذف کریں", edit: "ترمیم کریں", add: "شامل کریں", back: "واپس", confirm: "تصدیق کریں", loading: "لوڈ ہو رہا ہے...", error: "خرابی", success: "کامیابی", name: "نام", phone: "فون", date: "تاریخ", amount: "رقم", language: "زبان", currency: "کرنسی", security: "سیکیورٹی", appearance: "ظاہری شکل", darkMode: "ڈارک موڈ", selectYourRole: "اپنا ڈیفالٹ موڈ منتخب کریں", chooseHowYouWillUse: "منتخب کریں کہ آپ بنیادی طور پر ایپ کیسے استعمال کریں گے۔", homeUserDescription: "گھریلو عملے اور گھریلو معاملات کا انتظام کرنے والے صارفین کے لیے", staffProfessionalDescription: "اپنے کام کا انتظام کرنے والے سروس پروفیشنلز کے لیے", homeFeature1: "عملے کی حاضری اور تنخواہ کی ادائیگیوں کو ٹریک کریں", homeFeature2: "گھریلو بل اور اخراجات کا انتظام کریں", homeFeature3: "قیمتوں کے ساتھ لانڈری بیچ ریکارڈ کریں", homeFeature4: "رپورٹس بنائیں اور ڈیٹا برآمد کریں", staffFeature1: "متعدد کلائنٹ گھروں میں حاضری لاگ کریں", staffFeature2: "آمدنی اور ذاتی اخراجات کو ٹریک کریں", staffFeature3: "لانڈری جاب اور انوائسز کا انتظام کریں", staffFeature4: "کاروباری رپورٹس بنائیں", continueAsHome: "ہوم یوزر کے طور پر جاری رکھیں", continueAsStaff: "سٹاف یوزر کے طور پر جاری رکھیں", canSwitchModes: "آپ موڈز کے درمیان سوئچ کر سکتے ہیں اور سیٹنگز سے آسانی سے ڈیفالٹ موڈ تبدیل کر سکتے ہیں۔", hundredPercentPrivate: "100% نجی", privacyDescription: "آپ کا تمام ڈیٹا آپ کے ڈیوائس پر رہتا ہے۔ کوئی کلاؤڈ نہیں، کوئی اکاؤنٹس نہیں، مکمل رازداری۔", homeUser: "ہوم یوزر", staffProfessional: "عملہ/پروفیشنل" };
+const bn: typeof en = { ...en, home: "হোম", staff: "কর্মী", expenses: "খরচ", reports: "রিপোর্ট", settings: "সেটিংস", welcome: "স্বাগতম", save: "সংরক্ষণ করুন", cancel: "বাতিল করুন", delete: "মুছুন", edit: "সম্পাদনা করুন", add: "যোগ করুন", back: "পিছনে", confirm: "নিশ্চিত করুন", loading: "লোড হচ্ছে...", error: "ত্রুটি", success: "সফলতা", name: "নাম", phone: "ফোন", date: "তারিখ", amount: "পরিমাণ", language: "ভাষা", currency: "মুদ্রা", security: "নিরাপত্তা", appearance: "চেহারা", darkMode: "ডার্ক মোড", selectYourRole: "আপনার ডিফল্ট মোড নির্বাচন করুন", chooseHowYouWillUse: "আপনি প্রাথমিকভাবে কীভাবে অ্যাপ ব্যবহার করবেন তা নির্বাচন করুন।", homeUserDescription: "বাড়ির কর্মী এবং ঘরোয়া বিষয়গুলি পরিচালনা করতে ব্যবহারকারীদের জন্য", staffProfessionalDescription: "তাদের কাজ পরিচালনা করতে সেবা পেশাদারদের জন্য", homeFeature1: "কর্মী উপস্থিতি ও বেতন পরিশোধ ট্র্যাক করুন", homeFeature2: "বাড়ির বিল ও খরচ পরিচালনা করুন", homeFeature3: "মূল্য সহ লন্ড্রি ব্যাচ রেকর্ড করুন", homeFeature4: "রিপোর্ট তৈরি করুন ও ডেটা রপ্তানি করুন", staffFeature1: "একাধিক ক্লায়েন্ট বাড়িতে উপস্থিতি লগ করুন", staffFeature2: "আয় ও ব্যক্তিগত খরচ ট্র্যাক করুন", staffFeature3: "লন্ড্রি জব ও ইনভয়েস পরিচালনা করুন", staffFeature4: "ব্যবসায়িক রিপোর্ট তৈরি করুন", continueAsHome: "হোম ইউজার হিসেবে চালিয়ে যান", continueAsStaff: "স্টাফ ইউজার হিসেবে চালিয়ে যান", canSwitchModes: "আপনি মোডগুলির মধ্যে স্যুইচ করতে পারেন এবং সেটিংস থেকে সহজেই ডিফল্ট মোড পরিবর্তন করতে পারেন।", hundredPercentPrivate: "100% ব্যক্তিগত", privacyDescription: "আপনার সমস্ত ডেটা আপনার ডিভাইসে থাকে। কোনো ক্লাউড নেই, কোনো অ্যাকাউন্ট নেই, সম্পূর্ণ গোপনীয়তা।", homeUser: "হোম ইউজার", staffProfessional: "কর্মী/পেশাদার" };
+const or: typeof en = { ...en, home: "ହୋମ", staff: "କର୍ମଚାରୀ", expenses: "ଖର୍ଚ୍ଚ", reports: "ରିପୋର୍ଟ", settings: "ସେଟିଂସ", welcome: "ସ୍ୱାଗତ", save: "ସେଭ କରନ୍ତୁ", cancel: "ବାତିଲ କରନ୍ତୁ", delete: "ଡିଲିଟ କରନ୍ତୁ", edit: "ସମ୍ପାଦନା କରନ୍ତୁ", add: "ଯୋଡନ୍ତୁ", back: "ପଛକୁ", confirm: "ନିଶ୍ଚିତ କରନ୍ତୁ", loading: "ଲୋଡ ହେଉଛି...", error: "ତ୍ରୁଟି", success: "ସଫଳତା", name: "ନାମ", phone: "ଫୋନ", date: "ତାରିଖ", amount: "ପରିମାଣ", language: "ଭାଷା", currency: "ମୁଦ୍ରା", security: "ସୁରକ୍ଷା", appearance: "ରୂପ", darkMode: "ଡାର୍କ ମୋଡ", selectYourRole: "ଆପଣଙ୍କ ଡିଫଲ୍ଟ ମୋଡ ଚୟନ କରନ୍ତୁ", chooseHowYouWillUse: "ଆପଣ ମୁଖ୍ୟତଃ ଆପ୍ କିପରି ବ୍ୟବହାର କରିବେ ତାହା ଚୟନ କରନ୍ତୁ।", homeUserDescription: "ଘରର କର୍ମଚାରୀ ଏବଂ ଘରୋଇ ବିଷୟ ପରିଚାଳନା କରୁଥିବା ବ୍ୟବହାରକାରୀଙ୍କ ପାଇଁ", staffProfessionalDescription: "ନିଜର କାମ ପରିଚାଳନା କରୁଥିବା ସେବା ପେଶାଦାରଙ୍କ ପାଇଁ", homeFeature1: "କର୍ମଚାରୀ ହାଜିରା ଏବଂ ଦରମା ଦେୟ ଟ୍ରାକ କରନ୍ତୁ", homeFeature2: "ଘରର ବିଲ ଏବଂ ଖର୍ଚ୍ଚ ପରିଚାଳନା କରନ୍ତୁ", homeFeature3: "ମୂଲ୍ୟ ସହିତ ଲଣ୍ଡ୍ରି ବ୍ୟାଚ ରେକର୍ଡ କରନ୍ତୁ", homeFeature4: "ରିପୋର୍ଟ ସୃଷ୍ଟି କରନ୍ତୁ ଏବଂ ଡାଟା ରପ୍ତାନି କରନ୍ତୁ", staffFeature1: "ଏକାଧିକ କ୍ଲାଏଣ୍ଟ ଘରରେ ହାଜିରା ଲଗ କରନ୍ତୁ", staffFeature2: "ରୋଜଗାର ଏବଂ ବ୍ୟକ୍ତିଗତ ଖର୍ଚ୍ଚ ଟ୍ରାକ କରନ୍ତୁ", staffFeature3: "ଲଣ୍ଡ୍ରି ଜବ ଏବଂ ଇନଭଏସ ପରିଚାଳନା କରନ୍ତୁ", staffFeature4: "ବ୍ୟବସାୟ ରିପୋର୍ଟ ସୃଷ୍ଟି କରନ୍ତୁ", continueAsHome: "ହୋମ ୟୁଜର ଭାବେ ଜାରି ରଖନ୍ତୁ", continueAsStaff: "ଷ୍ଟାଫ ୟୁଜର ଭାବେ ଜାରି ରଖନ୍ତୁ", canSwitchModes: "ଆପଣ ମୋଡ ମଧ୍ୟରେ ସୁଇଚ କରିପାରିବେ ଏବଂ ସେଟିଂସରୁ ଡିଫଲ୍ଟ ମୋଡ ସହଜରେ ବଦଳାଇ ପାରିବେ।", hundredPercentPrivate: "100% ବ୍ୟକ୍ତିଗତ", privacyDescription: "ଆପଣଙ୍କ ସମସ୍ତ ଡାଟା ଆପଣଙ୍କ ଡିଭାଇସରେ ରହେ। କୌଣସି କ୍ଲାଉଡ ନାହିଁ, କୌଣସି ଆକାଉଣ୍ଟ ନାହିଁ, ସମ୍ପୂର୍ଣ୍ଣ ଗୋପନୀୟତା।", homeUser: "ହୋମ ୟୁଜର", staffProfessional: "କର୍ମଚାରୀ/ପେଶାଦାର" };
+const as: typeof en = { ...en, home: "হোম", staff: "কৰ্মচাৰী", expenses: "খৰচ", reports: "প্ৰতিবেদন", settings: "ছেটিংছ", welcome: "স্বাগতম", save: "সংৰক্ষণ কৰক", cancel: "বাতিল কৰক", delete: "মচি পেলাওক", edit: "সম্পাদনা কৰক", add: "যোগ কৰক", back: "পিছলৈ", confirm: "নিশ্চিত কৰক", loading: "লোড হৈ আছে...", error: "ত্ৰুটি", success: "সফলতা", name: "নাম", phone: "ফোন", date: "তাৰিখ", amount: "পৰিমাণ", language: "ভাষা", currency: "মুদ্ৰা", security: "সুৰক্ষা", appearance: "ৰূপ", darkMode: "ডাৰ্ক মোড", selectYourRole: "আপোনাৰ ডিফল্ট মোড নিৰ্বাচন কৰক", chooseHowYouWillUse: "আপুনি মূলতঃ এপটো কেনেকৈ ব্যৱহাৰ কৰিব সেইটো নিৰ্বাচন কৰক।", homeUserDescription: "ঘৰৰ কৰ্মচাৰী আৰু ঘৰুৱা বিষয়সমূহ পৰিচালনা কৰা ব্যৱহাৰকাৰীৰ বাবে", staffProfessionalDescription: "নিজৰ কাম পৰিচালনা কৰা সেৱা পেছাদাৰৰ বাবে", homeFeature1: "কৰ্মচাৰীৰ উপস্থিতি আৰু দৰমহা পৰিশোধ অনুসৰণ কৰক", homeFeature2: "ঘৰৰ বিল আৰু খৰচ পৰিচালনা কৰক", homeFeature3: "মূল্য সহ লণ্ড্ৰী বেচ ৰেকৰ্ড কৰক", homeFeature4: "প্ৰতিবেদন সৃষ্টি কৰক আৰু ডাটা ৰপ্তানি কৰক", staffFeature1: "একাধিক ক্লায়েণ্ট ঘৰত উপস্থিতি লগ কৰক", staffFeature2: "উপাৰ্জন আৰু ব্যক্তিগত খৰচ অনুসৰণ কৰক", staffFeature3: "লণ্ড্ৰী জব আৰু ইনভইচ পৰিচালনা কৰক", staffFeature4: "ব্যৱসায়িক প্ৰতিবেদন সৃষ্টি কৰক", continueAsHome: "হোম ইউজাৰ হিচাপে চলি থাকক", continueAsStaff: "ষ্টাফ ইউজাৰ হিচাপে চলি থাকক", canSwitchModes: "আপুনি মোডসমূহৰ মাজত সলনি কৰিব পাৰে আৰু ছেটিংছৰ পৰা সহজে ডিফল্ট মোড সলনি কৰিব পাৰে।", hundredPercentPrivate: "100% ব্যক্তিগত", privacyDescription: "আপোনাৰ সকলো ডাটা আপোনাৰ ডিভাইচত থাকে। কোনো ক্লাউড নাই, কোনো একাউণ্ট নাই, সম্পূৰ্ণ গোপনীয়তা।", homeUser: "হোম ইউজাৰ", staffProfessional: "কৰ্মচাৰী/পেছাদাৰ" };
+
+export const translations: Record<Language, typeof en> = {
+  en,
+  hi,
+  gu,
+  kn,
+  ml,
+  mr,
+  pa,
+  te,
+  ta,
+  ur,
+  bn,
+  or,
+  as,
+  es,
+  fr,
+  de,
+  ar,
+  zh,
+  ja,
+  pt,
+};
+
+export function getTranslation(language: Language, key: TranslationKey): string {
+  return translations[language]?.[key] || translations.en[key] || key;
+}
