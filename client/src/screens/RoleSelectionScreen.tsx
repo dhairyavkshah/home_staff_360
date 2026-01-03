@@ -1,17 +1,11 @@
-import { Home, Briefcase, ArrowRight, Shield, Info, Globe } from "lucide-react";
+import { Home, Briefcase, ArrowRight, Shield, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigation } from "@/lib/navigation";
 import { permissionsService } from "@/lib/permissions-service";
 import { useI18n } from "@/lib/i18n/i18n-context";
-import { languages, languageLabels, type UserType, type Language } from "@shared/schema";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { type UserType, type Language } from "@shared/schema";
+import { LanguageSelector } from "@/components/ui/language-selector";
 
 interface RoleCardProps {
   type: UserType;
@@ -78,19 +72,12 @@ export function RoleSelectionScreen() {
       <div className="flex-1 overflow-y-auto">
         <div className="content-container py-4 flex flex-col gap-4">
           <div className="flex justify-end">
-            <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
-              <SelectTrigger className="w-auto min-w-[140px] gap-2" data-testid="select-language">
-                <Globe className="w-4 h-4 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((lang) => (
-                  <SelectItem key={lang} value={lang} data-testid={`option-language-${lang}`}>
-                    {languageLabels[lang]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <LanguageSelector
+              value={language}
+              onValueChange={(value) => setLanguage(value as Language)}
+              className="w-auto min-w-[160px]"
+              data-testid="select-language"
+            />
           </div>
 
           <div className="flex flex-col items-center text-center gap-3 fade-in-up">

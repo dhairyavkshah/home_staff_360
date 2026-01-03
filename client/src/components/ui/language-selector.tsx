@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { Check, ChevronDown, Search, MapPin } from "lucide-react";
+import { Check, ChevronDown, Search, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,36 +9,43 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { COUNTRIES } from "@/lib/geolocation-service";
+import { languages, languageLabels, type Language } from "@shared/schema";
 
-interface CountrySelectorProps {
-  value: string;
-  onValueChange: (value: string) => void;
+interface LanguageSelectorProps {
+  value: Language;
+  onValueChange: (value: Language) => void;
   placeholder?: string;
   className?: string;
+  showIcon?: boolean;
   "data-testid"?: string;
 }
 
-export function CountrySelector({
+const LANGUAGE_LIST = languages.map((code) => ({
+  code,
+  name: languageLabels[code],
+}));
+
+export function LanguageSelector({
   value,
   onValueChange,
-  placeholder = "Select country",
+  placeholder = "Select language",
   className,
-  "data-testid": testId,
-}: CountrySelectorProps) {
+  showIcon = true,
+  "data-testid": testId = "select-language",
+}: LanguageSelectorProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const selectedCountry = COUNTRIES.find((c) => c.code === value);
+  const selectedLanguage = LANGUAGE_LIST.find((l) => l.code === value);
 
-  const filteredCountries = useMemo(() => {
-    if (!search.trim()) return COUNTRIES;
+  const filteredLanguages = useMemo(() => {
+    if (!search.trim()) return LANGUAGE_LIST;
     const query = search.toLowerCase();
-    return COUNTRIES.filter(
-      (country) =>
-        country.name.toLowerCase().includes(query) ||
-        country.code.toLowerCase().includes(query)
+    return LANGUAGE_LIST.filter(
+      (lang) =>
+        lang.name.toLowerCase().includes(query) ||
+        lang.code.toLowerCase().includes(query)
     );
   }, [search]);
 
@@ -50,7 +57,7 @@ export function CountrySelector({
     }
   }, [open]);
 
-  const handleSelect = (code: string) => {
+  const handleSelect = (code: Language) => {
     onValueChange(code);
     setOpen(false);
     setSearch("");
@@ -71,23 +78,16 @@ export function CountrySelector({
           data-testid={testId}
         >
           <span className="flex items-center gap-2 truncate">
-            {selectedCountry ? (
-              <>
-                <MapPin className="w-4 h-4 opacity-50" />
-                <span className="truncate">{selectedCountry.name}</span>
-              </>
-            ) : (
-              <>
-                <MapPin className="w-4 h-4 opacity-50" />
-                <span>{placeholder}</span>
-              </>
-            )}
+            {showIcon && <Globe className="w-4 h-4 opacity-50" />}
+            <span className="truncate">
+              {selectedLanguage ? selectedLanguage.name : placeholder}
+            </span>
           </span>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-[--radix-popover-trigger-width] p-0" 
+      <PopoverContent
+        className="w-[--radix-popover-trigger-width] p-0"
         align="start"
         sideOffset={4}
       >
@@ -95,35 +95,37 @@ export function CountrySelector({
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <Input
             ref={inputRef}
-            placeholder="Search countries..."
+            placeholder="Search languages..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-8 border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            data-testid={testId ? `${testId}-search` : "country-search"}
+            data-testid={`${testId}-search`}
           />
         </div>
         <ScrollArea className="h-[min(300px,50vh)]">
           <div className="p-1">
-            {filteredCountries.length === 0 ? (
+            {filteredLanguages.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
-                No country found
+                No language found
               </div>
             ) : (
-              filteredCountries.map((country) => (
+              filteredLanguages.map((lang) => (
                 <button
-                  key={country.code}
-                  onClick={() => handleSelect(country.code)}
+                  key={lang.code}
+                  onClick={() => handleSelect(lang.code)}
                   className={cn(
                     "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
-                    value === country.code && "bg-accent"
+                    value === lang.code && "bg-accent"
                   )}
-                  data-testid={testId ? `${testId}-option-${country.code}` : `country-option-${country.code}`}
+                  data-testid={`${testId}-option-${lang.code}`}
                 >
                   <span className="flex items-center gap-2 flex-1">
-                    <span className="text-xs text-muted-foreground font-mono w-6">{country.code}</span>
-                    <span>{country.name}</span>
+                    <span className="text-xs text-muted-foreground font-mono w-6">
+                      {lang.code.toUpperCase()}
+                    </span>
+                    <span>{lang.name}</span>
                   </span>
-                  {value === country.code && (
+                  {value === lang.code && (
                     <Check className="h-4 w-4 shrink-0" />
                   )}
                 </button>

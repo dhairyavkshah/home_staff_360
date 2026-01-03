@@ -30,6 +30,7 @@ import { useTour } from "@/lib/guided-tour";
 import { setHapticEnabled, setSoundEnabled, isHapticEnabled, isSoundEnabled } from "@/lib/sound-service";
 import { getCurrencyForCountry } from "@/lib/geolocation-service";
 import { CountrySelector } from "@/components/ui/country-selector";
+import { LanguageSelector } from "@/components/ui/language-selector";
 import { notifyCurrencyChange } from "@/hooks/useCurrency";
 
 export function SettingsScreen() {
@@ -316,18 +317,12 @@ export function SettingsScreen() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="language">{t("language")}</Label>
-            <Select value={language} onValueChange={(v) => setLanguage(v as Language)}>
-              <SelectTrigger id="language" data-testid="select-language">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((lang) => (
-                  <SelectItem key={lang} value={lang}>
-                    {languageLabels[lang]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <LanguageSelector
+              value={language}
+              onValueChange={(v) => setLanguage(v as Language)}
+              showIcon={false}
+              data-testid="select-language"
+            />
           </div>
 
           {isHome && (
