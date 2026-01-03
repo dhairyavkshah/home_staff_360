@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { Heart, Coffee, Gift, Star, User, MapPin, Globe, Smartphone, CreditCard, Wallet, Check, X, Sparkles } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Heart, Coffee, Gift, Star, User, MapPin, Globe, Smartphone, CreditCard, Wallet, Check, X, Sparkles, ChevronDown, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,14 @@ import {
   DrawerDescription,
   DrawerFooter,
 } from "@/components/ui/drawer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface DonationTier {
   amount: number;
@@ -284,6 +292,40 @@ function Confetti() {
   );
 }
 
+const DONATION_CURRENCIES = ["INR", ...PAYPAL_SUPPORTED_CURRENCIES];
+
+interface DonationCurrencyInfo {
+  code: string;
+  name: string;
+  symbol: string;
+}
+
+const DONATION_CURRENCY_LIST: DonationCurrencyInfo[] = [
+  { code: "INR", name: "Indian Rupee", symbol: "₹" },
+  { code: "AUD", name: "Australian Dollar", symbol: "A$" },
+  { code: "CAD", name: "Canadian Dollar", symbol: "C$" },
+  { code: "CHF", name: "Swiss Franc", symbol: "CHF" },
+  { code: "CZK", name: "Czech Koruna", symbol: "Kč" },
+  { code: "DKK", name: "Danish Krone", symbol: "kr" },
+  { code: "EUR", name: "Euro", symbol: "€" },
+  { code: "GBP", name: "British Pound", symbol: "£" },
+  { code: "HKD", name: "Hong Kong Dollar", symbol: "HK$" },
+  { code: "HUF", name: "Hungarian Forint", symbol: "Ft" },
+  { code: "ILS", name: "Israeli Shekel", symbol: "₪" },
+  { code: "JPY", name: "Japanese Yen", symbol: "¥" },
+  { code: "MXN", name: "Mexican Peso", symbol: "MX$" },
+  { code: "NOK", name: "Norwegian Krone", symbol: "kr" },
+  { code: "NZD", name: "New Zealand Dollar", symbol: "NZ$" },
+  { code: "PHP", name: "Philippine Peso", symbol: "₱" },
+  { code: "PLN", name: "Polish Zloty", symbol: "zł" },
+  { code: "RUB", name: "Russian Ruble", symbol: "₽" },
+  { code: "SEK", name: "Swedish Krona", symbol: "kr" },
+  { code: "SGD", name: "Singapore Dollar", symbol: "S$" },
+  { code: "THB", name: "Thai Baht", symbol: "฿" },
+  { code: "TWD", name: "Taiwan Dollar", symbol: "NT$" },
+  { code: "USD", name: "US Dollar", symbol: "$" },
+];
+
 export function SupportDeveloperScreen() {
   const { navigate } = useNavigation();
   const { toast } = useToast();
@@ -293,12 +335,18 @@ export function SupportDeveloperScreen() {
   const countryInfo = getCountryByCode(userCountry);
   const detectedCurrency = getCurrencyForCountry(userCountry) || "USD";
   
-  const isIndian = isIndianUser(userCountry);
+  const isIndianByCountry = isIndianUser(userCountry);
   const isPayPalSupported = PAYPAL_SUPPORTED_CURRENCIES.includes(detectedCurrency);
   
-  const currency = isIndian ? "INR" : (isPayPalSupported ? detectedCurrency : "USD");
-  const donations = DONATION_TIERS[currency] || DONATION_TIERS.USD;
-  const currencySymbol = CURRENCY_SYMBOLS[currency] || "$";
+  const initialCurrency = isIndianByCountry ? "INR" : (isPayPalSupported ? detectedCurrency : "USD");
+  
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(initialCurrency);
+  const [currencySearchOpen, setCurrencySearchOpen] = useState(false);
+  const [currencySearch, setCurrencySearch] = useState("");
+  
+  const isUpiCurrency = selectedCurrency === "INR";
+  const donations = DONATION_TIERS[selectedCurrency] || DONATION_TIERS.USD;
+  const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || "$";
 
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
@@ -309,6 +357,25 @@ export function SupportDeveloperScreen() {
   const [paymentInProgress, setPaymentInProgress] = useState(false);
 
   const donorStatus = getDonorStatus();
+  
+  const filteredCurrencies = useMemo(() => {
+    if (!currencySearch.trim()) return DONATION_CURRENCY_LIST;
+    const query = currencySearch.toLowerCase();
+    return DONATION_CURRENCY_LIST.filter(
+      (c) => c.code.toLowerCase().includes(query) || c.name.toLowerCase().includes(query)
+    );
+  }, [currencySearch]);
+  
+  const selectedCurrencyInfo = DONATION_CURRENCY_LIST.find((c) => c.code === selectedCurrency);
+  
+  const handleCurrencyChange = (code: string) => {
+    setSelectedCurrency(code);
+    setSelectedAmount(null);
+    setCustomAmount("");
+    setSelectedPaymentMethod(null);
+    setCurrencySearchOpen(false);
+    setCurrencySearch("");
+  };
 
   const handleVisibilityChange = useCallback(() => {
     if (document.visibilityState === "visible" && paymentInProgress) {
@@ -399,12 +466,12 @@ export function SupportDeveloperScreen() {
       return;
     }
 
-    const methodId = selectedPaymentMethod || (isIndian ? "upi" : "paypal");
+    const methodId = selectedPaymentMethod || (isUpiCurrency ? "upi" : "paypal");
     
     if (methodId === "upi" || methodId === "gpay") {
       handleUpiPayment(validAmount);
     } else {
-      handlePayPalPayment(validAmount, currency);
+      handlePayPalPayment(validAmount, selectedCurrency);
     }
   };
 
@@ -550,7 +617,91 @@ export function SupportDeveloperScreen() {
 
         <section className="flex flex-col gap-3">
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-            {t("chooseAmount")} ({currency})
+            {t("selectCurrency")}
+          </h3>
+          <Popover open={currencySearchOpen} onOpenChange={setCurrencySearchOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={currencySearchOpen}
+                className="w-full justify-between font-normal"
+                data-testid="button-currency-selector"
+              >
+                <span className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 opacity-50" />
+                  {selectedCurrencyInfo ? (
+                    <span>{selectedCurrencyInfo.symbol} {selectedCurrencyInfo.name} ({selectedCurrencyInfo.code})</span>
+                  ) : (
+                    <span>Select currency</span>
+                  )}
+                </span>
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              className="w-[--radix-popover-trigger-width] p-0" 
+              align="start"
+              sideOffset={4}
+              collisionPadding={{ top: 48, bottom: 48 }}
+            >
+              <div className="flex items-center border-b px-3 py-2">
+                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                <Input
+                  placeholder="Search currencies..."
+                  value={currencySearch}
+                  onChange={(e) => setCurrencySearch(e.target.value)}
+                  className="h-8 border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  data-testid="input-currency-search"
+                />
+              </div>
+              <ScrollArea className="h-[min(300px,50vh)]">
+                <div className="p-1">
+                  {filteredCurrencies.length === 0 ? (
+                    <div className="py-6 text-center text-sm text-muted-foreground">
+                      No currency found
+                    </div>
+                  ) : (
+                    filteredCurrencies.map((curr) => (
+                      <button
+                        key={curr.code}
+                        onClick={() => handleCurrencyChange(curr.code)}
+                        className={cn(
+                          "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                          selectedCurrency === curr.code && "bg-accent"
+                        )}
+                        data-testid={`currency-option-${curr.code}`}
+                      >
+                        <span className="flex items-center gap-2 flex-1">
+                          <span className="text-xs text-muted-foreground font-mono w-12">{curr.symbol}</span>
+                          <span>{curr.name}</span>
+                          <span className="text-xs text-muted-foreground">({curr.code})</span>
+                        </span>
+                        {selectedCurrency === curr.code && (
+                          <Check className="h-4 w-4 shrink-0" />
+                        )}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            </PopoverContent>
+          </Popover>
+          {isUpiCurrency && (
+            <p className="text-xs text-muted-foreground">
+              INR donations use UPI (Google Pay, PhonePe, Paytm, etc.)
+            </p>
+          )}
+          {!isUpiCurrency && (
+            <p className="text-xs text-muted-foreground">
+              International donations use PayPal
+            </p>
+          )}
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+            {t("chooseAmount")} ({selectedCurrency})
           </h3>
 
           <div className="grid grid-cols-3 gap-3">
@@ -582,7 +733,7 @@ export function SupportDeveloperScreen() {
           </div>
 
           <div className="flex flex-col gap-2 mt-2">
-            <label className="text-sm font-medium">{t("orEnterCustomAmount")} ({currency})</label>
+            <label className="text-sm font-medium">{t("orEnterCustomAmount")} ({selectedCurrency})</label>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -610,7 +761,7 @@ export function SupportDeveloperScreen() {
           </h3>
 
           <div className="flex flex-col gap-2">
-            {isIndian ? (
+            {isUpiCurrency ? (
               <>
                 <button
                   onClick={() => setSelectedPaymentMethod("upi")}
