@@ -1,9 +1,17 @@
-import { Home, Briefcase, ArrowRight, Shield, Info } from "lucide-react";
+import { Home, Briefcase, ArrowRight, Shield, Info, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigation } from "@/lib/navigation";
 import { permissionsService } from "@/lib/permissions-service";
-import type { UserType } from "@shared/schema";
+import { useI18n } from "@/lib/i18n/i18n-context";
+import { languages, languageLabels, type UserType, type Language } from "@shared/schema";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface RoleCardProps {
   type: UserType;
@@ -11,10 +19,11 @@ interface RoleCardProps {
   description: string;
   icon: typeof Home;
   features: string[];
+  buttonText: string;
   onSelect: () => void;
 }
 
-function RoleCard({ type, title, description, icon: Icon, features, onSelect }: RoleCardProps) {
+function RoleCard({ type, title, description, icon: Icon, features, buttonText, onSelect }: RoleCardProps) {
   return (
     <Card
       className="p-3 flex flex-col gap-2.5 cursor-pointer hover-elevate active-elevate-2"
@@ -43,7 +52,7 @@ function RoleCard({ type, title, description, icon: Icon, features, onSelect }: 
       </ul>
       
       <Button className="w-full mt-1" data-testid={`button-select-${type.toLowerCase()}`}>
-        Continue as {title}
+        {buttonText}
         <ArrowRight className="w-4 h-4 ml-2" />
       </Button>
     </Card>
@@ -52,6 +61,7 @@ function RoleCard({ type, title, description, icon: Icon, features, onSelect }: 
 
 export function RoleSelectionScreen() {
   const { navigate } = useNavigation();
+  const { language, setLanguage, t } = useI18n();
 
   const handleSelectRole = (type: UserType) => {
     if (permissionsService.hasCompletedPermissionsFlow()) {
@@ -67,16 +77,32 @@ export function RoleSelectionScreen() {
 
       <div className="flex-1 overflow-y-auto">
         <div className="content-container py-4 flex flex-col gap-4">
+          <div className="flex justify-end">
+            <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
+              <SelectTrigger className="w-auto min-w-[140px] gap-2" data-testid="select-language">
+                <Globe className="w-4 h-4 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((lang) => (
+                  <SelectItem key={lang} value={lang} data-testid={`option-language-${lang}`}>
+                    {languageLabels[lang]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex flex-col items-center text-center gap-3 fade-in-up">
             <div className="icon-halo-primary w-14 h-14">
               <Home className="w-7 h-7 text-primary" />
             </div>
             <div>
               <h1 className="text-xl font-bold" data-testid="text-choose-role">
-                Select Your Default Mode
+                {t("selectYourRole")}
               </h1>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Choose how you will use the app primarily.
+                {t("chooseHowYouWillUse")}
               </p>
             </div>
           </div>
@@ -84,29 +110,31 @@ export function RoleSelectionScreen() {
           <div className="flex flex-col gap-3">
             <RoleCard
               type="HOME"
-              title="Home User"
-              description="For home users managing domestic staff at home, and household stuff"
+              title={t("homeUser")}
+              description={t("homeUserDescription")}
               icon={Home}
               features={[
-                "Track staff attendance & salary payments",
-                "Manage household bills & expenses",
-                "Record laundry batches with pricing",
-                "Generate reports & export data",
+                t("homeFeature1"),
+                t("homeFeature2"),
+                t("homeFeature3"),
+                t("homeFeature4"),
               ]}
+              buttonText={t("continueAsHome")}
               onSelect={() => handleSelectRole("HOME")}
             />
 
             <RoleCard
               type="STAFF"
-              title="Staff User"
-              description="For service professionals managing their work"
+              title={t("staffProfessional")}
+              description={t("staffProfessionalDescription")}
               icon={Briefcase}
               features={[
-                "Log attendance at multiple client homes",
-                "Track earnings & personal expenses",
-                "Manage laundry jobs & invoices",
-                "Generate business reports",
+                t("staffFeature1"),
+                t("staffFeature2"),
+                t("staffFeature3"),
+                t("staffFeature4"),
               ]}
+              buttonText={t("continueAsStaff")}
               onSelect={() => handleSelectRole("STAFF")}
             />
           </div>
@@ -114,7 +142,7 @@ export function RoleSelectionScreen() {
           <div className="flex items-center gap-2 px-2 fade-in-up" style={{ animationDelay: "200ms" }}>
             <Info className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             <p className="text-xs text-muted-foreground">
-              You can switch between the modes and change the default mode from the Settings easily.
+              {t("canSwitchModes")}
             </p>
           </div>
 
@@ -122,9 +150,9 @@ export function RoleSelectionScreen() {
             <div className="flex items-start gap-2">
               <Shield className="w-5 h-5 text-primary flex-shrink-0" />
               <div>
-                <h3 className="text-sm font-semibold text-primary">100% Private</h3>
+                <h3 className="text-sm font-semibold text-primary">{t("hundredPercentPrivate")}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  All your data stays on your device. No cloud, no accounts, complete privacy.
+                  {t("privacyDescription")}
                 </p>
               </div>
             </div>
