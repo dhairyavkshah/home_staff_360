@@ -101,7 +101,7 @@ export function StaffLaundryScreen() {
   };
 
   const handleView = (job: StaffLaundryJob) => {
-    navigate("staff-edit-laundry", { laundryId: job.id });
+    navigate("staff-edit-laundry", { laundryJobId: job.id });
   };
 
   const handleDelete = (job: StaffLaundryJob) => {

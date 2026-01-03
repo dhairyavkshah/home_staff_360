@@ -150,6 +150,7 @@ export function StaffAddExpenseScreen() {
       vendor: vendor.trim() || undefined,
       notes: notes.trim() || undefined,
       isPaid,
+      accountId: activeAccountId || undefined,
       clientHomeId: clientHomeId === "none" ? undefined : clientHomeId,
       recurrence,
       staffUserId: storage.getProfile()?.id || 'unknown',

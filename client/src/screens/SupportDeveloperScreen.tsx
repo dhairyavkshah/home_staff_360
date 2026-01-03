@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 import { getUserCountry, getCurrencyForCountry, getCountryByCode } from "@/lib/geolocation-service";
 import { 
   openUpiPayment, 
@@ -28,194 +29,194 @@ import {
 
 interface DonationTier {
   amount: number;
-  label: string;
+  labelKey: string;
   icon: typeof Coffee;
 }
 
 const DONATION_TIERS: { [key: string]: DonationTier[] } = {
   INR: [
-    { amount: 9, label: "A small tea/coffee", icon: Coffee },
-    { amount: 29, label: "A thank you", icon: Heart },
-    { amount: 99, label: "Show appreciation", icon: Star },
-    { amount: 299, label: "Generous support", icon: Gift },
-    { amount: 599, label: "Amazing supporter", icon: Heart },
-    { amount: 999, label: "Champion supporter", icon: Star },
+    { amount: 9, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 29, labelKey: "aThankYou", icon: Heart },
+    { amount: 99, labelKey: "showAppreciation", icon: Star },
+    { amount: 299, labelKey: "generousSupport", icon: Gift },
+    { amount: 599, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 999, labelKey: "championSupporter", icon: Star },
   ],
   USD: [
-    { amount: 1, label: "A small tea/coffee", icon: Coffee },
-    { amount: 3, label: "A thank you", icon: Heart },
-    { amount: 5, label: "Show appreciation", icon: Star },
-    { amount: 10, label: "Generous support", icon: Gift },
-    { amount: 20, label: "Amazing supporter", icon: Heart },
-    { amount: 50, label: "Champion supporter", icon: Star },
+    { amount: 1, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 3, labelKey: "aThankYou", icon: Heart },
+    { amount: 5, labelKey: "showAppreciation", icon: Star },
+    { amount: 10, labelKey: "generousSupport", icon: Gift },
+    { amount: 20, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 50, labelKey: "championSupporter", icon: Star },
   ],
   EUR: [
-    { amount: 1, label: "A small tea/coffee", icon: Coffee },
-    { amount: 3, label: "A thank you", icon: Heart },
-    { amount: 5, label: "Show appreciation", icon: Star },
-    { amount: 10, label: "Generous support", icon: Gift },
-    { amount: 20, label: "Amazing supporter", icon: Heart },
-    { amount: 50, label: "Champion supporter", icon: Star },
+    { amount: 1, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 3, labelKey: "aThankYou", icon: Heart },
+    { amount: 5, labelKey: "showAppreciation", icon: Star },
+    { amount: 10, labelKey: "generousSupport", icon: Gift },
+    { amount: 20, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 50, labelKey: "championSupporter", icon: Star },
   ],
   GBP: [
-    { amount: 1, label: "A small tea/coffee", icon: Coffee },
-    { amount: 2, label: "A thank you", icon: Heart },
-    { amount: 4, label: "Show appreciation", icon: Star },
-    { amount: 8, label: "Generous support", icon: Gift },
-    { amount: 15, label: "Amazing supporter", icon: Heart },
-    { amount: 40, label: "Champion supporter", icon: Star },
+    { amount: 1, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 2, labelKey: "aThankYou", icon: Heart },
+    { amount: 4, labelKey: "showAppreciation", icon: Star },
+    { amount: 8, labelKey: "generousSupport", icon: Gift },
+    { amount: 15, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 40, labelKey: "championSupporter", icon: Star },
   ],
   AUD: [
-    { amount: 2, label: "A small tea/coffee", icon: Coffee },
-    { amount: 5, label: "A thank you", icon: Heart },
-    { amount: 10, label: "Show appreciation", icon: Star },
-    { amount: 20, label: "Generous support", icon: Gift },
-    { amount: 40, label: "Amazing supporter", icon: Heart },
-    { amount: 80, label: "Champion supporter", icon: Star },
+    { amount: 2, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 5, labelKey: "aThankYou", icon: Heart },
+    { amount: 10, labelKey: "showAppreciation", icon: Star },
+    { amount: 20, labelKey: "generousSupport", icon: Gift },
+    { amount: 40, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 80, labelKey: "championSupporter", icon: Star },
   ],
   CAD: [
-    { amount: 2, label: "A small tea/coffee", icon: Coffee },
-    { amount: 5, label: "A thank you", icon: Heart },
-    { amount: 10, label: "Show appreciation", icon: Star },
-    { amount: 20, label: "Generous support", icon: Gift },
-    { amount: 40, label: "Amazing supporter", icon: Heart },
-    { amount: 75, label: "Champion supporter", icon: Star },
+    { amount: 2, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 5, labelKey: "aThankYou", icon: Heart },
+    { amount: 10, labelKey: "showAppreciation", icon: Star },
+    { amount: 20, labelKey: "generousSupport", icon: Gift },
+    { amount: 40, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 75, labelKey: "championSupporter", icon: Star },
   ],
   CHF: [
-    { amount: 1, label: "A small tea/coffee", icon: Coffee },
-    { amount: 3, label: "A thank you", icon: Heart },
-    { amount: 5, label: "Show appreciation", icon: Star },
-    { amount: 10, label: "Generous support", icon: Gift },
-    { amount: 20, label: "Amazing supporter", icon: Heart },
-    { amount: 50, label: "Champion supporter", icon: Star },
+    { amount: 1, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 3, labelKey: "aThankYou", icon: Heart },
+    { amount: 5, labelKey: "showAppreciation", icon: Star },
+    { amount: 10, labelKey: "generousSupport", icon: Gift },
+    { amount: 20, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 50, labelKey: "championSupporter", icon: Star },
   ],
   CZK: [
-    { amount: 25, label: "A small tea/coffee", icon: Coffee },
-    { amount: 75, label: "A thank you", icon: Heart },
-    { amount: 125, label: "Show appreciation", icon: Star },
-    { amount: 250, label: "Generous support", icon: Gift },
-    { amount: 500, label: "Amazing supporter", icon: Heart },
-    { amount: 1200, label: "Champion supporter", icon: Star },
+    { amount: 25, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 75, labelKey: "aThankYou", icon: Heart },
+    { amount: 125, labelKey: "showAppreciation", icon: Star },
+    { amount: 250, labelKey: "generousSupport", icon: Gift },
+    { amount: 500, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 1200, labelKey: "championSupporter", icon: Star },
   ],
   DKK: [
-    { amount: 10, label: "A small tea/coffee", icon: Coffee },
-    { amount: 25, label: "A thank you", icon: Heart },
-    { amount: 50, label: "Show appreciation", icon: Star },
-    { amount: 100, label: "Generous support", icon: Gift },
-    { amount: 200, label: "Amazing supporter", icon: Heart },
-    { amount: 400, label: "Champion supporter", icon: Star },
+    { amount: 10, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 25, labelKey: "aThankYou", icon: Heart },
+    { amount: 50, labelKey: "showAppreciation", icon: Star },
+    { amount: 100, labelKey: "generousSupport", icon: Gift },
+    { amount: 200, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 400, labelKey: "championSupporter", icon: Star },
   ],
   HKD: [
-    { amount: 10, label: "A small tea/coffee", icon: Coffee },
-    { amount: 25, label: "A thank you", icon: Heart },
-    { amount: 50, label: "Show appreciation", icon: Star },
-    { amount: 100, label: "Generous support", icon: Gift },
-    { amount: 200, label: "Amazing supporter", icon: Heart },
-    { amount: 400, label: "Champion supporter", icon: Star },
+    { amount: 10, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 25, labelKey: "aThankYou", icon: Heart },
+    { amount: 50, labelKey: "showAppreciation", icon: Star },
+    { amount: 100, labelKey: "generousSupport", icon: Gift },
+    { amount: 200, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 400, labelKey: "championSupporter", icon: Star },
   ],
   HUF: [
-    { amount: 400, label: "A small tea/coffee", icon: Coffee },
-    { amount: 1200, label: "A thank you", icon: Heart },
-    { amount: 2000, label: "Show appreciation", icon: Star },
-    { amount: 4000, label: "Generous support", icon: Gift },
-    { amount: 8000, label: "Amazing supporter", icon: Heart },
-    { amount: 20000, label: "Champion supporter", icon: Star },
+    { amount: 400, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 1200, labelKey: "aThankYou", icon: Heart },
+    { amount: 2000, labelKey: "showAppreciation", icon: Star },
+    { amount: 4000, labelKey: "generousSupport", icon: Gift },
+    { amount: 8000, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 20000, labelKey: "championSupporter", icon: Star },
   ],
   ILS: [
-    { amount: 5, label: "A small tea/coffee", icon: Coffee },
-    { amount: 12, label: "A thank you", icon: Heart },
-    { amount: 20, label: "Show appreciation", icon: Star },
-    { amount: 40, label: "Generous support", icon: Gift },
-    { amount: 80, label: "Amazing supporter", icon: Heart },
-    { amount: 200, label: "Champion supporter", icon: Star },
+    { amount: 5, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 12, labelKey: "aThankYou", icon: Heart },
+    { amount: 20, labelKey: "showAppreciation", icon: Star },
+    { amount: 40, labelKey: "generousSupport", icon: Gift },
+    { amount: 80, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 200, labelKey: "championSupporter", icon: Star },
   ],
   JPY: [
-    { amount: 150, label: "A small tea/coffee", icon: Coffee },
-    { amount: 500, label: "A thank you", icon: Heart },
-    { amount: 800, label: "Show appreciation", icon: Star },
-    { amount: 1500, label: "Generous support", icon: Gift },
-    { amount: 3000, label: "Amazing supporter", icon: Heart },
-    { amount: 8000, label: "Champion supporter", icon: Star },
+    { amount: 150, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 500, labelKey: "aThankYou", icon: Heart },
+    { amount: 800, labelKey: "showAppreciation", icon: Star },
+    { amount: 1500, labelKey: "generousSupport", icon: Gift },
+    { amount: 3000, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 8000, labelKey: "championSupporter", icon: Star },
   ],
   MXN: [
-    { amount: 20, label: "A small tea/coffee", icon: Coffee },
-    { amount: 60, label: "A thank you", icon: Heart },
-    { amount: 100, label: "Show appreciation", icon: Star },
-    { amount: 200, label: "Generous support", icon: Gift },
-    { amount: 400, label: "Amazing supporter", icon: Heart },
-    { amount: 1000, label: "Champion supporter", icon: Star },
+    { amount: 20, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 60, labelKey: "aThankYou", icon: Heart },
+    { amount: 100, labelKey: "showAppreciation", icon: Star },
+    { amount: 200, labelKey: "generousSupport", icon: Gift },
+    { amount: 400, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 1000, labelKey: "championSupporter", icon: Star },
   ],
   NOK: [
-    { amount: 15, label: "A small tea/coffee", icon: Coffee },
-    { amount: 40, label: "A thank you", icon: Heart },
-    { amount: 70, label: "Show appreciation", icon: Star },
-    { amount: 140, label: "Generous support", icon: Gift },
-    { amount: 280, label: "Amazing supporter", icon: Heart },
-    { amount: 600, label: "Champion supporter", icon: Star },
+    { amount: 15, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 40, labelKey: "aThankYou", icon: Heart },
+    { amount: 70, labelKey: "showAppreciation", icon: Star },
+    { amount: 140, labelKey: "generousSupport", icon: Gift },
+    { amount: 280, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 600, labelKey: "championSupporter", icon: Star },
   ],
   NZD: [
-    { amount: 2, label: "A small tea/coffee", icon: Coffee },
-    { amount: 5, label: "A thank you", icon: Heart },
-    { amount: 10, label: "Show appreciation", icon: Star },
-    { amount: 20, label: "Generous support", icon: Gift },
-    { amount: 40, label: "Amazing supporter", icon: Heart },
-    { amount: 100, label: "Champion supporter", icon: Star },
+    { amount: 2, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 5, labelKey: "aThankYou", icon: Heart },
+    { amount: 10, labelKey: "showAppreciation", icon: Star },
+    { amount: 20, labelKey: "generousSupport", icon: Gift },
+    { amount: 40, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 100, labelKey: "championSupporter", icon: Star },
   ],
   PHP: [
-    { amount: 60, label: "A small tea/coffee", icon: Coffee },
-    { amount: 180, label: "A thank you", icon: Heart },
-    { amount: 300, label: "Show appreciation", icon: Star },
-    { amount: 600, label: "Generous support", icon: Gift },
-    { amount: 1200, label: "Amazing supporter", icon: Heart },
-    { amount: 3000, label: "Champion supporter", icon: Star },
+    { amount: 60, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 180, labelKey: "aThankYou", icon: Heart },
+    { amount: 300, labelKey: "showAppreciation", icon: Star },
+    { amount: 600, labelKey: "generousSupport", icon: Gift },
+    { amount: 1200, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 3000, labelKey: "championSupporter", icon: Star },
   ],
   PLN: [
-    { amount: 5, label: "A small tea/coffee", icon: Coffee },
-    { amount: 15, label: "A thank you", icon: Heart },
-    { amount: 25, label: "Show appreciation", icon: Star },
-    { amount: 50, label: "Generous support", icon: Gift },
-    { amount: 100, label: "Amazing supporter", icon: Heart },
-    { amount: 250, label: "Champion supporter", icon: Star },
+    { amount: 5, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 15, labelKey: "aThankYou", icon: Heart },
+    { amount: 25, labelKey: "showAppreciation", icon: Star },
+    { amount: 50, labelKey: "generousSupport", icon: Gift },
+    { amount: 100, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 250, labelKey: "championSupporter", icon: Star },
   ],
   RUB: [
-    { amount: 100, label: "A small tea/coffee", icon: Coffee },
-    { amount: 300, label: "A thank you", icon: Heart },
-    { amount: 500, label: "Show appreciation", icon: Star },
-    { amount: 1000, label: "Generous support", icon: Gift },
-    { amount: 2000, label: "Amazing supporter", icon: Heart },
-    { amount: 5000, label: "Champion supporter", icon: Star },
+    { amount: 100, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 300, labelKey: "aThankYou", icon: Heart },
+    { amount: 500, labelKey: "showAppreciation", icon: Star },
+    { amount: 1000, labelKey: "generousSupport", icon: Gift },
+    { amount: 2000, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 5000, labelKey: "championSupporter", icon: Star },
   ],
   SEK: [
-    { amount: 15, label: "A small tea/coffee", icon: Coffee },
-    { amount: 40, label: "A thank you", icon: Heart },
-    { amount: 70, label: "Show appreciation", icon: Star },
-    { amount: 140, label: "Generous support", icon: Gift },
-    { amount: 280, label: "Amazing supporter", icon: Heart },
-    { amount: 600, label: "Champion supporter", icon: Star },
+    { amount: 15, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 40, labelKey: "aThankYou", icon: Heart },
+    { amount: 70, labelKey: "showAppreciation", icon: Star },
+    { amount: 140, labelKey: "generousSupport", icon: Gift },
+    { amount: 280, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 600, labelKey: "championSupporter", icon: Star },
   ],
   SGD: [
-    { amount: 2, label: "A small tea/coffee", icon: Coffee },
-    { amount: 5, label: "A thank you", icon: Heart },
-    { amount: 10, label: "Show appreciation", icon: Star },
-    { amount: 20, label: "Generous support", icon: Gift },
-    { amount: 40, label: "Amazing supporter", icon: Heart },
-    { amount: 80, label: "Champion supporter", icon: Star },
+    { amount: 2, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 5, labelKey: "aThankYou", icon: Heart },
+    { amount: 10, labelKey: "showAppreciation", icon: Star },
+    { amount: 20, labelKey: "generousSupport", icon: Gift },
+    { amount: 40, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 80, labelKey: "championSupporter", icon: Star },
   ],
   THB: [
-    { amount: 40, label: "A small tea/coffee", icon: Coffee },
-    { amount: 120, label: "A thank you", icon: Heart },
-    { amount: 200, label: "Show appreciation", icon: Star },
-    { amount: 400, label: "Generous support", icon: Gift },
-    { amount: 800, label: "Amazing supporter", icon: Heart },
-    { amount: 2000, label: "Champion supporter", icon: Star },
+    { amount: 40, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 120, labelKey: "aThankYou", icon: Heart },
+    { amount: 200, labelKey: "showAppreciation", icon: Star },
+    { amount: 400, labelKey: "generousSupport", icon: Gift },
+    { amount: 800, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 2000, labelKey: "championSupporter", icon: Star },
   ],
   TWD: [
-    { amount: 40, label: "A small tea/coffee", icon: Coffee },
-    { amount: 100, label: "A thank you", icon: Heart },
-    { amount: 175, label: "Show appreciation", icon: Star },
-    { amount: 350, label: "Generous support", icon: Gift },
-    { amount: 700, label: "Amazing supporter", icon: Heart },
-    { amount: 1750, label: "Champion supporter", icon: Star },
+    { amount: 40, labelKey: "aSmallTeaCoffee", icon: Coffee },
+    { amount: 100, labelKey: "aThankYou", icon: Heart },
+    { amount: 175, labelKey: "showAppreciation", icon: Star },
+    { amount: 350, labelKey: "generousSupport", icon: Gift },
+    { amount: 700, labelKey: "amazingSupporter", icon: Heart },
+    { amount: 1750, labelKey: "championSupporter", icon: Star },
   ],
 };
 
@@ -286,6 +287,7 @@ function Confetti() {
 export function SupportDeveloperScreen() {
   const { navigate } = useNavigation();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const userCountry = getUserCountry() || "US";
   const countryInfo = getCountryByCode(userCountry);
@@ -328,8 +330,8 @@ export function SupportDeveloperScreen() {
     const validAmount = validateAmount(amount);
     if (!validAmount) {
       toast({
-        title: "Invalid amount",
-        description: "Please enter a valid amount",
+        title: t("invalidAmount"),
+        description: t("pleaseEnterValidAmount"),
         variant: "destructive",
       });
       return;
@@ -341,14 +343,14 @@ export function SupportDeveloperScreen() {
     const success = openUpiPayment(validAmount);
     if (success) {
       toast({
-        title: "Opening UPI App",
-        description: "Choose your preferred UPI app to complete payment",
+        title: t("openingUpiApp"),
+        description: t("chooseUpiApp"),
       });
     } else {
       setPaymentInProgress(false);
       toast({
-        title: "Unable to open UPI",
-        description: "Please use the UPI ID below to pay manually",
+        title: t("unableToOpenUpi"),
+        description: t("useUpiIdManually"),
         variant: "destructive",
       });
     }
@@ -358,8 +360,8 @@ export function SupportDeveloperScreen() {
     const validAmount = validateAmount(amount);
     if (!validAmount) {
       toast({
-        title: "Invalid amount",
-        description: "Please enter a valid amount",
+        title: t("invalidAmount"),
+        description: t("pleaseEnterValidAmount"),
         variant: "destructive",
       });
       return;
@@ -371,14 +373,14 @@ export function SupportDeveloperScreen() {
     const success = openPayPalPayment(validAmount, currencyCode);
     if (success) {
       toast({
-        title: "Opening PayPal",
-        description: "Complete the payment on PayPal",
+        title: t("openingPayPal"),
+        description: t("completePaymentOnPayPal"),
       });
     } else {
       setPaymentInProgress(false);
       toast({
-        title: "Unable to open PayPal",
-        description: "Please try again",
+        title: t("unableToOpenPayPal"),
+        description: t("pleaseTryAgain"),
         variant: "destructive",
       });
     }
@@ -420,7 +422,7 @@ export function SupportDeveloperScreen() {
   return (
     <AppLayout>
       <Header
-        title="Support the Developer"
+        title={t("supportTheDeveloper")}
         onBack={() => navigate("settings")}
       />
 
@@ -445,12 +447,12 @@ export function SupportDeveloperScreen() {
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
                 <Sparkles className="w-10 h-10 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-center">Thank You!</h2>
+              <h2 className="text-xl font-bold text-center">{t("thankYou")}</h2>
               <p className="text-sm text-muted-foreground text-center">
-                Your generous support means the world to me. It helps keep this project alive and growing!
+                {t("yourSupportMeansALot")}
               </p>
               <Badge className="bg-primary/10 text-primary border-primary/20">
-                You are now a supporter!
+                {t("youAreNowSupporter")}
               </Badge>
             </motion.div>
           </motion.div>
@@ -460,9 +462,9 @@ export function SupportDeveloperScreen() {
       <Drawer open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DrawerContent>
           <DrawerHeader className="text-center">
-            <DrawerTitle className="text-lg">Payment Verification</DrawerTitle>
+            <DrawerTitle className="text-lg">{t("paymentVerification")}</DrawerTitle>
             <DrawerDescription>
-              Did your support transaction of {currencySymbol}{pendingPaymentAmount} go through?
+              {t("didPaymentGoThrough").replace("{amount}", `${currencySymbol}${pendingPaymentAmount}`)}
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4 py-6 flex flex-col gap-4">
@@ -473,7 +475,7 @@ export function SupportDeveloperScreen() {
               data-testid="button-confirm-donation"
             >
               <Check className="w-5 h-5" />
-              Yes, I contributed
+              {t("yesPaymentCompleted")}
             </Button>
             <Button
               variant="outline"
@@ -483,12 +485,12 @@ export function SupportDeveloperScreen() {
               data-testid="button-decline-donation"
             >
               <X className="w-5 h-5" />
-              No / Not yet
+              {t("noTryAgain")}
             </Button>
           </div>
           <DrawerFooter className="pt-0">
             <p className="text-xs text-center text-muted-foreground">
-              We cannot automatically verify UPI payments. Please confirm manually.
+              {t("cannotVerifyUpi")}
             </p>
           </DrawerFooter>
         </DrawerContent>
@@ -500,9 +502,9 @@ export function SupportDeveloperScreen() {
             <Heart className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Thank You!</h2>
+            <h2 className="text-lg font-semibold">{t("thankYou")}</h2>
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-              Your support helps me continue developing and improving Home Staff 360
+              {t("yourSupportMeansALot")}
             </p>
           </div>
           {countryInfo && (
@@ -514,7 +516,7 @@ export function SupportDeveloperScreen() {
           {donorStatus.isDonor && (
             <Badge className="gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
               <Star className="w-3 h-3" />
-              Supporter
+              {t("supporter")}
             </Badge>
           )}
         </section>
@@ -525,32 +527,30 @@ export function SupportDeveloperScreen() {
               <User className="w-6 h-6 text-primary" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-sm">About the Developer</h3>
+              <h3 className="font-semibold text-sm">{t("aboutTheDeveloper")}</h3>
               <p className="text-xs text-muted-foreground">
-                Independent developer from India
+                {t("independentDeveloper")}
               </p>
             </div>
           </div>
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              <span>Based in India</span>
+              <span>{t("basedInIndia")}</span>
             </div>
             <div className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
-              <span>Building apps that make life easier</span>
+              <span>{t("buildingApps")}</span>
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            Built by a solo-preneur passionate about creating useful and individuals-focused apps. 
-            Home Staff 360 is crafted with love and dedication to help households manage their domestic staff seamlessly, while also empowering professionals in household service industries to organize their work and earnings with ease. 
-            Your support keeps this project alive and growing!
+            {t("developerDescription")}
           </p>
         </Card>
 
         <section className="flex flex-col gap-3">
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-            Choose an Amount ({currency})
+            {t("chooseAmount")} ({currency})
           </h3>
 
           <div className="grid grid-cols-3 gap-3">
@@ -574,7 +574,7 @@ export function SupportDeveloperScreen() {
                     {currencySymbol}{donation.amount}
                   </div>
                   <span className="text-xs text-muted-foreground text-center leading-tight">
-                    {donation.label}
+                    {t(donation.labelKey as any)}
                   </span>
                 </button>
               );
@@ -582,7 +582,7 @@ export function SupportDeveloperScreen() {
           </div>
 
           <div className="flex flex-col gap-2 mt-2">
-            <label className="text-sm font-medium">Or enter custom amount ({currency})</label>
+            <label className="text-sm font-medium">{t("orEnterCustomAmount")} ({currency})</label>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -606,7 +606,7 @@ export function SupportDeveloperScreen() {
 
         <section className="flex flex-col gap-3">
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-            Payment Method
+            {t("selectPaymentMethod")}
           </h3>
 
           <div className="flex flex-col gap-2">

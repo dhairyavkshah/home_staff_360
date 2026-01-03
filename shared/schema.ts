@@ -554,6 +554,7 @@ export type InsertStaffEarning = z.infer<typeof insertStaffEarningSchema>;
 export const staffExpenseSchema = z.object({
   id: z.string(),
   staffUserId: z.string(),
+  accountId: z.string().optional(),
   clientHomeId: z.string().optional(),
   title: z.string().min(1),
   category: z.string(),

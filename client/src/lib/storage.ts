@@ -962,7 +962,10 @@ export const storage = {
 
   getStaffExpensesByAccount(accountId: string): StaffExpense[] {
     const clientHomeIds = new Set(this.getClientHomesByAccount(accountId).map(h => h.id));
-    return this.getStaffExpenses().filter(e => e.clientHomeId && clientHomeIds.has(e.clientHomeId));
+    return this.getStaffExpenses().filter(e => 
+      e.accountId === accountId || 
+      (e.clientHomeId && clientHomeIds.has(e.clientHomeId))
+    );
   },
 
   addStaffExpense(data: InsertStaffExpense): StaffExpense {
