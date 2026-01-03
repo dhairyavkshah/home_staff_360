@@ -97,7 +97,7 @@ export const getCurrencySymbol = (currency: Currency, customSymbol?: string): st
   return CURRENCIES[currency].symbol;
 };
 
-export const languages = ['en', 'hi', 'gu', 'kn', 'ml', 'mr', 'pa', 'te', 'ta', 'ur', 'bn', 'or', 'as', 'es', 'fr', 'de', 'ar', 'zh', 'ja', 'pt'] as const;
+export const languages = ['en', 'hi', 'gu', 'kn', 'ml', 'mr', 'pa', 'te', 'ta', 'ur', 'bn', 'or', 'as', 'es', 'fr', 'de', 'ar', 'zh', 'ja', 'pt', 'ru'] as const;
 export type Language = typeof languages[number];
 
 export const languageLabels: Record<Language, string> = {
@@ -121,6 +121,7 @@ export const languageLabels: Record<Language, string> = {
   zh: '中文 (Chinese)',
   ja: '日本語 (Japanese)',
   pt: 'Português (Portuguese)',
+  ru: 'Русский (Russian)',
 };
 
 export const salaryTypes = ['MONTHLY', 'DAILY', 'HOURLY'] as const;
