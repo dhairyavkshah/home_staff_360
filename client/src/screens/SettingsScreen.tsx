@@ -596,10 +596,17 @@ export function SettingsScreen() {
             <div className="text-center flex flex-col gap-2">
               <div>
                 <p className="font-semibold text-base">Home Staff 360</p>
-                <p className="text-xs text-muted-foreground">Version 1.0.0</p>
+                <p className="text-xs text-muted-foreground">Version 1.0.1</p>
               </div>
               <p className="text-sm text-muted-foreground">A private household and staff profession management app</p>
               <p className="text-xs text-muted-foreground/70 pt-1">Crafted by Dhairya Shah (The Team 360)</p>
+              <button
+                className="text-xs text-primary underline pt-2"
+                onClick={() => window.open("https://www.theteam360.com/homestaff360", "_blank")}
+                data-testid="button-privacy-policy"
+              >
+                Privacy Policy
+              </button>
             </div>
           </Card>
         </section>
