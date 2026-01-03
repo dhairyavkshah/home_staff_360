@@ -7,6 +7,7 @@ import { I18nProvider } from "@/lib/i18n/i18n-context";
 import { GuidedTourProvider } from "@/lib/guided-tour";
 import { SafeAreaProvider } from "@/lib/safe-area-provider";
 import { storage } from "@/lib/storage";
+import "@/lib/demo-data";
 
 import { SplashScreen } from "@/screens/SplashScreen";
 import { LauncherScreen } from "@/screens/LauncherScreen";
