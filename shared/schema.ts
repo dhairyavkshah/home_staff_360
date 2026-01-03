@@ -97,7 +97,7 @@ export const getCurrencySymbol = (currency: Currency, customSymbol?: string): st
   return CURRENCIES[currency].symbol;
 };
 
-export const languages = ['en', 'hi', 'gu', 'kn', 'ml', 'es', 'fr', 'de', 'ar', 'zh', 'ja', 'pt'] as const;
+export const languages = ['en', 'hi', 'gu', 'kn', 'ml', 'mr', 'pa', 'te', 'ta', 'ur', 'bn', 'or', 'as', 'es', 'fr', 'de', 'ar', 'zh', 'ja', 'pt'] as const;
 export type Language = typeof languages[number];
 
 export const languageLabels: Record<Language, string> = {
@@ -106,6 +106,14 @@ export const languageLabels: Record<Language, string> = {
   gu: 'ગુજરાતી (Gujarati)',
   kn: 'ಕನ್ನಡ (Kannada)',
   ml: 'മലയാളം (Malayalam)',
+  mr: 'मराठी (Marathi)',
+  pa: 'ਪੰਜਾਬੀ (Punjabi)',
+  te: 'తెలుగు (Telugu)',
+  ta: 'தமிழ் (Tamil)',
+  ur: 'اردو (Urdu)',
+  bn: 'বাংলা (Bengali)',
+  or: 'ଓଡ଼ିଆ (Odia)',
+  as: 'অসমীয়া (Assamese)',
   es: 'Español (Spanish)',
   fr: 'Français (French)',
   de: 'Deutsch (German)',
