@@ -102,6 +102,13 @@ export function StaffLogAttendanceScreen() {
     }
     if (!profile) return;
 
+    // Prevent marking attendance for future dates (recompute today for freshness)
+    const currentDate = new Date().toISOString().split('T')[0];
+    if (date > currentDate) {
+      toast({ title: t("cannotMarkFutureAttendance"), variant: "destructive" });
+      return;
+    }
+
     storage.addSelfAttendance({
       staffUserId: profile.id,
       clientHomeId: selectedHome,

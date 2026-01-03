@@ -12,11 +12,13 @@ import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
 import { getTodayString } from "@/lib/calculations";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 import type { AttendanceStatus } from "@shared/schema";
 
 export function AddAttendanceScreen() {
   const { navigate, goBack, data } = useNavigation();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
   const personId = data.personId as string;
   const source = data.source as "attendance" | "payables" | "quick-pay" | "person-detail" | undefined;
@@ -47,18 +49,24 @@ export function AddAttendanceScreen() {
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!date) newErrors.date = "Date is required";
+    if (!date) newErrors.date = t("dueDateRequired");
+
+    // Prevent marking attendance for future dates
+    const today = getTodayString();
+    if (date > today) {
+      newErrors.date = t("cannotMarkFutureAttendance");
+    }
 
     const existing = storage.getAttendance().find(
       (a) => a.personId === personId && a.date === date
     );
     if (existing) {
-      newErrors.date = "Attendance already marked for this date";
+      newErrors.date = t("existingRecord");
     }
 
     if (showHours && status !== "ABSENT") {
       if (!hours || parseFloat(hours) <= 0) {
-        newErrors.hours = "Hours must be greater than 0";
+        newErrors.hours = t("baseRateRequired");
       }
     }
 
@@ -78,7 +86,7 @@ export function AddAttendanceScreen() {
     });
 
     markClean();
-    toast({ title: "Attendance marked successfully" });
+    toast({ title: t("attendanceMarked") });
     navigate("person-detail", { personId, source });
   };
 

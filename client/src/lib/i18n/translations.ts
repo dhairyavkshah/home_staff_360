@@ -317,6 +317,7 @@ const en = {
   amountRequired: "Amount must be greater than 0",
   dueDateRequired: "Due date is required",
   attendanceMarked: "Attendance marked successfully",
+  cannotMarkFutureAttendance: "Cannot mark attendance for future dates",
   transactionAdded: "Transaction added successfully",
   dataCleared: "All data cleared",
   pinDisabled: "App Lock disabled",
