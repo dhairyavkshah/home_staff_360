@@ -281,6 +281,9 @@ const en = {
   // Validation
   nameRequired: "Name is required",
   roleRequired: "Role is required",
+  roleAutoSetForLaundry: "Role is automatically set for Laundry Service businesses",
+  noLaundryBusinesses: "No Laundry Service businesses",
+  createLaundryBusinessFirst: "Create a business with 'Laundry Service' profession to log laundry jobs",
   validPhoneRequired: "Valid phone number required (10+ digits)",
   baseRateRequired: "Base rate must be greater than 0",
   mustBeBetween0And100: "Must be between 0 and 100",
@@ -1014,6 +1017,9 @@ const hi: typeof en = {
   // Validation
   nameRequired: "नाम आवश्यक है",
   roleRequired: "भूमिका आवश्यक है",
+  roleAutoSetForLaundry: "लॉन्ड्री सेवा व्यवसायों के लिए भूमिका स्वचालित रूप से सेट है",
+  noLaundryBusinesses: "कोई लॉन्ड्री सेवा व्यवसाय नहीं",
+  createLaundryBusinessFirst: "लॉन्ड्री जॉब लॉग करने के लिए 'लॉन्ड्री सेवा' पेशे के साथ एक व्यवसाय बनाएं",
   validPhoneRequired: "वैध फोन नंबर आवश्यक (10+ अंक)",
   baseRateRequired: "आधार दर 0 से अधिक होनी चाहिए",
   mustBeBetween0And100: "0 और 100 के बीच होना चाहिए",

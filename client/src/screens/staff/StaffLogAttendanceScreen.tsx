@@ -299,6 +299,7 @@ export function StaffLogAttendanceScreen() {
               <Input
                 type="date"
                 value={date}
+                max={today}
                 onChange={(e) => { setDate(e.target.value); markDirty(); }}
                 data-testid="input-date"
               />

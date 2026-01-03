@@ -37,6 +37,23 @@ export function StaffLaundryScreen() {
 
   const activeAccountId = useMemo(() => storage.getActiveAccountId(), [refreshKey]);
   const showAllContexts = useMemo(() => storage.getShowAllContexts(), [refreshKey]);
+  
+  // Check if current context allows laundry (active account is Laundry Service, or showAllContexts and any laundry business exists)
+  const activeAccount = useMemo(() => {
+    if (!activeAccountId) return null;
+    return storage.getAccounts().find(a => a.id === activeAccountId) || null;
+  }, [activeAccountId, refreshKey]);
+  
+  const laundryBusinesses = useMemo(() => {
+    const accounts = storage.getAccounts().filter(a => a.ownerType === 'STAFF');
+    return accounts.filter(a => a.profession === 'Laundry Service');
+  }, [refreshKey]);
+  
+  // Only allow laundry logging if: active account is Laundry Service OR (showAllContexts AND at least one laundry business exists)
+  const hasLaundryBusiness = showAllContexts 
+    ? laundryBusinesses.length > 0 
+    : activeAccount?.profession === 'Laundry Service';
+  
   const clientHomes = useMemo(() => {
     if (!showAllContexts && activeAccountId) {
       return storage.getActiveClientHomesByAccount(activeAccountId);
@@ -134,7 +151,7 @@ export function StaffLaundryScreen() {
         onBack={() => navigate("staff-home")}
         contextLabel={contextLabel}
         contextMode={contextMode}
-        onAdd={() => navigate("staff-log-laundry")}
+        onAdd={hasLaundryBusiness ? () => navigate("staff-log-laundry") : undefined}
         addTestId="button-add-laundry"
         sticky
       />
@@ -187,7 +204,21 @@ export function StaffLaundryScreen() {
             testId="search-laundry-jobs"
           />
 
-          {filteredJobs.length === 0 ? (
+          {!hasLaundryBusiness ? (
+            <Card className="p-4 flex flex-col items-center gap-2" data-testid="empty-state-no-business">
+              <div className="icon-halo-muted w-10 h-10">
+                <Building2 className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="text-center">
+                <h3 className="font-semibold text-sm">{t("noLaundryBusinesses") || "No Laundry Service businesses"}</h3>
+                <p className="text-xs text-muted-foreground">{t("createLaundryBusinessFirst") || "Create a business with 'Laundry Service' profession to log laundry jobs"}</p>
+              </div>
+              <Button onClick={() => navigate("staff-businesses")} data-testid="button-go-to-businesses">
+                <Building2 className="w-4 h-4 mr-2" />
+                {t("goToBusinesses") || "Go to Businesses"}
+              </Button>
+            </Card>
+          ) : filteredJobs.length === 0 ? (
             <Card className="p-4 flex flex-col items-center gap-2" data-testid="empty-state">
               <div className="icon-halo-muted w-10 h-10">
                 <Shirt className="w-5 h-5 text-muted-foreground" />

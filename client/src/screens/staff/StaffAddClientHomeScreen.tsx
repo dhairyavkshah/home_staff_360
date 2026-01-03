@@ -38,6 +38,11 @@ export function StaffAddClientHomeScreen() {
   
   const profile = useMemo(() => storage.getProfile(), []);
   const activeAccountId = useMemo(() => storage.getActiveAccountId(), []);
+  const activeAccount = useMemo(() => {
+    if (!activeAccountId) return null;
+    return storage.getAccounts().find(a => a.id === activeAccountId) || null;
+  }, [activeAccountId]);
+  const isLaundryBusiness = activeAccount?.profession === 'Laundry Service';
   const editMode = !!data.clientHomeId;
   const existingHome = useMemo(() => {
     if (!data.clientHomeId) return null;
@@ -48,7 +53,7 @@ export function StaffAddClientHomeScreen() {
   const [address, setAddress] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState(isLaundryBusiness ? "Laundry" : "");
   const [salaryType, setSalaryType] = useState<SalaryType>("DAILY");
   const [rate, setRate] = useState("");
   const [isActive, setIsActive] = useState(true);
@@ -77,6 +82,19 @@ export function StaffAddClientHomeScreen() {
       }
     }
   }, [existingHome]);
+
+  // Auto-set role to "Laundry" for Laundry Service businesses in create mode
+  // Reset to empty when switching away from Laundry Service business
+  useEffect(() => {
+    if (!editMode) {
+      if (isLaundryBusiness) {
+        setRole("Laundry");
+      } else {
+        // Only reset if role was auto-set to Laundry and account is no longer laundry business
+        setRole(prev => prev === "Laundry" ? "" : prev);
+      }
+    }
+  }, [editMode, isLaundryBusiness]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -216,7 +234,11 @@ export function StaffAddClientHomeScreen() {
 
         <div className="flex flex-col gap-2">
           <Label>{t("yourRole")} <span className="text-destructive">*</span></Label>
-          <Select value={role} onValueChange={(v) => { setRole(v); markDirty(); }}>
+          <Select 
+            value={role} 
+            onValueChange={(v) => { setRole(v); markDirty(); }}
+            disabled={isLaundryBusiness && !editMode}
+          >
             <SelectTrigger data-testid="select-role">
               <SelectValue placeholder={t("selectRole")} />
             </SelectTrigger>
@@ -226,6 +248,9 @@ export function StaffAddClientHomeScreen() {
               ))}
             </SelectContent>
           </Select>
+          {isLaundryBusiness && !editMode && (
+            <p className="text-xs text-muted-foreground">{t("roleAutoSetForLaundry") || "Role is automatically set for Laundry Service businesses"}</p>
+          )}
           {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
         </div>
 

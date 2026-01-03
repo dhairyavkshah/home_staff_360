@@ -121,6 +121,7 @@ export function AddAttendanceScreen() {
               id="date"
               type="date"
               value={date}
+              max={getTodayString()}
               onChange={(e) => { setDate(e.target.value); markDirty(); }}
               data-testid="input-date"
             />
