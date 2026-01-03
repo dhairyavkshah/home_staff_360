@@ -65,31 +65,189 @@ const DONATION_TIERS: { [key: string]: DonationTier[] } = {
     { amount: 15, label: "Amazing supporter", icon: Heart },
     { amount: 40, label: "Champion supporter", icon: Star },
   ],
-  AED: [
+  AUD: [
+    { amount: 2, label: "A small tea/coffee", icon: Coffee },
+    { amount: 5, label: "A thank you", icon: Heart },
+    { amount: 10, label: "Show appreciation", icon: Star },
+    { amount: 20, label: "Generous support", icon: Gift },
+    { amount: 40, label: "Amazing supporter", icon: Heart },
+    { amount: 80, label: "Champion supporter", icon: Star },
+  ],
+  CAD: [
+    { amount: 2, label: "A small tea/coffee", icon: Coffee },
+    { amount: 5, label: "A thank you", icon: Heart },
+    { amount: 10, label: "Show appreciation", icon: Star },
+    { amount: 20, label: "Generous support", icon: Gift },
+    { amount: 40, label: "Amazing supporter", icon: Heart },
+    { amount: 75, label: "Champion supporter", icon: Star },
+  ],
+  CHF: [
+    { amount: 1, label: "A small tea/coffee", icon: Coffee },
+    { amount: 3, label: "A thank you", icon: Heart },
+    { amount: 5, label: "Show appreciation", icon: Star },
+    { amount: 10, label: "Generous support", icon: Gift },
+    { amount: 20, label: "Amazing supporter", icon: Heart },
+    { amount: 50, label: "Champion supporter", icon: Star },
+  ],
+  CZK: [
+    { amount: 25, label: "A small tea/coffee", icon: Coffee },
+    { amount: 75, label: "A thank you", icon: Heart },
+    { amount: 125, label: "Show appreciation", icon: Star },
+    { amount: 250, label: "Generous support", icon: Gift },
+    { amount: 500, label: "Amazing supporter", icon: Heart },
+    { amount: 1200, label: "Champion supporter", icon: Star },
+  ],
+  DKK: [
+    { amount: 10, label: "A small tea/coffee", icon: Coffee },
+    { amount: 25, label: "A thank you", icon: Heart },
+    { amount: 50, label: "Show appreciation", icon: Star },
+    { amount: 100, label: "Generous support", icon: Gift },
+    { amount: 200, label: "Amazing supporter", icon: Heart },
+    { amount: 400, label: "Champion supporter", icon: Star },
+  ],
+  HKD: [
+    { amount: 10, label: "A small tea/coffee", icon: Coffee },
+    { amount: 25, label: "A thank you", icon: Heart },
+    { amount: 50, label: "Show appreciation", icon: Star },
+    { amount: 100, label: "Generous support", icon: Gift },
+    { amount: 200, label: "Amazing supporter", icon: Heart },
+    { amount: 400, label: "Champion supporter", icon: Star },
+  ],
+  HUF: [
+    { amount: 400, label: "A small tea/coffee", icon: Coffee },
+    { amount: 1200, label: "A thank you", icon: Heart },
+    { amount: 2000, label: "Show appreciation", icon: Star },
+    { amount: 4000, label: "Generous support", icon: Gift },
+    { amount: 8000, label: "Amazing supporter", icon: Heart },
+    { amount: 20000, label: "Champion supporter", icon: Star },
+  ],
+  ILS: [
     { amount: 5, label: "A small tea/coffee", icon: Coffee },
-    { amount: 10, label: "A thank you", icon: Heart },
+    { amount: 12, label: "A thank you", icon: Heart },
     { amount: 20, label: "Show appreciation", icon: Star },
     { amount: 40, label: "Generous support", icon: Gift },
-    { amount: 75, label: "Amazing supporter", icon: Heart },
+    { amount: 80, label: "Amazing supporter", icon: Heart },
     { amount: 200, label: "Champion supporter", icon: Star },
   ],
+  JPY: [
+    { amount: 150, label: "A small tea/coffee", icon: Coffee },
+    { amount: 500, label: "A thank you", icon: Heart },
+    { amount: 800, label: "Show appreciation", icon: Star },
+    { amount: 1500, label: "Generous support", icon: Gift },
+    { amount: 3000, label: "Amazing supporter", icon: Heart },
+    { amount: 8000, label: "Champion supporter", icon: Star },
+  ],
+  MXN: [
+    { amount: 20, label: "A small tea/coffee", icon: Coffee },
+    { amount: 60, label: "A thank you", icon: Heart },
+    { amount: 100, label: "Show appreciation", icon: Star },
+    { amount: 200, label: "Generous support", icon: Gift },
+    { amount: 400, label: "Amazing supporter", icon: Heart },
+    { amount: 1000, label: "Champion supporter", icon: Star },
+  ],
+  NOK: [
+    { amount: 15, label: "A small tea/coffee", icon: Coffee },
+    { amount: 40, label: "A thank you", icon: Heart },
+    { amount: 70, label: "Show appreciation", icon: Star },
+    { amount: 140, label: "Generous support", icon: Gift },
+    { amount: 280, label: "Amazing supporter", icon: Heart },
+    { amount: 600, label: "Champion supporter", icon: Star },
+  ],
+  NZD: [
+    { amount: 2, label: "A small tea/coffee", icon: Coffee },
+    { amount: 5, label: "A thank you", icon: Heart },
+    { amount: 10, label: "Show appreciation", icon: Star },
+    { amount: 20, label: "Generous support", icon: Gift },
+    { amount: 40, label: "Amazing supporter", icon: Heart },
+    { amount: 100, label: "Champion supporter", icon: Star },
+  ],
+  PHP: [
+    { amount: 60, label: "A small tea/coffee", icon: Coffee },
+    { amount: 180, label: "A thank you", icon: Heart },
+    { amount: 300, label: "Show appreciation", icon: Star },
+    { amount: 600, label: "Generous support", icon: Gift },
+    { amount: 1200, label: "Amazing supporter", icon: Heart },
+    { amount: 3000, label: "Champion supporter", icon: Star },
+  ],
+  PLN: [
+    { amount: 5, label: "A small tea/coffee", icon: Coffee },
+    { amount: 15, label: "A thank you", icon: Heart },
+    { amount: 25, label: "Show appreciation", icon: Star },
+    { amount: 50, label: "Generous support", icon: Gift },
+    { amount: 100, label: "Amazing supporter", icon: Heart },
+    { amount: 250, label: "Champion supporter", icon: Star },
+  ],
+  RUB: [
+    { amount: 100, label: "A small tea/coffee", icon: Coffee },
+    { amount: 300, label: "A thank you", icon: Heart },
+    { amount: 500, label: "Show appreciation", icon: Star },
+    { amount: 1000, label: "Generous support", icon: Gift },
+    { amount: 2000, label: "Amazing supporter", icon: Heart },
+    { amount: 5000, label: "Champion supporter", icon: Star },
+  ],
+  SEK: [
+    { amount: 15, label: "A small tea/coffee", icon: Coffee },
+    { amount: 40, label: "A thank you", icon: Heart },
+    { amount: 70, label: "Show appreciation", icon: Star },
+    { amount: 140, label: "Generous support", icon: Gift },
+    { amount: 280, label: "Amazing supporter", icon: Heart },
+    { amount: 600, label: "Champion supporter", icon: Star },
+  ],
+  SGD: [
+    { amount: 2, label: "A small tea/coffee", icon: Coffee },
+    { amount: 5, label: "A thank you", icon: Heart },
+    { amount: 10, label: "Show appreciation", icon: Star },
+    { amount: 20, label: "Generous support", icon: Gift },
+    { amount: 40, label: "Amazing supporter", icon: Heart },
+    { amount: 80, label: "Champion supporter", icon: Star },
+  ],
+  THB: [
+    { amount: 40, label: "A small tea/coffee", icon: Coffee },
+    { amount: 120, label: "A thank you", icon: Heart },
+    { amount: 200, label: "Show appreciation", icon: Star },
+    { amount: 400, label: "Generous support", icon: Gift },
+    { amount: 800, label: "Amazing supporter", icon: Heart },
+    { amount: 2000, label: "Champion supporter", icon: Star },
+  ],
+  TWD: [
+    { amount: 40, label: "A small tea/coffee", icon: Coffee },
+    { amount: 100, label: "A thank you", icon: Heart },
+    { amount: 175, label: "Show appreciation", icon: Star },
+    { amount: 350, label: "Generous support", icon: Gift },
+    { amount: 700, label: "Amazing supporter", icon: Heart },
+    { amount: 1750, label: "Champion supporter", icon: Star },
+  ],
 };
+
+const PAYPAL_SUPPORTED_CURRENCIES = [
+  'AUD', 'USD', 'CAD', 'CHF', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD', 'HUF',
+  'ILS', 'JPY', 'MXN', 'NOK', 'NZD', 'PHP', 'PLN', 'RUB', 'SEK', 'SGD', 'THB', 'TWD'
+];
 
 const CURRENCY_SYMBOLS: { [key: string]: string } = {
   INR: "₹",
   USD: "$",
   EUR: "€",
   GBP: "£",
-  AED: "د.إ",
-  JPY: "¥",
-  CNY: "¥",
-  CAD: "C$",
   AUD: "A$",
-  CHF: "Fr.",
+  CAD: "C$",
+  CHF: "CHF",
+  CZK: "Kč",
+  DKK: "kr",
+  HKD: "HK$",
+  HUF: "Ft",
+  ILS: "₪",
+  JPY: "¥",
+  MXN: "MX$",
+  NOK: "kr",
+  NZD: "NZ$",
+  PHP: "₱",
+  PLN: "zł",
+  RUB: "₽",
+  SEK: "kr",
   SGD: "S$",
-  MXN: "$",
-  BRL: "R$",
-  ZAR: "R",
+  THB: "฿",
+  TWD: "NT$",
 };
 
 function ConfettiParticle({ delay }: { delay: number }) {
@@ -131,7 +289,12 @@ export function SupportDeveloperScreen() {
 
   const userCountry = getUserCountry() || "US";
   const countryInfo = getCountryByCode(userCountry);
-  const currency = getCurrencyForCountry(userCountry) || "USD";
+  const detectedCurrency = getCurrencyForCountry(userCountry) || "USD";
+  
+  const isIndian = isIndianUser(userCountry);
+  const isPayPalSupported = PAYPAL_SUPPORTED_CURRENCIES.includes(detectedCurrency);
+  
+  const currency = isIndian ? "INR" : (isPayPalSupported ? detectedCurrency : "USD");
   const donations = DONATION_TIERS[currency] || DONATION_TIERS.USD;
   const currencySymbol = CURRENCY_SYMBOLS[currency] || "$";
 
@@ -143,7 +306,6 @@ export function SupportDeveloperScreen() {
   const [pendingPaymentAmount, setPendingPaymentAmount] = useState<number>(0);
   const [paymentInProgress, setPaymentInProgress] = useState(false);
 
-  const isIndian = isIndianUser(userCountry);
   const donorStatus = getDonorStatus();
 
   const handleVisibilityChange = useCallback(() => {

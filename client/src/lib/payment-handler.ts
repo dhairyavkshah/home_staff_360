@@ -15,7 +15,7 @@ export interface PaymentResult {
 }
 
 const DEFAULT_CONFIG: PaymentConfig = {
-  upiId: "dhairyavkshah@icici",
+  upiId: "dhairyavkshah@okhdfcbank",
   payeeName: "Dhairya Shah",
   paypalUsername: "dhairyavkshah",
   transactionNote: "Support HomeStaff360",

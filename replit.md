@@ -95,8 +95,10 @@ Located in Settings > Support the Developer, this optional feature allows users 
 - Safe area collision padding for Android compatibility
 - Grouped by region (Indian languages first, then international)
 
-### Multi-Currency Support (15 Currencies)
-INR, USD, EUR, GBP, AED, JPY, CNY, CAD, AUD, CHF, SGD, MXN, BRL, ZAR, and custom currencies with user-defined symbol.
+### Multi-Currency Support (27 Currencies)
+**General App Currencies**: INR, USD, EUR, GBP, AUD, CAD, CHF, CZK, DKK, HKD, HUF, ILS, JPY, MXN, NOK, NZD, PHP, PLN, RUB, SEK, SGD, THB, TWD, AED, CNY, BRL, ZAR, and custom currencies with user-defined symbol.
+
+**PayPal Donation Currencies (22)**: AUD, USD, CAD, CHF, CZK, DKK, EUR, GBP, HKD, HUF, ILS, JPY, MXN, NOK, NZD, PHP, PLN, RUB, SEK, SGD, THB, TWD. Users with unsupported currencies are shown USD amounts.
 
 ## External Dependencies
 
