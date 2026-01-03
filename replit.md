@@ -1,55 +1,141 @@
 # Home Staff 360
 
 ## Overview
-Home Staff 360 is an offline-first mobile/web application designed for managing household staff and service businesses. It enables efficient tracking of attendance, payments, and expenses for domestic staff (Home User Mode) and allows service professionals to manage their clients and earnings (Staff User Mode). The application prioritizes privacy, storing all user data locally on the device with no server dependencies. It supports multi-currency and multi-language, offering a robust solution for personal and professional management. The project aims to provide a comprehensive "operating system" for home and work, crafted by The Team 360, with a one-time purchase model for lifetime access.
+Home Staff 360 is a **100% free, offline-first mobile/web application** for managing household staff and service businesses. It enables efficient tracking of attendance, payments, and expenses for domestic staff (Home User Mode) and allows service professionals to manage their clients and earnings (Staff User Mode). The application prioritizes privacy, storing all user data locally on the device with no server dependencies. It supports multi-currency and multi-language, offering a robust solution for personal and professional management.
+
+## App Philosophy
+- **Completely Free**: No premium tiers, no subscriptions, no paywalls
+- **Ad-Free**: No advertisements of any kind
+- **Privacy-First**: 100% offline, all data stays on the user's device
+- **Donation-Supported**: Optional donations help keep the app free for everyone
 
 ## User Preferences
 I prefer simple language and clear explanations. I want iterative development, with small, testable changes. Please ask before making any major architectural decisions or large-scale code changes. I value privacy and offline-first capabilities.
 
+## Current Specifications & Scope
+
+### Dual Mode Operation
+1. **Home User Mode**: For households managing domestic staff
+   - Manage unlimited staff members with roles (maid, cook, driver, gardener, etc.)
+   - Track attendance (Full Day, Half Day, Absent)
+   - Record payments, advances, and deductions
+   - Track household bills and expenses with categories
+   - Log laundry batches with item-wise pricing
+   - Generate and export CSV reports
+   - Backup and restore data
+
+2. **Staff/Professional Mode**: For service professionals managing their work
+   - Manage client homes where they work
+   - Log attendance at multiple client locations
+   - Track laundry jobs with earnings
+   - Record personal business expenses
+   - Generate earnings reports
+   - Create and manage invoices with tax support
+
+### Plan & Limits (100% Free)
+- **Home User Mode**: Maximum 10 households
+- **Staff User Mode**: Maximum 10 businesses
+- **No hard limits** on staff members, clients, or documents
+- **Soft limit of 1000 total records**: Warning at 900 records, prompt at 1000 to delete old records
+- **Document storage**: 5MB per file, images auto-compressed to 80% JPEG quality
+
+### Support the Developer (Donation Feature)
+Located in Settings > Support the Developer, this optional feature allows users to make voluntary donations:
+
+**Payment Methods**:
+- **Indian Users**: UPI (opens native UPI app) with UPI ID: dhairyavkshah@okhdfcbank
+- **International Users**: PayPal (opens PayPal.me link)
+
+**Donation Tiers** (currency-specific):
+- **INR**: ₹20, ₹50, ₹100, ₹200, ₹500, ₹1000 + custom amount
+- **USD**: $1, $2, $5, $10, $20, $50 + custom amount
+- **EUR**: €1, €2, €5, €10, €20, €50 + custom amount
+- **GBP**: £1, £2, £5, £10, £20, £50 + custom amount
+- **AED**: 5, 10, 20, 50, 100, 200 AED + custom amount
+
+**Flow**:
+1. User selects amount (preset or custom)
+2. User chooses payment method (auto-detected by country)
+3. Opens UPI app or PayPal externally
+4. User confirms payment completion
+5. Thank you message with confetti animation
+6. User marked as "supporter" in localStorage
+
 ## System Architecture
 
-### UI/UX Decisions
-The application features a modern UI inspired by Samsung One UI and Material 3, incorporating "Squircle" corners (24px radius) for a soft, premium feel. It supports both Light and Dark modes and uses Google Blue (#0B57D0) as the primary color.
+### UI/UX Design
+- Modern UI inspired by Samsung One UI and Material 3
+- "Squircle" corners (24px radius) for a soft, premium feel
+- Light and Dark mode support
+- Primary color: Google Blue (#0B57D0)
+- Bottom navigation with 5 tabs (Home, Staff/Clients, Expenses, Reports, Settings)
 
 ### Technical Implementations
-- **Offline-First Design**: All data is stored 100% locally using browser `localStorage` with no server dependencies, ensuring privacy.
-- **Security**: PIN-based app lock with optional biometric authentication (WebAuthn) for secure access.
-- **Default App Mode**: The application remembers the user's preferred mode (HOME or STAFF) and defaults to it on launch, configurable in settings.
-- **Guided Tour**: Interactive onboarding tours are available for both HOME and STAFF modes, automatically starting once and replayable from settings.
-- **Data Scoping**: All data is properly filtered by active account ID, with helper methods for both HOME and STAFF modes. A "Show All Contexts" toggle allows viewing data across all accounts.
-- **Cascade Deletes**: Deleting records automatically cleans up all related data (e.g., deleting a person also removes their attendance, transactions, etc.).
-- **Document Management**: Documents can be linked to various records (expenses, transactions, people, laundry, client homes). Images are automatically resized (max 1920x1920) and compressed (80% JPEG) to optimize storage, with a 5MB per file limit. Documents are stored as Base64-encoded strings in `localStorage`.
-- **Plan Management**: The app is fully free with the following limits:
-  - **Home User Mode**: Maximum 10 households
-  - **Staff User Mode**: Maximum 10 businesses
-  - **No hard limits** on staff, clients, or documents
-  - **Soft limit of 1000 total records**: When reached, users are prompted to delete dormant records to add more. Warning shows at 900 records.
-- **Invoicing System (STAFF Mode)**: Allows creation of itemized invoices with sequential numbering, tax rate support, and five statuses (draft, sent, paid, overdue, cancelled).
+- **Offline-First Design**: All data stored in browser `localStorage`, no server dependencies
+- **Security**: PIN-based app lock with optional biometric authentication (WebAuthn)
+- **Default App Mode**: Remembers user's preferred mode (HOME or STAFF), configurable in settings
+- **Guided Tour**: Interactive onboarding tours for both modes, auto-starts once, replayable from settings
+- **Data Scoping**: All data filtered by active account ID, "Show All Contexts" toggle available
+- **Cascade Deletes**: Deleting records automatically cleans up related data
+- **Document Management**: Images resized (max 1920x1920), compressed (80% JPEG), stored as Base64
+- **Invoicing System (STAFF Mode)**: Itemized invoices with sequential numbering, tax rates, 5 statuses
 
-### Feature Specifications
-- **Home User Features**: Manage staff, track attendance (Full/Half/Absent), record payments, advances, deductions, track household expenses, log laundry batches, generate CSV reports, and backup/restore data.
-- **Staff User Features**: Manage client homes, log attendance, track laundry jobs and earnings, record personal expenses, generate earnings reports, and create/manage invoices.
-- **Dashboard**: Both modes feature overview sections with clickable cards for quick stats and navigation.
-- **Multi-language Support**: English, Hindi, Gujarati, Kannada, Malayalam, Spanish, French, German, Arabic, Chinese, Japanese, Portuguese.
-- **Multi-currency Support**: INR, USD, EUR, GBP, AED, and custom currencies.
+### Multi-Language Support (20 Languages)
+**Complete translations (100% coverage ~250 keys)**:
+- English (en), Hindi (hi), Gujarati (gu), Kannada (kn), Malayalam (ml)
+- Spanish (es), French (fr), German (de), Arabic (ar), Chinese (zh)
+- Japanese (ja), Portuguese (pt), Marathi (mr), Punjabi (pa)
 
-### System Design Choices
-The application is built as a Progressive Web App (PWA) using React with TypeScript and Vite for the frontend. A simple Express.js server is used only for serving static files during development/production. Data models are defined using Zod schemas.
+**Partial translations (onboarding keys only, remaining ~720 translations pending)**:
+- Telugu (te), Tamil (ta), Urdu (ur), Bengali (bn), Odia (or), Assamese (as)
+
+**Language Selector Features**:
+- Typeahead search functionality
+- Safe area collision padding for Android compatibility
+- Grouped by region (Indian languages first, then international)
+
+### Multi-Currency Support (15 Currencies)
+INR, USD, EUR, GBP, AED, JPY, CNY, CAD, AUD, CHF, SGD, MXN, BRL, ZAR, and custom currencies with user-defined symbol.
 
 ## External Dependencies
 
-- **Frontend Framework**: React
+- **Frontend Framework**: React with TypeScript
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS
 - **UI Components**: Shadcn/ui
 - **Icons**: `lucide-react`, `react-icons`
+- **Animation**: `framer-motion`
 - **State Management**: React Context
 - **Persistence**: Browser `localStorage`
 - **Biometric Authentication**: WebAuthn API
-- **Backend (Development/Static Serving)**: Express.js
+- **Backend (Static Serving Only)**: Express.js
 - **Schema Validation**: Zod
-- **Mobile Packaging**: Capacitor (for Android APK builds)
-- **CI/CD**: GitHub Actions (for Android APK builds)
+- **Mobile Packaging**: Capacitor (Android)
+- **CI/CD**: GitHub Actions
+
+## Project Structure
+
+```
+client/src/
+├── components/         # Reusable UI components
+│   ├── ui/            # Shadcn components
+│   └── ...            # App-specific components
+├── screens/           # Main app screens
+│   ├── HomeScreen.tsx
+│   ├── StaffScreen.tsx
+│   ├── ExpensesScreen.tsx
+│   ├── ReportsScreen.tsx
+│   ├── SettingsScreen.tsx
+│   ├── SupportDeveloperScreen.tsx
+│   └── ...
+├── lib/
+│   ├── i18n/          # Internationalization
+│   │   └── translations.ts
+│   ├── storage.ts     # localStorage wrapper
+│   ├── payment-handler.ts  # Donation payment handling
+│   └── ...
+└── hooks/             # Custom React hooks
+```
 
 ## CRITICAL: GitHub Push & Workflow Instructions
 
@@ -175,3 +261,16 @@ jobs:
 - `KEYSTORE_PASSWORD` - Keystore password
 - `KEY_ALIAS` - Key alias
 - `KEY_PASSWORD` - Key password
+
+## Development Notes
+
+### Translation Status
+- 14 languages have complete translations (~250 keys each)
+- 6 Indian languages have partial translations (onboarding only, ~30 keys each)
+- Remaining work: ~720 translations for Telugu, Tamil, Urdu, Bengali, Odia, Assamese
+
+### Key Design Decisions
+- Language selector uses typeahead search for better UX with 20 languages
+- Dropdowns have safe area collision padding for Android status bar
+- All data operations use helper methods that respect active account context
+- Documents stored as compressed Base64 to stay within localStorage limits
