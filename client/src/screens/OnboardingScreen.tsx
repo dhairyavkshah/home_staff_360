@@ -5,13 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
@@ -21,24 +14,6 @@ import { useTour } from "@/lib/guided-tour";
 import { getCurrencyForCountry, getUserCountry, detectCountryFromIP } from "@/lib/geolocation-service";
 import { CountrySelector } from "@/components/ui/country-selector";
 import { CurrencySelector } from "@/components/ui/currency-selector";
-
-const currencyOptions: { value: Currency; label: string; symbol: string }[] = [
-  { value: "INR", label: "Indian Rupee", symbol: "₹" },
-  { value: "USD", label: "US Dollar", symbol: "$" },
-  { value: "EUR", label: "Euro", symbol: "€" },
-  { value: "GBP", label: "British Pound", symbol: "£" },
-  { value: "AED", label: "UAE Dirham", symbol: "د.إ" },
-  { value: "JPY", label: "Japanese Yen", symbol: "¥" },
-  { value: "CNY", label: "Chinese Yuan", symbol: "¥" },
-  { value: "CAD", label: "Canadian Dollar", symbol: "C$" },
-  { value: "AUD", label: "Australian Dollar", symbol: "A$" },
-  { value: "CHF", label: "Swiss Franc", symbol: "CHF" },
-  { value: "SGD", label: "Singapore Dollar", symbol: "S$" },
-  { value: "MXN", label: "Mexican Peso", symbol: "MX$" },
-  { value: "BRL", label: "Brazilian Real", symbol: "R$" },
-  { value: "ZAR", label: "South African Rand", symbol: "R" },
-  { value: "OTHER", label: "Other", symbol: "$" },
-];
 
 export function OnboardingScreen() {
   const { navigate, data } = useNavigation();
