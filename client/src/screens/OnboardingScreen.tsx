@@ -20,6 +20,7 @@ import { pinService } from "@/lib/pin-service";
 import { useTour } from "@/lib/guided-tour";
 import { getCurrencyForCountry, getUserCountry, detectCountryFromIP } from "@/lib/geolocation-service";
 import { CountrySelector } from "@/components/ui/country-selector";
+import { CurrencySelector } from "@/components/ui/currency-selector";
 
 const currencyOptions: { value: Currency; label: string; symbol: string }[] = [
   { value: "INR", label: "Indian Rupee", symbol: "₹" },
@@ -262,18 +263,11 @@ export function OnboardingScreen() {
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="currency">Currency</Label>
-              <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
-                <SelectTrigger id="currency" data-testid="select-currency">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencyOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.symbol} {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CurrencySelector
+                value={currency}
+                onValueChange={(v) => setCurrency(v)}
+                data-testid="select-currency"
+              />
               <p className="text-xs text-muted-foreground">
                 Auto-set based on country, but you can change it
               </p>

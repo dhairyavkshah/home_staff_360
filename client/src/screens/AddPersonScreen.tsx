@@ -39,6 +39,7 @@ import {
   type Currency,
   CURRENCIES,
 } from "@shared/schema";
+import { CurrencySelector } from "@/components/ui/currency-selector";
 
 export function AddPersonScreen() {
   const { navigate, goBack, data } = useNavigation();
@@ -311,41 +312,11 @@ export function AddPersonScreen() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="currency">Currency <span className="text-destructive">*</span></Label>
-            <Select value={currency} onValueChange={(v) => { setCurrency(v as Currency); markDirty(); }}>
-              <SelectTrigger id="currency" data-testid="select-currency">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="INR">INR - Indian Rupee</SelectItem>
-                <SelectItem value="USD">USD - US Dollar</SelectItem>
-                <SelectItem value="EUR">EUR - Euro</SelectItem>
-                <SelectItem value="GBP">GBP - British Pound</SelectItem>
-                <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>
-                <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
-                <SelectItem value="CHF">CHF - Swiss Franc</SelectItem>
-                <SelectItem value="CZK">CZK - Czech Koruna</SelectItem>
-                <SelectItem value="DKK">DKK - Danish Krone</SelectItem>
-                <SelectItem value="HKD">HKD - Hong Kong Dollar</SelectItem>
-                <SelectItem value="HUF">HUF - Hungarian Forint</SelectItem>
-                <SelectItem value="ILS">ILS - Israeli Shekel</SelectItem>
-                <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
-                <SelectItem value="MXN">MXN - Mexican Peso</SelectItem>
-                <SelectItem value="NOK">NOK - Norwegian Krone</SelectItem>
-                <SelectItem value="NZD">NZD - New Zealand Dollar</SelectItem>
-                <SelectItem value="PHP">PHP - Philippine Peso</SelectItem>
-                <SelectItem value="PLN">PLN - Polish Zloty</SelectItem>
-                <SelectItem value="RUB">RUB - Russian Rouble</SelectItem>
-                <SelectItem value="SEK">SEK - Swedish Krona</SelectItem>
-                <SelectItem value="SGD">SGD - Singapore Dollar</SelectItem>
-                <SelectItem value="THB">THB - Thai Baht</SelectItem>
-                <SelectItem value="TWD">TWD - Taiwan Dollar</SelectItem>
-                <SelectItem value="AED">AED - UAE Dirham</SelectItem>
-                <SelectItem value="CNY">CNY - Chinese Yuan</SelectItem>
-                <SelectItem value="BRL">BRL - Brazilian Real</SelectItem>
-                <SelectItem value="ZAR">ZAR - South African Rand</SelectItem>
-                <SelectItem value="OTHER">Other (Custom)</SelectItem>
-              </SelectContent>
-            </Select>
+            <CurrencySelector
+              value={currency}
+              onValueChange={(v) => { setCurrency(v); markDirty(); }}
+              data-testid="select-currency"
+            />
             <p className="text-xs text-muted-foreground">All records for this staff will use this currency</p>
           </div>
 
