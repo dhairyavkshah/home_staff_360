@@ -50,3 +50,128 @@ The application is built as a Progressive Web App (PWA) using React with TypeScr
 - **Schema Validation**: Zod
 - **Mobile Packaging**: Capacitor (for Android APK builds)
 - **CI/CD**: GitHub Actions (for Android APK builds)
+
+## CRITICAL: GitHub Push & Workflow Instructions
+
+**IMPORTANT**: The Replit OAuth token does NOT have `workflow` scope, so you CANNOT push workflow files from Replit.
+
+### Correct Workflow for GitHub Push:
+1. **Remove .github folder from Replit** (run in Shell):
+   ```bash
+   rm -rf .github
+   ```
+2. **Push to GitHub**:
+   ```bash
+   git push origin main --force
+   ```
+3. **Add workflow file manually in GitHub**:
+   - Go to https://github.com/dhairyavkshah/home-staff-360
+   - Click "Add file" > "Create new file"
+   - Path: `.github/workflows/android.yml`
+   - Paste the workflow content (see below)
+   - Commit directly to main
+
+### Android Build Workflow Content:
+```yaml
+name: Android Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build web app
+        run: npm run build
+      
+      - name: Sync Capacitor
+        run: npx cap sync android
+      
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      
+      - name: Decode Keystore
+        if: inputs.build_type == 'release'
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/homestaff360-release.jks
+      
+      - name: Build Release AAB
+        if: inputs.build_type == 'release'
+        working-directory: android
+        run: ./gradlew bundleRelease
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/android/app/homestaff360-release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      
+      - name: Build Release APK
+        if: inputs.build_type == 'release'
+        working-directory: android
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/android/app/homestaff360-release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      
+      - name: Build Debug APK
+        if: inputs.build_type == 'debug'
+        working-directory: android
+        run: ./gradlew assembleDebug
+      
+      - name: Upload Release AAB
+        if: inputs.build_type == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+      
+      - name: Upload Release APK
+        if: inputs.build_type == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+      
+      - name: Upload Debug APK
+        if: inputs.build_type == 'debug'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### GitHub Secrets Required for Release Builds:
+- `KEYSTORE_BASE64` - Base64-encoded keystore file
+- `KEYSTORE_PASSWORD` - Keystore password
+- `KEY_ALIAS` - Key alias
+- `KEY_PASSWORD` - Key password
