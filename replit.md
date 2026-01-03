@@ -43,7 +43,7 @@ I prefer simple language and clear explanations. I want iterative development, w
 Located in Settings > Support the Developer, this optional feature allows users to make voluntary donations:
 
 **Payment Methods**:
-- **Indian Users**: UPI (opens native UPI app) with UPI ID: dhairyavkshah@okhdfcbank
+- **Indian Users**: UPI (opens native UPI app) with UPI ID: dhairyavkshah@icici
 - **International Users**: PayPal (opens PayPal.me link)
 
 **Donation Tiers** (currency-specific):
