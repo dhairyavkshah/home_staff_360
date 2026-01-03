@@ -90,6 +90,7 @@ export function CountrySelector({
         className="w-[--radix-popover-trigger-width] p-0" 
         align="start"
         sideOffset={4}
+        collisionPadding={{ top: 48, bottom: 48 }}
       >
         <div className="flex items-center border-b px-3 py-2">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
