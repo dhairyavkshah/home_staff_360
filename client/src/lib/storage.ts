@@ -5,6 +5,7 @@ import {
   PLAN_LIMITS,
   STORAGE_LIMITS,
   CURRENCIES,
+  backupDataSchema,
   type AppSettings,
   type HomeSettings,
   type StaffSettings,
@@ -691,20 +692,42 @@ export const storage = {
     };
   },
 
-  importBackup(backup: BackupData, mode: "replace" | "merge" | "keep"): void {
+  validateBackup(data: unknown): { valid: boolean; error?: string; backup?: BackupData } {
+    try {
+      const result = backupDataSchema.safeParse(data);
+      if (!result.success) {
+        const errorMessages = result.error.issues.map(issue => 
+          `${issue.path.join('.')}: ${issue.message}`
+        ).join('; ');
+        return { valid: false, error: `Invalid backup format: ${errorMessages}` };
+      }
+      return { valid: true, backup: result.data };
+    } catch (e) {
+      return { valid: false, error: 'Failed to parse backup data' };
+    }
+  },
+
+  importBackup(backup: BackupData, mode: "replace" | "merge" | "keep"): { success: boolean; error?: string } {
+    const validation = this.validateBackup(backup);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
+    }
+    
+    const validatedBackup = validation.backup!;
+    
     if (mode === "replace") {
-      setItem(STORAGE_KEYS.SETTINGS, backup.settings);
-      if (backup.profile) setItem(STORAGE_KEYS.PROFILE, backup.profile);
-      if (backup.accounts) setItem(STORAGE_KEYS.ACCOUNTS, backup.accounts);
-      setItem(STORAGE_KEYS.PEOPLE, backup.people);
-      setItem(STORAGE_KEYS.ATTENDANCE, backup.attendance);
-      setItem(STORAGE_KEYS.TRANSACTIONS, backup.transactions);
-      setItem(STORAGE_KEYS.LAUNDRY, backup.laundry);
-      setItem(STORAGE_KEYS.EXPENSES, backup.expenses);
+      setItem(STORAGE_KEYS.SETTINGS, validatedBackup.settings);
+      if (validatedBackup.profile) setItem(STORAGE_KEYS.PROFILE, validatedBackup.profile);
+      if (validatedBackup.accounts) setItem(STORAGE_KEYS.ACCOUNTS, validatedBackup.accounts);
+      setItem(STORAGE_KEYS.PEOPLE, validatedBackup.people);
+      setItem(STORAGE_KEYS.ATTENDANCE, validatedBackup.attendance);
+      setItem(STORAGE_KEYS.TRANSACTIONS, validatedBackup.transactions);
+      setItem(STORAGE_KEYS.LAUNDRY, validatedBackup.laundry);
+      setItem(STORAGE_KEYS.EXPENSES, validatedBackup.expenses);
     } else if (mode === "merge") {
       const existingPeople = this.getPeople();
       const mergedPeople = [...existingPeople];
-      for (const person of backup.people) {
+      for (const person of validatedBackup.people) {
         const index = mergedPeople.findIndex((p) => p.id === person.id);
         if (index === -1) {
           mergedPeople.push(person);
@@ -716,12 +739,14 @@ export const storage = {
       
     } else if (mode === "keep") {
       const existingPeople = this.getPeople();
-      const newPeople = backup.people.map((p) => ({
+      const newPeople = validatedBackup.people.map((p) => ({
         ...p,
         id: generateId(),
       }));
       setItem(STORAGE_KEYS.PEOPLE, [...existingPeople, ...newPeople]);
     }
+    
+    return { success: true };
   },
 
   clearAllData(): void {

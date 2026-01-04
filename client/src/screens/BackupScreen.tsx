@@ -243,7 +243,10 @@ export function BackupScreen() {
         throw new Error(`Backup validation failed: ${errorMessages}`);
       }
 
-      storage.importBackup(result.data, importMode);
+      const importResult = storage.importBackup(result.data, importMode);
+      if (!importResult.success) {
+        throw new Error(importResult.error || "Import validation failed");
+      }
       toast({ title: "Backup imported successfully" });
       navigate(profile?.type === "STAFF" ? "staff-home" : "home");
     } catch (error) {

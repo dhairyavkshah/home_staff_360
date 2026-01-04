@@ -3,7 +3,7 @@ import { useNavigation } from "@/lib/navigation";
 import { pinService } from "@/lib/pin-service";
 import { storage } from "@/lib/storage";
 import { Card } from "@/components/ui/card";
-import { Lock, X, Fingerprint } from "lucide-react";
+import { Lock, X, Fingerprint, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NumericKeypad } from "@/components/ui/numeric-keypad";
 
@@ -12,6 +12,13 @@ interface PinEntryScreenProps {
   title?: string;
   subtitle?: string;
   showBiometric?: boolean;
+}
+
+function formatCountdown(ms: number): string {
+  const totalSeconds = Math.ceil(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 export function PinEntryScreen({ 
@@ -23,7 +30,9 @@ export function PinEntryScreen({
   const { navigate } = useNavigation();
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
-  const [attempts, setAttempts] = useState(0);
+  const [isLockedOut, setIsLockedOut] = useState(pinService.isLockedOut());
+  const [lockoutRemaining, setLockoutRemaining] = useState(pinService.getLockoutRemainingMs());
+  const [remainingAttempts, setRemainingAttempts] = useState(pinService.getRemainingAttempts());
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const profile = useMemo(() => storage.getProfile(), []);
   const settings = useMemo(() => storage.getSettings(), []);
@@ -37,6 +46,23 @@ export function PinEntryScreen({
     }
   };
 
+  // Check lockout status and update countdown
+  useEffect(() => {
+    const checkLockout = () => {
+      const lockedOut = pinService.isLockedOut();
+      setIsLockedOut(lockedOut);
+      if (lockedOut) {
+        setLockoutRemaining(pinService.getLockoutRemainingMs());
+      } else {
+        setRemainingAttempts(pinService.getRemainingAttempts());
+      }
+    };
+    
+    checkLockout();
+    const interval = setInterval(checkLockout, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const initBiometric = async () => {
       const enabled = await pinService.initializeBiometric();
@@ -46,7 +72,7 @@ export function PinEntryScreen({
   }, []);
 
   const handleDigitPress = (digit: string) => {
-    if (pin.length >= 4 || attempts >= 3) return;
+    if (pin.length >= 4 || isLockedOut) return;
     
     const updatedPin = pin + digit;
     setPin(updatedPin);
@@ -61,11 +87,14 @@ export function PinEntryScreen({
             navigateToHome();
           }
         } else {
-          setAttempts((prev) => prev + 1);
-          if (attempts >= 2) {
-            setError("Too many failed attempts. Please try again later.");
+          const result = pinService.recordFailedAttempt();
+          if (result.isLockedOut) {
+            setIsLockedOut(true);
+            setLockoutRemaining(pinService.getLockoutRemainingMs());
+            setError("Too many failed attempts. Try again in 30 minutes.");
           } else {
-            setError(`Incorrect PIN. ${2 - attempts} attempts remaining.`);
+            setRemainingAttempts(result.remainingAttempts);
+            setError(`Incorrect PIN. ${result.remainingAttempts} attempt${result.remainingAttempts !== 1 ? 's' : ''} remaining.`);
           }
           setPin("");
         }
@@ -124,14 +153,24 @@ export function PinEntryScreen({
           ))}
         </div>
 
-        {error && (
+        {isLockedOut ? (
+          <div className="flex flex-col items-center gap-2 text-destructive fade-in-up">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              <span className="text-sm font-medium">Account Locked</span>
+            </div>
+            <p className="text-xs text-center">
+              Too many failed attempts. Try again in {formatCountdown(lockoutRemaining)}
+            </p>
+          </div>
+        ) : error && (
           <div className="flex items-center gap-2 text-destructive text-sm fade-in-up">
             <X className="w-4 h-4" />
             <span>{error}</span>
           </div>
         )}
 
-        {showBiometric && biometricEnabled && (
+        {showBiometric && biometricEnabled && !isLockedOut && (
           <Button
             variant="ghost"
             size="sm"
@@ -147,7 +186,7 @@ export function PinEntryScreen({
         <NumericKeypad
           onDigitPress={handleDigitPress}
           onBackspace={handleBackspace}
-          disabled={attempts >= 3}
+          disabled={isLockedOut}
         />
 
         <p className="text-xs text-muted-foreground text-center">
