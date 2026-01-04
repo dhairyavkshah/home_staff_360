@@ -159,7 +159,14 @@ export function AttendanceScreen() {
     return date.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   };
 
+  const isFutureDate = (day: number) => {
+    const dateStr = getDateString(day);
+    return dateStr > getTodayString();
+  };
+
   const handleDayClick = (day: number) => {
+    // Prevent selecting future dates
+    if (isFutureDate(day)) return;
     setSelectedDate(getDateString(day));
   };
 
@@ -203,20 +210,23 @@ export function AttendanceScreen() {
               const isSelected = dateStr === selectedDate;
               const isToday = dateStr === getTodayString();
               const status = getDayStatus(day);
+              const isFuture = isFutureDate(day);
               
               return (
                 <button
                   key={day}
                   onClick={() => handleDayClick(day)}
+                  disabled={isFuture}
                   className={`
                     h-10 rounded-lg text-sm font-medium transition-colors relative
-                    ${isSelected ? 'bg-primary text-primary-foreground' : 'hover-elevate'}
+                    ${isFuture ? 'text-muted-foreground/40 cursor-not-allowed' : ''}
+                    ${isSelected && !isFuture ? 'bg-primary text-primary-foreground' : !isFuture ? 'hover-elevate' : ''}
                     ${isToday && !isSelected ? 'ring-2 ring-primary ring-offset-2' : ''}
                   `}
                   data-testid={`calendar-day-${day}`}
                 >
                   {day}
-                  {status !== "none" && !isSelected && (
+                  {status !== "none" && !isSelected && !isFuture && (
                     <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${
                       status === "complete" ? "bg-success" : "bg-warning"
                     }`} />
