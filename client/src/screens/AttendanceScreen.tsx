@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Calendar, ChevronLeft, ChevronRight, CheckCircle, MinusCircle, XCircle, Users, CheckCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,22 @@ export function AttendanceScreen() {
     return { full, half, absent, notMarked, total: people.length };
   }, [todayAttendance, people]);
 
+  // Clamp selectedDate to today if it's in the future
+  useEffect(() => {
+    const today = getTodayString();
+    if (selectedDate > today) {
+      setSelectedDate(today);
+    }
+  }, [selectedDate]);
+
   const handleMarkAllPresent = () => {
+    // Defensive check: prevent marking for future dates
+    const today = getTodayString();
+    if (selectedDate > today) {
+      toast({ title: t("cannotMarkFutureAttendance"), variant: "destructive" });
+      return;
+    }
+
     const unmarkedPeople = people.filter(p => !todayAttendance.has(p.id));
     
     if (unmarkedPeople.length === 0) {
@@ -168,6 +183,13 @@ export function AttendanceScreen() {
     // Prevent selecting future dates
     if (isFutureDate(day)) return;
     setSelectedDate(getDateString(day));
+  };
+
+  const handlePersonClick = (personId: string) => {
+    // Clamp date to today before navigation to ensure we never pass a future date
+    const today = getTodayString();
+    const safeDate = selectedDate > today ? today : selectedDate;
+    navigate("add-attendance", { personId, date: safeDate });
   };
 
   return (
@@ -310,7 +332,7 @@ export function AttendanceScreen() {
                       <div 
                         key={person.id} 
                         className="flex items-center gap-3 py-2.5 px-3 rounded-lg border bg-card hover-elevate cursor-pointer"
-                        onClick={() => navigate("add-attendance", { personId: person.id, date: selectedDate })}
+                        onClick={() => handlePersonClick(person.id)}
                         data-testid={`staff-attendance-${person.id}`}
                       >
                         <div className="icon-halo-primary w-9 h-9 shrink-0">

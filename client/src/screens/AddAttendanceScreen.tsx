@@ -26,7 +26,10 @@ export function AddAttendanceScreen() {
   const person = useMemo(() => storage.getPerson(personId), [personId]);
   const showHours = person?.salaryType === "HOURLY";
 
-  const [date, setDate] = useState(data.date as string || getTodayString());
+  // Clamp incoming date to today if it's in the future
+  const today = getTodayString();
+  const incomingDate = data.date as string || today;
+  const [date, setDate] = useState(incomingDate > today ? today : incomingDate);
   const [status, setStatus] = useState<AttendanceStatus>("FULL");
   const [hours, setHours] = useState("");
   const [note, setNote] = useState("");

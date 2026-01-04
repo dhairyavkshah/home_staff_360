@@ -51,6 +51,19 @@ function generateId(): string {
   return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+function getTodayString(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function clampDateToToday(date: string): string {
+  const today = getTodayString();
+  return date > today ? today : date;
+}
+
 function getItem<T>(key: string, defaultValue: T): T {
   try {
     const item = localStorage.getItem(key);
@@ -483,8 +496,11 @@ export const storage = {
     const person = this.getPerson(data.personId);
     const settings = this.getSettings();
     const currencyInfo = getPersonCurrencyInfo(data.personId);
+    // Clamp date to today to prevent future attendance
+    const safeDate = clampDateToToday(data.date);
     const entry: AttendanceEntry = {
       ...data,
+      date: safeDate,
       id: generateId(),
       createdAt: new Date().toISOString(),
       recordSalaryType: data.recordSalaryType || person?.salaryType,
@@ -502,7 +518,9 @@ export const storage = {
     const attendance = this.getAttendance();
     const index = attendance.findIndex((a) => a.id === id);
     if (index === -1) return undefined;
-    attendance[index] = { ...attendance[index], ...data };
+    // Clamp date to today if updating date field
+    const safeData = data.date ? { ...data, date: clampDateToToday(data.date) } : data;
+    attendance[index] = { ...attendance[index], ...safeData };
     setItem(STORAGE_KEYS.ATTENDANCE, attendance);
     return attendance[index];
   },
@@ -859,8 +877,11 @@ export const storage = {
     const attendance = this.getSelfAttendance();
     const clientHome = this.getClientHome(data.clientHomeId);
     const currencyInfo = getClientHomeCurrencyInfo(data.clientHomeId);
+    // Clamp date to today to prevent future attendance
+    const safeDate = clampDateToToday(data.date);
     const entry: SelfAttendance = {
       ...data,
+      date: safeDate,
       id: generateId(),
       createdAt: new Date().toISOString(),
       recordSalaryType: data.recordSalaryType || clientHome?.salaryType,
@@ -877,7 +898,9 @@ export const storage = {
     const attendance = this.getSelfAttendance();
     const index = attendance.findIndex((a) => a.id === id);
     if (index === -1) return undefined;
-    attendance[index] = { ...attendance[index], ...data };
+    // Clamp date to today if updating date field
+    const safeData = data.date ? { ...data, date: clampDateToToday(data.date) } : data;
+    attendance[index] = { ...attendance[index], ...safeData };
     setItem(STAFF_STORAGE_KEYS.SELF_ATTENDANCE, attendance);
     return attendance[index];
   },
