@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import appIconPath from "@/assets/app-icon.png";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 
 interface SplashScreenProps {
   onComplete: () => void;
 }
 
 export function SplashScreen({ onComplete }: SplashScreenProps) {
+  const { t } = useTranslation();
   const [fadeIn, setFadeIn] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
@@ -45,7 +47,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             Home Staff 360
           </h1>
           <p className="text-white/70 text-xs" data-testid="text-tagline">
-            A personal household and staff profession management app
+            {t("appTagline")}
           </p>
         </div>
       </div>
@@ -55,10 +57,10 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         }`}
       >
         <p className="text-white/50 text-xs" data-testid="text-version">
-          Version 1.0.1
+          {t("version")} 1.0.1
         </p>
         <p className="text-white/40 text-xs" data-testid="text-branding">
-          Crafted by Dhairya Shah (The Team 360)
+          {t("craftedBy")}
         </p>
       </div>
     </div>

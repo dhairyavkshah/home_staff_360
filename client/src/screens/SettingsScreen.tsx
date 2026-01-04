@@ -256,7 +256,7 @@ export function SettingsScreen() {
             <div className="flex flex-col gap-2">
               <Label htmlFor="country" className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
-                Country
+                {t("country")}
               </Label>
               <CountrySelector
                 value={country}
@@ -591,15 +591,15 @@ export function SettingsScreen() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">About</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("about")}</h2>
           <Card className="p-4">
             <div className="text-center flex flex-col gap-2">
               <div>
                 <p className="font-semibold text-base">Home Staff 360</p>
-                <p className="text-xs text-muted-foreground">Version 1.0.1</p>
+                <p className="text-xs text-muted-foreground">{t("version")} 1.0.1</p>
               </div>
-              <p className="text-sm text-muted-foreground">A personal household and staff profession management app</p>
-              <p className="text-xs text-muted-foreground/70 pt-1">Crafted by Dhairya Shah (The Team 360)</p>
+              <p className="text-sm text-muted-foreground">{t("appTagline")}</p>
+              <p className="text-xs text-muted-foreground/70 pt-1">{t("craftedBy")}</p>
               <button
                 className="text-xs text-primary underline pt-2"
                 onClick={() => window.open("https://www.theteam360.com/homestaff360", "_blank")}

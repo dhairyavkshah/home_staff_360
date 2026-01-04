@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import appIconPath from "@/assets/app-icon.png";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 
 interface ExitCoverScreenProps {
   isVisible: boolean;
@@ -11,6 +12,7 @@ interface ExitCoverScreenProps {
 }
 
 export function ExitCoverScreen({ isVisible, onComplete, onCancel }: ExitCoverScreenProps) {
+  const { t } = useTranslation();
   const [showGoodbye, setShowGoodbye] = useState(false);
   const [exitFailed, setExitFailed] = useState(false);
 
@@ -74,7 +76,7 @@ export function ExitCoverScreen({ isVisible, onComplete, onCancel }: ExitCoverSc
                 Home Staff 360
               </h1>
               <p className="text-muted-foreground text-sm">
-                Thank you for using our app
+                {t("thankYouForUsing")}
               </p>
             </motion.div>
 
@@ -85,7 +87,7 @@ export function ExitCoverScreen({ isVisible, onComplete, onCancel }: ExitCoverSc
               className="text-center mt-4"
             >
               <p className="text-lg font-medium text-primary">
-                {showGoodbye ? "See you soon!" : ""}
+                {showGoodbye ? t("seeYouSoon") : ""}
               </p>
             </motion.div>
 

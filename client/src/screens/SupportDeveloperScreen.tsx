@@ -780,11 +780,11 @@ export function SupportDeveloperScreen() {
                     <Smartphone className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-sm">UPI Apps</p>
-                    <p className="text-xs text-muted-foreground">Google Pay, PhonePe, Paytm, BHIM & more</p>
+                    <p className="font-medium text-sm">{t("upiApps")}</p>
+                    <p className="text-xs text-muted-foreground">{t("upiAppsDescription")}</p>
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    Recommended
+                    {t("recommended")}
                   </Badge>
                 </button>
                 <button
@@ -802,8 +802,8 @@ export function SupportDeveloperScreen() {
                     <Wallet className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-sm">Google Pay</p>
-                    <p className="text-xs text-muted-foreground">Pay directly with Google Pay</p>
+                    <p className="font-medium text-sm">{t("googlePay")}</p>
+                    <p className="text-xs text-muted-foreground">{t("payDirectlyWithGooglePay")}</p>
                   </div>
                 </button>
               </>
@@ -825,11 +825,11 @@ export function SupportDeveloperScreen() {
                   <CreditCard className="w-5 h-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">PayPal</p>
-                  <p className="text-xs text-muted-foreground">Pay securely with PayPal</p>
+                  <p className="font-medium text-sm">{t("paypal")}</p>
+                  <p className="text-xs text-muted-foreground">{t("paySecurelyWithPayPal")}</p>
                 </div>
                 <Badge variant="secondary" className="text-xs">
-                  Recommended
+                  {t("recommended")}
                 </Badge>
               </button>
             )}
@@ -845,28 +845,27 @@ export function SupportDeveloperScreen() {
         >
           <Heart className="w-4 h-4 mr-2" />
           {selectedAmount || customAmount
-            ? `Donate ${currencySymbol}${selectedAmount || customAmount}`
-            : "Select an Amount"}
+            ? `${t("donate")} ${currencySymbol}${selectedAmount || customAmount}`
+            : t("selectAnAmount")}
         </Button>
 
         <Card className="p-4">
           <div className="flex items-start gap-3">
             <Star className="w-5 h-5 text-primary shrink-0 mt-0.5" />
             <div>
-              <h4 className="font-medium text-sm">What Your Support Does</h4>
+              <h4 className="font-medium text-sm">{t("whatYourSupportDoes")}</h4>
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>Helps maintain and improve the app</li>
-                <li>Supports development of new features</li>
-                <li>Keeps the app ad-free and privacy-focused</li>
-                <li>Enables faster bug fixes and updates</li>
+                <li>{t("helpsMaintainApp")}</li>
+                <li>{t("supportsDevelopment")}</li>
+                <li>{t("keepsAppAdFree")}</li>
+                <li>{t("enablesFasterBugFixes")}</li>
               </ul>
             </div>
           </div>
         </Card>
 
         <p className="text-xs text-center text-muted-foreground">
-          All donations are voluntary. The app is free to use forever, regardless of donations. 
-          Thank you for your support!
+          {t("donationsVoluntary")}
         </p>
       </ScrollContent>
     </AppLayout>
