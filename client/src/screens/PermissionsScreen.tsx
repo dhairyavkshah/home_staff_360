@@ -14,6 +14,7 @@ import {
   type PermissionType 
 } from "@/lib/permissions-service";
 import { detectAndSaveCountry } from "@/lib/geolocation-service";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 
 const iconMap: Record<string, typeof Camera> = {
   camera: Camera,
@@ -25,6 +26,7 @@ const iconMap: Record<string, typeof Camera> = {
 
 export function PermissionsScreen() {
   const { navigate, data } = useNavigation();
+  const { t } = useTranslation();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, watchDrag: false });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>({
@@ -39,6 +41,31 @@ export function PermissionsScreen() {
   const permissions = REQUIRED_PERMISSIONS;
   const currentPermission = permissions[currentIndex];
   const isLastPermission = currentIndex === permissions.length - 1;
+
+  // Translation key maps for permission names, descriptions, and "why needed" texts
+  const permissionNameKeys: Record<PermissionType, string> = {
+    location: "locationAccess",
+    storage: "storageAccess",
+    media: "mediaAccess",
+    notifications: "notifications",
+    camera: "cameraAccess",
+  };
+
+  const permissionDescKeys: Record<PermissionType, string> = {
+    location: "locationAccessDesc",
+    storage: "storageAccessDesc",
+    media: "mediaAccessDesc",
+    notifications: "notificationsDesc",
+    camera: "cameraAccessDesc",
+  };
+
+  const whyNeededKeys: Record<PermissionType, string> = {
+    location: "whyLocationNeeded",
+    storage: "whyStorageNeeded",
+    media: "whyMediaNeeded",
+    notifications: "whyNotificationsNeeded",
+    camera: "whyCameraNeeded",
+  };
 
   useEffect(() => {
     checkPermissions();
@@ -131,8 +158,8 @@ export function PermissionsScreen() {
   return (
     <AppLayout data-testid="screen-permissions">
       <Header
-        title="App Permissions"
-        subtitle={`${grantedCount} of ${permissions.length} granted`}
+        title={t("appPermissions")}
+        subtitle={t("nOfMGranted").replace("{n}", String(grantedCount)).replace("{m}", String(permissions.length))}
       />
 
       <ScrollContent className="flex flex-col">
@@ -198,24 +225,20 @@ export function PermissionsScreen() {
                     {/* Content */}
                     <div className="text-center flex flex-col gap-3">
                       <div className="flex items-center justify-center gap-2">
-                        <h2 className="text-lg font-semibold">{permission.name}</h2>
+                        <h2 className="text-lg font-semibold">{t(permissionNameKeys[permission.id] as any)}</h2>
                         {isRequired && (
-                          <Badge variant="secondary" className="text-xs">Required</Badge>
+                          <Badge variant="secondary" className="text-xs">{t("required")}</Badge>
                         )}
                       </div>
                       
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {permission.description}
+                        {t(permissionDescKeys[permission.id] as any)}
                       </p>
 
                       {/* Why needed - subtle info box */}
                       <div className="bg-muted/50 rounded-lg p-3 mt-2">
                         <p className="text-xs text-muted-foreground">
-                          {permission.id === "location" && "Used to auto-detect your country for currency settings"}
-                          {permission.id === "storage" && "Required for backup files and exported reports"}
-                          {permission.id === "media" && "Used for staff photos and document attachments"}
-                          {permission.id === "notifications" && "Used for payment reminders and alerts"}
-                          {permission.id === "camera" && "Used to scan documents and capture receipts"}
+                          {t(whyNeededKeys[permission.id] as any)}
                         </p>
                       </div>
 
@@ -224,14 +247,14 @@ export function PermissionsScreen() {
                         {isGranted ? (
                           <div className="flex items-center justify-center gap-2 py-3 text-green-600 dark:text-green-400">
                             <Check className="w-5 h-5" />
-                            <span className="font-medium">Permission Granted</span>
+                            <span className="font-medium">{t("permissionGranted")}</span>
                           </div>
                         ) : isDenied ? (
                           <>
                             <p className="text-xs text-muted-foreground">
                               {isRequired 
-                                ? "This permission is required. Please enable it in device settings and try again."
-                                : "Denied. You can enable this later in device settings."
+                                ? t("permissionDeniedRequired")
+                                : t("permissionDeniedOptional")
                               }
                             </p>
                             <div className="flex gap-3">
@@ -242,7 +265,7 @@ export function PermissionsScreen() {
                                 disabled={isRequesting}
                                 data-testid={`button-retry-${permission.id}`}
                               >
-                                Try Again
+                                {t("tryAgain")}
                               </Button>
                               {!isRequired && (
                                 <Button
@@ -251,7 +274,7 @@ export function PermissionsScreen() {
                                   onClick={handleSkip}
                                   data-testid={`button-skip-${permission.id}`}
                                 >
-                                  Skip
+                                  {t("skip")}
                                 </Button>
                               )}
                             </div>
@@ -264,7 +287,7 @@ export function PermissionsScreen() {
                               disabled={isRequesting}
                               data-testid={`button-allow-${permission.id}`}
                             >
-                              {isRequesting ? "Requesting..." : "Allow"}
+                              {isRequesting ? t("requesting") : t("allow")}
                             </Button>
                             {!isRequired && (
                               <Button
@@ -272,7 +295,7 @@ export function PermissionsScreen() {
                                 onClick={handleSkip}
                                 data-testid={`button-skip-${permission.id}`}
                               >
-                                Skip
+                                {t("skip")}
                               </Button>
                             )}
                           </div>
@@ -291,7 +314,7 @@ export function PermissionsScreen() {
           <div className="flex items-center justify-between gap-4">
             {/* Progress text */}
             <p className="text-xs text-muted-foreground">
-              Step {currentIndex + 1} of {permissions.length}
+              {t("stepNOfM").replace("{n}", String(currentIndex + 1)).replace("{m}", String(permissions.length))}
             </p>
 
             {/* Navigation buttons */}
@@ -303,7 +326,7 @@ export function PermissionsScreen() {
                   onClick={() => emblaApi?.scrollPrev()}
                   data-testid="button-prev-permission"
                 >
-                  Back
+                  {t("back")}
                 </Button>
               )}
 
@@ -313,7 +336,7 @@ export function PermissionsScreen() {
                   disabled={!canFinish}
                   data-testid="button-continue-permissions"
                 >
-                  Continue
+                  {t("continueBtn")}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
@@ -323,7 +346,7 @@ export function PermissionsScreen() {
                   onClick={() => emblaApi?.scrollNext()}
                   data-testid="button-next-permission"
                 >
-                  Next
+                  {t("next")}
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               )}
@@ -339,7 +362,7 @@ export function PermissionsScreen() {
                 onClick={finishPermissions}
                 data-testid="button-skip-all"
               >
-                Skip remaining and continue
+                {t("skipRemainingAndContinue")}
               </Button>
             </div>
           )}
@@ -347,7 +370,7 @@ export function PermissionsScreen() {
           {/* Message when required permissions are missing */}
           {!canFinish && (
             <p className="text-xs text-center text-muted-foreground mt-4">
-              Please grant required permissions to continue
+              {t("pleaseGrantRequiredPermissions")}
             </p>
           )}
         </div>

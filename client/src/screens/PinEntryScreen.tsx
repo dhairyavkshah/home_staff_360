@@ -6,11 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Lock, X, Fingerprint, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NumericKeypad } from "@/components/ui/numeric-keypad";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 
 interface PinEntryScreenProps {
   onSuccess?: () => void;
-  title?: string;
-  subtitle?: string;
   showBiometric?: boolean;
 }
 
@@ -23,11 +22,10 @@ function formatCountdown(ms: number): string {
 
 export function PinEntryScreen({ 
   onSuccess, 
-  title = "Enter Your PIN",
-  subtitle = "Enter your 4-digit PIN to unlock",
   showBiometric = true
 }: PinEntryScreenProps) {
   const { navigate } = useNavigation();
+  const { t } = useTranslation();
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [isLockedOut, setIsLockedOut] = useState(pinService.isLockedOut());
@@ -91,10 +89,10 @@ export function PinEntryScreen({
           if (result.isLockedOut) {
             setIsLockedOut(true);
             setLockoutRemaining(pinService.getLockoutRemainingMs());
-            setError("Too many failed attempts. Try again in 30 minutes.");
+            setError(t("tooManyFailedAttempts"));
           } else {
             setRemainingAttempts(result.remainingAttempts);
-            setError(`Incorrect PIN. ${result.remainingAttempts} attempt${result.remainingAttempts !== 1 ? 's' : ''} remaining.`);
+            setError(t("incorrectPinAttempts").replace("{n}", String(result.remainingAttempts)));
           }
           setPin("");
         }
@@ -120,10 +118,10 @@ export function PinEntryScreen({
           navigateToHome();
         }
       } else {
-        setError(result.error || "Biometric authentication failed");
+        setError(result.error || t("biometricAuthFailed"));
       }
     } catch (err: any) {
-      setError(err.message || "Biometric authentication failed");
+      setError(err.message || t("biometricAuthFailed"));
     }
   };
 
@@ -135,8 +133,8 @@ export function PinEntryScreen({
         </div>
 
         <div className="text-center">
-          <h2 className="text-lg font-semibold mb-1">{title}</h2>
-          <p className="text-xs text-muted-foreground">{subtitle}</p>
+          <h2 className="text-lg font-semibold mb-1">{t("enterYourPin")}</h2>
+          <p className="text-xs text-muted-foreground">{t("enterPinToUnlock")}</p>
         </div>
 
         <div className="flex gap-3">
@@ -157,10 +155,10 @@ export function PinEntryScreen({
           <div className="flex flex-col items-center gap-2 text-destructive fade-in-up">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span className="text-sm font-medium">Account Locked</span>
+              <span className="text-sm font-medium">{t("accountLocked")}</span>
             </div>
             <p className="text-xs text-center">
-              Too many failed attempts. Try again in {formatCountdown(lockoutRemaining)}
+              {t("tooManyAttemptsTryIn").replace("{time}", formatCountdown(lockoutRemaining))}
             </p>
           </div>
         ) : error && (
@@ -179,7 +177,7 @@ export function PinEntryScreen({
             data-testid="button-biometric"
           >
             <Fingerprint className="w-4 h-4" />
-            <span>Use Biometric</span>
+            <span>{t("useBiometric")}</span>
           </Button>
         )}
 
@@ -190,7 +188,7 @@ export function PinEntryScreen({
         />
 
         <p className="text-xs text-muted-foreground text-center">
-          Your PIN protects your household data
+          {t("pinProtectsData")}
         </p>
       </Card>
     </div>

@@ -3,22 +3,20 @@ import { pinService } from "@/lib/pin-service";
 import { Button } from "@/components/ui/button";
 import { Lock, X } from "lucide-react";
 import { NumericKeypad } from "@/components/ui/numeric-keypad";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 
 interface PinConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  title?: string;
-  description?: string;
 }
 
 export function PinConfirmModal({
   isOpen,
   onClose,
   onConfirm,
-  title = "Confirm with PIN",
-  description = "Enter your PIN to continue",
 }: PinConfirmModalProps) {
+  const { t } = useTranslation();
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [attempts, setAttempts] = useState(0);
@@ -46,12 +44,12 @@ export function PinConfirmModal({
         } else {
           setAttempts((prev) => prev + 1);
           if (attempts >= 2) {
-            setError("Too many failed attempts");
+            setError(t("tooManyFailedAttempts"));
             setTimeout(() => {
               onClose();
             }, 1500);
           } else {
-            setError(`Incorrect PIN. ${2 - attempts} attempts remaining.`);
+            setError(t("incorrectPinAttempts").replace("{n}", String(2 - attempts)));
           }
           setPin("");
         }
@@ -90,8 +88,8 @@ export function PinConfirmModal({
         </div>
 
         <div className="text-center">
-          <h2 className="text-lg font-semibold mb-1">{title}</h2>
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <h2 className="text-lg font-semibold mb-1">{t("confirmWithPin")}</h2>
+          <p className="text-sm text-muted-foreground">{t("enterPinToContinue")}</p>
         </div>
 
         <div className="flex gap-3">
@@ -127,7 +125,7 @@ export function PinConfirmModal({
           className="w-full"
           data-testid="button-cancel-pin"
         >
-          Cancel
+          {t("cancel")}
         </Button>
       </div>
     </div>

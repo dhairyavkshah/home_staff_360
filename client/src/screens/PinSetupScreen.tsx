@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Lock, X, Fingerprint } from "lucide-react";
 import { NumericKeypad } from "@/components/ui/numeric-keypad";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 
 type Step = "enter" | "confirm" | "biometric";
 
 export function PinSetupScreen() {
   const { navigate, data, goBack } = useNavigation();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const returnScreen = (data?.returnTo as string) || "settings";
   const shouldStartTour = data?.startTour === true;
   const tourMode = data?.tourMode as string | undefined;
@@ -63,13 +65,13 @@ export function PinSetupScreen() {
               setStep("biometric");
             } else {
               toast({
-                title: "PIN Set Successfully",
-                description: "Your app is now protected with a PIN.",
+                title: t("pinSetSuccessfully"),
+                description: t("appProtectedWithPin"),
               });
               navigateToReturn();
             }
           } else {
-            setError("PINs don't match. Try again.");
+            setError(t("pinsDontMatch"));
             setConfirmPin("");
           }
         }, 200);
@@ -92,8 +94,8 @@ export function PinSetupScreen() {
       setError("");
     } else if (step === "biometric") {
       toast({
-        title: "PIN Set Successfully",
-        description: "Your app is now protected with a PIN.",
+        title: t("pinSetSuccessfully"),
+        description: t("appProtectedWithPin"),
       });
       navigateToReturn();
     } else {
@@ -108,15 +110,15 @@ export function PinSetupScreen() {
       const result = await pinService.enrollBiometric();
       if (result.success) {
         toast({
-          title: "Biometric Enabled",
-          description: "You can now unlock with your fingerprint or face.",
+          title: t("biometricEnabled"),
+          description: t("biometricEnabledDesc"),
         });
         navigateToReturn();
       } else {
-        setError(result.error || "Failed to enable biometric");
+        setError(result.error || t("biometricAuthFailed"));
       }
     } catch (e: any) {
-      setError(e.message || "Failed to enable biometric");
+      setError(e.message || t("biometricAuthFailed"));
     } finally {
       setEnrollingBiometric(false);
     }
@@ -124,8 +126,8 @@ export function PinSetupScreen() {
 
   const handleSkipBiometric = () => {
     toast({
-      title: "PIN Set Successfully",
-      description: "Your app is now protected with a PIN.",
+      title: t("pinSetSuccessfully"),
+      description: t("appProtectedWithPin"),
     });
     navigate(returnScreen as any);
   };
@@ -143,7 +145,7 @@ export function PinSetupScreen() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-lg font-semibold">Set Up PIN</h1>
+            <h1 className="text-lg font-semibold">{t("setUpPin")}</h1>
           </div>
         </div>
       </header>
@@ -156,9 +158,9 @@ export function PinSetupScreen() {
             </div>
 
             <div className="text-center">
-              <h2 className="text-lg font-semibold mb-1">Enable Biometric Unlock?</h2>
+              <h2 className="text-lg font-semibold mb-1">{t("enableBiometricUnlock")}</h2>
               <p className="text-xs text-muted-foreground">
-                Use your fingerprint or face to unlock Home Staff 360 quickly and securely.
+                {t("biometricDescription")}
               </p>
             </div>
 
@@ -176,7 +178,7 @@ export function PinSetupScreen() {
                 className="w-full"
                 data-testid="button-enable-biometric"
               >
-                {enrollingBiometric ? "Enabling..." : "Enable Biometric"}
+                {enrollingBiometric ? t("enabling") : t("enableBiometric")}
               </Button>
               <Button
                 variant="outline"
@@ -185,12 +187,12 @@ export function PinSetupScreen() {
                 className="w-full"
                 data-testid="button-skip-biometric"
               >
-                Skip for Now
+                {t("skipForNow")}
               </Button>
             </div>
 
             <p className="text-xs text-muted-foreground text-center">
-              Your biometric data never leaves your device. We only receive a success/failure response.
+              {t("biometricDataPrivacy")}
             </p>
           </Card>
         ) : (
@@ -201,12 +203,12 @@ export function PinSetupScreen() {
 
             <div className="text-center">
               <h2 className="text-lg font-semibold mb-1">
-                {step === "enter" ? "Create Your PIN" : "Confirm Your PIN"}
+                {step === "enter" ? t("createYourPin") : t("confirmYourPin")}
               </h2>
               <p className="text-xs text-muted-foreground">
                 {step === "enter"
-                  ? "Enter a 4-digit PIN to protect your app"
-                  : "Re-enter your PIN to confirm"}
+                  ? t("enterPinToProtect")
+                  : t("reEnterPinToConfirm")}
               </p>
             </div>
 
