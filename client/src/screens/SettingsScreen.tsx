@@ -598,7 +598,7 @@ export function SettingsScreen() {
                 <p className="font-semibold text-base">Home Staff 360</p>
                 <p className="text-xs text-muted-foreground">Version 1.0.1</p>
               </div>
-              <p className="text-sm text-muted-foreground">A private household and staff profession management app</p>
+              <p className="text-sm text-muted-foreground">A personal household and staff profession management app</p>
               <p className="text-xs text-muted-foreground/70 pt-1">Crafted by Dhairya Shah (The Team 360)</p>
               <button
                 className="text-xs text-primary underline pt-2"
