@@ -4,13 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
@@ -235,20 +229,16 @@ export function StaffAddClientHomeScreen() {
 
         <div className="flex flex-col gap-2">
           <Label>{t("yourRole")} <span className="text-destructive">*</span></Label>
-          <Select 
-            value={role} 
+          <SearchableSelect
+            value={role}
             onValueChange={(v) => { setRole(v); markDirty(); }}
             disabled={isLaundryBusiness && !editMode}
-          >
-            <SelectTrigger data-testid="select-role">
-              <SelectValue placeholder={t("selectRole")} />
-            </SelectTrigger>
-            <SelectContent>
-              {STAFF_ROLES.map((r) => (
-                <SelectItem key={r} value={r}>{r}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder={t("selectRole")}
+            searchPlaceholder="Search roles..."
+            emptyMessage="No roles found"
+            options={STAFF_ROLES.map((r) => ({ value: r, label: r }))}
+            data-testid="select-role"
+          />
           {isLaundryBusiness && !editMode && (
             <p className="text-xs text-muted-foreground">{t("roleAutoSetForLaundry") || "Role is automatically set for Laundry Service businesses"}</p>
           )}
@@ -281,16 +271,15 @@ export function StaffAddClientHomeScreen() {
         {role !== 'Laundry' && (
           <div className="flex flex-col gap-2">
             <Label>{t("salaryType")} <span className="text-destructive">*</span></Label>
-            <Select value={salaryType} onValueChange={(v) => { setSalaryType(v as SalaryType); markDirty(); }}>
-              <SelectTrigger data-testid="select-salary-type">
-                <SelectValue placeholder={t("salaryType")} />
-              </SelectTrigger>
-              <SelectContent>
-                {salaryTypes.map((type) => (
-                  <SelectItem key={type} value={type}>{SALARY_TYPE_LABELS[type]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={salaryType}
+              onValueChange={(v) => { setSalaryType(v as SalaryType); markDirty(); }}
+              placeholder={t("salaryType")}
+              searchPlaceholder="Search salary types..."
+              emptyMessage="No salary types found"
+              options={salaryTypes.map((type) => ({ value: type, label: SALARY_TYPE_LABELS[type] }))}
+              data-testid="select-salary-type"
+            />
             <p className="text-xs text-muted-foreground">{t("daily")}, {t("hourly")}, or {t("monthly")}</p>
           </div>
         )}

@@ -6,13 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Tooltip,
   TooltipContent,
@@ -465,21 +459,18 @@ export function AddLaundryScreen() {
           {laundryStaff.length > 0 && (
             <div className="flex flex-col gap-2">
               <Label htmlFor="staff">Staff <span className="text-destructive">*</span></Label>
-              <Select value={selectedStaffId} onValueChange={(v) => { setSelectedStaffId(v); markDirty(); }}>
-                <SelectTrigger id="staff" data-testid="select-staff">
-                  <SelectValue placeholder="Select staff member" />
-                </SelectTrigger>
-                <SelectContent>
-                  {laundryStaff.map((staff) => (
-                    <SelectItem key={staff.id} value={staff.id}>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        {staff.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={selectedStaffId}
+                onValueChange={(v) => { setSelectedStaffId(v); markDirty(); }}
+                placeholder="Select staff member"
+                searchPlaceholder="Search staff..."
+                emptyMessage="No staff found"
+                options={laundryStaff.map((staff) => ({
+                  value: staff.id,
+                  label: staff.name,
+                }))}
+                data-testid="select-staff"
+              />
               {errors.staffId && <p className="text-xs text-destructive">{errors.staffId}</p>}
             </div>
           )}
@@ -507,18 +498,18 @@ export function AddLaundryScreen() {
                 </TooltipContent>
               </Tooltip>
             </div>
-            <Select value={serviceType} onValueChange={(v) => { setServiceType(v as LaundryServiceType); markDirty(); }}>
-              <SelectTrigger id="serviceType" data-testid="select-service-type">
-                <SelectValue placeholder="Select service type" />
-              </SelectTrigger>
-              <SelectContent>
-                {LAUNDRY_SERVICE_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={serviceType}
+              onValueChange={(v) => { setServiceType(v as LaundryServiceType); markDirty(); }}
+              placeholder="Select service type"
+              searchPlaceholder="Search service types..."
+              emptyMessage="No service types found"
+              options={LAUNDRY_SERVICE_TYPES.map((type) => ({
+                value: type,
+                label: type,
+              }))}
+              data-testid="select-service-type"
+            />
             {errors.serviceType && <p className="text-xs text-destructive">{errors.serviceType}</p>}
           </div>
 

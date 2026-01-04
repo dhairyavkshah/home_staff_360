@@ -3,13 +3,7 @@ import { FileText, Clock, CheckCircle, AlertCircle, XCircle, Filter, Plus } from
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
@@ -119,32 +113,38 @@ export function StaffInvoicesScreen() {
         </div>
 
         <div className="flex gap-2 mb-4">
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as InvoiceStatus | "all")}>
-            <SelectTrigger className="flex-1" data-testid="select-status-filter">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="sent">Sent</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="overdue">Overdue</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
+          <SearchableSelect
+            value={statusFilter}
+            onValueChange={(v) => setStatusFilter(v as InvoiceStatus | "all")}
+            placeholder="Status"
+            searchPlaceholder="Search status..."
+            emptyMessage="No status found"
+            className="flex-1"
+            icon={<Filter className="w-4 h-4" />}
+            options={[
+              { value: "all", label: "All Statuses" },
+              { value: "draft", label: "Draft" },
+              { value: "sent", label: "Sent" },
+              { value: "paid", label: "Paid" },
+              { value: "overdue", label: "Overdue" },
+              { value: "cancelled", label: "Cancelled" },
+            ]}
+            data-testid="select-status-filter"
+          />
 
-          <Select value={clientFilter} onValueChange={setClientFilter}>
-            <SelectTrigger className="flex-1" data-testid="select-client-filter">
-              <SelectValue placeholder="Client" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Clients</SelectItem>
-              {clientHomes.map(client => (
-                <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SearchableSelect
+            value={clientFilter}
+            onValueChange={setClientFilter}
+            placeholder="Client"
+            searchPlaceholder="Search clients..."
+            emptyMessage="No clients found"
+            className="flex-1"
+            options={[
+              { value: "all", label: "All Clients" },
+              ...clientHomes.map(client => ({ value: client.id, label: client.name }))
+            ]}
+            data-testid="select-client-filter"
+          />
         </div>
 
         {invoices.length === 0 ? (

@@ -63,8 +63,11 @@ function getSafeAreaPadding() {
   const topValue = style.getPropertyValue('--app-safe-area-top')?.trim();
   const bottomValue = style.getPropertyValue('--app-safe-area-bottom')?.trim();
   
-  const safeTop = topValue ? parseInt(topValue, 10) : 0;
-  const safeBottom = bottomValue ? parseInt(bottomValue, 10) : 0;
+  const parsedTop = topValue ? parseInt(topValue, 10) : 0;
+  const parsedBottom = bottomValue ? parseInt(bottomValue, 10) : 0;
+  
+  const safeTop = Number.isNaN(parsedTop) ? 0 : parsedTop;
+  const safeBottom = Number.isNaN(parsedBottom) ? 0 : parsedBottom;
   
   return { 
     top: Math.max(safeTop, 24) + 16, 

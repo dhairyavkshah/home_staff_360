@@ -7,13 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -348,18 +342,15 @@ export function StaffAddExpenseScreen() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="category">{t("category")} <span className="text-destructive">*</span></Label>
-            <Select value={category} onValueChange={(v) => { setCategory(v); markDirty(); }}>
-              <SelectTrigger id="category" data-testid="select-category">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORY_OPTIONS.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={category}
+              onValueChange={(v) => { setCategory(v); markDirty(); }}
+              placeholder="Select category"
+              searchPlaceholder="Search categories..."
+              emptyMessage="No categories found"
+              options={CATEGORY_OPTIONS.map((cat) => ({ value: cat.value, label: cat.label }))}
+              data-testid="select-category"
+            />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -401,35 +392,37 @@ export function StaffAddExpenseScreen() {
           {clientHomes.length > 0 && (
             <div className="flex flex-col gap-2">
               <Label htmlFor="clientHome">{t("relatedClient")} ({t("optional")})</Label>
-              <Select value={clientHomeId} onValueChange={(v) => { setClientHomeId(v); markDirty(); }}>
-                <SelectTrigger id="clientHome" data-testid="select-client-home">
-                  <SelectValue placeholder={t("selectClientHome")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t("noSpecificClient")}</SelectItem>
-                  {clientHomes.map((home) => (
-                    <SelectItem key={home.id} value={home.id}>
-                      {home.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={clientHomeId}
+                onValueChange={(v) => { setClientHomeId(v); markDirty(); }}
+                placeholder={t("selectClientHome")}
+                searchPlaceholder="Search clients..."
+                emptyMessage="No clients found"
+                options={[
+                  { value: "none", label: t("noSpecificClient") },
+                  ...clientHomes.map((home) => ({ value: home.id, label: home.name }))
+                ]}
+                data-testid="select-client-home"
+              />
             </div>
           )}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="recurrence">{t("recurrence")}</Label>
-            <Select value={recurrence} onValueChange={(v) => { setRecurrence(v as any); markDirty(); }}>
-              <SelectTrigger id="recurrence" data-testid="select-recurrence">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="one-time">{t("oneTime")}</SelectItem>
-                <SelectItem value="weekly">{t("weekly")}</SelectItem>
-                <SelectItem value="monthly">{t("monthly")}</SelectItem>
-                <SelectItem value="yearly">{t("yearly")}</SelectItem>
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={recurrence}
+              onValueChange={(v) => { setRecurrence(v as any); markDirty(); }}
+              placeholder="Select recurrence"
+              searchPlaceholder="Search recurrence..."
+              emptyMessage="No options found"
+              options={[
+                { value: "one-time", label: t("oneTime") },
+                { value: "weekly", label: t("weekly") },
+                { value: "monthly", label: t("monthly") },
+                { value: "yearly", label: t("yearly") },
+              ]}
+              data-testid="select-recurrence"
+            />
           </div>
 
           <div className="flex flex-col gap-2">

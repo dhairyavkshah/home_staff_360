@@ -4,13 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Dialog,
   DialogContent,
@@ -278,16 +272,18 @@ export function AddPersonScreen() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="role">Role/Profession <span className="text-destructive">*</span></Label>
-            <Select value={role} onValueChange={(v) => { setRole(v); markDirty(); }}>
-              <SelectTrigger id="role" data-testid="select-role">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                {STAFF_ROLES.map((r) => (
-                  <SelectItem key={r} value={r}>{r}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={role}
+              onValueChange={(v) => { setRole(v); markDirty(); }}
+              placeholder="Select role"
+              searchPlaceholder="Search roles..."
+              emptyMessage="No roles found"
+              options={STAFF_ROLES.map((r) => ({
+                value: r,
+                label: r,
+              }))}
+              data-testid="select-role"
+            />
             {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
           </div>
 
@@ -337,16 +333,18 @@ export function AddPersonScreen() {
           {role !== "Laundry" && (
             <div className="flex flex-col gap-2">
               <Label htmlFor="salaryType">Salary Type <span className="text-destructive">*</span></Label>
-              <Select value={salaryType} onValueChange={(v) => { setSalaryType(v as SalaryType); markDirty(); }}>
-                <SelectTrigger id="salaryType" data-testid="select-salary-type">
-                  <SelectValue placeholder="Select salary type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {salaryTypes.map((type) => (
-                    <SelectItem key={type} value={type}>{SALARY_TYPE_LABELS[type]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={salaryType}
+                onValueChange={(v) => { setSalaryType(v as SalaryType); markDirty(); }}
+                placeholder="Select salary type"
+                searchPlaceholder="Search salary types..."
+                emptyMessage="No salary types found"
+                options={salaryTypes.map((type) => ({
+                  value: type,
+                  label: SALARY_TYPE_LABELS[type],
+                }))}
+                data-testid="select-salary-type"
+              />
               <p className="text-xs text-muted-foreground">How this person is paid</p>
             </div>
           )}

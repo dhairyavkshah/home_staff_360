@@ -6,13 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Tooltip,
   TooltipContent,
@@ -397,16 +391,18 @@ export function AddExpenseScreen() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="category">{tLabel('category', 'Category')} <span className="text-destructive">*</span></Label>
-            <Select value={category} onValueChange={(v) => { setCategory(v); markDirty(); }}>
-              <SelectTrigger id="category" data-testid="select-category">
-                <SelectValue placeholder={tLabel('selectCategory', 'Select category')} />
-              </SelectTrigger>
-              <SelectContent>
-                {expenseCategories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>{EXPENSE_CATEGORY_LABELS[cat]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={category}
+              onValueChange={(v) => { setCategory(v); markDirty(); }}
+              placeholder={tLabel('selectCategory', 'Select category')}
+              searchPlaceholder={tLabel('searchCategories', 'Search categories...')}
+              emptyMessage={tLabel('noCategoriesFound', 'No categories found')}
+              options={expenseCategories.map((cat) => ({
+                value: cat,
+                label: EXPENSE_CATEGORY_LABELS[cat],
+              }))}
+              data-testid="select-category"
+            />
             <p className="text-xs text-muted-foreground">{tLabel('expenseTypeTracking', 'Type of expense for tracking')}</p>
           </div>
 
@@ -563,33 +559,35 @@ export function AddExpenseScreen() {
             <>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="recurrence">{tLabel('repeat', 'Repeat')}</Label>
-                <Select value={recurrence} onValueChange={(v) => { setRecurrence(v as RecurrenceType); markDirty(); }}>
-                  <SelectTrigger id="recurrence" data-testid="select-recurrence">
-                    <SelectValue placeholder={tLabel('selectFrequency', 'Select frequency')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {recurrenceTypes.filter(t => t !== 'NONE').map((type) => (
-                      <SelectItem key={type} value={type}>{RECURRENCE_LABELS[type]}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  value={recurrence}
+                  onValueChange={(v) => { setRecurrence(v as RecurrenceType); markDirty(); }}
+                  placeholder={tLabel('selectFrequency', 'Select frequency')}
+                  searchPlaceholder={tLabel('searchFrequency', 'Search frequency...')}
+                  emptyMessage={tLabel('noFrequencyFound', 'No frequency found')}
+                  options={recurrenceTypes.filter(t => t !== 'NONE').map((type) => ({
+                    value: type,
+                    label: RECURRENCE_LABELS[type],
+                  }))}
+                  data-testid="select-recurrence"
+                />
                 <p className="text-xs text-muted-foreground">{tLabel('howOften', 'How often this expense repeats')}</p>
               </div>
 
               <div className="flex flex-col gap-2">
                 <Label htmlFor="reminderDays">{tLabel('remindMe', 'Remind Me')}</Label>
-                <Select value={reminderDays} onValueChange={(v) => { setReminderDays(v); markDirty(); }}>
-                  <SelectTrigger id="reminderDays" data-testid="select-reminder">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {REMIND_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  value={reminderDays}
+                  onValueChange={(v) => { setReminderDays(v); markDirty(); }}
+                  placeholder={tLabel('selectReminder', 'Select reminder')}
+                  searchPlaceholder={tLabel('searchReminder', 'Search...')}
+                  emptyMessage={tLabel('noReminderFound', 'No reminder found')}
+                  options={REMIND_OPTIONS.map((opt) => ({
+                    value: opt.value,
+                    label: opt.label,
+                  }))}
+                  data-testid="select-reminder"
+                />
               </div>
             </>
           )}

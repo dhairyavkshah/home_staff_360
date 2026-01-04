@@ -12,13 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -244,18 +238,18 @@ export function BusinessesScreen() {
             </div>
             <div className="flex flex-col gap-2">
               <Label>{tLabel('serviceProfessionType', 'Service/Profession Type')} <span className="text-destructive">*</span></Label>
-              <Select value={businessProfession} onValueChange={setBusinessProfession}>
-                <SelectTrigger data-testid="select-business-profession">
-                  <SelectValue placeholder={tLabel('selectProfession', 'Select profession...')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {BUSINESS_PROFESSIONS.map((profession) => (
-                    <SelectItem key={profession} value={profession}>
-                      {profession}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={businessProfession}
+                onValueChange={setBusinessProfession}
+                placeholder={tLabel('selectProfession', 'Select profession...')}
+                searchPlaceholder={tLabel('searchProfession', 'Search professions...')}
+                emptyMessage={tLabel('noProfessionFound', 'No profession found')}
+                options={BUSINESS_PROFESSIONS.map((profession) => ({
+                  value: profession,
+                  label: profession,
+                }))}
+                data-testid="select-business-profession"
+              />
             </div>
             <div className="flex flex-col gap-2">
               <Label>{tLabel('businessDescription', 'Business Description')}</Label>

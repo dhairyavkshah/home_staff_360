@@ -3,13 +3,7 @@ import { Calendar, ChevronLeft, ChevronRight, CheckCircle, MinusCircle, XCircle,
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -147,17 +141,18 @@ export function StaffAttendanceScreen() {
         </div>
 
         {clientHomes.length > 1 && (
-          <Select value={selectedHomeId} onValueChange={setSelectedHomeId}>
-            <SelectTrigger data-testid="select-client-filter">
-              <SelectValue placeholder={t("allClientHomes")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("allClientHomes")}</SelectItem>
-              {clientHomes.map(home => (
-                <SelectItem key={home.id} value={home.id}>{home.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SearchableSelect
+            value={selectedHomeId}
+            onValueChange={setSelectedHomeId}
+            placeholder={t("allClientHomes")}
+            searchPlaceholder={t("searchClientHomes") || "Search client homes..."}
+            emptyMessage={t("noClientHomesFound") || "No client homes found"}
+            options={[
+              { value: "all", label: t("allClientHomes") },
+              ...clientHomes.map(home => ({ value: home.id, label: home.name }))
+            ]}
+            data-testid="select-client-filter"
+          />
         )}
 
         <Card className="p-4">

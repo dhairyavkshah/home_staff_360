@@ -6,13 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -416,16 +410,18 @@ export function StaffAddInvoiceScreen() {
 
           <div className="flex flex-col gap-2">
             <Label>Client <span className="text-destructive">*</span></Label>
-            <Select value={clientHomeId} onValueChange={(v) => { setClientHomeId(v); markDirty(); }}>
-              <SelectTrigger data-testid="select-client">
-                <SelectValue placeholder="Select client" />
-              </SelectTrigger>
-              <SelectContent>
-                {clientHomes.map(client => (
-                  <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={clientHomeId}
+              onValueChange={(v) => { setClientHomeId(v); markDirty(); }}
+              placeholder="Select client"
+              searchPlaceholder="Search clients..."
+              emptyMessage="No clients found"
+              options={clientHomes.map(client => ({
+                value: client.id,
+                label: client.name,
+              }))}
+              data-testid="select-client"
+            />
             {errors.clientHomeId && <p className="text-xs text-destructive">{errors.clientHomeId}</p>}
           </div>
 
@@ -444,18 +440,21 @@ export function StaffAddInvoiceScreen() {
 
             <div className="flex flex-col gap-2">
               <Label>Status</Label>
-              <Select value={status} onValueChange={(v) => { setStatus(v as InvoiceStatus); markDirty(); }}>
-                <SelectTrigger data-testid="select-status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="overdue">Overdue</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={status}
+                onValueChange={(v) => { setStatus(v as InvoiceStatus); markDirty(); }}
+                placeholder="Select status"
+                searchPlaceholder="Search status..."
+                emptyMessage="No status found"
+                options={[
+                  { value: "draft", label: "Draft" },
+                  { value: "sent", label: "Sent" },
+                  { value: "paid", label: "Paid" },
+                  { value: "overdue", label: "Overdue" },
+                  { value: "cancelled", label: "Cancelled" },
+                ]}
+                data-testid="select-status"
+              />
             </div>
           </div>
 

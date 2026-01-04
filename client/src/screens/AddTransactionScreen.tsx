@@ -6,13 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -430,17 +424,20 @@ export function AddTransactionScreen() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="category">{tLabel('category', 'Category')} <span className="text-destructive">*</span></Label>
-            <Select value={category} onValueChange={(v) => { setCategory(v); markDirty(); }}>
-              <SelectTrigger id="category" data-testid="select-category">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="payment">{tLabel('payment', 'Payment')}</SelectItem>
-                <SelectItem value="advance">{tLabel('advance', 'Advance')}</SelectItem>
-                <SelectItem value="deduction">{tLabel('deduction', 'Deduction')}</SelectItem>
-                <SelectItem value="other">{tLabel('other', 'Other')}</SelectItem>
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={category}
+              onValueChange={(v) => { setCategory(v); markDirty(); }}
+              placeholder={tLabel('selectCategory', 'Select category')}
+              searchPlaceholder={tLabel('searchCategories', 'Search categories...')}
+              emptyMessage={tLabel('noCategoriesFound', 'No categories found')}
+              options={[
+                { value: "payment", label: tLabel('payment', 'Payment') },
+                { value: "advance", label: tLabel('advance', 'Advance') },
+                { value: "deduction", label: tLabel('deduction', 'Deduction') },
+                { value: "other", label: tLabel('other', 'Other') },
+              ]}
+              data-testid="select-category"
+            />
           </div>
 
           <div className="flex flex-col gap-2">

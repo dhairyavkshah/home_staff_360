@@ -8,13 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { PinConfirmModal } from "@/components/ui/pin-confirm-modal";
 import { Header } from "@/components/layout/Header";
@@ -313,21 +307,18 @@ export function SettingsScreen() {
             <>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="salaryStartDay">{t("salaryStartDay")}</Label>
-                <Select
+                <SearchableSelect
                   value={salaryStartDay.toString()}
                   onValueChange={(v) => setSalaryStartDay(parseInt(v))}
-                >
-                  <SelectTrigger id="salaryStartDay" data-testid="select-salary-day">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                      <SelectItem key={day} value={day.toString()}>
-                        {day}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select day"
+                  searchPlaceholder="Search day..."
+                  emptyMessage="No day found"
+                  options={Array.from({ length: 31 }, (_, i) => ({
+                    value: (i + 1).toString(),
+                    label: (i + 1).toString(),
+                  }))}
+                  data-testid="select-salary-day"
+                />
               </div>
 
               <div className="flex flex-col gap-2">

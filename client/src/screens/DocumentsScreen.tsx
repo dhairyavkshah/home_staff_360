@@ -5,13 +5,7 @@ import { compressImage, formatBytes } from "@/lib/imageCompression";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Dialog,
   DialogContent,
@@ -196,17 +190,21 @@ export function DocumentsScreen() {
       />
 
       <div className="content-container pt-4 pb-2">
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger data-testid="select-category">
-            <SelectValue placeholder={tLabel('allCategories', 'All Categories')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{tLabel('allCategories', 'All Categories')}</SelectItem>
-            {HOME_DOCUMENT_CATEGORIES.map(cat => (
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SearchableSelect
+          value={selectedCategory}
+          onValueChange={setSelectedCategory}
+          placeholder={tLabel('allCategories', 'All Categories')}
+          searchPlaceholder="Search categories..."
+          emptyMessage="No categories found"
+          options={[
+            { value: "all", label: tLabel('allCategories', 'All Categories') },
+            ...HOME_DOCUMENT_CATEGORIES.map(cat => ({
+              value: cat,
+              label: cat,
+            })),
+          ]}
+          data-testid="select-category"
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
@@ -315,16 +313,18 @@ export function DocumentsScreen() {
           <div className="flex flex-col gap-4 py-4">
             <div className="flex flex-col gap-2">
               <Label>{tLabel('category', 'Category')}</Label>
-              <Select value={newDocCategory} onValueChange={(v) => setNewDocCategory(v as HomeDocumentCategory)}>
-                <SelectTrigger data-testid="select-new-category">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {HOME_DOCUMENT_CATEGORIES.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={newDocCategory}
+                onValueChange={(v) => setNewDocCategory(v as HomeDocumentCategory)}
+                placeholder={tLabel('selectCategory', 'Select category')}
+                searchPlaceholder="Search categories..."
+                emptyMessage="No categories found"
+                options={HOME_DOCUMENT_CATEGORIES.map(cat => ({
+                  value: cat,
+                  label: cat,
+                }))}
+                data-testid="select-new-category"
+              />
             </div>
             <div className="flex flex-col gap-2">
               <Label>{tLabel('description', 'Description')} ({tLabel('optional', 'Optional')})</Label>

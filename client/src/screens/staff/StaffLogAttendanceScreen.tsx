@@ -6,13 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -280,18 +274,15 @@ export function StaffLogAttendanceScreen() {
           <>
             <div className="flex flex-col gap-2">
               <Label>{t("clientHomes")}</Label>
-              <Select value={selectedHome} onValueChange={(v) => { setSelectedHome(v); markDirty(); }}>
-                <SelectTrigger data-testid="select-client-home">
-                  <SelectValue placeholder={t("selectClientHome")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {clientHomes.map((home) => (
-                    <SelectItem key={home.id} value={home.id}>
-                      {home.name} - {home.role}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={selectedHome}
+                onValueChange={(v) => { setSelectedHome(v); markDirty(); }}
+                placeholder={t("selectClientHome")}
+                searchPlaceholder="Search clients..."
+                emptyMessage="No clients found"
+                options={clientHomes.map((home) => ({ value: home.id, label: `${home.name} - ${home.role}` }))}
+                data-testid="select-client-home"
+              />
             </div>
 
             <div className="flex flex-col gap-2">

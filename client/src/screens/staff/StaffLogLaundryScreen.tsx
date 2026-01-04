@@ -6,13 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -469,45 +463,37 @@ export function StaffLogLaundryScreen() {
           {laundryBusinesses.length > 1 && (
             <div className="flex flex-col gap-2">
               <Label htmlFor="business">{t("business") || "Business"} <span className="text-destructive">*</span></Label>
-              <Select value={selectedBusinessId} onValueChange={(v) => { setSelectedBusinessId(v); setSelectedHome(""); markDirty(); }}>
-                <SelectTrigger id="business" data-testid="select-business">
-                  <SelectValue placeholder={t("selectBusiness") || "Select business"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {laundryBusinesses.map((business) => (
-                    <SelectItem key={business.id} value={business.id}>
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="w-4 h-4" />
-                        {business.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={selectedBusinessId}
+                onValueChange={(v) => { setSelectedBusinessId(v); setSelectedHome(""); markDirty(); }}
+                placeholder={t("selectBusiness") || "Select business"}
+                searchPlaceholder="Search businesses..."
+                emptyMessage="No businesses found"
+                options={laundryBusinesses.map((business) => ({
+                  value: business.id,
+                  label: business.name,
+                  icon: <Briefcase className="w-4 h-4" />,
+                }))}
+                data-testid="select-business"
+              />
               {errors.selectedBusinessId && <p className="text-xs text-destructive">{errors.selectedBusinessId}</p>}
             </div>
           )}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="clientHome">{t("clientHomes")} <span className="text-destructive">*</span></Label>
-            <Select value={selectedHome} onValueChange={(v) => { setSelectedHome(v); markDirty(); }}>
-              <SelectTrigger id="clientHome" data-testid="select-client-home">
-                <SelectValue placeholder={t("selectClientHome")} />
-              </SelectTrigger>
-              <SelectContent>
-                {clientHomes.length === 0 ? (
-                  <div className="p-3 text-sm text-muted-foreground text-center">
-                    {t("noClientHomesFound") || "No client homes found. Add a client home first."}
-                  </div>
-                ) : (
-                  clientHomes.map((home) => (
-                    <SelectItem key={home.id} value={home.id}>
-                      {home.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={selectedHome}
+              onValueChange={(v) => { setSelectedHome(v); markDirty(); }}
+              placeholder={t("selectClientHome") || "Select client home"}
+              searchPlaceholder="Search client homes..."
+              emptyMessage={t("noClientHomesFound") || "No client homes found. Add a client home first."}
+              options={clientHomes.map((home) => ({
+                value: home.id,
+                label: home.name,
+              }))}
+              data-testid="select-client-home"
+            />
             {errors.selectedHome && <p className="text-xs text-destructive">{errors.selectedHome}</p>}
           </div>
 
@@ -537,18 +523,18 @@ export function StaffLogLaundryScreen() {
           
           <div className="flex flex-col gap-2">
             <Label htmlFor="serviceType">{t("serviceType") || "Service Type"} <span className="text-destructive">*</span></Label>
-            <Select value={serviceType} onValueChange={(v) => { setServiceType(v as LaundryServiceType); markDirty(); }}>
-              <SelectTrigger id="serviceType" data-testid="select-service-type">
-                <SelectValue placeholder={t("selectServiceType") || "Select service type"} />
-              </SelectTrigger>
-              <SelectContent>
-                {LAUNDRY_SERVICE_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={serviceType}
+              onValueChange={(v) => { setServiceType(v as LaundryServiceType); markDirty(); }}
+              placeholder={t("selectServiceType") || "Select service type"}
+              searchPlaceholder="Search service types..."
+              emptyMessage="No service types found"
+              options={LAUNDRY_SERVICE_TYPES.map((type) => ({
+                value: type,
+                label: type,
+              }))}
+              data-testid="select-service-type"
+            />
             {errors.serviceType && <p className="text-xs text-destructive">{errors.serviceType}</p>}
           </div>
 

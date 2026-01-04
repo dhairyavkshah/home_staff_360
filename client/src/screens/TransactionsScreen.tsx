@@ -7,13 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SearchBar } from "@/components/SearchBar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
@@ -212,32 +206,37 @@ export function TransactionsScreen() {
             
             <div className="flex flex-col gap-2">
               <Label htmlFor="person">{tLabel('staff', 'Staff')} <span className="text-destructive">*</span></Label>
-              <Select value={selectedPersonId} onValueChange={setSelectedPersonId}>
-                <SelectTrigger id="person" data-testid="select-person">
-                  <SelectValue placeholder={tLabel('selectStaff', 'Select staff member')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {activePeople.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={selectedPersonId}
+                onValueChange={setSelectedPersonId}
+                placeholder={tLabel('selectStaff', 'Select staff member')}
+                searchPlaceholder="Search staff..."
+                emptyMessage="No staff members found"
+                options={activePeople.map((p) => ({
+                  value: p.id,
+                  label: p.name,
+                }))}
+                data-testid="select-person"
+              />
               {errors.person && <p className="text-xs text-destructive">{errors.person}</p>}
             </div>
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="category">{tLabel('category', 'Category')} <span className="text-destructive">*</span></Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger id="category" data-testid="select-category">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="payment">{tLabel('payment', 'Payment')}</SelectItem>
-                  <SelectItem value="advance">{tLabel('advance', 'Advance')}</SelectItem>
-                  <SelectItem value="deduction">{tLabel('deduction', 'Deduction')}</SelectItem>
-                  <SelectItem value="other">{tLabel('other', 'Other')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={category}
+                onValueChange={setCategory}
+                placeholder={tLabel('selectCategory', 'Select category')}
+                searchPlaceholder="Search categories..."
+                emptyMessage="No categories found"
+                options={[
+                  { value: "payment", label: tLabel('payment', 'Payment') },
+                  { value: "advance", label: tLabel('advance', 'Advance') },
+                  { value: "deduction", label: tLabel('deduction', 'Deduction') },
+                  { value: "other", label: tLabel('other', 'Other') },
+                ]}
+                data-testid="select-category"
+              />
             </div>
 
             <div className="flex flex-col gap-2">
