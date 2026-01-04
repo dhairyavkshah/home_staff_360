@@ -213,9 +213,9 @@ export function StaffLaundryScreen() {
                 <h3 className="font-semibold text-sm">{t("noLaundryBusinesses") || "No Laundry Service businesses"}</h3>
                 <p className="text-xs text-muted-foreground">{t("createLaundryBusinessFirst") || "Create a business with 'Laundry Service' profession to log laundry jobs"}</p>
               </div>
-              <Button onClick={() => navigate("staff-businesses")} data-testid="button-go-to-businesses">
+              <Button onClick={() => navigate("settings")} data-testid="button-go-to-businesses">
                 <Building2 className="w-4 h-4 mr-2" />
-                {t("goToBusinesses") || "Go to Businesses"}
+                {t("manageAccounts") || "Manage Businesses"}
               </Button>
             </Card>
           ) : filteredJobs.length === 0 ? (
