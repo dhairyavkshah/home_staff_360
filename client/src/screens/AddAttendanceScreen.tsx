@@ -135,19 +135,19 @@ export function AddAttendanceScreen() {
             <div className="flex items-center space-x-3 p-3 rounded-lg border hover-elevate cursor-pointer">
               <RadioGroupItem value="FULL" id="full" data-testid="radio-full" />
               <Label htmlFor="full" className="flex-1 cursor-pointer font-normal">
-                Full Day
+                {t("fullDay")}
               </Label>
             </div>
             <div className="flex items-center space-x-3 p-3 rounded-lg border hover-elevate cursor-pointer">
               <RadioGroupItem value="HALF" id="half" data-testid="radio-half" />
               <Label htmlFor="half" className="flex-1 cursor-pointer font-normal">
-                Half Day
+                {t("halfDay")}
               </Label>
             </div>
             <div className="flex items-center space-x-3 p-3 rounded-lg border hover-elevate cursor-pointer">
               <RadioGroupItem value="ABSENT" id="absent" data-testid="radio-absent" />
               <Label htmlFor="absent" className="flex-1 cursor-pointer font-normal">
-                Absent
+                {t("absent")}
               </Label>
             </div>
           </RadioGroup>

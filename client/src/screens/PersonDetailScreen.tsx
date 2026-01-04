@@ -11,6 +11,7 @@ import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveContext } from "@/hooks/use-active-context";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 import {
   calculatePersonBalance,
   formatCurrency,
@@ -25,6 +26,7 @@ export function PersonDetailScreen() {
   const { navigate, goBack, data } = useNavigation();
   const { toast } = useToast();
   const { contextLabel, contextMode } = useActiveContext();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteAttendanceId, setDeleteAttendanceId] = useState<string | null>(null);
@@ -187,7 +189,7 @@ export function PersonDetailScreen() {
                   </span>
                 </div>
                 <div className="p-4 flex justify-between gap-2">
-                  <span className="text-muted-foreground">Half Day</span>
+                  <span className="text-muted-foreground">{t("halfDay")}</span>
                   <span className="font-medium">
                     {person.halfDayPercentage ?? settings.halfDayPercentage}%
                   </span>
@@ -216,15 +218,15 @@ export function PersonDetailScreen() {
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-bold text-success">{attendanceSummary.full}</p>
-                  <p className="text-xs text-muted-foreground">Full Days</p>
+                  <p className="text-xs text-muted-foreground">{t("fullDays")}</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-warning">{attendanceSummary.half}</p>
-                  <p className="text-xs text-muted-foreground">Half Days</p>
+                  <p className="text-xs text-muted-foreground">{t("halfDays")}</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-muted-foreground">{attendanceSummary.absent}</p>
-                  <p className="text-xs text-muted-foreground">Absent</p>
+                  <p className="text-xs text-muted-foreground">{t("absent")}</p>
                 </div>
               </div>
             </Card>

@@ -362,9 +362,9 @@ export function ReportsScreen() {
       reportTitle: t("attendanceReport"),
       subtitle: monthName,
       summary: {
-        "Full Days": String(attendanceData.summary.fullDays),
-        "Half Days": String(attendanceData.summary.halfDays),
-        "Total Records": String(attendanceData.summary.totalDays),
+        [t("fullDays")]: String(attendanceData.summary.fullDays),
+        [t("halfDays")]: String(attendanceData.summary.halfDays),
+        [t("totalDays")]: String(attendanceData.summary.totalDays),
       },
       entries: attendanceData.records,
     });
