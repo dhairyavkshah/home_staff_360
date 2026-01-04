@@ -66,7 +66,7 @@ export function AddAttendanceScreen() {
 
     if (showHours && status !== "ABSENT") {
       if (!hours || parseFloat(hours) <= 0) {
-        newErrors.hours = t("baseRateRequired");
+        newErrors.hours = t("hoursRequired");
       }
     }
 
@@ -161,7 +161,7 @@ export function AddAttendanceScreen() {
               type="number"
               value={hours}
               onChange={(e) => { setHours(e.target.value); markDirty(); }}
-              placeholder="e.g., 8"
+              placeholder={t("hoursPlaceholder")}
               data-testid="input-hours"
             />
             {errors.hours && <p className="text-xs text-destructive">{errors.hours}</p>}
@@ -181,7 +181,7 @@ export function AddAttendanceScreen() {
         </div>
 
         <Button className="w-full" onClick={handleSubmit} data-testid="button-save">
-          Save Attendance
+          {t("save")}
         </Button>
       </ScrollContent>
 

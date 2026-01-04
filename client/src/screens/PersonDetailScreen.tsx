@@ -18,7 +18,6 @@ import {
   formatRecordCurrency,
   formatShortDate,
   getAttendanceSummary,
-  getCategoryLabel,
 } from "@/lib/calculations";
 import type { Transaction } from "@shared/schema";
 
@@ -179,13 +178,15 @@ export function PersonDetailScreen() {
               <Card className="divide-y">
                 <div className="p-4 flex justify-between gap-2">
                   <span className="text-muted-foreground">{t("salaryType")}</span>
-                  <span className="font-medium">{person.salaryType}</span>
+                  <span className="font-medium">
+                    {person.salaryType === "MONTHLY" ? t("monthly") : person.salaryType === "DAILY" ? t("daily") : t("hourly")}
+                  </span>
                 </div>
                 <div className="p-4 flex justify-between gap-2">
                   <span className="text-muted-foreground">{t("baseRate")}</span>
                   <span className="font-medium">
                     {formatCurrency(person.baseRate, settings.currency, settings.customCurrencySymbol)}
-                    {person.salaryType === "MONTHLY" ? "/mo" : person.salaryType === "DAILY" ? "/day" : "/hr"}
+                    {person.salaryType === "MONTHLY" ? t("perMonth") : person.salaryType === "DAILY" ? t("perDay") : t("perHour")}
                   </span>
                 </div>
                 <div className="p-4 flex justify-between gap-2">
@@ -245,10 +246,12 @@ export function PersonDetailScreen() {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">{formatShortDate(entry.date)}</p>
                         {entry.hours && (
-                          <p className="text-xs text-muted-foreground">{entry.hours} hours</p>
+                          <p className="text-xs text-muted-foreground">{entry.hours} {t("hours")}</p>
                         )}
                       </div>
-                      <span className="text-xs capitalize text-muted-foreground">{entry.status.toLowerCase()}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {entry.status === "FULL" ? t("fullDay") : entry.status === "HALF" ? t("halfDay") : t("absent")}
+                      </span>
                       <Button
                         size="icon"
                         variant="ghost"
@@ -269,7 +272,7 @@ export function PersonDetailScreen() {
               onClick={() => navigate("add-attendance", { personId, source })}
               data-testid="button-mark-attendance-tab"
             >
-              Mark Attendance
+              {t("markAttendance")}
             </Button>
           </>
         )}
@@ -277,10 +280,10 @@ export function PersonDetailScreen() {
         {activeTab === "payment" && (
           <>
             <section className="flex flex-col gap-3">
-              <h3 className="font-semibold text-sm">Recent Transactions</h3>
+              <h3 className="font-semibold text-sm">{t("recentTransactions")}</h3>
               {recentTransactions.length === 0 ? (
                 <div className="text-center py-4 text-muted-foreground text-sm">
-                  No transactions yet
+                  {t("noTransactionsYet")}
                 </div>
               ) : (
                 <div className="flex flex-col gap-1.5">
@@ -289,7 +292,7 @@ export function PersonDetailScreen() {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm truncate">{tx.description}</p>
                         <p className="text-xs text-muted-foreground">
-                          {getCategoryLabel(tx.category)} • {formatShortDate(tx.date)}
+                          {tx.category === "payment" ? t("payment") : tx.category === "advance" ? t("advance") : tx.category === "deduction" ? t("deduction") : t("other")} • {formatShortDate(tx.date)}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
@@ -298,7 +301,7 @@ export function PersonDetailScreen() {
                           {formatRecordCurrency(tx.amount, tx.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {tx.isPaid ? "Paid" : "Pending"}
+                          {tx.isPaid ? t("paid") : t("pending")}
                         </p>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
@@ -310,7 +313,7 @@ export function PersonDetailScreen() {
                             data-testid={`button-pay-now-${tx.id}`}
                           >
                             <Banknote className="w-4 h-4 mr-1" />
-                            Pay
+                            {t("pay")}
                           </Button>
                         )}
                         <Button
