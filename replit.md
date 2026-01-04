@@ -73,12 +73,19 @@ Located in Settings > Support the Developer, this optional feature allows users 
 ### Technical Implementations
 - **Offline-First Design**: All data stored in browser `localStorage`, no server dependencies
 - **Security**: PIN-based app lock with optional biometric authentication (WebAuthn)
+  - **Brute-force protection**: 5 failed PIN attempts = 30-minute lockout with countdown timer (persistent in localStorage)
+- **Backup Validation**: Zod schema validation for backup imports to prevent data corruption
 - **Default App Mode**: Remembers user's preferred mode (HOME or STAFF), configurable in settings
 - **Guided Tour**: Interactive onboarding tours for both modes, auto-starts once, replayable from settings
 - **Data Scoping**: All data filtered by active account ID, "Show All Contexts" toggle available
 - **Cascade Deletes**: Deleting records automatically cleans up related data
 - **Document Management**: Images resized (max 1920x1920), compressed (80% JPEG), stored as Base64
 - **Invoicing System (STAFF Mode)**: Itemized invoices with sequential numbering, tax rates, 5 statuses
+
+### Known Limitations (Planned for v1.1)
+- **Hardcoded English labels**: Some financial terms like "Payment", "Advance", "Deduction" in getCategoryLabel() are in English (globally understood financial terms)
+- **List virtualization**: Not implemented for v1.0 (soft limit of 1000 records mitigates performance concerns)
+- **Comprehensive ARIA labels**: Baseline accessibility provided by Shadcn components; comprehensive ARIA audit planned
 
 ### Multi-Language Support (21 Languages)
 **Complete translations (100% coverage ~250 keys)**:
