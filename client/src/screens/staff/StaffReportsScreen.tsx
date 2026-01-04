@@ -177,14 +177,14 @@ export function StaffReportsScreen() {
             const earned = a.status === "FULL" ? rate : rate * 0.5;
             return {
               date: a.date,
-              clientName: homeNames.get(a.clientHomeId) || "Unknown",
-              status: a.status === "FULL" ? "Full Day" : "Half Day",
+              clientName: homeNames.get(a.clientHomeId) || t("unknown"),
+              status: a.status === "FULL" ? t("fullDay") : t("halfDay"),
               formattedEarnings: formatRecordCurrency(earned, a.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol),
             };
           }),
         laundryJobs: laundryJobs.map((job) => ({
           date: job.date,
-          clientName: homeNames.get(job.clientHomeId) || "Unknown",
+          clientName: homeNames.get(job.clientHomeId) || t("unknown"),
           items: job.itemCount,
           formattedEarned: formatRecordCurrency(job.totalEarned, job.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol),
         })),
@@ -195,8 +195,8 @@ export function StaffReportsScreen() {
         period,
         attendance: attendance.map((a) => ({
           date: a.date,
-          clientName: homeNames.get(a.clientHomeId) || "Unknown",
-          status: a.status === "FULL" ? "Full Day" : a.status === "HALF" ? "Half Day" : "Absent",
+          clientName: homeNames.get(a.clientHomeId) || t("unknown"),
+          status: a.status === "FULL" ? t("fullDay") : a.status === "HALF" ? t("halfDay") : t("absent"),
           hoursWorked: a.hoursWorked,
           note: a.note,
         })),
@@ -221,7 +221,7 @@ export function StaffReportsScreen() {
     } else {
       toast({
         title: t("error"),
-        description: "Export failed",
+        description: t("exportFailed"),
         variant: "destructive",
       });
     }
@@ -264,8 +264,8 @@ export function StaffReportsScreen() {
         const earned = a.status === "FULL" ? rate : rate * 0.5;
         entries.push({
           date: a.date,
-          clientName: homeNames.get(a.clientHomeId) || "Unknown",
-          description: a.status === "FULL" ? "Full Day Work" : "Half Day Work",
+          clientName: homeNames.get(a.clientHomeId) || t("unknown"),
+          description: a.status === "FULL" ? t("fullDay") : t("halfDay"),
           earnings: earned,
           formattedEarnings: formatRecordCurrency(earned, a.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol),
           type: "attendance",
@@ -275,8 +275,8 @@ export function StaffReportsScreen() {
     laundryJobs.forEach((job) => {
       entries.push({
         date: job.date,
-        clientName: homeNames.get(job.clientHomeId) || "Unknown",
-        description: `Laundry (${job.itemCount} items)`,
+        clientName: homeNames.get(job.clientHomeId) || t("unknown"),
+        description: t("laundryItemsCount").replace("{count}", String(job.itemCount)),
         earnings: job.totalEarned,
         formattedEarnings: formatRecordCurrency(job.totalEarned, job.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol),
         type: "laundry",
@@ -290,10 +290,10 @@ export function StaffReportsScreen() {
       reportTitle: t("earningsReport"),
       subtitle: monthName,
       summary: {
-        "Work Earnings": formatCurrencyTotals(earningsByCurrency.attendanceByCurrency),
-        "Laundry Earnings": formatCurrencyTotals(earningsByCurrency.laundryByCurrency),
-        "Tips & Bonus": formatCurrencyTotals(earningsByCurrency.bonusTipsByCurrency),
-        "Total Earnings": formatCurrencyTotals(earningsByCurrency.totalByCurrency),
+        [t("workEarnings")]: formatCurrencyTotals(earningsByCurrency.attendanceByCurrency),
+        [t("laundryEarnings")]: formatCurrencyTotals(earningsByCurrency.laundryByCurrency),
+        [t("tipsAndBonus")]: formatCurrencyTotals(earningsByCurrency.bonusTipsByCurrency),
+        [t("totalEarnings")]: formatCurrencyTotals(earningsByCurrency.totalByCurrency),
       },
       entries,
     });
@@ -302,8 +302,8 @@ export function StaffReportsScreen() {
   const handleViewAttendanceReport = () => {
     const entries = attendance.map((a) => ({
       date: a.date,
-      clientName: homeNames.get(a.clientHomeId) || "Unknown",
-      status: a.status === "FULL" ? "Full Day" : a.status === "HALF" ? "Half Day" : "Absent",
+      clientName: homeNames.get(a.clientHomeId) || t("unknown"),
+      status: a.status === "FULL" ? t("fullDay") : a.status === "HALF" ? t("halfDay") : t("absent"),
       hoursWorked: a.hoursWorked,
       note: a.note,
     }));
@@ -315,9 +315,9 @@ export function StaffReportsScreen() {
       reportTitle: t("attendanceReport"),
       subtitle: monthName,
       summary: {
-        "Full Days": String(attendanceSummary.fullDays),
-        "Half Days": String(attendanceSummary.halfDays),
-        "Total Days": String(attendanceSummary.totalDays),
+        [t("fullDays")]: String(attendanceSummary.fullDays),
+        [t("halfDays")]: String(attendanceSummary.halfDays),
+        [t("totalDays")]: String(attendanceSummary.totalDays),
       },
       entries,
     });

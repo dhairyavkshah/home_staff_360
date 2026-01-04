@@ -467,6 +467,7 @@ const en = {
   sendReport: "Send Report",
   reportExported: "Report exported successfully",
   reportShared: "Report shared successfully",
+  exportFailed: "Export failed",
   workingDays: "Working Days",
   staffAttendance: "Staff Attendance",
   staffAttendanceDesc: "View and export staff attendance records",
@@ -479,6 +480,12 @@ const en = {
   endDate: "End Date",
   noDataForPeriod: "No data for this period",
   moreRecords: "more records",
+  workEarnings: "Work Earnings",
+  laundryEarnings: "Laundry Earnings",
+  fullDays: "Full Days",
+  halfDays: "Half Days",
+  totalDays: "Total Days",
+  laundryItemsCount: "Laundry ({count} items)",
   
   // HOME Mode Laundry
   noLaundryEntries: "No Laundry Entries",

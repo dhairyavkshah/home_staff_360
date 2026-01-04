@@ -47,12 +47,6 @@ interface PendingAttachment {
   preview: string;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  payment: "Payment",
-  advance: "Advance",
-  deduction: "Deduction",
-  other: "Other",
-};
 
 export function AddTransactionScreen() {
   const { navigate, goBack, data } = useNavigation();
@@ -297,7 +291,10 @@ export function AddTransactionScreen() {
             <div className="flex flex-col gap-1">
               <Label className="text-muted-foreground text-sm">{tLabel('category', 'Category')}</Label>
               <p className="font-medium" data-testid="view-category">
-                {CATEGORY_LABELS[existingTransaction.category] || existingTransaction.category}
+                {existingTransaction.category === 'payment' ? tLabel('payment', 'Payment') : 
+                 existingTransaction.category === 'advance' ? tLabel('advance', 'Advance') : 
+                 existingTransaction.category === 'deduction' ? tLabel('deduction', 'Deduction') : 
+                 existingTransaction.category === 'other' ? tLabel('other', 'Other') : existingTransaction.category}
               </p>
             </div>
 

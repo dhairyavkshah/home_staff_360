@@ -72,9 +72,9 @@ export function LaundryViewScreen() {
   }, [people]);
 
   const getPersonName = (personId?: string) => {
-    if (!personId) return "Not assigned";
+    if (!personId) return t("noSpecificClient");
     const person = people.find((p) => p.id === personId);
-    return person?.name || "Unknown";
+    return person?.name || t("unknown");
   };
 
   const serviceTypes = useMemo(() => {

@@ -239,7 +239,7 @@ export function ReportsScreen() {
         records.push({
           date: a.date,
           personName: person.name,
-          status: a.status === "FULL" ? "Full Day" : a.status === "HALF" ? "Half Day" : "Absent",
+          status: a.status === "FULL" ? t("fullDay") : a.status === "HALF" ? t("halfDay") : t("absent"),
           hours: a.hours,
           notes: a.note,
         });
@@ -249,9 +249,9 @@ export function ReportsScreen() {
     records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const summary = {
-      fullDays: records.filter((r) => r.status === "Full Day").length,
-      halfDays: records.filter((r) => r.status === "Half Day").length,
-      totalDays: records.filter((r) => r.status !== "Absent").length,
+      fullDays: records.filter((r) => r.status === t("fullDay")).length,
+      halfDays: records.filter((r) => r.status === t("halfDay")).length,
+      totalDays: records.filter((r) => r.status !== t("absent")).length,
     };
 
     return { records, summary };
@@ -281,7 +281,7 @@ export function ReportsScreen() {
     if (success) {
       toast({ title: t("success"), description: t("reportExported") });
     } else {
-      toast({ title: t("error"), description: "Export failed", variant: "destructive" });
+      toast({ title: t("error"), description: t("exportFailed"), variant: "destructive" });
     }
   };
 
@@ -320,7 +320,7 @@ export function ReportsScreen() {
     if (success) {
       toast({ title: t("success"), description: t("reportExported") });
     } else {
-      toast({ title: t("error"), description: "Export failed", variant: "destructive" });
+      toast({ title: t("error"), description: t("exportFailed"), variant: "destructive" });
     }
   };
 
@@ -345,12 +345,12 @@ export function ReportsScreen() {
     
     navigate("report-preview", {
       reportType: "ledger",
-      reportTitle: "Ledger Report",
+      reportTitle: t("ledger"),
       subtitle: monthName,
       summary: {
-        "Total Wages": formatCurrencyTotals(reportData.wagesByCurrency),
-        "Total Expenses": formatCurrencyTotals(reportData.expensesByCurrency),
-        "Grand Total": formatCurrencyTotals(reportData.allEntriesByCurrency),
+        [t("wages")]: formatCurrencyTotals(reportData.wagesByCurrency),
+        [t("totalExpenses")]: formatCurrencyTotals(reportData.expensesByCurrency),
+        [t("grandTotal")]: formatCurrencyTotals(reportData.allEntriesByCurrency),
       },
       entries,
     });
