@@ -88,14 +88,11 @@ Located in Settings > Support the Developer, this optional feature allows users 
 - **Comprehensive ARIA labels**: Baseline accessibility provided by Shadcn components; comprehensive ARIA audit planned
 
 ### Multi-Language Support (21 Languages)
-**Complete translations (100% coverage ~250 keys)**:
+**All 21 languages have complete translations (100% coverage ~620 keys)**:
 - English (en), Hindi (hi), Gujarati (gu), Kannada (kn), Malayalam (ml)
 - Spanish (es), Marathi (mr), Punjabi (pa), Tamil (ta)
 - Telugu (te), Urdu (ur), Bengali (bn), Odia (or), Assamese (as)
-- Russian (ru) - NEW
-
-**Partial translations (onboarding keys only, ~40 keys translated)**:
-- French (fr), German (de), Arabic (ar), Chinese (zh), Japanese (ja), Portuguese (pt)
+- Russian (ru), French (fr), German (de), Arabic (ar), Chinese (zh), Japanese (ja), Portuguese (pt)
 
 **Language Selector Features**:
 - Typeahead search functionality
