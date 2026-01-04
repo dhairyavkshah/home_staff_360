@@ -38,9 +38,9 @@ export function AddAttendanceScreen() {
   if (!person) {
     return (
       <AppLayout>
-        <Header title="Staff Not Found" onBack={handleBack} />
+        <Header title={t("staffNotFound")} onBack={handleBack} />
         <ScrollContent>
-          <p className="text-center text-muted-foreground">This staff member could not be found.</p>
+          <p className="text-center text-muted-foreground">{t("staffMemberNotFound")}</p>
         </ScrollContent>
       </AppLayout>
     );
@@ -107,8 +107,8 @@ export function AddAttendanceScreen() {
   return (
     <AppLayout>
       <Header
-        title="Attendance Details"
-        subtitle={`for ${person.name}`}
+        title={t("attendanceDetails")}
+        subtitle={`${t("for")} ${person.name}`}
         onBack={handleBack}
         onHome={handleHomePress}
       />
@@ -116,7 +116,7 @@ export function AddAttendanceScreen() {
       <ScrollContent>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{t("date")}</Label>
             <Input
               id="date"
               type="date"
@@ -130,7 +130,7 @@ export function AddAttendanceScreen() {
         </div>
 
         <section className="flex flex-col gap-4">
-          <Label>Attendance Status <span className="text-destructive">*</span></Label>
+          <Label>{t("status")} <span className="text-destructive">*</span></Label>
           <RadioGroup value={status} onValueChange={(v) => { setStatus(v as AttendanceStatus); markDirty(); }}>
             <div className="flex items-center space-x-3 p-3 rounded-lg border hover-elevate cursor-pointer">
               <RadioGroupItem value="FULL" id="full" data-testid="radio-full" />
@@ -155,7 +155,7 @@ export function AddAttendanceScreen() {
 
         {showHours && status !== "ABSENT" && (
           <div className="flex flex-col gap-2">
-            <Label htmlFor="hours">Hours Worked <span className="text-destructive">*</span></Label>
+            <Label htmlFor="hours">{t("hours")} <span className="text-destructive">*</span></Label>
             <Input
               id="hours"
               type="number"
@@ -169,12 +169,12 @@ export function AddAttendanceScreen() {
         )}
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="note">Note</Label>
+          <Label htmlFor="note">{t("notes")}</Label>
           <Textarea
             id="note"
             value={note}
             onChange={(e) => { setNote(e.target.value); markDirty(); }}
-            placeholder="Add a note..."
+            placeholder={t("addNote")}
             rows={2}
             data-testid="textarea-note"
           />
