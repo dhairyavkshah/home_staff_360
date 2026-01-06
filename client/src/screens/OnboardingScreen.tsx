@@ -36,6 +36,13 @@ export function OnboardingScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    if (!collaborationService.isAuthenticated()) {
+      navigate("auth");
+      return;
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     async function detectCountry() {
       const existingCountry = getUserCountry();
       if (existingCountry) {
