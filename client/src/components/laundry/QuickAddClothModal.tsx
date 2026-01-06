@@ -107,7 +107,7 @@ export function QuickAddClothModal({
   const subtotal = quantity * (parseFloat(rate) || 0);
 
   const content = (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {step === 'select' ? (
         <>
           <div className="flex flex-col gap-2">
@@ -120,20 +120,20 @@ export function QuickAddClothModal({
               autoFocus
             />
           </div>
-          <ScrollArea className="h-[300px] -mx-2">
+          <ScrollArea className="flex-1 -mx-2">
             <div className="grid grid-cols-2 gap-2 px-2">
               {filteredTypes.map((type) => (
                 <Button
                   key={type}
                   variant="outline"
                   className={cn(
-                    "h-auto py-3 px-3 flex flex-col items-center gap-1 text-sm font-medium",
+                    "h-auto min-h-[52px] py-2.5 px-3 flex flex-col items-center gap-1 text-sm font-medium",
                     selectedType === type && "border-primary bg-primary/10"
                   )}
                   onClick={() => handleSelectType(type)}
                   data-testid={`button-cloth-type-${type.replace(/\s+/g, '-').toLowerCase()}`}
                 >
-                  <Shirt className="w-5 h-5 text-muted-foreground" />
+                  <Shirt className="w-4 h-4 text-muted-foreground shrink-0" />
                   <span className="text-center leading-tight">{type}</span>
                 </Button>
               ))}
@@ -141,18 +141,18 @@ export function QuickAddClothModal({
           </ScrollArea>
         </>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-3">
-              <Shirt className="w-8 h-8 text-primary" />
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-1">
+              <Shirt className="w-6 h-6 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold">{selectedType}</h3>
+            <h3 className="text-base font-semibold">{selectedType}</h3>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label className="text-center text-muted-foreground">Quantity</Label>
-              <div className="flex items-center justify-center gap-4">
+          <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-1">
+              <Label className="text-center text-muted-foreground text-sm">Quantity</Label>
+              <div className="flex items-center justify-center gap-3">
                 <Button
                   variant="outline"
                   size="icon"
@@ -167,7 +167,7 @@ export function QuickAddClothModal({
                   min="1"
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 text-center text-xl font-bold"
+                  className="w-16 text-center text-lg font-bold"
                   data-testid="input-quantity"
                 />
                 <Button
@@ -181,29 +181,29 @@ export function QuickAddClothModal({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-center text-muted-foreground">Rate per item</Label>
+            <div className="flex flex-col gap-1">
+              <Label className="text-center text-muted-foreground text-sm">Rate per item</Label>
               <div className="flex items-center justify-center gap-2">
-                <span className="text-lg font-medium">{currencySymbol}</span>
+                <span className="text-base font-medium">{currencySymbol}</span>
                 <Input
                   type="number"
                   min="0"
                   step="0.01"
                   value={rate}
                   onChange={(e) => setRate(e.target.value)}
-                  className="w-24 text-center text-lg"
+                  className="w-20 text-center text-base"
                   data-testid="input-rate"
                 />
               </div>
             </div>
 
-            <div className="p-4 rounded-lg bg-muted/50 text-center">
-              <p className="text-sm text-muted-foreground">Subtotal</p>
-              <p className="text-2xl font-bold">{currencySymbol}{subtotal.toLocaleString()}</p>
+            <div className="py-2 px-3 rounded-lg bg-muted/50 text-center">
+              <p className="text-xs text-muted-foreground">Subtotal</p>
+              <p className="text-lg font-bold">{currencySymbol}{subtotal.toLocaleString()}</p>
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-2 pt-2 pb-safe">
             <Button
               variant="outline"
               onClick={handleBack}
@@ -218,7 +218,7 @@ export function QuickAddClothModal({
               className="flex-1"
               data-testid="button-add-confirm"
             >
-              <Check className="w-4 h-4 mr-2" />
+              <Check className="w-4 h-4 mr-1.5" />
               Add Item
             </Button>
           </div>
@@ -238,13 +238,13 @@ export function QuickAddClothModal({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader>
+        <DrawerContent className="max-h-[95vh] flex flex-col">
+          <DrawerHeader className="py-3 shrink-0">
             <DrawerTitle>
               {step === 'select' ? 'Select Cloth Type' : 'Enter Quantity'}
             </DrawerTitle>
           </DrawerHeader>
-          <div className="px-4 pb-10 overflow-y-auto">
+          <div className="px-4 pb-4 overflow-y-auto flex-1 flex flex-col">
             {content}
           </div>
         </DrawerContent>
