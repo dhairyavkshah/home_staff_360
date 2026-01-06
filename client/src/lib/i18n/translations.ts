@@ -180,6 +180,22 @@ const en = {
   // Appearance
   appearance: "Appearance",
   darkMode: "Dark Mode",
+  toggleLightDarkTheme: "Toggle light/dark theme",
+  
+  // Feedback
+  hapticFeedback: "Haptic Feedback",
+  vibrationOnTouch: "Vibration on touch interactions",
+  soundEffects: "Sound Effects",
+  playTapSounds: "Play tap sounds on interactions",
+  
+  // Help
+  help: "Help",
+  seeGuidedTour: "See Guided Tour",
+  learnHowToUseApp: "Learn how to use the app effectively",
+  
+  // Currency Description
+  defaultCurrencyForStaff: "Default currency for new staff members. Each staff member can have their own currency.",
+  defaultCurrencyForClients: "Default currency for new clients. Each client can have their own currency.",
   
   // Data Management
   dataManagement: "Data Management",
@@ -1036,6 +1052,22 @@ const hi: Partial<typeof en> = {
   // Appearance
   appearance: "दिखावट",
   darkMode: "डार्क मोड",
+  toggleLightDarkTheme: "लाइट/डार्क थीम टॉगल करें",
+  
+  // Feedback
+  hapticFeedback: "हैप्टिक फीडबैक",
+  vibrationOnTouch: "टच इंटरेक्शन पर वाइब्रेशन",
+  soundEffects: "साउंड इफेक्ट्स",
+  playTapSounds: "इंटरेक्शन पर टैप साउंड बजाएं",
+  
+  // Help
+  help: "सहायता",
+  seeGuidedTour: "गाइडेड टूर देखें",
+  learnHowToUseApp: "ऐप को प्रभावी ढंग से उपयोग करना सीखें",
+  
+  // Currency Description
+  defaultCurrencyForStaff: "नए स्टाफ सदस्यों के लिए डिफ़ॉल्ट मुद्रा। प्रत्येक स्टाफ सदस्य की अपनी मुद्रा हो सकती है।",
+  defaultCurrencyForClients: "नए क्लाइंट्स के लिए डिफ़ॉल्ट मुद्रा। प्रत्येक क्लाइंट की अपनी मुद्रा हो सकती है।",
   
   // Data Management
   dataManagement: "डेटा प्रबंधन",
@@ -1842,6 +1874,16 @@ const gu: Partial<typeof en> = {
   incorrectPin: "ખોટો પિન",
   appearance: "દેખાવ",
   darkMode: "ડાર્ક મોડ",
+  toggleLightDarkTheme: "લાઇટ/ડાર્ક થીમ ટૉગલ કરો",
+  hapticFeedback: "હેપ્ટિક ફીડબેક",
+  vibrationOnTouch: "ટચ ઇન્ટરેક્શન પર વાઇબ્રેશન",
+  soundEffects: "સાઉન્ડ ઇફેક્ટ્સ",
+  playTapSounds: "ઇન્ટરેક્શન પર ટેપ સાઉન્ડ વગાડો",
+  help: "મદદ",
+  seeGuidedTour: "ગાઇડેડ ટૂર જુઓ",
+  learnHowToUseApp: "એપ્લિકેશનનો અસરકારક રીતે ઉપયોગ કરવાનું શીખો",
+  defaultCurrencyForStaff: "નવા સ્ટાફ સભ્યો માટે ડિફોલ્ટ ચલણ. દરેક સ્ટાફ સભ્યનું પોતાનું ચલણ હોઈ શકે છે.",
+  defaultCurrencyForClients: "નવા ક્લાયન્ટ્સ માટે ડિફોલ્ટ ચલણ. દરેક ક્લાયન્ટનું પોતાનું ચલણ હોઈ શકે છે.",
   dataManagement: "ડેટા મેનેજમેન્ટ",
   backupRestore: "બેકઅપ અને રિસ્ટોર",
   backupAndRestore: "બેકઅપ અને રિસ્ટોર",
@@ -2301,6 +2343,16 @@ const kn: Partial<typeof en> = {
   incorrectPin: "ತಪ್ಪಾದ ಪಿನ್",
   appearance: "ಗೋಚರತೆ",
   darkMode: "ಡಾರ್ಕ್ ಮೋಡ್",
+  toggleLightDarkTheme: "ಲೈಟ್/ಡಾರ್ಕ್ ಥೀಮ್ ಟಾಗಲ್ ಮಾಡಿ",
+  hapticFeedback: "ಹ್ಯಾಪ್ಟಿಕ್ ಫೀಡ್‌ಬ್ಯಾಕ್",
+  vibrationOnTouch: "ಸ್ಪರ್ಶ ಸಂವಾದಗಳಲ್ಲಿ ಕಂಪನ",
+  soundEffects: "ಧ್ವನಿ ಪರಿಣಾಮಗಳು",
+  playTapSounds: "ಸಂವಾದಗಳಲ್ಲಿ ಟ್ಯಾಪ್ ಧ್ವನಿಗಳನ್ನು ಪ್ಲೇ ಮಾಡಿ",
+  help: "ಸಹಾಯ",
+  seeGuidedTour: "ಮಾರ್ಗದರ್ಶಿ ಪ್ರವಾಸ ನೋಡಿ",
+  learnHowToUseApp: "ಆ್ಯಪ್ ಅನ್ನು ಪರಿಣಾಮಕಾರಿಯಾಗಿ ಬಳಸಲು ಕಲಿಯಿರಿ",
+  defaultCurrencyForStaff: "ಹೊಸ ಸಿಬ್ಬಂದಿಗೆ ಡೀಫಾಲ್ಟ್ ಕರೆನ್ಸಿ. ಪ್ರತಿ ಸಿಬ್ಬಂದಿಗೆ ಅವರದ್ದೇ ಕರೆನ್ಸಿ ಇರಬಹುದು.",
+  defaultCurrencyForClients: "ಹೊಸ ಕ್ಲೈಂಟ್‌ಗಳಿಗೆ ಡೀಫಾಲ್ಟ್ ಕರೆನ್ಸಿ. ಪ್ರತಿ ಕ್ಲೈಂಟ್‌ಗೆ ಅವರದ್ದೇ ಕರೆನ್ಸಿ ಇರಬಹುದು.",
   dataManagement: "ಡೇಟಾ ನಿರ್ವಹಣೆ",
   backupRestore: "ಬ್ಯಾಕಪ್ ಮತ್ತು ಮರುಸ್ಥಾಪನೆ",
   backupAndRestore: "ಬ್ಯಾಕಪ್ ಮತ್ತು ಮರುಸ್ಥಾಪನೆ",
@@ -2760,6 +2812,16 @@ const ml: Partial<typeof en> = {
   incorrectPin: "തെറ്റായ പിൻ",
   appearance: "രൂപം",
   darkMode: "ഡാർക്ക് മോഡ്",
+  toggleLightDarkTheme: "ലൈറ്റ്/ഡാർക്ക് തീം മാറ്റുക",
+  hapticFeedback: "ഹാപ്റ്റിക് ഫീഡ്ബാക്ക്",
+  vibrationOnTouch: "ടച്ച് ഇടപെടലുകളിൽ വൈബ്രേഷൻ",
+  soundEffects: "സൗണ്ട് ഇഫക്റ്റ്സ്",
+  playTapSounds: "ഇടപെടലുകളിൽ ടാപ്പ് ശബ്ദങ്ങൾ പ്ലേ ചെയ്യുക",
+  help: "സഹായം",
+  seeGuidedTour: "ഗൈഡഡ് ടൂർ കാണുക",
+  learnHowToUseApp: "ആപ്പ് ഫലപ്രദമായി ഉപയോഗിക്കാൻ പഠിക്കുക",
+  defaultCurrencyForStaff: "പുതിയ സ്റ്റാഫ് അംഗങ്ങൾക്കുള്ള ഡിഫോൾട്ട് കറൻസി. ഓരോ സ്റ്റാഫ് അംഗത്തിനും സ്വന്തം കറൻസി ഉണ്ടാകാം.",
+  defaultCurrencyForClients: "പുതിയ ക്ലയന്റുകൾക്കുള്ള ഡിഫോൾട്ട് കറൻസി. ഓരോ ക്ലയന്റിനും സ്വന്തം കറൻസി ഉണ്ടാകാം.",
   dataManagement: "ഡാറ്റ മാനേജ്മെന്റ്",
   backupRestore: "ബാക്കപ്പും പുനഃസ്ഥാപിക്കലും",
   backupAndRestore: "ബാക്കപ്പും പുനഃസ്ഥാപിക്കലും",
@@ -3246,6 +3308,22 @@ const es: Partial<typeof en> = {
   // Appearance
   appearance: "Apariencia",
   darkMode: "Modo Oscuro",
+  toggleLightDarkTheme: "Alternar tema claro/oscuro",
+  
+  // Feedback
+  hapticFeedback: "Retroalimentación Háptica",
+  vibrationOnTouch: "Vibración en interacciones táctiles",
+  soundEffects: "Efectos de Sonido",
+  playTapSounds: "Reproducir sonidos de toque en interacciones",
+  
+  // Help
+  help: "Ayuda",
+  seeGuidedTour: "Ver Tour Guiado",
+  learnHowToUseApp: "Aprende a usar la app de manera efectiva",
+  
+  // Currency Description
+  defaultCurrencyForStaff: "Moneda predeterminada para nuevos miembros del personal. Cada miembro puede tener su propia moneda.",
+  defaultCurrencyForClients: "Moneda predeterminada para nuevos clientes. Cada cliente puede tener su propia moneda.",
   
   // Data Management
   dataManagement: "Gestión de Datos",

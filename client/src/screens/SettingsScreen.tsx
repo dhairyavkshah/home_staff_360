@@ -267,8 +267,8 @@ export function SettingsScreen() {
               <Label htmlFor="currency">{t("currency")}</Label>
               <p className="text-xs text-muted-foreground">
                 {isHome 
-                  ? "Default currency for new staff members. Each staff member can have their own currency."
-                  : "Default currency for new clients. Each client can have their own currency."}
+                  ? t("defaultCurrencyForStaff")
+                  : t("defaultCurrencyForClients")}
               </p>
             </div>
             <CurrencySelector
@@ -359,7 +359,7 @@ export function SettingsScreen() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Support</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("support")}</h2>
           <button
             className="w-full text-left hover-elevate"
             onClick={() => navigate("support-developer")}
@@ -371,9 +371,9 @@ export function SettingsScreen() {
                   <Crown className="w-5 h-5 text-pink-500 dark:text-pink-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-sm">Support the Developer</p>
+                  <p className="font-semibold text-sm">{t("supportTheDeveloper")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Help keep this app free and ad-free
+                    {t("helpKeepAppFreeAdFree")}
                   </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -469,7 +469,7 @@ export function SettingsScreen() {
                 </div>
                 <div>
                   <p className="font-medium text-sm">{t("darkMode")}</p>
-                  <p className="text-xs text-muted-foreground">Toggle light/dark theme</p>
+                  <p className="text-xs text-muted-foreground">{t("toggleLightDarkTheme")}</p>
                 </div>
               </div>
               <Switch
@@ -482,7 +482,7 @@ export function SettingsScreen() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Feedback</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("feedback")}</h2>
           <Card className="divide-y">
             <div className="p-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -490,8 +490,8 @@ export function SettingsScreen() {
                   <Vibrate className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium text-sm">Haptic Feedback</p>
-                  <p className="text-xs text-muted-foreground">Vibration on touch interactions</p>
+                  <p className="font-medium text-sm">{t("hapticFeedback")}</p>
+                  <p className="text-xs text-muted-foreground">{t("vibrationOnTouch")}</p>
                 </div>
               </div>
               <Switch
@@ -511,8 +511,8 @@ export function SettingsScreen() {
                   <Volume2 className="w-4.5 h-4.5 text-info" />
                 </div>
                 <div>
-                  <p className="font-medium text-sm">Sound Effects</p>
-                  <p className="text-xs text-muted-foreground">Play tap sounds on interactions</p>
+                  <p className="font-medium text-sm">{t("soundEffects")}</p>
+                  <p className="text-xs text-muted-foreground">{t("playTapSounds")}</p>
                 </div>
               </div>
               <Switch
@@ -530,7 +530,7 @@ export function SettingsScreen() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Help</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("help")}</h2>
           <Card className="divide-y">
             <button
               className="w-full p-3 flex items-center gap-3 hover-elevate text-left"
@@ -541,8 +541,8 @@ export function SettingsScreen() {
                 <HelpCircle className="w-4.5 h-4.5 text-info" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-sm">See Guided Tour</p>
-                <p className="text-xs text-muted-foreground">Learn how to use the app effectively</p>
+                <p className="font-medium text-sm">{t("seeGuidedTour")}</p>
+                <p className="text-xs text-muted-foreground">{t("learnHowToUseApp")}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
