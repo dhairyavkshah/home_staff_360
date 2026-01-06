@@ -722,6 +722,7 @@ export type UserStatus = typeof userStatuses[number];
 export const serverUsers = pgTable("users", {
   id: varchar("id", { length: 255 }).primaryKey(),
   phone: varchar("phone", { length: 20 }).notNull(),
+  passwordHash: text("password_hash"),
   userType: varchar("user_type", { length: 50 }),
   displayName: varchar("display_name", { length: 100 }),
   avatarData: text("avatar_data"),
@@ -735,6 +736,8 @@ export const serverUsers = pgTable("users", {
   otpAttemptResetAt: timestamp("otp_attempt_reset_at"),
   otpLastSentAt: timestamp("otp_last_sent_at"),
   isVerified: boolean("is_verified").default(false),
+  isNewUser: boolean("is_new_user").default(true),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
   preferredLanguage: varchar("preferred_language", { length: 10 }),
   lastLoginAt: timestamp("last_login_at"),
   lastActiveAt: timestamp("last_active_at"),

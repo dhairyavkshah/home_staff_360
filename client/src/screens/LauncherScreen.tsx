@@ -14,10 +14,10 @@ export function LauncherScreen() {
       const settings = storage.getSettings();
       const profile = storage.getProfile();
       
-      const isPhoneVerified = collaborationService.isAuthenticated();
+      const isAuthenticated = collaborationService.isAuthenticated();
       
-      if (!isPhoneVerified) {
-        navigate("phone-verification", { isOnboarding: true });
+      if (!isAuthenticated) {
+        navigate("auth");
         return;
       }
       

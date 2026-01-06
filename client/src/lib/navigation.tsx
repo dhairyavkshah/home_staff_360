@@ -59,7 +59,11 @@ export type Screen =
   | "link-account"
   | "sync-activity"
   | "notification-center"
-  | "approval-detail";
+  | "approval-detail"
+  | "chat"
+  | "messages-list"
+  | "auth"
+  | "set-password";
 
 interface NavigationData {
   personId?: string;
@@ -83,6 +87,8 @@ interface NavigationData {
   entityType?: "attendance" | "laundry";
   entityId?: string;
   notificationType?: string;
+  chatId?: string;
+  connectionId?: string;
   [key: string]: unknown;
 }
 

@@ -9,10 +9,13 @@ import {
   Plus,
   Wifi,
   WifiOff,
+  MessageCircle,
+  Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
@@ -23,12 +26,16 @@ import {
   type CollaborationLink,
 } from "@/lib/collaboration-service";
 import { storage } from "@/lib/storage";
+import { ConnectionsTab } from "./ConnectionsTab";
+import { MessagesTab } from "./MessagesTab";
+import { SharedSpacesTab } from "./SharedSpacesTab";
 
 export function CollaborationHubScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  const [activeTab, setActiveTab] = useState("connections");
   const [links, setLinks] = useState<CollaborationLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -115,22 +122,6 @@ export function CollaborationHubScreen() {
     </div>
   );
 
-  const renderEmptyState = () => (
-    <div className="flex flex-col items-center justify-center py-12 px-6">
-      <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
-        <Users className="w-10 h-10 text-muted-foreground" />
-      </div>
-      <h3 className="text-lg font-medium mb-2">{t("noLinkedAccounts")}</h3>
-      <p className="text-muted-foreground text-center text-sm mb-6">
-        {t("linkYourFirstAccount")}
-      </p>
-      <Button onClick={() => navigate("link-account")} data-testid="button-link-first">
-        <Plus className="w-4 h-4 mr-2" />
-        {t("linkAccount")}
-      </Button>
-    </div>
-  );
-
   const renderLinkCard = (link: CollaborationLink) => {
     const isAccepted = link.status === "accepted";
     const isPending = link.status === "pending";
@@ -205,6 +196,98 @@ export function CollaborationHubScreen() {
     );
   };
 
+  const renderLinksTab = () => (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Link2 className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-medium">{t("syncStatus")}</p>
+              <ConnectionIndicator />
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSync}
+            disabled={isSyncing}
+            data-testid="button-sync"
+          >
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${isSyncing ? "animate-spin" : ""}`}
+            />
+            {isSyncing ? t("syncing") : t("syncNow")}
+          </Button>
+        </div>
+      </Card>
+
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium">{t("linkedAccounts")}</h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("link-account")}
+          data-testid="button-add-link"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          {t("add")}
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : activeLinks.length === 0 && pendingLinks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 px-6">
+          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
+            <Link2 className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-medium mb-2">{t("noLinkedAccounts")}</h3>
+          <p className="text-muted-foreground text-center text-sm mb-6">
+            {t("linkYourFirstAccount")}
+          </p>
+          <Button onClick={() => navigate("link-account")} data-testid="button-link-first">
+            <Plus className="w-4 h-4 mr-2" />
+            {t("linkAccount")}
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {activeLinks.map(renderLinkCard)}
+
+          {pendingLinks.length > 0 && (
+            <>
+              <h4 className="text-sm font-medium text-muted-foreground pt-2">
+                {t("pendingInvites")} ({pendingLinks.length})
+              </h4>
+              {pendingLinks.map(renderLinkCard)}
+            </>
+          )}
+        </div>
+      )}
+
+      <Card
+        className="p-4 hover-elevate cursor-pointer"
+        onClick={() => navigate("sync-activity")}
+        data-testid="card-sync-activity"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+            <Clock className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium">{t("syncActivity")}</p>
+            <p className="text-sm text-muted-foreground">{t("recentSync")}</p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+
   if (!collaborationService.isAuthenticated()) {
     return (
       <AppLayout>
@@ -239,85 +322,35 @@ export function CollaborationHubScreen() {
         title={t("collaborationHub")}
         onBack={goBack}
       />
-      <ScrollContent>
-        <div className="p-4 space-y-4">
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Link2 className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("syncStatus")}</p>
-                  <ConnectionIndicator />
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSync}
-                disabled={isSyncing}
-                data-testid="button-sync"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 mr-2 ${isSyncing ? "animate-spin" : ""}`}
-                />
-                {isSyncing ? t("syncing") : t("syncNow")}
-              </Button>
-            </div>
-          </Card>
-
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium">{t("linkedAccounts")}</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("link-account")}
-              data-testid="button-add-link"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              {t("add")}
-            </Button>
-          </div>
-
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : activeLinks.length === 0 && pendingLinks.length === 0 ? (
-            renderEmptyState()
-          ) : (
-            <div className="space-y-3">
-              {activeLinks.map(renderLinkCard)}
-
-              {pendingLinks.length > 0 && (
-                <>
-                  <h4 className="text-sm font-medium text-muted-foreground pt-2">
-                    {t("pendingInvites")} ({pendingLinks.length})
-                  </h4>
-                  {pendingLinks.map(renderLinkCard)}
-                </>
-              )}
-            </div>
-          )}
-
-          <Card
-            className="p-4 hover-elevate cursor-pointer"
-            onClick={() => navigate("sync-activity")}
-            data-testid="card-sync-activity"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                <Clock className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">{t("syncActivity")}</p>
-                <p className="text-sm text-muted-foreground">{t("recentSync")}</p>
-              </div>
-            </div>
-          </Card>
+      <div className="flex flex-col h-full">
+        <div className="px-4 pt-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full grid grid-cols-4">
+              <TabsTrigger value="connections" data-testid="tab-connections">
+                <Users className="w-4 h-4" />
+              </TabsTrigger>
+              <TabsTrigger value="messages" data-testid="tab-messages">
+                <MessageCircle className="w-4 h-4" />
+              </TabsTrigger>
+              <TabsTrigger value="spaces" data-testid="tab-spaces">
+                <Share2 className="w-4 h-4" />
+              </TabsTrigger>
+              <TabsTrigger value="links" data-testid="tab-links">
+                <Link2 className="w-4 h-4" />
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
-      </ScrollContent>
+
+        <ScrollContent>
+          <div className="p-4">
+            {activeTab === "connections" && <ConnectionsTab />}
+            {activeTab === "messages" && <MessagesTab />}
+            {activeTab === "spaces" && <SharedSpacesTab />}
+            {activeTab === "links" && renderLinksTab()}
+          </div>
+        </ScrollContent>
+      </div>
     </AppLayout>
   );
 }

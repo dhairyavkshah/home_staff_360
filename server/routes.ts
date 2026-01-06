@@ -12,6 +12,15 @@ import {
   sharedLaundry,
   laundryRevisions,
   notifications,
+  collabConnectionInvites,
+  collabConnections,
+  collabChats,
+  chatParticipants,
+  chatMessages,
+  householdShares,
+  householdShareMembers,
+  businessShares,
+  businessShareMembers,
   insertServerUserSchema,
   insertDeviceSchema,
   insertCollaborationLinkSchema,
@@ -339,6 +348,9 @@ router.post("/api/auth/verify-otp", async (req: Request, res: Response) => {
       { expiresIn: "30d" }
     );
 
+    const isNewUser = !user.passwordHash;
+    const needsOnboarding = !user.onboardingCompleted;
+
     res.json({
       success: true,
       token,
@@ -347,12 +359,161 @@ router.post("/api/auth/verify-otp", async (req: Request, res: Response) => {
         phone: user.phone,
         displayName: user.displayName,
         userType: user.userType,
-        isVerified: true
+        isVerified: true,
+        isNewUser,
+        needsOnboarding,
+        hasPassword: !!user.passwordHash
       }
     });
   } catch (error) {
     console.error("Verify OTP error:", error);
     res.status(500).json({ error: "Failed to verify OTP" });
+  }
+});
+
+// Set password for new users (after OTP verification)
+router.post("/api/auth/set-password", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    await db.update(serverUsers)
+      .set({ 
+        passwordHash,
+        isNewUser: false
+      })
+      .where(eq(serverUsers.id, userId));
+
+    res.json({ success: true, message: "Password set successfully" });
+  } catch (error) {
+    console.error("Set password error:", error);
+    res.status(500).json({ error: "Failed to set password" });
+  }
+});
+
+// Sign in with phone + password (for returning users)
+router.post("/api/auth/login", async (req: Request, res: Response) => {
+  try {
+    const { phone, password } = req.body;
+
+    if (!phone || !password) {
+      return res.status(400).json({ error: "Phone and password are required" });
+    }
+
+    const user = await findUserByPhone(phone);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found. Please sign up first." });
+    }
+
+    if (!user.passwordHash) {
+      return res.status(400).json({ 
+        error: "No password set. Please verify with OTP first.",
+        needsOtp: true 
+      });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    
+    if (!isValidPassword) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    await db.update(serverUsers)
+      .set({ 
+        lastLoginAt: new Date(),
+        lastActiveAt: new Date()
+      })
+      .where(eq(serverUsers.id, user.id));
+
+    const token = jwt.sign(
+      { userId: user.id, phone: user.phone },
+      JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        phone: user.phone,
+        displayName: user.displayName,
+        userType: user.userType,
+        isVerified: user.isVerified,
+        needsOnboarding: !user.onboardingCompleted
+      }
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Failed to login" });
+  }
+});
+
+// Check if phone exists and has password
+router.post("/api/auth/check-phone", async (req: Request, res: Response) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ error: "Phone number is required" });
+    }
+
+    const user = await findUserByPhone(phone);
+
+    if (!user) {
+      return res.json({ 
+        exists: false,
+        hasPassword: false,
+        message: "New user - OTP verification required"
+      });
+    }
+
+    return res.json({
+      exists: true,
+      hasPassword: !!user.passwordHash,
+      isVerified: user.isVerified,
+      displayName: user.displayName,
+      message: user.passwordHash 
+        ? "Existing user - can login with password" 
+        : "User exists but needs to set password"
+    });
+  } catch (error) {
+    console.error("Check phone error:", error);
+    res.status(500).json({ error: "Failed to check phone" });
+  }
+});
+
+// Mark onboarding as completed
+router.post("/api/user/complete-onboarding", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    await db.update(serverUsers)
+      .set({ 
+        onboardingCompleted: true,
+        isNewUser: false
+      })
+      .where(eq(serverUsers.id, userId));
+
+    res.json({ success: true, message: "Onboarding completed" });
+  } catch (error) {
+    console.error("Complete onboarding error:", error);
+    res.status(500).json({ error: "Failed to complete onboarding" });
   }
 });
 
@@ -391,6 +552,9 @@ router.get("/api/user/profile", authenticateToken, async (req: Request, res: Res
       displayName: user.displayName,
       userType: user.userType,
       isVerified: user.isVerified,
+      isNewUser: user.isNewUser,
+      onboardingCompleted: user.onboardingCompleted,
+      hasPassword: !!user.passwordHash,
       preferredLanguage: user.preferredLanguage,
       connectCount: user.connectCount,
       createdAt: user.createdAt
@@ -1545,6 +1709,1370 @@ async function createNotification(
     console.error("Failed to create notification:", error);
   }
 }
+
+// ============ CONNECTIONS API ============
+
+// Rate limiting for phone search (simple in-memory)
+const phoneSearchRateLimit = new Map<string, { count: number; resetAt: number }>();
+const PHONE_SEARCH_LIMIT = 10;
+const PHONE_SEARCH_WINDOW = 60 * 1000; // 1 minute
+
+function checkPhoneSearchRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const limit = phoneSearchRateLimit.get(userId);
+  
+  if (!limit || now > limit.resetAt) {
+    phoneSearchRateLimit.set(userId, { count: 1, resetAt: now + PHONE_SEARCH_WINDOW });
+    return true;
+  }
+  
+  if (limit.count >= PHONE_SEARCH_LIMIT) {
+    return false;
+  }
+  
+  limit.count++;
+  return true;
+}
+
+// Search for user by phone number
+router.get("/api/connections/search", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { phone, mode } = req.query;
+
+    if (!phone || typeof phone !== 'string') {
+      return res.status(400).json({ error: "Phone number is required" });
+    }
+
+    if (!checkPhoneSearchRateLimit(userId)) {
+      return res.status(429).json({ error: "Too many search requests. Please try again later." });
+    }
+
+    const normalizedPhone = normalizePhoneWithCountryCode(phone);
+    const variants = generatePhoneVariants(phone);
+
+    let foundUser = null;
+    for (const variant of variants) {
+      foundUser = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.phone, variant)
+      });
+      if (foundUser) break;
+    }
+
+    if (!foundUser || foundUser.id === userId) {
+      return res.json({ user: null });
+    }
+
+    // Check if already connected
+    const existingConnection = await db.query.collabConnections.findFirst({
+      where: or(
+        and(eq(collabConnections.userAId, userId), eq(collabConnections.userBId, foundUser.id)),
+        and(eq(collabConnections.userAId, foundUser.id), eq(collabConnections.userBId, userId))
+      )
+    });
+
+    // Check for pending invite
+    const pendingInvite = await db.query.collabConnectionInvites.findFirst({
+      where: and(
+        eq(collabConnectionInvites.senderId, userId),
+        eq(collabConnectionInvites.targetUserId, foundUser.id),
+        eq(collabConnectionInvites.status, 'pending')
+      )
+    });
+
+    res.json({
+      user: {
+        id: foundUser.id,
+        displayName: foundUser.displayName,
+        phone: foundUser.phone.slice(0, -4) + '****', // Mask last 4 digits
+        isVerified: foundUser.isVerified
+      },
+      alreadyConnected: !!existingConnection,
+      pendingInvite: !!pendingInvite
+    });
+  } catch (error) {
+    console.error("Search user error:", error);
+    res.status(500).json({ error: "Failed to search for user" });
+  }
+});
+
+// Send connection request
+router.post("/api/connections/request", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { targetUserId, senderMode, message } = req.body;
+
+    if (!targetUserId || !senderMode) {
+      return res.status(400).json({ error: "Target user ID and sender mode are required" });
+    }
+
+    if (targetUserId === userId) {
+      return res.status(400).json({ error: "Cannot send connection request to yourself" });
+    }
+
+    // Check if target user exists
+    const targetUser = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, targetUserId)
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ error: "Target user not found" });
+    }
+
+    // Check existing connection
+    const existingConnection = await db.query.collabConnections.findFirst({
+      where: or(
+        and(eq(collabConnections.userAId, userId), eq(collabConnections.userBId, targetUserId)),
+        and(eq(collabConnections.userAId, targetUserId), eq(collabConnections.userBId, userId))
+      )
+    });
+
+    if (existingConnection) {
+      return res.status(400).json({ error: "Already connected with this user" });
+    }
+
+    // Check pending invite
+    const pendingInvite = await db.query.collabConnectionInvites.findFirst({
+      where: and(
+        or(
+          and(eq(collabConnectionInvites.senderId, userId), eq(collabConnectionInvites.targetUserId, targetUserId)),
+          and(eq(collabConnectionInvites.senderId, targetUserId), eq(collabConnectionInvites.targetUserId, userId))
+        ),
+        eq(collabConnectionInvites.status, 'pending')
+      )
+    });
+
+    if (pendingInvite) {
+      // If they sent us an invite, auto-accept
+      if (pendingInvite.senderId === targetUserId) {
+        return res.json({ 
+          success: true, 
+          message: "You have a pending invite from this user. Accepting it now.",
+          inviteId: pendingInvite.id,
+          autoAccept: true
+        });
+      }
+      return res.status(400).json({ error: "Connection request already pending" });
+    }
+
+    // Get sender info
+    const sender = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    // Create invite
+    const inviteId = uuidv4();
+    const normalizedPhone = targetUser.phone ? normalizePhoneWithCountryCode(targetUser.phone) : '';
+
+    await db.insert(collabConnectionInvites).values({
+      id: inviteId,
+      senderId: userId,
+      senderMode,
+      targetPhone: targetUser.phone || '',
+      targetPhoneNormalized: normalizedPhone,
+      targetUserId,
+      status: 'pending',
+      message: message || null,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+    });
+
+    // Create notification for target user (send to both modes)
+    await createNotification(
+      targetUserId, 
+      'HOME',
+      'connection_request',
+      'New Connection Request',
+      `${sender?.displayName || 'Someone'} wants to connect with you.`,
+      'connection',
+      inviteId,
+      { senderId: userId, senderName: sender?.displayName }
+    );
+
+    await createNotification(
+      targetUserId, 
+      'STAFF',
+      'connection_request',
+      'New Connection Request',
+      `${sender?.displayName || 'Someone'} wants to connect with you.`,
+      'connection',
+      inviteId,
+      { senderId: userId, senderName: sender?.displayName }
+    );
+
+    res.json({ success: true, inviteId });
+  } catch (error) {
+    console.error("Connection request error:", error);
+    res.status(500).json({ error: "Failed to send connection request" });
+  }
+});
+
+// Get pending connection invites (received)
+router.get("/api/connections/invites/received", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    const invites = await db.query.collabConnectionInvites.findMany({
+      where: and(
+        eq(collabConnectionInvites.targetUserId, userId),
+        eq(collabConnectionInvites.status, 'pending')
+      ),
+      orderBy: desc(collabConnectionInvites.createdAt)
+    });
+
+    // Enrich with sender info
+    const enrichedInvites = await Promise.all(invites.map(async (invite) => {
+      const sender = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.id, invite.senderId)
+      });
+      return {
+        ...invite,
+        senderName: sender?.displayName,
+        senderPhone: sender?.phone ? sender.phone.slice(0, -4) + '****' : undefined
+      };
+    }));
+
+    res.json({ invites: enrichedInvites });
+  } catch (error) {
+    console.error("Get received invites error:", error);
+    res.status(500).json({ error: "Failed to get invites" });
+  }
+});
+
+// Get pending connection invites (sent)
+router.get("/api/connections/invites/sent", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    const invites = await db.query.collabConnectionInvites.findMany({
+      where: and(
+        eq(collabConnectionInvites.senderId, userId),
+        eq(collabConnectionInvites.status, 'pending')
+      ),
+      orderBy: desc(collabConnectionInvites.createdAt)
+    });
+
+    // Enrich with target info
+    const enrichedInvites = await Promise.all(invites.map(async (invite) => {
+      const target = invite.targetUserId ? await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.id, invite.targetUserId)
+      }) : null;
+      return {
+        ...invite,
+        targetName: target?.displayName,
+        targetPhoneMasked: invite.targetPhone ? invite.targetPhone.slice(0, -4) + '****' : undefined
+      };
+    }));
+
+    res.json({ invites: enrichedInvites });
+  } catch (error) {
+    console.error("Get sent invites error:", error);
+    res.status(500).json({ error: "Failed to get invites" });
+  }
+});
+
+// Accept connection invite
+router.post("/api/connections/invites/:id/accept", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+    const { receiverMode } = req.body;
+
+    const invite = await db.query.collabConnectionInvites.findFirst({
+      where: and(
+        eq(collabConnectionInvites.id, id),
+        eq(collabConnectionInvites.targetUserId, userId),
+        eq(collabConnectionInvites.status, 'pending')
+      )
+    });
+
+    if (!invite) {
+      return res.status(404).json({ error: "Invite not found or already processed" });
+    }
+
+    const now = new Date();
+
+    // Update invite status
+    await db.update(collabConnectionInvites)
+      .set({ status: 'accepted', respondedAt: now })
+      .where(eq(collabConnectionInvites.id, id));
+
+    // Create connection
+    const connectionId = uuidv4();
+    await db.insert(collabConnections).values({
+      id: connectionId,
+      userAId: invite.senderId,
+      userAMode: invite.senderMode,
+      userBId: userId,
+      userBMode: receiverMode || 'HOME',
+      status: 'accepted',
+      initiatedBy: invite.senderId,
+      createdAt: now,
+      updatedAt: now
+    });
+
+    // Create direct chat for the connection
+    const chatId = uuidv4();
+    await db.insert(collabChats).values({
+      id: chatId,
+      type: 'direct',
+      connectionId,
+      createdAt: now,
+      updatedAt: now
+    });
+
+    // Add both users as chat participants
+    const currentUser = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    await db.insert(chatParticipants).values([
+      {
+        id: uuidv4(),
+        chatId,
+        userId: invite.senderId,
+        userMode: invite.senderMode,
+        role: 'member',
+        joinedAt: now
+      },
+      {
+        id: uuidv4(),
+        chatId,
+        userId,
+        userMode: receiverMode || 'HOME',
+        role: 'member',
+        joinedAt: now
+      }
+    ]);
+
+    // Notify sender
+    await createNotification(
+      invite.senderId,
+      invite.senderMode as 'HOME' | 'STAFF',
+      'connection_accepted',
+      'Connection Accepted',
+      `${currentUser?.displayName || 'Someone'} accepted your connection request.`,
+      'connection',
+      connectionId
+    );
+
+    res.json({ success: true, connectionId, chatId });
+  } catch (error) {
+    console.error("Accept invite error:", error);
+    res.status(500).json({ error: "Failed to accept invite" });
+  }
+});
+
+// Reject connection invite
+router.post("/api/connections/invites/:id/reject", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+
+    const invite = await db.query.collabConnectionInvites.findFirst({
+      where: and(
+        eq(collabConnectionInvites.id, id),
+        eq(collabConnectionInvites.targetUserId, userId),
+        eq(collabConnectionInvites.status, 'pending')
+      )
+    });
+
+    if (!invite) {
+      return res.status(404).json({ error: "Invite not found or already processed" });
+    }
+
+    await db.update(collabConnectionInvites)
+      .set({ status: 'blocked', respondedAt: new Date() })
+      .where(eq(collabConnectionInvites.id, id));
+
+    // Optionally notify sender
+    await createNotification(
+      invite.senderId,
+      invite.senderMode as 'HOME' | 'STAFF',
+      'connection_rejected',
+      'Connection Request Declined',
+      'Your connection request was declined.',
+      'connection',
+      id
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Reject invite error:", error);
+    res.status(500).json({ error: "Failed to reject invite" });
+  }
+});
+
+// Get all connections
+router.get("/api/connections", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    const connections = await db.query.collabConnections.findMany({
+      where: or(
+        eq(collabConnections.userAId, userId),
+        eq(collabConnections.userBId, userId)
+      ),
+      orderBy: desc(collabConnections.createdAt)
+    });
+
+    // Enrich with user info and chat ID
+    const enrichedConnections = await Promise.all(connections.map(async (conn) => {
+      const otherUserId = conn.userAId === userId ? conn.userBId : conn.userAId;
+      const otherUserMode = conn.userAId === userId ? conn.userBMode : conn.userAMode;
+      
+      const otherUser = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.id, otherUserId)
+      });
+
+      // Get chat for this connection
+      const chat = await db.query.collabChats.findFirst({
+        where: eq(collabChats.connectionId, conn.id)
+      });
+
+      return {
+        id: conn.id,
+        otherUser: {
+          id: otherUserId,
+          displayName: otherUser?.displayName,
+          phone: otherUser?.phone ? otherUser.phone.slice(0, -4) + '****' : undefined,
+          mode: otherUserMode
+        },
+        nickname: conn.nickname,
+        chatId: chat?.id,
+        lastMessageAt: chat?.lastMessageAt,
+        lastMessagePreview: chat?.lastMessagePreview,
+        status: conn.status,
+        createdAt: conn.createdAt
+      };
+    }));
+
+    res.json({ connections: enrichedConnections });
+  } catch (error) {
+    console.error("Get connections error:", error);
+    res.status(500).json({ error: "Failed to get connections" });
+  }
+});
+
+// Remove connection
+router.delete("/api/connections/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+
+    const connection = await db.query.collabConnections.findFirst({
+      where: and(
+        eq(collabConnections.id, id),
+        or(
+          eq(collabConnections.userAId, userId),
+          eq(collabConnections.userBId, userId)
+        )
+      )
+    });
+
+    if (!connection) {
+      return res.status(404).json({ error: "Connection not found" });
+    }
+
+    // Get associated chat
+    const chat = await db.query.collabChats.findFirst({
+      where: eq(collabChats.connectionId, id)
+    });
+
+    if (chat) {
+      // Delete chat participants
+      await db.delete(chatParticipants).where(eq(chatParticipants.chatId, chat.id));
+      // Delete messages
+      await db.delete(chatMessages).where(eq(chatMessages.chatId, chat.id));
+      // Delete chat
+      await db.delete(collabChats).where(eq(collabChats.id, chat.id));
+    }
+
+    // Delete connection
+    await db.delete(collabConnections).where(eq(collabConnections.id, id));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Remove connection error:", error);
+    res.status(500).json({ error: "Failed to remove connection" });
+  }
+});
+
+// ============ MESSAGING API ============
+
+// Get all chats for current user
+router.get("/api/chats", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    // Get all chats where user is a participant
+    const participations = await db.query.chatParticipants.findMany({
+      where: and(
+        eq(chatParticipants.userId, userId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+
+    const chatIds = participations.map(p => p.chatId);
+    
+    if (chatIds.length === 0) {
+      return res.json({ chats: [] });
+    }
+
+    // Get chats with details
+    const chats = await Promise.all(chatIds.map(async (chatId) => {
+      const chat = await db.query.collabChats.findFirst({
+        where: eq(collabChats.id, chatId)
+      });
+      
+      if (!chat) return null;
+
+      // Get other participants
+      const allParticipants = await db.query.chatParticipants.findMany({
+        where: eq(chatParticipants.chatId, chatId)
+      });
+
+      const otherParticipants = await Promise.all(
+        allParticipants
+          .filter(p => p.userId !== userId)
+          .map(async (p) => {
+            const user = await db.query.serverUsers.findFirst({
+              where: eq(serverUsers.id, p.userId)
+            });
+            return {
+              userId: p.userId,
+              displayName: user?.displayName,
+              mode: p.userMode
+            };
+          })
+      );
+
+      // Get unread count
+      const myParticipation = participations.find(p => p.chatId === chatId);
+      let unreadCount = 0;
+      if (myParticipation?.lastReadAt) {
+        const unreadMessages = await db.query.chatMessages.findMany({
+          where: and(
+            eq(chatMessages.chatId, chatId),
+            sql`${chatMessages.createdAt} > ${myParticipation.lastReadAt}`,
+            sql`${chatMessages.senderId} != ${userId}`
+          )
+        });
+        unreadCount = unreadMessages.length;
+      } else {
+        const allMessages = await db.query.chatMessages.findMany({
+          where: and(
+            eq(chatMessages.chatId, chatId),
+            sql`${chatMessages.senderId} != ${userId}`
+          )
+        });
+        unreadCount = allMessages.length;
+      }
+
+      return {
+        id: chat.id,
+        type: chat.type,
+        name: chat.name,
+        connectionId: chat.connectionId,
+        lastMessageAt: chat.lastMessageAt,
+        lastMessagePreview: chat.lastMessagePreview,
+        participants: otherParticipants,
+        unreadCount,
+        isMuted: myParticipation?.isMuted || false
+      };
+    }));
+
+    // Filter nulls and sort by last message
+    const validChats = chats.filter(c => c !== null);
+    validChats.sort((a, b) => {
+      if (!a.lastMessageAt) return 1;
+      if (!b.lastMessageAt) return -1;
+      return new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime();
+    });
+
+    res.json({ chats: validChats });
+  } catch (error) {
+    console.error("Get chats error:", error);
+    res.status(500).json({ error: "Failed to get chats" });
+  }
+});
+
+// Get messages for a chat
+router.get("/api/chats/:chatId/messages", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { chatId } = req.params;
+    const { before, limit = '50' } = req.query;
+
+    // Verify user is a participant
+    const participation = await db.query.chatParticipants.findFirst({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        eq(chatParticipants.userId, userId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+
+    if (!participation) {
+      return res.status(403).json({ error: "Not a participant of this chat" });
+    }
+
+    // Get messages
+    let conditions = [eq(chatMessages.chatId, chatId)];
+    if (before) {
+      conditions.push(sql`${chatMessages.createdAt} < ${new Date(before as string)}`);
+    }
+
+    const messages = await db.query.chatMessages.findMany({
+      where: and(...conditions),
+      orderBy: desc(chatMessages.createdAt),
+      limit: parseInt(limit as string)
+    });
+
+    // Enrich with sender info
+    const enrichedMessages = await Promise.all(messages.map(async (msg) => {
+      const sender = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.id, msg.senderId)
+      });
+      return {
+        ...msg,
+        senderName: sender?.displayName,
+        isOwn: msg.senderId === userId
+      };
+    }));
+
+    // Reverse to show oldest first in the response
+    enrichedMessages.reverse();
+
+    res.json({ messages: enrichedMessages });
+  } catch (error) {
+    console.error("Get messages error:", error);
+    res.status(500).json({ error: "Failed to get messages" });
+  }
+});
+
+// Send a message
+router.post("/api/chats/:chatId/messages", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { chatId } = req.params;
+    const { content, senderMode, clientMessageId, replyToId } = req.body;
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ error: "Message content is required" });
+    }
+
+    // Verify user is a participant
+    const participation = await db.query.chatParticipants.findFirst({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        eq(chatParticipants.userId, userId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+
+    if (!participation) {
+      return res.status(403).json({ error: "Not a participant of this chat" });
+    }
+
+    // Check for duplicate (idempotency)
+    if (clientMessageId) {
+      const existing = await db.query.chatMessages.findFirst({
+        where: eq(chatMessages.clientMessageId, clientMessageId)
+      });
+      if (existing) {
+        return res.json({ success: true, messageId: existing.id, duplicate: true });
+      }
+    }
+
+    const now = new Date();
+    const messageId = uuidv4();
+
+    await db.insert(chatMessages).values({
+      id: messageId,
+      chatId,
+      senderId: userId,
+      senderMode: senderMode || participation.userMode,
+      content: content.trim(),
+      status: 'sent',
+      clientMessageId: clientMessageId || null,
+      replyToId: replyToId || null,
+      createdAt: now
+    });
+
+    // Update chat last message
+    const preview = content.length > 200 ? content.substring(0, 197) + '...' : content;
+    await db.update(collabChats)
+      .set({
+        lastMessageAt: now,
+        lastMessagePreview: preview,
+        updatedAt: now
+      })
+      .where(eq(collabChats.id, chatId));
+
+    // Create notifications for other participants
+    const otherParticipants = await db.query.chatParticipants.findMany({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        sql`${chatParticipants.userId} != ${userId}`,
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+
+    const sender = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    for (const participant of otherParticipants) {
+      if (!participant.isMuted) {
+        await createNotification(
+          participant.userId,
+          participant.userMode as 'HOME' | 'STAFF',
+          'chat_message',
+          `Message from ${sender?.displayName || 'Someone'}`,
+          preview,
+          'chat',
+          chatId,
+          { messageId, senderId: userId }
+        );
+      }
+    }
+
+    res.json({ success: true, messageId });
+  } catch (error) {
+    console.error("Send message error:", error);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+});
+
+// Mark messages as read
+router.post("/api/chats/:chatId/read", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { chatId } = req.params;
+    const { lastMessageId } = req.body;
+
+    const now = new Date();
+
+    await db.update(chatParticipants)
+      .set({
+        lastReadAt: now,
+        lastReadMessageId: lastMessageId || null
+      })
+      .where(and(
+        eq(chatParticipants.chatId, chatId),
+        eq(chatParticipants.userId, userId)
+      ));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Mark read error:", error);
+    res.status(500).json({ error: "Failed to mark messages as read" });
+  }
+});
+
+// Mute/unmute chat
+router.patch("/api/chats/:chatId/mute", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { chatId } = req.params;
+    const { muted } = req.body;
+
+    await db.update(chatParticipants)
+      .set({ isMuted: muted })
+      .where(and(
+        eq(chatParticipants.chatId, chatId),
+        eq(chatParticipants.userId, userId)
+      ));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Mute chat error:", error);
+    res.status(500).json({ error: "Failed to update mute setting" });
+  }
+});
+
+// Get chat by connection ID (useful for opening chat from connections list)
+router.get("/api/chats/by-connection/:connectionId", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { connectionId } = req.params;
+
+    // Verify user is part of this connection
+    const connection = await db.query.collabConnections.findFirst({
+      where: and(
+        eq(collabConnections.id, connectionId),
+        or(
+          eq(collabConnections.userAId, userId),
+          eq(collabConnections.userBId, userId)
+        )
+      )
+    });
+
+    if (!connection) {
+      return res.status(403).json({ error: "Not part of this connection" });
+    }
+
+    const chat = await db.query.collabChats.findFirst({
+      where: eq(collabChats.connectionId, connectionId)
+    });
+
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found for this connection" });
+    }
+
+    res.json({ chat });
+  } catch (error) {
+    console.error("Get chat by connection error:", error);
+    res.status(500).json({ error: "Failed to get chat" });
+  }
+});
+
+// ============ SHARED SPACES API (Household/Business) ============
+
+// Get all shared spaces for current user
+router.get("/api/shared-spaces", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { type } = req.query; // 'household' or 'business'
+
+    const results: any[] = [];
+
+    if (!type || type === 'household') {
+      // Get households I own
+      const ownedHouseholds = await db.query.householdShares.findMany({
+        where: eq(householdShares.ownerId, userId)
+      });
+
+      for (const h of ownedHouseholds) {
+        const members = await db.query.householdShareMembers.findMany({
+          where: eq(householdShareMembers.shareId, h.id)
+        });
+        
+        const enrichedMembers = await Promise.all(members.map(async (m) => {
+          const user = await db.query.serverUsers.findFirst({
+            where: eq(serverUsers.id, m.userId)
+          });
+          return {
+            ...m,
+            displayName: user?.displayName,
+            phone: user?.phone ? user.phone.slice(0, -4) + '****' : undefined
+          };
+        }));
+
+        results.push({
+          id: h.id,
+          type: 'household',
+          name: h.householdName,
+          localId: h.localHouseholdId,
+          ownerId: h.ownerId,
+          isOwner: true,
+          role: 'admin',
+          memberCount: members.filter(m => m.status === 'accepted').length + 1,
+          members: enrichedMembers,
+          createdAt: h.createdAt
+        });
+      }
+
+      // Get households I'm a member of
+      const memberShips = await db.query.householdShareMembers.findMany({
+        where: and(
+          eq(householdShareMembers.userId, userId),
+          eq(householdShareMembers.status, 'accepted')
+        )
+      });
+
+      for (const m of memberShips) {
+        const h = await db.query.householdShares.findFirst({
+          where: eq(householdShares.id, m.shareId)
+        });
+        if (h && h.ownerId !== userId) {
+          const owner = await db.query.serverUsers.findFirst({
+            where: eq(serverUsers.id, h.ownerId)
+          });
+          results.push({
+            id: h.id,
+            type: 'household',
+            name: h.householdName,
+            localId: h.localHouseholdId,
+            ownerId: h.ownerId,
+            ownerName: owner?.displayName,
+            isOwner: false,
+            role: m.role,
+            createdAt: h.createdAt
+          });
+        }
+      }
+    }
+
+    if (!type || type === 'business') {
+      // Get businesses I own
+      const ownedBusinesses = await db.query.businessShares.findMany({
+        where: eq(businessShares.ownerId, userId)
+      });
+
+      for (const b of ownedBusinesses) {
+        const members = await db.query.businessShareMembers.findMany({
+          where: eq(businessShareMembers.shareId, b.id)
+        });
+        
+        const enrichedMembers = await Promise.all(members.map(async (m) => {
+          const user = await db.query.serverUsers.findFirst({
+            where: eq(serverUsers.id, m.userId)
+          });
+          return {
+            ...m,
+            displayName: user?.displayName,
+            phone: user?.phone ? user.phone.slice(0, -4) + '****' : undefined
+          };
+        }));
+
+        results.push({
+          id: b.id,
+          type: 'business',
+          name: b.businessName,
+          localId: b.localBusinessId,
+          ownerId: b.ownerId,
+          isOwner: true,
+          role: 'admin',
+          memberCount: members.filter(m => m.status === 'accepted').length + 1,
+          members: enrichedMembers,
+          createdAt: b.createdAt
+        });
+      }
+
+      // Get businesses I'm a member of
+      const businessMemberShips = await db.query.businessShareMembers.findMany({
+        where: and(
+          eq(businessShareMembers.userId, userId),
+          eq(businessShareMembers.status, 'accepted')
+        )
+      });
+
+      for (const m of businessMemberShips) {
+        const b = await db.query.businessShares.findFirst({
+          where: eq(businessShares.id, m.shareId)
+        });
+        if (b && b.ownerId !== userId) {
+          const owner = await db.query.serverUsers.findFirst({
+            where: eq(serverUsers.id, b.ownerId)
+          });
+          results.push({
+            id: b.id,
+            type: 'business',
+            name: b.businessName,
+            localId: b.localBusinessId,
+            ownerId: b.ownerId,
+            ownerName: owner?.displayName,
+            isOwner: false,
+            role: m.role,
+            createdAt: b.createdAt
+          });
+        }
+      }
+    }
+
+    res.json({ spaces: results });
+  } catch (error) {
+    console.error("Get shared spaces error:", error);
+    res.status(500).json({ error: "Failed to get shared spaces" });
+  }
+});
+
+// Create a shared space
+router.post("/api/shared-spaces", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { type, name, localId } = req.body;
+
+    if (!type || !name || !localId) {
+      return res.status(400).json({ error: "Type, name, and local ID are required" });
+    }
+
+    const now = new Date();
+    const id = uuidv4();
+
+    if (type === 'household') {
+      await db.insert(householdShares).values({
+        id,
+        ownerId: userId,
+        localHouseholdId: localId,
+        householdName: name,
+        createdAt: now,
+        updatedAt: now
+      });
+    } else if (type === 'business') {
+      await db.insert(businessShares).values({
+        id,
+        ownerId: userId,
+        localBusinessId: localId,
+        businessName: name,
+        createdAt: now,
+        updatedAt: now
+      });
+    } else {
+      return res.status(400).json({ error: "Invalid type. Must be 'household' or 'business'" });
+    }
+
+    res.json({ success: true, id, type });
+  } catch (error) {
+    console.error("Create shared space error:", error);
+    res.status(500).json({ error: "Failed to create shared space" });
+  }
+});
+
+// Invite someone to a shared space
+router.post("/api/shared-spaces/:id/invite", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+    const { type, targetUserId, role = 'viewer' } = req.body;
+
+    if (!type || !targetUserId) {
+      return res.status(400).json({ error: "Type and target user ID are required" });
+    }
+
+    const now = new Date();
+
+    if (type === 'household') {
+      const share = await db.query.householdShares.findFirst({
+        where: and(eq(householdShares.id, id), eq(householdShares.ownerId, userId))
+      });
+      
+      if (!share) {
+        return res.status(403).json({ error: "You don't have permission to invite members" });
+      }
+
+      // Check if already invited
+      const existing = await db.query.householdShareMembers.findFirst({
+        where: and(
+          eq(householdShareMembers.shareId, id),
+          eq(householdShareMembers.userId, targetUserId)
+        )
+      });
+
+      if (existing) {
+        return res.status(400).json({ error: "User already invited or is a member" });
+      }
+
+      const memberId = uuidv4();
+      await db.insert(householdShareMembers).values({
+        id: memberId,
+        shareId: id,
+        userId: targetUserId,
+        role,
+        status: 'pending',
+        invitedAt: now,
+        createdAt: now
+      });
+
+      // Notify target
+      const inviter = await db.query.serverUsers.findFirst({ where: eq(serverUsers.id, userId) });
+      await createNotification(
+        targetUserId, 'HOME', 'share_invitation',
+        'Household Invitation',
+        `${inviter?.displayName || 'Someone'} invited you to join their household "${share.householdName}"`,
+        'household', id
+      );
+
+      res.json({ success: true, memberId });
+    } else if (type === 'business') {
+      const share = await db.query.businessShares.findFirst({
+        where: and(eq(businessShares.id, id), eq(businessShares.ownerId, userId))
+      });
+      
+      if (!share) {
+        return res.status(403).json({ error: "You don't have permission to invite members" });
+      }
+
+      const existing = await db.query.businessShareMembers.findFirst({
+        where: and(
+          eq(businessShareMembers.shareId, id),
+          eq(businessShareMembers.userId, targetUserId)
+        )
+      });
+
+      if (existing) {
+        return res.status(400).json({ error: "User already invited or is a member" });
+      }
+
+      const memberId = uuidv4();
+      await db.insert(businessShareMembers).values({
+        id: memberId,
+        shareId: id,
+        userId: targetUserId,
+        role,
+        status: 'pending',
+        invitedAt: now,
+        createdAt: now
+      });
+
+      const inviter = await db.query.serverUsers.findFirst({ where: eq(serverUsers.id, userId) });
+      await createNotification(
+        targetUserId, 'STAFF', 'share_invitation',
+        'Business Invitation',
+        `${inviter?.displayName || 'Someone'} invited you to join their business "${share.businessName}"`,
+        'business', id
+      );
+
+      res.json({ success: true, memberId });
+    } else {
+      return res.status(400).json({ error: "Invalid type" });
+    }
+  } catch (error) {
+    console.error("Invite to shared space error:", error);
+    res.status(500).json({ error: "Failed to invite member" });
+  }
+});
+
+// Get pending share invitations for current user
+router.get("/api/shared-spaces/invitations", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    const results: any[] = [];
+
+    // Household invitations
+    const householdInvites = await db.query.householdShareMembers.findMany({
+      where: and(
+        eq(householdShareMembers.userId, userId),
+        eq(householdShareMembers.status, 'pending')
+      )
+    });
+
+    for (const inv of householdInvites) {
+      const share = await db.query.householdShares.findFirst({
+        where: eq(householdShares.id, inv.shareId)
+      });
+      const owner = share ? await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.id, share.ownerId)
+      }) : null;
+
+      results.push({
+        id: inv.id,
+        type: 'household',
+        shareId: inv.shareId,
+        spaceName: share?.householdName,
+        ownerName: owner?.displayName,
+        role: inv.role,
+        invitedAt: inv.invitedAt
+      });
+    }
+
+    // Business invitations
+    const businessInvites = await db.query.businessShareMembers.findMany({
+      where: and(
+        eq(businessShareMembers.userId, userId),
+        eq(businessShareMembers.status, 'pending')
+      )
+    });
+
+    for (const inv of businessInvites) {
+      const share = await db.query.businessShares.findFirst({
+        where: eq(businessShares.id, inv.shareId)
+      });
+      const owner = share ? await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.id, share.ownerId)
+      }) : null;
+
+      results.push({
+        id: inv.id,
+        type: 'business',
+        shareId: inv.shareId,
+        spaceName: share?.businessName,
+        ownerName: owner?.displayName,
+        role: inv.role,
+        invitedAt: inv.invitedAt
+      });
+    }
+
+    res.json({ invitations: results });
+  } catch (error) {
+    console.error("Get share invitations error:", error);
+    res.status(500).json({ error: "Failed to get invitations" });
+  }
+});
+
+// Accept share invitation
+router.post("/api/shared-spaces/invitations/:id/accept", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+    const { type } = req.body;
+
+    const now = new Date();
+
+    if (type === 'household') {
+      const inv = await db.query.householdShareMembers.findFirst({
+        where: and(
+          eq(householdShareMembers.id, id),
+          eq(householdShareMembers.userId, userId),
+          eq(householdShareMembers.status, 'pending')
+        )
+      });
+
+      if (!inv) {
+        return res.status(404).json({ error: "Invitation not found" });
+      }
+
+      await db.update(householdShareMembers)
+        .set({ status: 'accepted', acceptedAt: now })
+        .where(eq(householdShareMembers.id, id));
+
+      // Notify owner
+      const share = await db.query.householdShares.findFirst({ where: eq(householdShares.id, inv.shareId) });
+      const accepter = await db.query.serverUsers.findFirst({ where: eq(serverUsers.id, userId) });
+      if (share) {
+        await createNotification(
+          share.ownerId, 'HOME', 'share_accepted',
+          'Invitation Accepted',
+          `${accepter?.displayName || 'Someone'} joined your household "${share.householdName}"`,
+          'household', share.id
+        );
+      }
+
+      res.json({ success: true });
+    } else if (type === 'business') {
+      const inv = await db.query.businessShareMembers.findFirst({
+        where: and(
+          eq(businessShareMembers.id, id),
+          eq(businessShareMembers.userId, userId),
+          eq(businessShareMembers.status, 'pending')
+        )
+      });
+
+      if (!inv) {
+        return res.status(404).json({ error: "Invitation not found" });
+      }
+
+      await db.update(businessShareMembers)
+        .set({ status: 'accepted', acceptedAt: now })
+        .where(eq(businessShareMembers.id, id));
+
+      const share = await db.query.businessShares.findFirst({ where: eq(businessShares.id, inv.shareId) });
+      const accepter = await db.query.serverUsers.findFirst({ where: eq(serverUsers.id, userId) });
+      if (share) {
+        await createNotification(
+          share.ownerId, 'STAFF', 'share_accepted',
+          'Invitation Accepted',
+          `${accepter?.displayName || 'Someone'} joined your business "${share.businessName}"`,
+          'business', share.id
+        );
+      }
+
+      res.json({ success: true });
+    } else {
+      return res.status(400).json({ error: "Invalid type" });
+    }
+  } catch (error) {
+    console.error("Accept share invitation error:", error);
+    res.status(500).json({ error: "Failed to accept invitation" });
+  }
+});
+
+// Decline/leave shared space
+router.delete("/api/shared-spaces/:shareId/member/:memberId", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { shareId, memberId } = req.params;
+    const { type } = req.query;
+
+    if (type === 'household') {
+      // Check if user is owner or the member being removed
+      const share = await db.query.householdShares.findFirst({
+        where: eq(householdShares.id, shareId)
+      });
+      
+      const member = await db.query.householdShareMembers.findFirst({
+        where: eq(householdShareMembers.id, memberId)
+      });
+
+      if (!member) {
+        return res.status(404).json({ error: "Member not found" });
+      }
+
+      const isOwner = share?.ownerId === userId;
+      const isSelf = member.userId === userId;
+
+      if (!isOwner && !isSelf) {
+        return res.status(403).json({ error: "Not authorized to remove this member" });
+      }
+
+      await db.delete(householdShareMembers).where(eq(householdShareMembers.id, memberId));
+      res.json({ success: true });
+    } else if (type === 'business') {
+      const share = await db.query.businessShares.findFirst({
+        where: eq(businessShares.id, shareId)
+      });
+      
+      const member = await db.query.businessShareMembers.findFirst({
+        where: eq(businessShareMembers.id, memberId)
+      });
+
+      if (!member) {
+        return res.status(404).json({ error: "Member not found" });
+      }
+
+      const isOwner = share?.ownerId === userId;
+      const isSelf = member.userId === userId;
+
+      if (!isOwner && !isSelf) {
+        return res.status(403).json({ error: "Not authorized to remove this member" });
+      }
+
+      await db.delete(businessShareMembers).where(eq(businessShareMembers.id, memberId));
+      res.json({ success: true });
+    } else {
+      return res.status(400).json({ error: "Invalid type" });
+    }
+  } catch (error) {
+    console.error("Remove member error:", error);
+    res.status(500).json({ error: "Failed to remove member" });
+  }
+});
+
+// Delete shared space (owner only)
+router.delete("/api/shared-spaces/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+    const { type } = req.query;
+
+    if (type === 'household') {
+      const share = await db.query.householdShares.findFirst({
+        where: and(eq(householdShares.id, id), eq(householdShares.ownerId, userId))
+      });
+
+      if (!share) {
+        return res.status(403).json({ error: "Not authorized to delete this space" });
+      }
+
+      // Delete all members first
+      await db.delete(householdShareMembers).where(eq(householdShareMembers.shareId, id));
+      await db.delete(householdShares).where(eq(householdShares.id, id));
+      
+      res.json({ success: true });
+    } else if (type === 'business') {
+      const share = await db.query.businessShares.findFirst({
+        where: and(eq(businessShares.id, id), eq(businessShares.ownerId, userId))
+      });
+
+      if (!share) {
+        return res.status(403).json({ error: "Not authorized to delete this space" });
+      }
+
+      await db.delete(businessShareMembers).where(eq(businessShareMembers.shareId, id));
+      await db.delete(businessShares).where(eq(businessShares.id, id));
+      
+      res.json({ success: true });
+    } else {
+      return res.status(400).json({ error: "Invalid type" });
+    }
+  } catch (error) {
+    console.error("Delete shared space error:", error);
+    res.status(500).json({ error: "Failed to delete space" });
+  }
+});
 
 async function initializeDefaultAdmin() {
   const defaultEmail = process.env.ADMIN_DEFAULT_EMAIL;

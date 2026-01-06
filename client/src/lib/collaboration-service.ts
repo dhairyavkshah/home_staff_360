@@ -53,13 +53,38 @@ export interface OtpResponse {
   success: boolean;
   message?: string;
   expiresAt?: string;
+  expiresIn?: number;
+  remainingAttempts?: number;
+  cooldownSeconds?: number;
 }
 
 export interface VerifyOtpResponse {
   success: boolean;
   token?: string;
-  user?: CollaborationUser;
+  user?: CollaborationUser & {
+    isNewUser?: boolean;
+    needsOnboarding?: boolean;
+    hasPassword?: boolean;
+  };
   message?: string;
+}
+
+export interface CheckPhoneResponse {
+  exists: boolean;
+  hasPassword: boolean;
+  isVerified?: boolean;
+  displayName?: string;
+  message: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  token?: string;
+  user?: CollaborationUser & {
+    needsOnboarding?: boolean;
+  };
+  error?: string;
+  needsOtp?: boolean;
 }
 
 interface ApiCollaborationLink {
@@ -154,6 +179,13 @@ class CollaborationService {
     return response.json();
   }
 
+  async fetchWithAuth<T = any>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    return this.apiRequest<T>(endpoint, options);
+  }
+
   async requestOtp(phone: string): Promise<OtpResponse> {
     return this.apiRequest<OtpResponse>("/auth/request-otp", {
       method: "POST",
@@ -169,9 +201,69 @@ class CollaborationService {
 
     if (response.success && response.token) {
       this.saveToken(response.token);
+      // Save credentials for quick access
+      this.saveCredentials(phone);
     }
 
     return response;
+  }
+
+  async checkPhone(phone: string): Promise<CheckPhoneResponse> {
+    return this.apiRequest<CheckPhoneResponse>("/auth/check-phone", {
+      method: "POST",
+      body: JSON.stringify({ phone }),
+    });
+  }
+
+  async login(phone: string, password: string): Promise<LoginResponse> {
+    const response = await this.apiRequest<LoginResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ phone, password }),
+    });
+
+    if (response.success && response.token) {
+      this.saveToken(response.token);
+      this.saveCredentials(phone);
+    }
+
+    return response;
+  }
+
+  async setPassword(password: string): Promise<{ success: boolean; message?: string }> {
+    return this.apiRequest("/auth/set-password", {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    });
+  }
+
+  async completeOnboarding(): Promise<{ success: boolean }> {
+    return this.apiRequest("/user/complete-onboarding", {
+      method: "POST",
+    });
+  }
+
+  private saveCredentials(phone: string) {
+    try {
+      localStorage.setItem("homestaff360_saved_phone", phone);
+    } catch {
+      console.error("Failed to save credentials");
+    }
+  }
+
+  getSavedPhone(): string | null {
+    try {
+      return localStorage.getItem("homestaff360_saved_phone");
+    } catch {
+      return null;
+    }
+  }
+
+  clearSavedCredentials() {
+    try {
+      localStorage.removeItem("homestaff360_saved_phone");
+    } catch {
+      console.error("Failed to clear credentials");
+    }
   }
 
   async getProfile(): Promise<CollaborationUser | null> {
