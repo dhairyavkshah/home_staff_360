@@ -3831,7 +3831,10 @@ const fr: Partial<typeof en> = {
   settingsTitle: "Paramètres", general: "Général", householdName: "Nom du foyer", vendorCompanyName: "Nom du fournisseur/entreprise", currency: "Devise", currencySymbol: "Symbole de devise", language: "Langue", salaryStartDay: "Jour de début de salaire", halfDayPercentageLabel: "Pourcentage demi-journée",
   account: "Compte", manageHomes: "Gérer les foyers", manageBusinesses: "Gérer les entreprises", homeUser: "Utilisateur domestique", staffProfessional: "Personnel/Professionnel", configured: "configuré",
   security: "Sécurité", appLock: "Verrouillage de l'application", protectedWithPin: "Protégé par PIN", protectWith4DigitPin: "Protéger avec un PIN à 4 chiffres", changePin: "Changer le PIN", setNewPin: "Définir un nouveau PIN à 4 chiffres", enterPin: "Entrer le PIN", confirmPin: "Confirmer le PIN", pinMismatch: "Les PINs ne correspondent pas", incorrectPin: "PIN incorrect",
-  appearance: "Apparence", darkMode: "Mode sombre",
+  appearance: "Apparence", darkMode: "Mode sombre", toggleLightDarkTheme: "Basculer le thème clair/sombre",
+  hapticFeedback: "Retour haptique", vibrationOnTouch: "Vibration lors des interactions tactiles", soundEffects: "Effets sonores", playTapSounds: "Jouer des sons de toucher lors des interactions",
+  help: "Aide", seeGuidedTour: "Voir la visite guidée", learnHowToUseApp: "Apprenez à utiliser l'application efficacement",
+  defaultCurrencyForStaff: "Devise par défaut pour les nouveaux membres du personnel. Chaque membre peut avoir sa propre devise.", defaultCurrencyForClients: "Devise par défaut pour les nouveaux clients. Chaque client peut avoir sa propre devise.",
   dataManagement: "Gestion des données", backupRestore: "Sauvegarde et restauration", backupAndRestore: "Sauvegarde et restauration", exportImportData: "Exporter ou importer vos données", clearAllData: "Effacer toutes les données", deleteEverything: "Tout supprimer et recommencer", deleteEverythingStartFresh: "Tout supprimer et recommencer",
   app: "Application", exitApp: "Quitter l'application", closeApplication: "Fermer l'application", exitAppDescription: "Pour fermer l'application, veuillez utiliser le bouton d'accueil ou le gestionnaire d'applications de votre appareil.",
   laundry: "Blanchisserie", addLaundry: "Ajouter blanchisserie", provider: "Fournisseur", itemType: "Type d'article", quantity: "Quantité", rate: "Tarif", details: "Détails", totalAmount: "Montant total",
@@ -3956,7 +3959,10 @@ const de: Partial<typeof en> = {
   settingsTitle: "Einstellungen", general: "Allgemein", householdName: "Haushaltsname", vendorCompanyName: "Lieferanten-/Firmenname", currency: "Währung", currencySymbol: "Währungssymbol", language: "Sprache", salaryStartDay: "Gehaltsstarttag", halfDayPercentageLabel: "Halbtags-Prozentsatz",
   account: "Konto", manageHomes: "Haushalte verwalten", manageBusinesses: "Unternehmen verwalten", homeUser: "Heimbenutzer", staffProfessional: "Personal/Professionell", configured: "konfiguriert",
   security: "Sicherheit", appLock: "App-Sperre", protectedWithPin: "Mit PIN geschützt", protectWith4DigitPin: "Mit 4-stelliger PIN schützen", changePin: "PIN ändern", setNewPin: "Neue 4-stellige PIN festlegen", enterPin: "PIN eingeben", confirmPin: "PIN bestätigen", pinMismatch: "PINs stimmen nicht überein", incorrectPin: "Falsche PIN",
-  appearance: "Aussehen", darkMode: "Dunkelmodus",
+  appearance: "Aussehen", darkMode: "Dunkelmodus", toggleLightDarkTheme: "Hell/Dunkel-Design umschalten",
+  hapticFeedback: "Haptisches Feedback", vibrationOnTouch: "Vibration bei Berührungsinteraktionen", soundEffects: "Soundeffekte", playTapSounds: "Tippgeräusche bei Interaktionen abspielen",
+  help: "Hilfe", seeGuidedTour: "Geführte Tour ansehen", learnHowToUseApp: "Lernen Sie die App effektiv zu nutzen",
+  defaultCurrencyForStaff: "Standardwährung für neue Mitarbeiter. Jeder Mitarbeiter kann seine eigene Währung haben.", defaultCurrencyForClients: "Standardwährung für neue Kunden. Jeder Kunde kann seine eigene Währung haben.",
   dataManagement: "Datenverwaltung", backupRestore: "Sicherung und Wiederherstellung", backupAndRestore: "Sicherung und Wiederherstellung", exportImportData: "Daten exportieren oder importieren", clearAllData: "Alle Daten löschen", deleteEverything: "Alles löschen und neu beginnen", deleteEverythingStartFresh: "Alles löschen und neu beginnen",
   app: "App", exitApp: "App beenden", closeApplication: "Anwendung schließen", exitAppDescription: "Um die App zu schließen, verwenden Sie bitte die Home-Taste oder den App-Umschalter Ihres Geräts.",
   laundry: "Wäsche", addLaundry: "Wäsche hinzufügen", provider: "Anbieter", itemType: "Artikeltyp", quantity: "Menge", rate: "Tarif", details: "Details", totalAmount: "Gesamtbetrag",
@@ -4081,7 +4087,10 @@ const ar: Partial<typeof en> = {
   settingsTitle: "الإعدادات", general: "عام", householdName: "اسم المنزل", vendorCompanyName: "اسم المورد/الشركة", currency: "العملة", currencySymbol: "رمز العملة", language: "اللغة", salaryStartDay: "يوم بدء الراتب", halfDayPercentageLabel: "نسبة نصف اليوم",
   account: "الحساب", manageHomes: "إدارة المنازل", manageBusinesses: "إدارة الأعمال", homeUser: "مستخدم منزلي", staffProfessional: "موظف/محترف", configured: "مُهيأ",
   security: "الأمان", appLock: "قفل التطبيق", protectedWithPin: "محمي برمز PIN", protectWith4DigitPin: "الحماية برمز PIN من 4 أرقام", changePin: "تغيير الرمز", setNewPin: "تعيين رمز PIN جديد من 4 أرقام", enterPin: "أدخل الرمز", confirmPin: "تأكيد الرمز", pinMismatch: "الرموز غير متطابقة", incorrectPin: "رمز خاطئ",
-  appearance: "المظهر", darkMode: "الوضع الداكن",
+  appearance: "المظهر", darkMode: "الوضع الداكن", toggleLightDarkTheme: "تبديل السمة الفاتحة/الداكنة",
+  hapticFeedback: "الاستجابة اللمسية", vibrationOnTouch: "الاهتزاز عند التفاعلات اللمسية", soundEffects: "المؤثرات الصوتية", playTapSounds: "تشغيل أصوات النقر عند التفاعلات",
+  help: "المساعدة", seeGuidedTour: "مشاهدة الجولة الإرشادية", learnHowToUseApp: "تعلم كيفية استخدام التطبيق بفعالية",
+  defaultCurrencyForStaff: "العملة الافتراضية للموظفين الجدد. يمكن لكل موظف أن يكون لديه عملته الخاصة.", defaultCurrencyForClients: "العملة الافتراضية للعملاء الجدد. يمكن لكل عميل أن يكون لديه عملته الخاصة.",
   dataManagement: "إدارة البيانات", backupRestore: "النسخ الاحتياطي والاستعادة", backupAndRestore: "النسخ الاحتياطي والاستعادة", exportImportData: "تصدير أو استيراد بياناتك", clearAllData: "مسح جميع البيانات", deleteEverything: "حذف كل شيء والبدء من جديد", deleteEverythingStartFresh: "حذف كل شيء والبدء من جديد",
   app: "التطبيق", exitApp: "الخروج من التطبيق", closeApplication: "إغلاق التطبيق", exitAppDescription: "لإغلاق التطبيق، استخدم زر الرئيسية أو مبدل التطبيقات في جهازك.",
   laundry: "الغسيل", addLaundry: "إضافة غسيل", provider: "مزود الخدمة", itemType: "نوع العنصر", quantity: "الكمية", rate: "السعر", details: "التفاصيل", totalAmount: "المبلغ الإجمالي",
@@ -4206,7 +4215,10 @@ const zh: Partial<typeof en> = {
   settingsTitle: "设置", general: "通用", householdName: "家庭名称", vendorCompanyName: "供应商/公司名称", currency: "货币", currencySymbol: "货币符号", language: "语言", salaryStartDay: "薪资起始日", halfDayPercentageLabel: "半天百分比",
   account: "账户", manageHomes: "管理家庭", manageBusinesses: "管理企业", homeUser: "家庭用户", staffProfessional: "员工/专业人员", configured: "已配置",
   security: "安全", appLock: "应用锁", protectedWithPin: "已用PIN保护", protectWith4DigitPin: "使用4位PIN保护", changePin: "更改PIN", setNewPin: "设置新的4位PIN", enterPin: "输入PIN", confirmPin: "确认PIN", pinMismatch: "PIN不匹配", incorrectPin: "PIN错误",
-  appearance: "外观", darkMode: "深色模式",
+  appearance: "外观", darkMode: "深色模式", toggleLightDarkTheme: "切换浅色/深色主题",
+  hapticFeedback: "触觉反馈", vibrationOnTouch: "触摸交互时振动", soundEffects: "音效", playTapSounds: "交互时播放点击声音",
+  help: "帮助", seeGuidedTour: "查看引导教程", learnHowToUseApp: "学习如何有效使用应用",
+  defaultCurrencyForStaff: "新员工的默认货币。每位员工可以有自己的货币。", defaultCurrencyForClients: "新客户的默认货币。每位客户可以有自己的货币。",
   dataManagement: "数据管理", backupRestore: "备份和恢复", backupAndRestore: "备份和恢复", exportImportData: "导出或导入您的数据", clearAllData: "清除所有数据", deleteEverything: "删除所有内容并重新开始", deleteEverythingStartFresh: "删除所有内容并重新开始",
   app: "应用", exitApp: "退出应用", closeApplication: "关闭应用", exitAppDescription: "要关闭应用，请使用设备的主页按钮或应用切换器。",
   laundry: "洗衣", addLaundry: "添加洗衣", provider: "服务提供商", itemType: "物品类型", quantity: "数量", rate: "费率", details: "详情", totalAmount: "总金额",
@@ -4330,7 +4342,10 @@ const ja: Partial<typeof en> = {
   settingsTitle: "設定", general: "一般", householdName: "家庭名", vendorCompanyName: "ベンダー/会社名", currency: "通貨", currencySymbol: "通貨記号", language: "言語", salaryStartDay: "給与開始日", halfDayPercentageLabel: "半日パーセンテージ",
   account: "アカウント", manageHomes: "家庭を管理", manageBusinesses: "ビジネスを管理", homeUser: "ホームユーザー", staffProfessional: "スタッフ/専門家", configured: "設定済み",
   security: "セキュリティ", appLock: "アプリロック", protectedWithPin: "PINで保護", protectWith4DigitPin: "4桁のPINで保護", changePin: "PINを変更", setNewPin: "新しい4桁のPINを設定", enterPin: "PINを入力", confirmPin: "PINを確認", pinMismatch: "PINが一致しません", incorrectPin: "PINが正しくありません",
-  appearance: "外観", darkMode: "ダークモード",
+  appearance: "外観", darkMode: "ダークモード", toggleLightDarkTheme: "ライト/ダークテーマを切り替え",
+  hapticFeedback: "触覚フィードバック", vibrationOnTouch: "タッチ操作時のバイブレーション", soundEffects: "効果音", playTapSounds: "操作時にタップ音を再生",
+  help: "ヘルプ", seeGuidedTour: "ガイドツアーを見る", learnHowToUseApp: "アプリを効果的に使用する方法を学ぶ",
+  defaultCurrencyForStaff: "新しいスタッフの既定通貨。各スタッフは独自の通貨を持つことができます。", defaultCurrencyForClients: "新しいクライアントの既定通貨。各クライアントは独自の通貨を持つことができます。",
   dataManagement: "データ管理", backupRestore: "バックアップと復元", backupAndRestore: "バックアップと復元", exportImportData: "データをエクスポートまたはインポート", clearAllData: "すべてのデータを消去", deleteEverything: "すべて削除してやり直す", deleteEverythingStartFresh: "すべて削除してやり直す",
   app: "アプリ", exitApp: "アプリを終了", closeApplication: "アプリケーションを閉じる", exitAppDescription: "アプリを閉じるには、デバイスのホームボタンまたはアプリスイッチャーを使用してください。",
   laundry: "洗濯", addLaundry: "洗濯を追加", provider: "提供者", itemType: "アイテムタイプ", quantity: "数量", rate: "料金", details: "詳細", totalAmount: "合計金額",
@@ -4385,7 +4400,10 @@ const pt: Partial<typeof en> = {
   settingsTitle: "Configurações", general: "Geral", householdName: "Nome do Lar", vendorCompanyName: "Nome do Fornecedor/Empresa", currency: "Moeda", currencySymbol: "Símbolo da Moeda", language: "Idioma", salaryStartDay: "Dia de Início do Salário", halfDayPercentageLabel: "Percentual de Meio Dia",
   account: "Conta", manageHomes: "Gerenciar Lares", manageBusinesses: "Gerenciar Negócios", homeUser: "Usuário Doméstico", staffProfessional: "Funcionário/Profissional", configured: "configurado",
   security: "Segurança", appLock: "Bloqueio do App", protectedWithPin: "Protegido com PIN", protectWith4DigitPin: "Proteger com PIN de 4 dígitos", changePin: "Alterar PIN", setNewPin: "Definir novo PIN de 4 dígitos", enterPin: "Digite o PIN", confirmPin: "Confirme o PIN", pinMismatch: "Os PINs não coincidem", incorrectPin: "PIN incorreto",
-  appearance: "Aparência", darkMode: "Modo Escuro",
+  appearance: "Aparência", darkMode: "Modo Escuro", toggleLightDarkTheme: "Alternar tema claro/escuro",
+  hapticFeedback: "Feedback Háptico", vibrationOnTouch: "Vibração em interações de toque", soundEffects: "Efeitos Sonoros", playTapSounds: "Reproduzir sons de toque nas interações",
+  help: "Ajuda", seeGuidedTour: "Ver Tour Guiado", learnHowToUseApp: "Aprenda a usar o app de forma eficaz",
+  defaultCurrencyForStaff: "Moeda padrão para novos funcionários. Cada funcionário pode ter sua própria moeda.", defaultCurrencyForClients: "Moeda padrão para novos clientes. Cada cliente pode ter sua própria moeda.",
   dataManagement: "Gerenciamento de Dados", backupRestore: "Backup e Restauração", backupAndRestore: "Backup e Restauração", exportImportData: "Exportar ou importar seus dados", clearAllData: "Limpar Todos os Dados", deleteEverything: "Excluir tudo e começar do zero", deleteEverythingStartFresh: "Excluir tudo e começar do zero",
   app: "App", exitApp: "Sair do App", closeApplication: "Fechar Aplicativo", exitAppDescription: "Para fechar o aplicativo, use o botão home ou o alternador de apps do seu dispositivo.",
   laundry: "Lavanderia", addLaundry: "Adicionar Lavanderia", provider: "Prestador", itemType: "Tipo de Item", quantity: "Quantidade", rate: "Taxa", details: "Detalhes", totalAmount: "Valor Total",
@@ -4512,7 +4530,10 @@ const mr: Partial<typeof en> = {
   settingsTitle: "सेटिंग्ज", general: "सामान्य", householdName: "घराचे नाव", vendorCompanyName: "विक्रेता/कंपनी नाव", currency: "चलन", currencySymbol: "चलन चिन्ह", language: "भाषा", salaryStartDay: "पगार सुरू दिवस", halfDayPercentageLabel: "अर्धा दिवस टक्केवारी",
   account: "खाते", manageHomes: "घरे व्यवस्थापित करा", manageBusinesses: "व्यवसाय व्यवस्थापित करा", homeUser: "होम युजर", staffProfessional: "स्टाफ/व्यावसायिक", configured: "कॉन्फिगर केलेले",
   security: "सुरक्षा", appLock: "अॅप लॉक", protectedWithPin: "PIN ने संरक्षित", protectWith4DigitPin: "4-अंकी PIN ने संरक्षित करा", changePin: "PIN बदला", setNewPin: "नवीन 4-अंकी PIN सेट करा", enterPin: "PIN प्रविष्ट करा", confirmPin: "PIN पुष्टी करा", pinMismatch: "PIN जुळत नाही", incorrectPin: "चुकीचा PIN",
-  appearance: "स्वरूप", darkMode: "डार्क मोड",
+  appearance: "स्वरूप", darkMode: "डार्क मोड", toggleLightDarkTheme: "लाइट/डार्क थीम टॉगल करा",
+  hapticFeedback: "हॅप्टिक फीडबॅक", vibrationOnTouch: "टच इंटरॅक्शनवर व्हायब्रेशन", soundEffects: "साउंड इफेक्ट्स", playTapSounds: "इंटरॅक्शनवर टॅप साउंड प्ले करा",
+  help: "मदत", seeGuidedTour: "मार्गदर्शित टूर पहा", learnHowToUseApp: "अॅप प्रभावीपणे कसे वापरायचे ते शिका",
+  defaultCurrencyForStaff: "नवीन स्टाफ सदस्यांसाठी डीफॉल्ट चलन. प्रत्येक स्टाफ सदस्याचे स्वतःचे चलन असू शकते.", defaultCurrencyForClients: "नवीन क्लायंट्ससाठी डीफॉल्ट चलन. प्रत्येक क्लायंटचे स्वतःचे चलन असू शकते.",
   dataManagement: "डेटा व्यवस्थापन", backupRestore: "बॅकअप आणि पुनर्संचय", backupAndRestore: "बॅकअप आणि पुनर्संचय", exportImportData: "तुमचा डेटा निर्यात किंवा आयात करा", clearAllData: "सर्व डेटा साफ करा", deleteEverything: "सर्वकाही हटवा आणि नव्याने सुरू करा", deleteEverythingStartFresh: "सर्वकाही हटवा आणि नव्याने सुरू करा",
   app: "अॅप", exitApp: "अॅप बंद करा", closeApplication: "अॅप्लिकेशन बंद करा", exitAppDescription: "अॅप बंद करण्यासाठी, कृपया तुमच्या डिव्हाइसचे होम बटण किंवा अॅप स्विचर वापरा.",
   laundry: "लॉन्ड्री", addLaundry: "लॉन्ड्री जोडा", provider: "प्रदाता", itemType: "वस्तू प्रकार", quantity: "प्रमाण", rate: "दर", details: "तपशील", totalAmount: "एकूण रक्कम",
@@ -4569,7 +4590,10 @@ const pa: Partial<typeof en> = {
   settingsTitle: "ਸੈਟਿੰਗਜ਼", general: "ਆਮ", householdName: "ਘਰ ਦਾ ਨਾਮ", vendorCompanyName: "ਵਿਕਰੇਤਾ/ਕੰਪਨੀ ਦਾ ਨਾਮ", currency: "ਮੁਦਰਾ", currencySymbol: "ਮੁਦਰਾ ਚਿੰਨ੍ਹ", language: "ਭਾਸ਼ਾ", salaryStartDay: "ਤਨਖਾਹ ਸ਼ੁਰੂ ਦਿਨ", halfDayPercentageLabel: "ਅੱਧੇ ਦਿਨ ਪ੍ਰਤੀਸ਼ਤ",
   account: "ਖਾਤਾ", manageHomes: "ਘਰਾਂ ਦਾ ਪ੍ਰਬੰਧ ਕਰੋ", manageBusinesses: "ਕਾਰੋਬਾਰਾਂ ਦਾ ਪ੍ਰਬੰਧ ਕਰੋ", homeUser: "ਹੋਮ ਯੂਜ਼ਰ", staffProfessional: "ਸਟਾਫ/ਪੇਸ਼ੇਵਰ", configured: "ਸੰਰਚਿਤ",
   security: "ਸੁਰੱਖਿਆ", appLock: "ਐਪ ਲੌਕ", protectedWithPin: "PIN ਨਾਲ ਸੁਰੱਖਿਅਤ", protectWith4DigitPin: "4-ਅੰਕੀ PIN ਨਾਲ ਸੁਰੱਖਿਅਤ ਕਰੋ", changePin: "PIN ਬਦਲੋ", setNewPin: "ਨਵਾਂ 4-ਅੰਕੀ PIN ਸੈੱਟ ਕਰੋ", enterPin: "PIN ਦਾਖਲ ਕਰੋ", confirmPin: "PIN ਪੁਸ਼ਟੀ ਕਰੋ", pinMismatch: "PIN ਮੇਲ ਨਹੀਂ ਖਾਂਦੇ", incorrectPin: "ਗਲਤ PIN",
-  appearance: "ਦਿੱਖ", darkMode: "ਡਾਰਕ ਮੋਡ",
+  appearance: "ਦਿੱਖ", darkMode: "ਡਾਰਕ ਮੋਡ", toggleLightDarkTheme: "ਲਾਈਟ/ਡਾਰਕ ਥੀਮ ਟੌਗਲ ਕਰੋ",
+  hapticFeedback: "ਹੈਪਟਿਕ ਫੀਡਬੈਕ", vibrationOnTouch: "ਟੱਚ ਇੰਟਰੈਕਸ਼ਨ ਤੇ ਵਾਈਬ੍ਰੇਸ਼ਨ", soundEffects: "ਸਾਊਂਡ ਇਫੈਕਟਸ", playTapSounds: "ਇੰਟਰੈਕਸ਼ਨ ਤੇ ਟੈਪ ਸਾਊਂਡ ਚਲਾਓ",
+  help: "ਮਦਦ", seeGuidedTour: "ਗਾਈਡਿਡ ਟੂਰ ਦੇਖੋ", learnHowToUseApp: "ਐਪ ਨੂੰ ਪ੍ਰਭਾਵਸ਼ਾਲੀ ਢੰਗ ਨਾਲ ਵਰਤਣਾ ਸਿੱਖੋ",
+  defaultCurrencyForStaff: "ਨਵੇਂ ਸਟਾਫ ਮੈਂਬਰਾਂ ਲਈ ਡਿਫਾਲਟ ਮੁਦਰਾ। ਹਰ ਸਟਾਫ ਮੈਂਬਰ ਦੀ ਆਪਣੀ ਮੁਦਰਾ ਹੋ ਸਕਦੀ ਹੈ।", defaultCurrencyForClients: "ਨਵੇਂ ਗਾਹਕਾਂ ਲਈ ਡਿਫਾਲਟ ਮੁਦਰਾ। ਹਰ ਗਾਹਕ ਦੀ ਆਪਣੀ ਮੁਦਰਾ ਹੋ ਸਕਦੀ ਹੈ।",
   dataManagement: "ਡਾਟਾ ਪ੍ਰਬੰਧਨ", backupRestore: "ਬੈਕਅੱਪ ਅਤੇ ਰੀਸਟੋਰ", backupAndRestore: "ਬੈਕਅੱਪ ਅਤੇ ਰੀਸਟੋਰ", exportImportData: "ਆਪਣਾ ਡਾਟਾ ਐਕਸਪੋਰਟ ਜਾਂ ਇੰਪੋਰਟ ਕਰੋ", clearAllData: "ਸਾਰਾ ਡਾਟਾ ਸਾਫ਼ ਕਰੋ", deleteEverything: "ਸਭ ਕੁਝ ਮਿਟਾਓ ਅਤੇ ਨਵੇਂ ਸਿਰੇ ਤੋਂ ਸ਼ੁਰੂ ਕਰੋ", deleteEverythingStartFresh: "ਸਭ ਕੁਝ ਮਿਟਾਓ ਅਤੇ ਨਵੇਂ ਸਿਰੇ ਤੋਂ ਸ਼ੁਰੂ ਕਰੋ",
   app: "ਐਪ", exitApp: "ਐਪ ਬੰਦ ਕਰੋ", closeApplication: "ਐਪਲੀਕੇਸ਼ਨ ਬੰਦ ਕਰੋ", exitAppDescription: "ਐਪ ਬੰਦ ਕਰਨ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਡਿਵਾਈਸ ਦਾ ਹੋਮ ਬਟਨ ਜਾਂ ਐਪ ਸਵਿੱਚਰ ਵਰਤੋ।",
   laundry: "ਲਾਂਡਰੀ", addLaundry: "ਲਾਂਡਰੀ ਜੋੜੋ", provider: "ਪ੍ਰਦਾਤਾ", itemType: "ਵਸਤੂ ਕਿਸਮ", quantity: "ਮਾਤਰਾ", rate: "ਦਰ", details: "ਵੇਰਵੇ", totalAmount: "ਕੁੱਲ ਰਕਮ",
@@ -4625,7 +4649,10 @@ const te: Partial<typeof en> = {
   settingsTitle: "సెట్టింగ్‌లు", general: "సాధారణ", householdName: "గృహం పేరు", vendorCompanyName: "విక్రేత/కంపెనీ పేరు", currency: "కరెన్సీ", currencySymbol: "కరెన్సీ చిహ్నం", language: "భాష", salaryStartDay: "జీతం ప్రారంభ రోజు", halfDayPercentageLabel: "అర్ధ రోజు శాతం",
   account: "ఖాతా", manageHomes: "గృహాలను నిర్వహించండి", manageBusinesses: "వ్యాపారాలను నిర్వహించండి", homeUser: "హోమ్ యూజర్", staffProfessional: "సిబ్బంది/ప్రొఫెషనల్", configured: "కాన్ఫిగర్ చేయబడింది",
   security: "భద్రత", appLock: "యాప్ లాక్", protectedWithPin: "PIN తో రక్షించబడింది", protectWith4DigitPin: "4-అంకెల PIN తో రక్షించండి", changePin: "PIN మార్చండి", setNewPin: "కొత్త 4-అంకెల PIN సెట్ చేయండి", enterPin: "PIN నమోదు చేయండి", confirmPin: "PIN నిర్ధారించండి", pinMismatch: "PINలు సరిపోలడం లేదు", incorrectPin: "తప్పు PIN",
-  appearance: "రూపం", darkMode: "డార్క్ మోడ్",
+  appearance: "రూపం", darkMode: "డార్క్ మోడ్", toggleLightDarkTheme: "లైట్/డార్క్ థీమ్ టోగుల్ చేయండి",
+  hapticFeedback: "హాప్టిక్ ఫీడ్‌బ్యాక్", vibrationOnTouch: "టచ్ ఇంటరాక్షన్‌లలో వైబ్రేషన్", soundEffects: "సౌండ్ ఎఫెక్ట్స్", playTapSounds: "ఇంటరాక్షన్‌లలో ట్యాప్ సౌండ్స్ ప్లే చేయండి",
+  help: "సహాయం", seeGuidedTour: "గైడెడ్ టూర్ చూడండి", learnHowToUseApp: "యాప్‌ను సమర్థవంతంగా ఉపయోగించడం నేర్చుకోండి",
+  defaultCurrencyForStaff: "కొత్త స్టాఫ్ సభ్యులకు డిఫాల్ట్ కరెన్సీ. ప్రతి స్టాఫ్ సభ్యునికి వారి స్వంత కరెన్సీ ఉండవచ్చు.", defaultCurrencyForClients: "కొత్త క్లయింట్‌లకు డిఫాల్ట్ కరెన్సీ. ప్రతి క్లయింట్‌కు వారి స్వంత కరెన్సీ ఉండవచ్చు.",
   dataManagement: "డేటా నిర్వహణ", backupRestore: "బ్యాకప్ & పునరుద్ధరణ", backupAndRestore: "బ్యాకప్ & పునరుద్ధరణ", exportImportData: "మీ డేటాను ఎగుమతి లేదా దిగుమతి చేయండి", clearAllData: "అన్ని డేటా క్లియర్ చేయండి", deleteEverything: "అన్నీ తొలగించి తాజాగా ప్రారంభించండి", deleteEverythingStartFresh: "అన్నీ తొలగించి తాజాగా ప్రారంభించండి",
   app: "యాప్", exitApp: "యాప్ నుండి నిష్క్రమించండి", closeApplication: "అప్లికేషన్ మూసివేయండి", exitAppDescription: "యాప్ మూసివేయడానికి, దయచేసి మీ పరికరం హోమ్ బటన్ లేదా యాప్ స్విచర్ ఉపయోగించండి.",
   laundry: "లాండ్రీ", addLaundry: "లాండ్రీ జోడించండి", provider: "ప్రొవైడర్", itemType: "వస్తు రకం", quantity: "పరిమాణం", rate: "రేటు", details: "వివరాలు", totalAmount: "మొత్తం మొత్తం",
@@ -4749,7 +4776,10 @@ const ta: Partial<typeof en> = {
   settingsTitle: "அமைப்புகள்", general: "பொது", householdName: "வீட்டின் பெயர்", vendorCompanyName: "விற்பனையாளர்/நிறுவனத்தின் பெயர்", currency: "நாணயம்", currencySymbol: "நாணய குறியீடு", language: "மொழி", salaryStartDay: "சம்பள தொடக்க நாள்", halfDayPercentageLabel: "அரை நாள் சதவீதம்",
   account: "கணக்கு", manageHomes: "வீடுகளை நிர்வகி", manageBusinesses: "வணிகங்களை நிர்வகி", homeUser: "வீட்டு பயனர்", staffProfessional: "ஊழியர் பயனர்", configured: "கட்டமைக்கப்பட்டது",
   security: "பாதுகாப்பு", appLock: "செயலி பூட்டு", protectedWithPin: "PIN உடன் பாதுகாக்கப்பட்டது", protectWith4DigitPin: "4 இலக்க PIN உடன் பாதுகாக்கவும்", changePin: "PIN மாற்றவும்", setNewPin: "புதிய 4 இலக்க PIN அமைக்கவும்", enterPin: "PIN உள்ளிடவும்", confirmPin: "PIN உறுதிப்படுத்தவும்", pinMismatch: "PIN பொருந்தவில்லை", incorrectPin: "தவறான PIN",
-  appearance: "தோற்றம்", darkMode: "இருள் பயன்முறை",
+  appearance: "தோற்றம்", darkMode: "இருள் பயன்முறை", toggleLightDarkTheme: "லைட்/டார்க் தீம் மாற்றவும்",
+  hapticFeedback: "ஹாப்டிக் பிட்பேக்", vibrationOnTouch: "தொடுதல் தொடர்புகளில் அதிர்வு", soundEffects: "ஒலி விளைவுகள்", playTapSounds: "தொடர்புகளில் தட்டு ஒலிகளை இயக்கவும்",
+  help: "உதவி", seeGuidedTour: "வழிகாட்டி சுற்றுப்பயணம் பார்க்கவும்", learnHowToUseApp: "செயலியை திறமையாக பயன்படுத்த கற்றுக்கொள்ளுங்கள்",
+  defaultCurrencyForStaff: "புதிய ஊழியர்களுக்கான இயல்புநிலை நாணயம். ஒவ்வொரு ஊழியருக்கும் அவர்களின் சொந்த நாணயம் இருக்கலாம்.", defaultCurrencyForClients: "புதிய வாடிக்கையாளர்களுக்கான இயல்புநிலை நாணயம். ஒவ்வொரு வாடிக்கையாளருக்கும் அவர்களின் சொந்த நாணயம் இருக்கலாம்.",
   dataManagement: "தரவு மேலாண்மை", backupRestore: "காப்புப்பிரதி & மீட்டெடு", backupAndRestore: "காப்புப்பிரதி & மீட்டெடு", exportImportData: "உங்கள் தரவை ஏற்றுமதி அல்லது இறக்குமதி செய்யவும்", clearAllData: "அனைத்து தரவையும் அழிக்கவும்", deleteEverything: "எல்லாவற்றையும் நீக்கி புதிதாக தொடங்கவும்", deleteEverythingStartFresh: "எல்லாவற்றையும் நீக்கி புதிதாக தொடங்கவும்",
   app: "செயலி", exitApp: "செயலியை மூடு", closeApplication: "செயலியை மூடவும்", exitAppDescription: "செயலியை மூட, உங்கள் சாதனத்தின் முகப்பு பொத்தான் அல்லது செயலி மாற்றியைப் பயன்படுத்தவும்.",
   laundry: "சலவை", addLaundry: "சலவை சேர்க்கவும்", provider: "வழங்குநர்", itemType: "பொருள் வகை", quantity: "அளவு", rate: "விகிதம்", details: "விவரங்கள்", totalAmount: "மொத்த தொகை",
@@ -5039,6 +5069,22 @@ const ur: Partial<typeof en> = {
   // Appearance - ظاہری شکل
   appearance: "ظاہری شکل",
   darkMode: "ڈارک موڈ",
+  toggleLightDarkTheme: "لائٹ/ڈارک تھیم ٹوگل کریں",
+  
+  // Feedback
+  hapticFeedback: "ہیپٹک فیڈبیک",
+  vibrationOnTouch: "ٹچ انٹریکشن پر وائبریشن",
+  soundEffects: "ساؤنڈ ایفیکٹس",
+  playTapSounds: "انٹریکشن پر ٹیپ آواز چلائیں",
+  
+  // Help
+  help: "مدد",
+  seeGuidedTour: "گائیڈڈ ٹور دیکھیں",
+  learnHowToUseApp: "ایپ کو مؤثر طریقے سے استعمال کرنا سیکھیں",
+  
+  // Currency Description
+  defaultCurrencyForStaff: "نئے عملے کے ارکان کے لیے ڈیفالٹ کرنسی۔ ہر عملے کے رکن کی اپنی کرنسی ہو سکتی ہے۔",
+  defaultCurrencyForClients: "نئے کلائنٹس کے لیے ڈیفالٹ کرنسی۔ ہر کلائنٹ کی اپنی کرنسی ہو سکتی ہے۔",
 
   // Data Management - ڈیٹا مینجمنٹ
   dataManagement: "ڈیٹا انتظام",
@@ -5873,6 +5919,22 @@ const bn: Partial<typeof en> = {
 
   appearance: "চেহারা",
   darkMode: "ডার্ক মোড",
+  toggleLightDarkTheme: "লাইট/ডার্ক থিম টগল করুন",
+  
+  // Feedback
+  hapticFeedback: "হ্যাপটিক ফিডব্যাক",
+  vibrationOnTouch: "টাচ ইন্টারঅ্যাকশনে ভাইব্রেশন",
+  soundEffects: "সাউন্ড ইফেক্টস",
+  playTapSounds: "ইন্টারঅ্যাকশনে ট্যাপ সাউন্ড চালান",
+  
+  // Help
+  help: "সাহায্য",
+  seeGuidedTour: "গাইডেড ট্যুর দেখুন",
+  learnHowToUseApp: "অ্যাপটি কার্যকরভাবে ব্যবহার করতে শিখুন",
+  
+  // Currency Description
+  defaultCurrencyForStaff: "নতুন স্টাফ সদস্যদের জন্য ডিফল্ট মুদ্রা। প্রতিটি স্টাফ সদস্যের নিজস্ব মুদ্রা থাকতে পারে।",
+  defaultCurrencyForClients: "নতুন ক্লায়েন্টদের জন্য ডিফল্ট মুদ্রা। প্রতিটি ক্লায়েন্টের নিজস্ব মুদ্রা থাকতে পারে।",
 
   dataManagement: "ডেটা ব্যবস্থাপনা",
   backupRestore: "ব্যাকআপ ও রিস্টোর",
@@ -6640,6 +6702,22 @@ const or: Partial<typeof en> = {
   // Appearance
   appearance: "ରୂପ",
   darkMode: "ଡାର୍କ ମୋଡ",
+  toggleLightDarkTheme: "ଲାଇଟ/ଡାର୍କ ଥିମ ଟଗଲ କରନ୍ତୁ",
+  
+  // Feedback
+  hapticFeedback: "ହାପ୍ଟିକ ଫିଡବ୍ୟାକ",
+  vibrationOnTouch: "ସ୍ପର୍ଶ ଇଣ୍ଟରାକ୍ସନରେ ଭାଇବ୍ରେସନ",
+  soundEffects: "ସାଉଣ୍ଡ ଇଫେକ୍ଟ",
+  playTapSounds: "ଇଣ୍ଟରାକ୍ସନରେ ଟ୍ୟାପ ସାଉଣ୍ଡ ଚଲାନ୍ତୁ",
+  
+  // Help
+  help: "ସାହାଯ୍ୟ",
+  seeGuidedTour: "ଗାଇଡେଡ ଟୁର ଦେଖନ୍ତୁ",
+  learnHowToUseApp: "ଆପ ପ୍ରଭାବଶାଳୀ ଭାବରେ ବ୍ୟବହାର କରିବାକୁ ଶିଖନ୍ତୁ",
+  
+  // Currency Description
+  defaultCurrencyForStaff: "ନୂଆ ଷ୍ଟାଫ ସଦସ୍ୟଙ୍କ ପାଇଁ ଡିଫଲ୍ଟ ମୁଦ୍ରା। ପ୍ରତ୍ୟେକ ଷ୍ଟାଫ ସଦସ୍ୟଙ୍କର ନିଜସ୍ୱ ମୁଦ୍ରା ଥାଇପାରେ।",
+  defaultCurrencyForClients: "ନୂଆ କ୍ଲାଏଣ୍ଟଙ୍କ ପାଇଁ ଡିଫଲ୍ଟ ମୁଦ୍ରା। ପ୍ରତ୍ୟେକ କ୍ଲାଏଣ୍ଟଙ୍କର ନିଜସ୍ୱ ମୁଦ୍ରା ଥାଇପାରେ।",
 
   // Data Management
   dataManagement: "ଡାଟା ପରିଚାଳନା",
@@ -7486,6 +7564,22 @@ const as: Partial<typeof en> = {
   // Appearance
   appearance: "ৰূপ",
   darkMode: "ডাৰ্ক মোড",
+  toggleLightDarkTheme: "লাইট/ডাৰ্ক থিম টগল কৰক",
+  
+  // Feedback
+  hapticFeedback: "হেপ্টিক ফিডবেক",
+  vibrationOnTouch: "স্পৰ্শ ইন্টাৰেকচনত ভাইব্ৰেচন",
+  soundEffects: "ছাউণ্ড ইফেক্ট",
+  playTapSounds: "ইন্টাৰেকচনত টেপ ছাউণ্ড বজাওক",
+  
+  // Help
+  help: "সহায়",
+  seeGuidedTour: "গাইডেড টুৰ চাওক",
+  learnHowToUseApp: "এপ ফলপ্ৰসূভাৱে ব্যৱহাৰ কৰিবলৈ শিকক",
+  
+  // Currency Description
+  defaultCurrencyForStaff: "নতুন কৰ্মচাৰীৰ বাবে ডিফল্ট মুদ্ৰা। প্ৰতিটো কৰ্মচাৰীৰ নিজস্ব মুদ্ৰা থাকিব পাৰে।",
+  defaultCurrencyForClients: "নতুন ক্লায়েণ্টৰ বাবে ডিফল্ট মুদ্ৰা। প্ৰতিটো ক্লায়েণ্টৰ নিজস্ব মুদ্ৰা থাকিব পাৰে।",
 
   // Data Management
   dataManagement: "ডাটা পৰিচালনা",
@@ -8333,6 +8427,22 @@ const ru: Partial<typeof en> = {
   // Appearance
   appearance: "Внешний вид",
   darkMode: "Тёмная тема",
+  toggleLightDarkTheme: "Переключить светлую/тёмную тему",
+  
+  // Feedback
+  hapticFeedback: "Тактильный отклик",
+  vibrationOnTouch: "Вибрация при касании",
+  soundEffects: "Звуковые эффекты",
+  playTapSounds: "Воспроизводить звуки касания при взаимодействии",
+  
+  // Help
+  help: "Помощь",
+  seeGuidedTour: "Посмотреть обзорную экскурсию",
+  learnHowToUseApp: "Научитесь эффективно использовать приложение",
+  
+  // Currency Description
+  defaultCurrencyForStaff: "Валюта по умолчанию для новых сотрудников. Каждый сотрудник может иметь свою валюту.",
+  defaultCurrencyForClients: "Валюта по умолчанию для новых клиентов. Каждый клиент может иметь свою валюту.",
   
   // Data Management
   dataManagement: "Управление данными",
