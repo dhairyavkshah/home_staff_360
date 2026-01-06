@@ -21,8 +21,9 @@ import { v4 as uuidv4 } from "uuid";
 const router = Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || "homestaff360-secret-key";
-const OTP_EXPIRY_MINUTES = 10;
-const MAX_OTP_ATTEMPTS = 5;
+const OTP_EXPIRY_MINUTES = 30;
+const MAX_OTP_ATTEMPTS_PER_HOUR = 5;
+const OTP_COOLDOWN_SECONDS = 60;
 
 const twilioClient = twilio(
   process.env.TWILIO_ACCOUNT_SID,
@@ -33,10 +34,67 @@ function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-function isRateLimited(lastAttemptTime: Date | null): boolean {
-  if (!lastAttemptTime) return false;
-  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-  return lastAttemptTime > thirtyMinutesAgo;
+function normalizePhoneWithCountryCode(phone: string): string {
+  let normalized = phone.replace(/[\s\-\(\)]/g, "");
+  if (!normalized.startsWith("+")) {
+    normalized = "+" + normalized;
+  }
+  return normalized;
+}
+
+async function findUserByPhone(phone: string) {
+  const normalizedPhone = normalizePhoneWithCountryCode(phone);
+  
+  let user = await db.query.serverUsers.findFirst({
+    where: eq(serverUsers.phone, normalizedPhone)
+  });
+  
+  if (!user) {
+    const phoneWithoutPlus = normalizedPhone.startsWith("+") ? normalizedPhone.slice(1) : normalizedPhone;
+    user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.phone, phoneWithoutPlus)
+    });
+    
+    if (user) {
+      await db.update(serverUsers)
+        .set({ phone: normalizedPhone })
+        .where(eq(serverUsers.id, user.id));
+      user = { ...user, phone: normalizedPhone };
+    }
+  }
+  
+  return user;
+}
+
+function canRequestOtp(user: { otpAttemptCount: number | null; otpAttemptResetAt: Date | null; otpLastSentAt: Date | null }): {
+  allowed: boolean;
+  reason?: string;
+  waitSeconds?: number;
+} {
+  const now = new Date();
+  
+  if (user.otpLastSentAt) {
+    const cooldownEndTime = new Date(user.otpLastSentAt.getTime() + OTP_COOLDOWN_SECONDS * 1000);
+    if (now < cooldownEndTime) {
+      const waitSeconds = Math.ceil((cooldownEndTime.getTime() - now.getTime()) / 1000);
+      return { allowed: false, reason: "Please wait before requesting another OTP", waitSeconds };
+    }
+  }
+  
+  const attemptCount = user.otpAttemptCount || 0;
+  const resetAt = user.otpAttemptResetAt;
+  
+  if (resetAt && now > resetAt) {
+    return { allowed: true };
+  }
+  
+  if (attemptCount >= MAX_OTP_ATTEMPTS_PER_HOUR) {
+    const resetTime = resetAt ? resetAt : new Date(now.getTime() + 60 * 60 * 1000);
+    const waitSeconds = Math.ceil((resetTime.getTime() - now.getTime()) / 1000);
+    return { allowed: false, reason: "Maximum OTP requests reached. Please try again later.", waitSeconds };
+  }
+  
+  return { allowed: true };
 }
 
 router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
@@ -44,39 +102,65 @@ router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
     const { phone } = req.body;
     
     if (!phone || phone.length < 10) {
-      return res.status(400).json({ error: "Valid phone number is required" });
+      return res.status(400).json({ error: "Valid phone number with country code is required" });
     }
 
-    let user = await db.query.serverUsers.findFirst({
-      where: eq(serverUsers.phone, phone)
-    });
+    const normalizedPhone = normalizePhoneWithCountryCode(phone);
+    
+    if (!normalizedPhone.match(/^\+\d{10,15}$/)) {
+      return res.status(400).json({ error: "Phone number must include country code (e.g., +1234567890)" });
+    }
+
+    let user = await findUserByPhone(phone);
 
     if (!user) {
       const userId = uuidv4();
+      const now = new Date();
       const [newUser] = await db.insert(serverUsers).values({
         id: userId,
-        phone,
+        phone: normalizedPhone,
         isVerified: false,
+        otpAttemptCount: 0,
+        otpAttemptResetAt: new Date(now.getTime() + 60 * 60 * 1000),
       }).returning();
       user = newUser;
     }
 
+    const rateLimitCheck = canRequestOtp(user);
+    if (!rateLimitCheck.allowed) {
+      return res.status(429).json({ 
+        error: rateLimitCheck.reason,
+        waitSeconds: rateLimitCheck.waitSeconds
+      });
+    }
+
     const otp = generateOTP();
     const otpHash = await bcrypt.hash(otp, 10);
-    const otpExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+    const now = new Date();
+    const otpExpiresAt = new Date(now.getTime() + OTP_EXPIRY_MINUTES * 60 * 1000);
+    
+    const currentAttemptCount = user.otpAttemptCount || 0;
+    const resetAt = user.otpAttemptResetAt;
+    const shouldResetCounter = resetAt && now > resetAt;
+    
+    const newAttemptCount = shouldResetCounter ? 1 : currentAttemptCount + 1;
+    const newResetAt = shouldResetCounter ? new Date(now.getTime() + 60 * 60 * 1000) : (resetAt || new Date(now.getTime() + 60 * 60 * 1000));
 
     await db.update(serverUsers)
       .set({ 
         otpHash, 
         otpExpiresAt,
+        otpAttemptCount: newAttemptCount,
+        otpAttemptResetAt: newResetAt,
+        otpLastSentAt: now,
       })
       .where(eq(serverUsers.id, user.id));
 
     if (process.env.TWILIO_PHONE_NUMBER && process.env.TWILIO_ACCOUNT_SID) {
       try {
         await twilioClient.messages.create({
-          body: `Your Home Staff 360 verification code is: ${otp}. Valid for ${OTP_EXPIRY_MINUTES} minutes.`,
-          to: phone,
+          body: `Your OTP for phone number verification is: ${otp} (Note: Please keep it valid only for ${OTP_EXPIRY_MINUTES} minutes.)`,
+          to: normalizedPhone,
           from: process.env.TWILIO_PHONE_NUMBER
         });
       } catch (smsError) {
@@ -89,11 +173,15 @@ router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
       console.log("DEV MODE - OTP:", otp);
     }
 
+    const remainingAttempts = MAX_OTP_ATTEMPTS_PER_HOUR - newAttemptCount;
+
     res.json({ 
       success: true, 
       message: "OTP sent successfully",
       userId: user.id,
-      expiresIn: OTP_EXPIRY_MINUTES * 60
+      expiresIn: OTP_EXPIRY_MINUTES * 60,
+      remainingAttempts,
+      cooldownSeconds: OTP_COOLDOWN_SECONDS
     });
   } catch (error) {
     console.error("Request OTP error:", error);
@@ -109,9 +197,7 @@ router.post("/api/auth/verify-otp", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Phone and OTP are required" });
     }
 
-    const user = await db.query.serverUsers.findFirst({
-      where: eq(serverUsers.phone, phone)
-    });
+    const user = await findUserByPhone(phone);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });

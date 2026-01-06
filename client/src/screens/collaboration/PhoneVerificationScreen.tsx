@@ -10,36 +10,81 @@ import { useNavigation } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { collaborationService } from "@/lib/collaboration-service";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const OTP_EXPIRY_SECONDS = 300;
+const OTP_EXPIRY_SECONDS = 1800;
+const RESEND_COOLDOWN_SECONDS = 60;
+
+const COUNTRY_CODES = [
+  { code: "+1", country: "US/CA", flag: "US" },
+  { code: "+44", country: "UK", flag: "GB" },
+  { code: "+91", country: "India", flag: "IN" },
+  { code: "+61", country: "Australia", flag: "AU" },
+  { code: "+49", country: "Germany", flag: "DE" },
+  { code: "+33", country: "France", flag: "FR" },
+  { code: "+81", country: "Japan", flag: "JP" },
+  { code: "+86", country: "China", flag: "CN" },
+  { code: "+55", country: "Brazil", flag: "BR" },
+  { code: "+52", country: "Mexico", flag: "MX" },
+  { code: "+34", country: "Spain", flag: "ES" },
+  { code: "+39", country: "Italy", flag: "IT" },
+  { code: "+7", country: "Russia", flag: "RU" },
+  { code: "+82", country: "S. Korea", flag: "KR" },
+  { code: "+65", country: "Singapore", flag: "SG" },
+  { code: "+971", country: "UAE", flag: "AE" },
+  { code: "+966", country: "Saudi Arabia", flag: "SA" },
+  { code: "+27", country: "South Africa", flag: "ZA" },
+  { code: "+234", country: "Nigeria", flag: "NG" },
+  { code: "+254", country: "Kenya", flag: "KE" },
+  { code: "+63", country: "Philippines", flag: "PH" },
+  { code: "+62", country: "Indonesia", flag: "ID" },
+  { code: "+60", country: "Malaysia", flag: "MY" },
+  { code: "+66", country: "Thailand", flag: "TH" },
+  { code: "+84", country: "Vietnam", flag: "VN" },
+];
 
 export function PhoneVerificationScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+91");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [isLoading, setIsLoading] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-  const [canResend, setCanResend] = useState(false);
+  const [otpExpiryCountdown, setOtpExpiryCountdown] = useState(0);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
+
+  const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+  const canResend = resendCooldown === 0 && step === "otp";
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            setCanResend(true);
-            return 0;
-          }
-          return prev - 1;
-        });
+    let expiryTimer: NodeJS.Timeout;
+    if (otpExpiryCountdown > 0) {
+      expiryTimer = setInterval(() => {
+        setOtpExpiryCountdown((prev) => (prev <= 1 ? 0 : prev - 1));
       }, 1000);
     }
-    return () => clearInterval(timer);
-  }, [countdown]);
+    return () => clearInterval(expiryTimer);
+  }, [otpExpiryCountdown]);
+
+  useEffect(() => {
+    let cooldownTimer: NodeJS.Timeout;
+    if (resendCooldown > 0) {
+      cooldownTimer = setInterval(() => {
+        setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+      }, 1000);
+    }
+    return () => clearInterval(cooldownTimer);
+  }, [resendCooldown]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -48,7 +93,7 @@ export function PhoneVerificationScreen() {
   };
 
   const handleSendOtp = useCallback(async () => {
-    if (!phone.trim()) {
+    if (!phoneNumber.trim()) {
       toast({
         title: t("error"),
         description: t("enterPhoneNumber"),
@@ -59,11 +104,14 @@ export function PhoneVerificationScreen() {
 
     setIsLoading(true);
     try {
-      const response = await collaborationService.requestOtp(phone);
+      const response = await collaborationService.requestOtp(fullPhoneNumber);
       if (response.success) {
         setStep("otp");
-        setCountdown(OTP_EXPIRY_SECONDS);
-        setCanResend(false);
+        setOtpExpiryCountdown(OTP_EXPIRY_SECONDS);
+        setResendCooldown(RESEND_COOLDOWN_SECONDS);
+        if ((response as any).remainingAttempts !== undefined) {
+          setRemainingAttempts((response as any).remainingAttempts);
+        }
         toast({
           title: t("success"),
           description: t("otpSent"),
@@ -84,7 +132,7 @@ export function PhoneVerificationScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [phone, toast, t]);
+  }, [phoneNumber, fullPhoneNumber, toast, t]);
 
   const handleVerifyOtp = useCallback(async () => {
     if (!otp.trim() || otp.length !== 6) {
@@ -98,7 +146,7 @@ export function PhoneVerificationScreen() {
 
     setIsLoading(true);
     try {
-      const response = await collaborationService.verifyOtp(phone, otp);
+      const response = await collaborationService.verifyOtp(fullPhoneNumber, otp);
       if (response.success) {
         toast({
           title: t("success"),
@@ -121,12 +169,11 @@ export function PhoneVerificationScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [phone, otp, toast, t, navigate]);
+  }, [fullPhoneNumber, otp, toast, t, navigate]);
 
   const handleResendOtp = useCallback(async () => {
     if (!canResend) return;
-    setCanResend(false);
-    setCountdown(OTP_EXPIRY_SECONDS);
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
     await handleSendOtp();
   }, [canResend, handleSendOtp]);
 
@@ -134,7 +181,8 @@ export function PhoneVerificationScreen() {
     if (step === "otp") {
       setStep("phone");
       setOtp("");
-      setCountdown(0);
+      setOtpExpiryCountdown(0);
+      setResendCooldown(0);
     } else {
       goBack();
     }
@@ -160,8 +208,8 @@ export function PhoneVerificationScreen() {
             </h2>
             <p className="text-muted-foreground text-sm">
               {step === "phone"
-                ? "Enter your phone number to receive a verification code"
-                : `We've sent a 6-digit code to ${phone}`}
+                ? "Enter your phone number with country code to receive a verification code"
+                : `We've sent a 6-digit code to ${fullPhoneNumber}`}
             </p>
           </div>
 
@@ -169,23 +217,40 @@ export function PhoneVerificationScreen() {
             {step === "phone" ? (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">{t("enterPhoneNumber")}</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder={t("phoneNumberPlaceholder")}
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="pl-10"
-                      data-testid="input-phone"
-                    />
+                  <Label>{t("enterPhoneNumber")}</Label>
+                  <div className="flex gap-2">
+                    <Select value={countryCode} onValueChange={setCountryCode}>
+                      <SelectTrigger className="w-[120px]" data-testid="select-country-code">
+                        <SelectValue placeholder="Code" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRY_CODES.map((cc) => (
+                          <SelectItem key={cc.code} value={cc.code}>
+                            {cc.code} {cc.country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="1234567890"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                        className="pl-10"
+                        data-testid="input-phone"
+                      />
+                    </div>
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Enter phone number without country code (it's selected above)
+                  </p>
                 </div>
                 <Button
                   onClick={handleSendOtp}
-                  disabled={isLoading || !phone.trim()}
+                  disabled={isLoading || !phoneNumber.trim()}
                   className="w-full"
                   data-testid="button-send-otp"
                 >
@@ -210,9 +275,21 @@ export function PhoneVerificationScreen() {
                   />
                 </div>
 
-                {countdown > 0 && (
+                {otpExpiryCountdown > 0 && (
                   <p className="text-center text-sm text-muted-foreground">
-                    {t("otpExpires")}: {formatTime(countdown)}
+                    {t("otpExpires")}: {formatTime(otpExpiryCountdown)}
+                  </p>
+                )}
+
+                {resendCooldown > 0 && (
+                  <p className="text-center text-sm text-muted-foreground">
+                    Resend available in: {resendCooldown}s
+                  </p>
+                )}
+
+                {remainingAttempts !== null && remainingAttempts <= 2 && (
+                  <p className="text-center text-sm text-amber-600 dark:text-amber-400">
+                    Remaining attempts: {remainingAttempts}
                   </p>
                 )}
 
@@ -240,8 +317,11 @@ export function PhoneVerificationScreen() {
           </Card>
 
           <p className="text-center text-xs text-muted-foreground px-4">
-            By continuing, you agree to our Terms of Service and Privacy Policy.
-            Your phone number is used only for account verification.
+            OTP is valid for 30 minutes. Maximum 5 OTP requests allowed per hour.
+          </p>
+
+          <p className="text-center text-xs text-muted-foreground px-4">
+            By continuing, you agree to our Terms of Service and Privacy Policy. Your phone number is used only for account verification.
           </p>
         </div>
       </ScrollContent>
