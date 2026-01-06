@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Shield,
   Users,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
 
-type AuthStep = "phone" | "password" | "otp" | "set-password";
+type AuthStep = "phone" | "password" | "otp" | "set-password" | "reset-otp" | "reset-password";
 
 export function AuthScreen() {
   const { navigate } = useNavigation();
@@ -238,14 +239,116 @@ export function AuthScreen() {
   const handleForgotPassword = async () => {
     setIsLoading(true);
     try {
-      await handleRequestOtp();
-      setStep("otp");
-      setHasPassword(false);
-    } catch (error) {
-      console.error(error);
+      const result = await collaborationService.forgotPassword(phone);
+      if (result.success) {
+        setCooldown(result.cooldownSeconds || 60);
+        setOtp("");
+        setPassword("");
+        setConfirmPassword("");
+        setStep("reset-otp");
+        toast({
+          title: "Reset Code Sent",
+          description: "Check your phone for the password reset code",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset code",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleResendResetOtp = async () => {
+    if (cooldown > 0) return;
+
+    setIsLoading(true);
+    try {
+      const result = await collaborationService.forgotPassword(phone);
+      if (result.success) {
+        setCooldown(result.cooldownSeconds || 60);
+        toast({
+          title: "Reset Code Sent",
+          description: "Check your phone for the password reset code",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset code",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyResetOtp = async () => {
+    if (!otp || otp.length < 4) {
+      toast({
+        title: "Invalid Code",
+        description: "Please enter the reset code",
+        variant: "destructive",
+      });
+      return;
+    }
+    setStep("reset-password");
+  };
+
+  const handleResetPassword = async () => {
+    if (!password || password.length < 6) {
+      toast({
+        title: "Weak Password",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await collaborationService.resetPassword(phone, otp, password);
+      
+      if (result.success) {
+        toast({
+          title: "Password Reset",
+          description: "Your password has been reset successfully",
+        });
+        
+        if (result.user?.needsOnboarding) {
+          navigate("onboarding");
+        } else {
+          navigate("launcher");
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "Reset Failed",
+        description: error.message || "Failed to reset password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBackToPhone = () => {
+    setStep("phone");
+    setOtp("");
+    setPassword("");
+    setConfirmPassword("");
   };
 
   return (
@@ -350,12 +453,13 @@ export function AuthScreen() {
                 )}
               </Button>
 
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between gap-2 text-sm">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="p-0 h-auto text-primary"
-                  onClick={() => setStep("phone")}
+                  onClick={handleBackToPhone}
+                  data-testid="button-change-number"
                 >
                   Change Number
                 </Button>
@@ -365,6 +469,7 @@ export function AuthScreen() {
                   className="p-0 h-auto text-primary"
                   onClick={handleForgotPassword}
                   disabled={isLoading}
+                  data-testid="button-forgot-password"
                 >
                   Forgot Password?
                 </Button>
@@ -409,12 +514,13 @@ export function AuthScreen() {
                 )}
               </Button>
 
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center gap-2 text-sm">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="p-0 h-auto text-primary"
-                  onClick={() => setStep("phone")}
+                  onClick={handleBackToPhone}
+                  data-testid="button-change-number-otp"
                 >
                   Change Number
                 </Button>
@@ -424,6 +530,7 @@ export function AuthScreen() {
                   className="p-0 h-auto text-primary"
                   onClick={handleRequestOtp}
                   disabled={cooldown > 0 || isLoading}
+                  data-testid="button-resend-otp"
                 >
                   {cooldown > 0 ? (
                     `Resend in ${cooldown}s`
@@ -435,6 +542,151 @@ export function AuthScreen() {
                   )}
                 </Button>
               </div>
+            </div>
+          )}
+
+          {step === "reset-otp" && (
+            <div className="space-y-4">
+              <div className="text-center mb-4">
+                <KeyRound className="w-12 h-12 text-primary mx-auto mb-2" />
+                <p className="font-medium">Reset Your Password</p>
+                <p className="text-sm text-muted-foreground">
+                  Enter the reset code sent to {phone}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="reset-otp">Reset Code</Label>
+                <Input
+                  id="reset-otp"
+                  type="text"
+                  placeholder="Enter reset code"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="text-center text-xl tracking-widest"
+                  maxLength={6}
+                  data-testid="input-reset-otp"
+                />
+              </div>
+
+              <Button
+                className="w-full"
+                onClick={handleVerifyResetOtp}
+                disabled={isLoading || otp.length < 4}
+                data-testid="button-verify-reset-otp"
+              >
+                Continue
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+
+              <div className="flex justify-between items-center gap-2 text-sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-0 h-auto text-primary"
+                  onClick={handleBackToPhone}
+                  data-testid="button-back-reset"
+                >
+                  Back to Login
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-0 h-auto text-primary"
+                  onClick={handleResendResetOtp}
+                  disabled={cooldown > 0 || isLoading}
+                  data-testid="button-resend-reset-otp"
+                >
+                  {cooldown > 0 ? (
+                    `Resend in ${cooldown}s`
+                  ) : (
+                    <>
+                      <RefreshCw className="w-3 h-3 mr-1" />
+                      Resend Code
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === "reset-password" && (
+            <div className="space-y-4">
+              <div className="text-center mb-4">
+                <Lock className="w-12 h-12 text-primary mx-auto mb-2" />
+                <p className="font-medium">Set New Password</p>
+                <p className="text-sm text-muted-foreground">
+                  Create a new password for your account
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="new-reset-password">New Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="new-reset-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="At least 6 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                    data-testid="input-new-reset-password"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirm-reset-password">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="confirm-reset-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Re-enter password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10"
+                    data-testid="input-confirm-reset-password"
+                  />
+                </div>
+              </div>
+
+              <Button
+                className="w-full"
+                onClick={handleResetPassword}
+                disabled={isLoading}
+                data-testid="button-reset-password"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Reset Password"
+                )}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full p-0 h-auto text-primary"
+                onClick={() => setStep("reset-otp")}
+                data-testid="button-back-to-reset-otp"
+              >
+                Back to Reset Code
+              </Button>
             </div>
           )}
 

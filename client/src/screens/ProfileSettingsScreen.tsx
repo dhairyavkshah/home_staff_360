@@ -154,7 +154,7 @@ export function ProfileSettingsScreen() {
       return;
     }
 
-    if (profile?.hasPassword && !currentPassword) {
+    if (!currentPassword) {
       toast({
         title: "Error",
         description: "Please enter your current password",
@@ -258,7 +258,7 @@ export function ProfileSettingsScreen() {
   const getTitle = () => {
     switch (step) {
       case "edit-name": return "Edit Name";
-      case "change-password": return profile?.hasPassword ? "Change Password" : "Set Password";
+      case "change-password": return "Change Password";
       case "change-phone": return "Change Phone Number";
       case "verify-phone": return "Verify New Phone";
       default: return "Profile";
@@ -332,7 +332,7 @@ export function ProfileSettingsScreen() {
                   <div className="text-left">
                     <p className="text-sm font-medium">Password</p>
                     <p className="text-sm text-muted-foreground">
-                      {profile?.hasPassword ? "Change your password" : "Set a password"}
+                      Change your password
                     </p>
                   </div>
                 </div>
@@ -381,31 +381,29 @@ export function ProfileSettingsScreen() {
         {step === "change-password" && (
           <section className="flex flex-col gap-4">
             <Card className="p-4 flex flex-col gap-4">
-              {profile?.hasPassword && (
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="currentPassword"
-                      type={showPassword ? "text" : "password"}
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      placeholder="Enter current password"
-                      className="pr-10"
-                      data-testid="input-current-password"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </Button>
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="currentPassword">Current Password</Label>
+                <div className="relative">
+                  <Input
+                    id="currentPassword"
+                    type={showPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Enter current password"
+                    className="pr-10"
+                    data-testid="input-current-password"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
                 </div>
-              )}
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
@@ -442,7 +440,7 @@ export function ProfileSettingsScreen() {
                 ) : (
                   <>
                     <Shield className="w-4 h-4 mr-2" />
-                    {profile?.hasPassword ? "Change Password" : "Set Password"}
+                    Change Password
                   </>
                 )}
               </Button>

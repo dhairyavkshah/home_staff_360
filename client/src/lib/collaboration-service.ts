@@ -236,6 +236,37 @@ class CollaborationService {
     });
   }
 
+  async forgotPassword(phone: string): Promise<OtpResponse> {
+    return this.apiRequest<OtpResponse>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ phone }),
+    });
+  }
+
+  async resetPassword(phone: string, otp: string, newPassword: string): Promise<{
+    success: boolean;
+    message?: string;
+    token?: string;
+    user?: CollaborationUser & { needsOnboarding?: boolean };
+  }> {
+    const response = await this.apiRequest<{
+      success: boolean;
+      message?: string;
+      token?: string;
+      user?: CollaborationUser & { needsOnboarding?: boolean };
+    }>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ phone, otp, newPassword }),
+    });
+
+    if (response.success && response.token) {
+      this.saveToken(response.token);
+      this.saveCredentials(phone);
+    }
+
+    return response;
+  }
+
   async completeOnboarding(): Promise<{ success: boolean }> {
     return this.apiRequest("/user/complete-onboarding", {
       method: "POST",

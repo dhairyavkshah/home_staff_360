@@ -498,6 +498,158 @@ router.post("/api/auth/check-phone", async (req: Request, res: Response) => {
   }
 });
 
+const PASSWORD_RESET_OTP_EXPIRY_MINUTES = 10;
+
+router.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+  try {
+    const { phone } = req.body;
+    
+    if (!phone || phone.length < 10) {
+      return res.status(400).json({ error: "Valid phone number is required" });
+    }
+
+    const normalizedPhone = normalizePhoneWithCountryCode(phone);
+    
+    if (!normalizedPhone.match(/^\+\d{10,15}$/)) {
+      return res.status(400).json({ error: "Phone number must include country code" });
+    }
+
+    const user = await findUserByPhone(phone);
+
+    if (!user) {
+      return res.json({ 
+        success: true, 
+        message: "If an account exists with this phone number, you will receive an OTP shortly",
+        cooldownSeconds: OTP_COOLDOWN_SECONDS
+      });
+    }
+
+    const rateLimitCheck = canRequestOtp(user);
+    if (!rateLimitCheck.allowed) {
+      return res.status(429).json({ 
+        error: rateLimitCheck.reason,
+        waitSeconds: rateLimitCheck.waitSeconds
+      });
+    }
+
+    const otp = generateOTP();
+    const otpHash = await bcrypt.hash(otp, 10);
+    const now = new Date();
+    const otpExpiresAt = new Date(now.getTime() + PASSWORD_RESET_OTP_EXPIRY_MINUTES * 60 * 1000);
+    
+    const currentAttemptCount = user.otpAttemptCount || 0;
+    const resetAt = user.otpAttemptResetAt;
+    const shouldResetCounter = resetAt && now > resetAt;
+    
+    const newAttemptCount = shouldResetCounter ? 1 : currentAttemptCount + 1;
+    const newResetAt = shouldResetCounter ? new Date(now.getTime() + 60 * 60 * 1000) : (resetAt || new Date(now.getTime() + 60 * 60 * 1000));
+
+    await db.update(serverUsers)
+      .set({ 
+        otpHash, 
+        otpExpiresAt,
+        otpAttemptCount: newAttemptCount,
+        otpAttemptResetAt: newResetAt,
+        otpLastSentAt: now,
+      })
+      .where(eq(serverUsers.id, user.id));
+
+    if (process.env.TWILIO_PHONE_NUMBER && process.env.TWILIO_ACCOUNT_SID) {
+      try {
+        await twilioClient.messages.create({
+          body: `Your password reset code is: ${otp} (Valid for ${PASSWORD_RESET_OTP_EXPIRY_MINUTES} minutes only)`,
+          to: normalizedPhone,
+          from: process.env.TWILIO_PHONE_NUMBER
+        });
+      } catch (smsError) {
+        console.error("SMS sending failed:", smsError);
+        if (process.env.NODE_ENV === "development") {
+          console.log("DEV MODE - Password Reset OTP:", otp);
+        }
+      }
+    } else if (process.env.NODE_ENV === "development") {
+      console.log("DEV MODE - Password Reset OTP:", otp);
+    }
+
+    res.json({ 
+      success: true, 
+      message: "If an account exists with this phone number, you will receive an OTP shortly",
+      cooldownSeconds: OTP_COOLDOWN_SECONDS
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ error: "Failed to process request" });
+  }
+});
+
+router.post("/api/auth/reset-password", async (req: Request, res: Response) => {
+  try {
+    const { phone, otp, newPassword } = req.body;
+
+    if (!phone || !otp || !newPassword) {
+      return res.status(400).json({ error: "Phone, OTP, and new password are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    const user = await findUserByPhone(phone);
+
+    if (!user) {
+      return res.status(400).json({ error: "Invalid or expired reset code" });
+    }
+
+    if (!user.otpHash || !user.otpExpiresAt) {
+      return res.status(400).json({ error: "Invalid or expired reset code" });
+    }
+
+    if (new Date() > user.otpExpiresAt) {
+      return res.status(400).json({ error: "Reset code has expired" });
+    }
+
+    const isValidOTP = await bcrypt.compare(otp, user.otpHash);
+    
+    if (!isValidOTP) {
+      return res.status(400).json({ error: "Invalid or expired reset code" });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await db.update(serverUsers)
+      .set({ 
+        passwordHash,
+        otpHash: null,
+        otpExpiresAt: null,
+        isVerified: true,
+        lastActiveAt: new Date()
+      })
+      .where(eq(serverUsers.id, user.id));
+
+    const token = jwt.sign(
+      { userId: user.id, phone: user.phone },
+      JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    res.json({
+      success: true,
+      message: "Password reset successfully",
+      token,
+      user: {
+        id: user.id,
+        phone: user.phone,
+        displayName: user.displayName,
+        isVerified: true,
+        needsOnboarding: !user.onboardingCompleted
+      }
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ error: "Failed to reset password" });
+  }
+});
+
 // Mark onboarding as completed
 router.post("/api/user/complete-onboarding", authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -743,7 +895,7 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
       return res.status(400).json({ error: "Phone number and OTP are required" });
     }
 
-    // Verify OTP
+    // Verify OTP first (outside transaction for early exit)
     const otpRecord = await db.query.otpCodes.findFirst({
       where: eq(otpCodes.phone, newPhone)
     });
@@ -767,7 +919,7 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
       return res.status(400).json({ error: "Invalid verification code" });
     }
 
-    // Get old phone for notifications
+    // Get user for notifications
     const user = await db.query.serverUsers.findFirst({
       where: eq(serverUsers.id, userId)
     });
@@ -778,51 +930,54 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
 
     const oldPhone = user.phone;
 
-    // Update user's phone number
-    await db.update(serverUsers)
-      .set({ phone: newPhone })
-      .where(eq(serverUsers.id, userId));
+    // Wrap all mutations in a transaction for atomicity
+    await db.transaction(async (tx) => {
+      // Update user's phone number
+      await tx.update(serverUsers)
+        .set({ phone: newPhone })
+        .where(eq(serverUsers.id, userId));
 
-    // Mark OTP as verified
-    await db.update(otpCodes)
-      .set({ verified: true })
-      .where(eq(otpCodes.id, otpRecord.id));
+      // Mark OTP as verified
+      await tx.update(otpCodes)
+        .set({ verified: true })
+        .where(eq(otpCodes.id, otpRecord.id));
 
-    // Create notification for user about phone change
-    await db.insert(notifications).values({
-      id: uuidv4(),
-      userId,
-      userMode: user.userType || 'HOME',
-      type: 'system',
-      title: 'Phone Number Changed',
-      message: `Your phone number has been changed from ${oldPhone} to ${newPhone}`,
-      payload: JSON.stringify({ oldPhone, newPhone }),
-      createdAt: new Date()
-    });
-
-    // Notify connections about the phone change
-    const userConnections = await db.query.collabConnections.findMany({
-      where: or(
-        eq(collabConnections.userAId, userId),
-        eq(collabConnections.userBId, userId)
-      )
-    });
-
-    for (const connection of userConnections) {
-      const otherUserId = connection.userAId === userId ? connection.userBId : connection.userAId;
-      await db.insert(notifications).values({
+      // Create notification for user about phone change
+      await tx.insert(notifications).values({
         id: uuidv4(),
-        userId: otherUserId,
-        userMode: 'HOME',
+        userId,
+        userMode: user.userType || 'HOME',
         type: 'system',
-        title: 'Contact Updated',
-        message: `${user.displayName || 'A contact'} has updated their phone number`,
-        payload: JSON.stringify({ connectionId: connection.id, userId }),
+        title: 'Phone Number Changed',
+        message: `Your phone number has been changed from ${oldPhone} to ${newPhone}`,
+        payload: JSON.stringify({ oldPhone, newPhone }),
         createdAt: new Date()
       });
-    }
 
-    // Generate new JWT with updated phone
+      // Notify connections about the phone change
+      const userConnections = await tx.query.collabConnections.findMany({
+        where: or(
+          eq(collabConnections.userAId, userId),
+          eq(collabConnections.userBId, userId)
+        )
+      });
+
+      for (const connection of userConnections) {
+        const otherUserId = connection.userAId === userId ? connection.userBId : connection.userAId;
+        await tx.insert(notifications).values({
+          id: uuidv4(),
+          userId: otherUserId,
+          userMode: 'HOME',
+          type: 'system',
+          title: 'Contact Updated',
+          message: `${user.displayName || 'A contact'} has updated their phone number`,
+          payload: JSON.stringify({ connectionId: connection.id, userId }),
+          createdAt: new Date()
+        });
+      }
+    });
+
+    // Generate new JWT with updated phone (after successful transaction)
     const newToken = jwt.sign(
       { userId: user.id, phone: newPhone },
       JWT_SECRET,
