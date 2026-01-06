@@ -349,21 +349,38 @@ export function SettingsScreen() {
 
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("account")}</h2>
-          <Card className="divide-y">
-            {profile && (
-              <div className="p-3 flex items-center gap-3">
+          <button
+            className="w-full text-left hover-elevate"
+            onClick={() => navigate("profile-settings")}
+            data-testid="button-profile-settings"
+          >
+            <Card className="p-3">
+              <div className="flex items-center gap-3">
                 <div className="icon-halo-primary w-9 h-9">
                   <User className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{profile.displayName}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {isHome ? t("homeUser") : t("staffProfessional")}
-                  </p>
+                  {profile && (
+                    <>
+                      <p className="font-medium text-sm">{profile.displayName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isHome ? t("homeUser") : t("staffProfessional")}
+                      </p>
+                    </>
+                  )}
+                  {!profile && (
+                    <>
+                      <p className="font-medium text-sm">Profile Settings</p>
+                      <p className="text-xs text-muted-foreground">
+                        Manage your name, phone, and password
+                      </p>
+                    </>
+                  )}
                 </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>
-            )}
-          </Card>
+            </Card>
+          </button>
         </section>
 
         <section className="flex flex-col gap-3">
@@ -648,7 +665,6 @@ export function SettingsScreen() {
         isOpen={showPinConfirmModal}
         onClose={() => setShowPinConfirmModal(false)}
         onConfirm={handlePinConfirmed}
-        title="Confirm with PIN"
       />
 
       <ConfirmModal

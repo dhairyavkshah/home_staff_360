@@ -68,6 +68,7 @@ import { SyncActivityScreen } from "@/screens/collaboration/SyncActivityScreen";
 import { NotificationCenterScreen } from "@/screens/collaboration/NotificationCenterScreen";
 import { ApprovalDetailScreen } from "@/screens/collaboration/ApprovalDetailScreen";
 import { AuthScreen } from "@/screens/auth/AuthScreen";
+import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
 
 function MobileAppRouter() {
   const { currentScreen } = useNavigation();
@@ -182,6 +183,8 @@ function MobileAppRouter() {
       return <ApprovalDetailScreen />;
     case "auth":
       return <AuthScreen />;
+    case "profile-settings":
+      return <ProfileSettingsScreen />;
     default:
       return <LauncherScreen />;
   }

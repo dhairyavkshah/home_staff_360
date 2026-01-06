@@ -587,6 +587,260 @@ router.patch("/api/user/profile", authenticateToken, async (req: Request, res: R
   }
 });
 
+// Change password
+router.put("/api/user/password", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: "New password must be at least 6 characters" });
+    }
+
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // If user has a password, verify current password
+    if (user.passwordHash) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: "Current password is required" });
+      }
+      const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: "Current password is incorrect" });
+      }
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    await db.update(serverUsers)
+      .set({ passwordHash: newPasswordHash })
+      .where(eq(serverUsers.id, userId));
+
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ error: "Failed to change password" });
+  }
+});
+
+// Simple in-memory rate limiter for phone change requests
+const phoneChangeRateLimiter = new Map<string, { count: number; resetAt: number }>();
+
+function checkPhoneChangeRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const limit = phoneChangeRateLimiter.get(userId);
+  
+  if (!limit || limit.resetAt < now) {
+    phoneChangeRateLimiter.set(userId, { count: 1, resetAt: now + 3600000 }); // 1 hour window
+    return true;
+  }
+  
+  if (limit.count >= 3) { // Max 3 phone change requests per hour
+    return false;
+  }
+  
+  limit.count++;
+  return true;
+}
+
+// Request phone number change (sends OTP to new phone)
+router.post("/api/user/phone/request-change", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { newPhone, currentPassword } = req.body;
+
+    // Rate limiting check
+    if (!checkPhoneChangeRateLimit(userId)) {
+      return res.status(429).json({ error: "Too many phone change requests. Please try again later." });
+    }
+
+    if (!newPhone || newPhone.length < 10) {
+      return res.status(400).json({ error: "Valid phone number is required" });
+    }
+
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Require password verification for phone change (always require for security)
+    if (!currentPassword) {
+      return res.status(400).json({ error: "Password verification is required" });
+    }
+    
+    if (user.passwordHash) {
+      const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: "Verification failed" });
+      }
+    }
+
+    // Check if new phone is already in use
+    const existingUser = await findUserByPhone(newPhone);
+    if (existingUser && existingUser.id !== userId) {
+      return res.status(409).json({ error: "This phone number is already registered" });
+    }
+
+    // Generate and send OTP to new phone
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    // Store pending phone change in OTP record
+    await db.insert(otpCodes).values({
+      id: uuidv4(),
+      phone: newPhone,
+      code: otp,
+      expiresAt,
+      verified: false,
+      attempts: 0
+    }).onConflictDoUpdate({
+      target: otpCodes.phone,
+      set: { code: otp, expiresAt, verified: false, attempts: 0 }
+    });
+
+    // Send OTP via Twilio
+    if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER) {
+      try {
+        await twilioClient.messages.create({
+          body: `Your Home Staff 360 phone change verification code is: ${otp}. This code will expire in 10 minutes.`,
+          from: TWILIO_PHONE_NUMBER,
+          to: newPhone
+        });
+      } catch (twilioError: any) {
+        console.error("Twilio error:", twilioError);
+        return res.status(500).json({ error: "Failed to send verification code" });
+      }
+    } else {
+      console.log(`[DEV] Phone change OTP for ${newPhone}: ${otp}`);
+    }
+
+    res.json({ 
+      success: true, 
+      message: "Verification code sent to new phone number",
+      expiresIn: 600
+    });
+  } catch (error) {
+    console.error("Request phone change error:", error);
+    res.status(500).json({ error: "Failed to request phone change" });
+  }
+});
+
+// Confirm phone number change with OTP
+router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { newPhone, otp } = req.body;
+
+    if (!newPhone || !otp) {
+      return res.status(400).json({ error: "Phone number and OTP are required" });
+    }
+
+    // Verify OTP
+    const otpRecord = await db.query.otpCodes.findFirst({
+      where: eq(otpCodes.phone, newPhone)
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ error: "No verification code found. Please request a new one." });
+    }
+
+    if (otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ error: "Verification code has expired" });
+    }
+
+    if (otpRecord.attempts >= 5) {
+      return res.status(429).json({ error: "Too many failed attempts. Please request a new code." });
+    }
+
+    if (otpRecord.code !== otp) {
+      await db.update(otpCodes)
+        .set({ attempts: otpRecord.attempts + 1 })
+        .where(eq(otpCodes.id, otpRecord.id));
+      return res.status(400).json({ error: "Invalid verification code" });
+    }
+
+    // Get old phone for notifications
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const oldPhone = user.phone;
+
+    // Update user's phone number
+    await db.update(serverUsers)
+      .set({ phone: newPhone })
+      .where(eq(serverUsers.id, userId));
+
+    // Mark OTP as verified
+    await db.update(otpCodes)
+      .set({ verified: true })
+      .where(eq(otpCodes.id, otpRecord.id));
+
+    // Create notification for user about phone change
+    await db.insert(notifications).values({
+      id: uuidv4(),
+      userId,
+      userMode: user.userType || 'HOME',
+      type: 'system',
+      title: 'Phone Number Changed',
+      message: `Your phone number has been changed from ${oldPhone} to ${newPhone}`,
+      payload: JSON.stringify({ oldPhone, newPhone }),
+      createdAt: new Date()
+    });
+
+    // Notify connections about the phone change
+    const userConnections = await db.query.collabConnections.findMany({
+      where: or(
+        eq(collabConnections.userAId, userId),
+        eq(collabConnections.userBId, userId)
+      )
+    });
+
+    for (const connection of userConnections) {
+      const otherUserId = connection.userAId === userId ? connection.userBId : connection.userAId;
+      await db.insert(notifications).values({
+        id: uuidv4(),
+        userId: otherUserId,
+        userMode: 'HOME',
+        type: 'system',
+        title: 'Contact Updated',
+        message: `${user.displayName || 'A contact'} has updated their phone number`,
+        payload: JSON.stringify({ connectionId: connection.id, userId }),
+        createdAt: new Date()
+      });
+    }
+
+    // Generate new JWT with updated phone
+    const newToken = jwt.sign(
+      { userId: user.id, phone: newPhone },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    res.json({ 
+      success: true, 
+      message: "Phone number updated successfully",
+      token: newToken,
+      phone: newPhone
+    });
+  } catch (error) {
+    console.error("Confirm phone change error:", error);
+    res.status(500).json({ error: "Failed to update phone number" });
+  }
+});
+
 router.post("/api/devices/register", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;

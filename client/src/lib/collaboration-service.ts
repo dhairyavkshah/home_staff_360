@@ -266,21 +266,6 @@ class CollaborationService {
     }
   }
 
-  async getProfile(): Promise<CollaborationUser | null> {
-    if (!this.token) return null;
-    try {
-      return await this.apiRequest<CollaborationUser>("/user/profile");
-    } catch {
-      return null;
-    }
-  }
-
-  async updateProfile(displayName: string): Promise<CollaborationUser> {
-    return this.apiRequest<CollaborationUser>("/user/profile", {
-      method: "PATCH",
-      body: JSON.stringify({ displayName }),
-    });
-  }
 
   async registerDevice(deviceInfo: {
     deviceId: string;
@@ -509,6 +494,86 @@ class CollaborationService {
     if (!navigator.onLine) return "disconnected";
     if (!this.token) return "disconnected";
     return "connected";
+  }
+
+  // Profile management methods
+  async getProfile(): Promise<{
+    id: string;
+    phone: string;
+    displayName?: string;
+    userType?: string;
+    isVerified: boolean;
+    isNewUser: boolean;
+    onboardingCompleted: boolean;
+    hasPassword: boolean;
+    preferredLanguage?: string;
+    connectCount?: number;
+    createdAt: string;
+  }> {
+    return this.apiRequest("/user/profile");
+  }
+
+  async updateProfile(data: {
+    displayName?: string;
+    userType?: string;
+    preferredLanguage?: string;
+  }): Promise<{ success: boolean; message?: string }> {
+    return this.apiRequest("/user/profile", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ 
+    success: boolean; 
+    message?: string;
+    error?: string;
+  }> {
+    return this.apiRequest("/user/password", {
+      method: "PUT",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  }
+
+  async requestPhoneChange(newPhone: string, currentPassword: string): Promise<{ 
+    success: boolean; 
+    message?: string;
+    expiresIn?: number;
+    error?: string;
+  }> {
+    return this.apiRequest("/user/phone/request-change", {
+      method: "POST",
+      body: JSON.stringify({ newPhone, currentPassword }),
+    });
+  }
+
+  async confirmPhoneChange(newPhone: string, otp: string): Promise<{ 
+    success: boolean; 
+    message?: string;
+    token?: string;
+    phone?: string;
+    error?: string;
+  }> {
+    const response = await this.apiRequest<{
+      success: boolean;
+      message?: string;
+      token?: string;
+      phone?: string;
+      error?: string;
+    }>("/user/phone/confirm", {
+      method: "POST",
+      body: JSON.stringify({ newPhone, otp }),
+    });
+
+    // Update stored token if phone change successful
+    if (response.success && response.token) {
+      this.saveToken(response.token);
+      if (response.phone) {
+        localStorage.setItem("homestaff360_saved_phone", response.phone);
+      }
+    }
+
+    return response;
   }
 }
 

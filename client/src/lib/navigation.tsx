@@ -63,7 +63,8 @@ export type Screen =
   | "chat"
   | "messages-list"
   | "auth"
-  | "set-password";
+  | "set-password"
+  | "profile-settings";
 
 interface NavigationData {
   personId?: string;
