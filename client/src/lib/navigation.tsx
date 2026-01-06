@@ -58,7 +58,8 @@ export type Screen =
   | "collaboration-hub"
   | "link-account"
   | "sync-activity"
-  | "notification-center";
+  | "notification-center"
+  | "approval-detail";
 
 interface NavigationData {
   personId?: string;
