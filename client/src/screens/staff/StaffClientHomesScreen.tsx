@@ -169,11 +169,11 @@ export function StaffClientHomesScreen() {
             <p>{t("noResultsFound")}</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-3">
             {filteredHomes.map((home) => (
               <div 
                 key={home.id} 
-                className="flex items-center gap-3 py-2.5 px-3 rounded-lg border bg-card"
+                className="flex items-center gap-3 p-4 rounded-lg border bg-card"
                 data-testid={`card-client-${home.id}`}
               >
                 <div className={home.isActive ? 'icon-halo-primary w-9 h-9' : 'icon-halo-muted w-9 h-9'}>

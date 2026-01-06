@@ -213,7 +213,7 @@ export function AttendanceScreen() {
           </Button>
         </div>
 
-        <Card className="p-3">
+        <Card className="p-4 rounded-lg">
           <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground mb-2">
             <span>Sun</span>
             <span>Mon</span>
@@ -259,8 +259,8 @@ export function AttendanceScreen() {
           </div>
         </Card>
 
-        <Card className="p-4">
-          <div className="grid grid-cols-4 gap-3 text-center">
+        <Card className="p-4 rounded-lg">
+          <div className="grid grid-cols-4 gap-4 text-center">
             <div>
               <p className="text-xl font-bold text-success" data-testid="stat-full">{summary.full}</p>
               <p className="text-xs text-muted-foreground">{t("fullDay")}</p>
@@ -281,7 +281,7 @@ export function AttendanceScreen() {
         </Card>
 
         <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-4">
             <h3 className="font-semibold text-sm flex-1">{formatSelectedDate(selectedDate)}</h3>
             {people.length > 0 && summary.notMarked > 0 && (
               <Button 
@@ -297,7 +297,7 @@ export function AttendanceScreen() {
           </div>
           
           {people.length === 0 ? (
-            <Card className="p-4 text-center">
+            <Card className="p-4 text-center rounded-lg">
               <Users className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">No staff added yet</p>
               <Button 
@@ -325,13 +325,13 @@ export function AttendanceScreen() {
                   <p>{t("noResultsFound")}</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-1.5" data-testid="list-attendance-staff">
+                <div className="flex flex-col gap-3" data-testid="list-attendance-staff">
                   {filteredPeople.map((person) => {
                     const record = todayAttendance.get(person.id);
                     return (
                       <div 
                         key={person.id} 
-                        className="flex items-center gap-3 py-2.5 px-3 rounded-lg border bg-card hover-elevate cursor-pointer"
+                        className="flex items-center gap-3 p-4 rounded-lg border bg-card hover-elevate cursor-pointer"
                         onClick={() => handlePersonClick(person.id)}
                         data-testid={`staff-attendance-${person.id}`}
                       >

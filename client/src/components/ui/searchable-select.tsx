@@ -147,7 +147,7 @@ export function SearchableSelect({
                       key={opt.value}
                       onClick={() => handleSelect(opt.value)}
                       className={cn(
-                        "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 px-2 text-sm outline-none hover-elevate active-elevate-2",
+                        "relative flex w-full cursor-pointer select-none items-center rounded py-2 px-2 text-sm outline-none hover-elevate active-elevate-2",
                         value === opt.value && "bg-accent"
                       )}
                       data-testid={`${testId}-option-${opt.value}`}

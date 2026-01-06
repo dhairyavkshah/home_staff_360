@@ -401,8 +401,8 @@ export function ReportsScreen() {
           </Button>
         </section>
 
-        <section className="grid grid-cols-2 gap-2.5">
-          <Card className="p-3 flex flex-col items-center">
+        <section className="grid grid-cols-2 gap-3">
+          <Card className="p-4 flex flex-col items-center">
             <div className="icon-halo-primary w-9 h-9 mb-2">
               <Users className="w-4 h-4 text-primary" />
             </div>
@@ -411,7 +411,7 @@ export function ReportsScreen() {
             </p>
             <p className="text-xs text-muted-foreground">{t("wages")}</p>
           </Card>
-          <Card className="p-3 flex flex-col items-center">
+          <Card className="p-4 flex flex-col items-center">
             <div className="icon-halo-warning w-9 h-9 mb-2">
               <Receipt className="w-4 h-4 text-warning" />
             </div>
@@ -425,7 +425,7 @@ export function ReportsScreen() {
         <section className="flex flex-col gap-4">
           <h3 className="font-semibold">{t("exportReports")}</h3>
 
-          <Card className="p-3 flex flex-col gap-3">
+          <Card className="p-4 flex flex-col gap-3">
             <div className="flex items-center gap-2.5">
               <div className="icon-halo-success w-9 h-9">
                 <FileText className="w-4 h-4 text-success" />
@@ -465,7 +465,7 @@ export function ReportsScreen() {
             </div>
           </Card>
 
-          <Card className="p-3 flex flex-col gap-3">
+          <Card className="p-4 flex flex-col gap-3">
             <div className="flex items-center gap-2.5">
               <div className="icon-halo-primary w-9 h-9">
                 <Calendar className="w-4 h-4 text-primary" />
@@ -506,25 +506,25 @@ export function ReportsScreen() {
           </Card>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h3 className="font-semibold">Summary</h3>
           <Card className="divide-y">
-            <div className="p-3 flex items-center justify-between gap-2">
+            <div className="p-4 flex items-center justify-between gap-2">
               <span className="text-sm text-muted-foreground">Staff Wages</span>
               <span className="font-medium text-sm text-right">{formatCurrencyTotals(reportData.wagesByCurrency)}</span>
             </div>
-            <div className="p-3 flex items-center justify-between gap-2">
+            <div className="p-4 flex items-center justify-between gap-2">
               <span className="text-sm text-muted-foreground">Household Expenses</span>
               <span className="font-medium text-sm text-right">{formatCurrencyTotals(reportData.expensesByCurrency)}</span>
             </div>
-            <div className="p-3 flex items-center justify-between gap-2 bg-primary/5">
+            <div className="p-4 flex items-center justify-between gap-2 bg-primary/5">
               <span className="font-semibold">{t("grandTotal")}</span>
               <span className="font-bold text-lg text-right">{formatCurrencyTotals(reportData.allEntriesByCurrency)}</span>
             </div>
           </Card>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h3 className="font-semibold">{t("attendance")}</h3>
           <Card className="divide-y">
             <div className="p-4 flex items-center justify-between">

@@ -564,7 +564,7 @@ export function SupportDeveloperScreen() {
       </Drawer>
 
       <ScrollContent className="pb-24">
-        <section className="flex flex-col items-center text-center gap-3">
+        <section className="flex flex-col items-center text-center gap-4">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
             <Heart className="w-8 h-8 text-white" />
           </div>
@@ -588,7 +588,7 @@ export function SupportDeveloperScreen() {
           )}
         </section>
 
-        <Card className="p-4 flex flex-col gap-3">
+        <Card className="p-4 flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
               <User className="w-6 h-6 text-primary" />

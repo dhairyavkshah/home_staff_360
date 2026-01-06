@@ -258,13 +258,13 @@ export function ConnectionsTab() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-6">
       <Card className="p-4">
-        <h4 className="font-medium mb-3 flex items-center gap-2">
+        <h4 className="font-medium mb-4 flex items-center gap-2">
           <Search className="w-4 h-4" />
           Find People
         </h4>
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           <Input
             placeholder="+1234567890"
             value={searchPhone}
@@ -286,7 +286,7 @@ export function ConnectionsTab() {
         </div>
 
         {searchResult?.user && (
-          <div className="mt-4 p-3 bg-muted rounded-md">
+          <div className="mt-4 p-4 bg-muted rounded-md">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -327,11 +327,11 @@ export function ConnectionsTab() {
       </Card>
 
       {receivedInvites.length > 0 && (
-        <div>
-          <h4 className="font-medium mb-2 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-4">
+          <h4 className="font-medium text-sm text-muted-foreground">
             Pending Requests ({receivedInvites.length})
           </h4>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-4">
             {receivedInvites.map((invite) => (
               <Card key={invite.id} className="p-4" data-testid={`card-invite-${invite.id}`}>
                 <div className="flex items-center justify-between gap-3">
@@ -371,13 +371,13 @@ export function ConnectionsTab() {
       )}
 
       {sentInvites.length > 0 && (
-        <div>
-          <h4 className="font-medium mb-2 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-4">
+          <h4 className="font-medium text-sm text-muted-foreground">
             Sent Requests ({sentInvites.length})
           </h4>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-4">
             {sentInvites.map((invite) => (
-              <Card key={invite.id} className="p-3" data-testid={`card-sent-${invite.id}`}>
+              <Card key={invite.id} className="p-4" data-testid={`card-sent-${invite.id}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
@@ -393,12 +393,12 @@ export function ConnectionsTab() {
         </div>
       )}
 
-      <div>
-        <h4 className="font-medium mb-2">
+      <div className="flex flex-col gap-4">
+        <h4 className="font-medium">
           My Connections ({connections.length})
         </h4>
         {connections.length === 0 ? (
-          <Card className="p-6">
+          <Card className="p-4">
             <div className="text-center text-muted-foreground">
               <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No connections yet</p>
@@ -406,7 +406,7 @@ export function ConnectionsTab() {
             </div>
           </Card>
         ) : (
-          <div className="space-y-2">
+          <div className="flex flex-col gap-4">
             {connections.map((conn) => (
               <Card
                 key={conn.id}

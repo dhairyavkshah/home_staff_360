@@ -186,9 +186,9 @@ export function StaffEarningsScreen() {
           {attendance.length === 0 ? (
             <p className="text-muted-foreground text-sm">{t("noAttendanceThisMonth")}</p>
           ) : (
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               {attendance.slice(0, 10).map((a) => (
-                <div key={a.id} className="flex items-center gap-2 py-2 px-3 rounded-lg border bg-card">
+                <div key={a.id} className="flex items-center gap-3 p-4 rounded-lg border bg-card">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{homeNames.get(a.clientHomeId) || t("unknown")}</p>
                     <p className="text-xs text-muted-foreground">
@@ -229,9 +229,9 @@ export function StaffEarningsScreen() {
         {laundryJobs.length > 0 && (
           <section className="flex flex-col gap-3">
             <h3 className="font-semibold text-sm">{t("laundryJobs")} ({laundryJobs.length})</h3>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               {laundryJobs.slice(0, 5).map((job) => (
-                <div key={job.id} className="flex items-center gap-2 py-2 px-3 rounded-lg border bg-card">
+                <div key={job.id} className="flex items-center gap-3 p-4 rounded-lg border bg-card">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{homeNames.get(job.clientHomeId) || t("unknown")}</p>
                     <p className="text-xs text-muted-foreground">

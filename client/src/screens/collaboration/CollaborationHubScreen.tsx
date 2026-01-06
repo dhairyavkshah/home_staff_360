@@ -197,7 +197,7 @@ export function CollaborationHubScreen() {
   };
 
   const renderLinksTab = () => (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-6">
       <Card className="p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -256,7 +256,7 @@ export function CollaborationHubScreen() {
           </Button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-4">
           {activeLinks.map(renderLinkCard)}
 
           {pendingLinks.length > 0 && (
@@ -343,12 +343,10 @@ export function CollaborationHubScreen() {
         </div>
 
         <ScrollContent>
-          <div className="p-4">
-            {activeTab === "connections" && <ConnectionsTab />}
-            {activeTab === "messages" && <MessagesTab />}
-            {activeTab === "spaces" && <SharedSpacesTab />}
-            {activeTab === "links" && renderLinksTab()}
-          </div>
+          {activeTab === "connections" && <ConnectionsTab />}
+          {activeTab === "messages" && <MessagesTab />}
+          {activeTab === "spaces" && <SharedSpacesTab />}
+          {activeTab === "links" && renderLinksTab()}
         </ScrollContent>
       </div>
     </AppLayout>

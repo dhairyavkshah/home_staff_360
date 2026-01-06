@@ -353,8 +353,8 @@ export function StaffHomeScreen() {
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         <StorageWarningBanner />
-        <div className="content-container pt-4 pb-6 flex flex-col gap-4">
-          <section className="grid grid-cols-2 gap-2" data-testid="section-modules">
+        <div className="content-container px-4 pt-4 pb-6 flex flex-col gap-6">
+          <section className="grid grid-cols-2 gap-3" data-testid="section-modules">
             {modules.map((module) => {
               const Icon = module.icon;
               const tourId = {
@@ -387,11 +387,11 @@ export function StaffHomeScreen() {
             })}
           </section>
 
-          <section className="flex flex-col gap-2" data-testid="section-quick-stats" data-tour-id="tour-overview-section">
+          <section className="flex flex-col gap-3" data-testid="section-quick-stats" data-tour-id="tour-overview-section">
             <h2 className="text-base font-semibold">{tLabel('overview', 'Overview')}</h2>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-3">
               <Card 
-                className="p-2.5 text-center hover-elevate cursor-pointer"
+                className="p-4 text-center hover-elevate cursor-pointer"
                 onClick={() => handleModuleClick('clients', 'staff-client-homes')}
                 data-testid="card-overview-active-clients"
               >
@@ -399,7 +399,7 @@ export function StaffHomeScreen() {
                 <p className="text-[10px] text-muted-foreground">{tLabel('activeClientHomes', 'Active Clients')}</p>
               </Card>
               <Card 
-                className="p-2.5 text-center hover-elevate cursor-pointer"
+                className="p-4 text-center hover-elevate cursor-pointer"
                 onClick={() => handleModuleClick('attendance', 'staff-log-attendance')}
                 data-testid="card-overview-today-attendance"
               >
@@ -407,7 +407,7 @@ export function StaffHomeScreen() {
                 <p className="text-[10px] text-muted-foreground">{tLabel('todayAttendance', "Today's Attendance")}</p>
               </Card>
               <Card 
-                className="p-2.5 text-center hover-elevate cursor-pointer"
+                className="p-4 text-center hover-elevate cursor-pointer"
                 onClick={() => handleModuleClick('attendance', 'staff-attendance')}
                 data-testid="card-overview-month-attendance"
               >
@@ -415,9 +415,9 @@ export function StaffHomeScreen() {
                 <p className="text-[10px] text-muted-foreground">{tLabel('thisMonthAttendance', 'This Month')}</p>
               </Card>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <Card 
-                className="p-2.5 text-center hover-elevate cursor-pointer"
+                className="p-4 text-center hover-elevate cursor-pointer"
                 onClick={() => handleModuleClick('reports', 'staff-reports')}
                 data-testid="card-overview-wage-earnings"
               >

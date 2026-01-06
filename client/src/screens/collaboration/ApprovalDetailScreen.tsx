@@ -367,8 +367,9 @@ export function ApprovalDetailScreen() {
 
   return (
     <div className="flex flex-col h-full bg-background">
+      <div className="safe-area-top" />
       <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background border-b">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={goBack} data-testid="button-back">
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -385,7 +386,7 @@ export function ApprovalDetailScreen() {
       </header>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-4">
+        <div className="px-4 py-4 flex flex-col gap-6">
           {/* Offline indicator */}
           {!isOnline && (
             <Card className="p-3 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
@@ -398,7 +399,7 @@ export function ApprovalDetailScreen() {
 
           {/* Record Details Card */}
           <Card className="p-4">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               {isAttendance ? (
                 <Calendar className="w-5 h-5 text-primary" />
               ) : (
@@ -408,7 +409,7 @@ export function ApprovalDetailScreen() {
             </div>
 
             {isAttendance ? (
-              <div className="space-y-3">
+              <div className="flex flex-col gap-4">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Status</span>
                   <Badge variant="secondary">{attendanceRecord.status}</Badge>
@@ -439,7 +440,7 @@ export function ApprovalDetailScreen() {
                 )}
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="flex flex-col gap-4">
                 {laundryRecord.items && laundryRecord.items.length > 0 && (
                   <div>
                     <span className="text-muted-foreground text-sm">Items</span>
@@ -473,7 +474,7 @@ export function ApprovalDetailScreen() {
 
           {/* Submitted By Card */}
           <Card className="p-4">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <User className="w-5 h-5 text-primary" />
               <h2 className="font-semibold">Submitted By</h2>
             </div>
@@ -501,11 +502,11 @@ export function ApprovalDetailScreen() {
           {/* Revision History */}
           {revisions.length > 0 && (
             <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-4">
                 <History className="w-5 h-5 text-primary" />
                 <h2 className="font-semibold">History</h2>
               </div>
-              <div className="space-y-3">
+              <div className="flex flex-col gap-4">
                 {revisions.map((revision, idx) => (
                   <div key={revision.id} className="relative pl-4 border-l-2 border-muted">
                     <div className="flex items-center justify-between">
@@ -529,7 +530,7 @@ export function ApprovalDetailScreen() {
           {/* Reject Form */}
           {showRejectForm && (
             <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-4">
                 <MessageSquare className="w-5 h-5 text-primary" />
                 <h2 className="font-semibold">Rejection Remarks</h2>
               </div>
@@ -603,12 +604,13 @@ export function ApprovalDetailScreen() {
 
       {/* Already actioned message */}
       {record.approvalStatus !== "pending" && (
-        <div className="p-4 border-t bg-background">
+        <div className="px-4 py-4 border-t bg-background">
           <div className="text-center text-sm text-muted-foreground">
             This record has been {record.approvalStatus}
           </div>
         </div>
       )}
+      <div className="safe-area-bottom" />
     </div>
   );
 }

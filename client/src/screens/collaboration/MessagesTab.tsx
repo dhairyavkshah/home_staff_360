@@ -127,7 +127,7 @@ export function MessagesTab() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-4">
       {chats.map((chat) => (
         <Card
           key={chat.id}

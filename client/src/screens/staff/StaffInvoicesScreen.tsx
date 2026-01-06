@@ -97,14 +97,14 @@ export function StaffInvoicesScreen() {
       />
 
       <ScrollContent>
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <Card className="p-3">
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="p-4">
             <p className="text-xs text-muted-foreground">Pending Amount</p>
             <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">
               {formatCurrency(totalPending, settings.currency, settings.customCurrencySymbol)}
             </p>
           </Card>
-          <Card className="p-3">
+          <Card className="p-4">
             <p className="text-xs text-muted-foreground">Total Paid</p>
             <p className="text-lg font-semibold text-green-600 dark:text-green-400">
               {formatCurrency(totalPaid, settings.currency, settings.customCurrencySymbol)}
@@ -112,7 +112,7 @@ export function StaffInvoicesScreen() {
           </Card>
         </div>
 
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-3">
           <SearchableSelect
             value={statusFilter}
             onValueChange={(v) => setStatusFilter(v as InvoiceStatus | "all")}

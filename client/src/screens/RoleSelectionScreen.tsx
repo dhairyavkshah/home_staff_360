@@ -20,7 +20,7 @@ interface RoleCardProps {
 function RoleCard({ type, title, description, icon: Icon, features, buttonText, onSelect }: RoleCardProps) {
   return (
     <Card
-      className="p-3 flex flex-col gap-2.5 cursor-pointer hover-elevate active-elevate-2"
+      className="p-4 flex flex-col gap-3 cursor-pointer hover-elevate active-elevate-2"
       onClick={onSelect}
       data-testid={`card-role-${type.toLowerCase()}`}
     >
@@ -70,7 +70,7 @@ export function RoleSelectionScreen() {
       <div className="safe-area-top" />
 
       <div className="flex-1 overflow-y-auto">
-        <div className="content-container py-4 flex flex-col gap-4">
+        <div className="content-container py-4 flex flex-col gap-6">
           <div className="flex justify-end">
             <LanguageSelector
               value={language}

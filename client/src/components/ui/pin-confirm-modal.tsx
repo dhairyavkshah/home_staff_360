@@ -72,7 +72,7 @@ export function PinConfirmModal({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm fade-in-scale"
         onClick={onClose}
       />
-      <div className="relative bg-background rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl fade-in-up flex flex-col items-center gap-5">
+      <div className="relative bg-background rounded-xl p-4 w-full max-w-sm mx-4 shadow-xl fade-in-up flex flex-col items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
@@ -87,8 +87,8 @@ export function PinConfirmModal({
           <Lock className="w-7 h-7 text-destructive" />
         </div>
 
-        <div className="text-center">
-          <h2 className="text-lg font-semibold mb-1">{t("confirmWithPin")}</h2>
+        <div className="text-center flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">{t("confirmWithPin")}</h2>
           <p className="text-sm text-muted-foreground">{t("enterPinToContinue")}</p>
         </div>
 

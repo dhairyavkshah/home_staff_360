@@ -157,8 +157,8 @@ export function StaffLaundryScreen() {
       />
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="content-container py-4 flex flex-col gap-4">
-          <Card className="p-3">
+        <div className="content-container px-4 py-4 flex flex-col gap-6">
+          <Card className="p-4">
             <div className="flex items-center justify-between mb-3">
               <Button
                 variant="ghost"
@@ -233,11 +233,11 @@ export function StaffLaundryScreen() {
               </Button>
             </Card>
           ) : (
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-3">
               {filteredJobs.map((job) => (
                 <Card
                   key={job.id}
-                  className="p-3"
+                  className="p-4"
                   data-testid={`card-laundry-${job.id}`}
                 >
                   <div className="flex items-start justify-between gap-2.5">
@@ -313,6 +313,7 @@ export function StaffLaundryScreen() {
         </div>
       </div>
 
+      <div className="safe-area-bottom" />
       <ConfirmModal
         open={!!deleteTarget}
         onOpenChange={() => setDeleteTarget(null)}

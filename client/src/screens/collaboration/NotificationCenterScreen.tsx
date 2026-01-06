@@ -156,6 +156,7 @@ export function NotificationCenterScreen() {
 
   return (
     <div className="flex flex-col h-full bg-background">
+      <div className="safe-area-top" />
       <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background border-b">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={goBack} data-testid="button-back">
@@ -205,7 +206,7 @@ export function NotificationCenterScreen() {
             {notifications.map((notification) => (
               <button
                 key={notification.id}
-                className={`w-full p-4 text-left hover-elevate flex items-start gap-3 ${
+                className={`w-full px-4 py-4 text-left hover-elevate flex items-start gap-4 ${
                   !notification.isRead ? "bg-primary/5" : ""
                 }`}
                 onClick={() => handleNotificationClick(notification)}
@@ -243,6 +244,7 @@ export function NotificationCenterScreen() {
           </div>
         )}
       </div>
+      <div className="safe-area-bottom" />
     </div>
   );
 }

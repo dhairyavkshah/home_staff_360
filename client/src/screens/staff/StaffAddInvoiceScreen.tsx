@@ -408,7 +408,7 @@ export function StaffAddInvoiceScreen() {
         <section className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Invoice Details</h2>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label>Client <span className="text-destructive">*</span></Label>
             <SearchableSelect
               value={clientHomeId}
@@ -426,7 +426,7 @@ export function StaffAddInvoiceScreen() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label htmlFor="invoiceNumber">Invoice Number <span className="text-destructive">*</span></Label>
               <Input
                 id="invoiceNumber"
@@ -438,7 +438,7 @@ export function StaffAddInvoiceScreen() {
               {errors.invoiceNumber && <p className="text-xs text-destructive">{errors.invoiceNumber}</p>}
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label>Status</Label>
               <SearchableSelect
                 value={status}
@@ -459,7 +459,7 @@ export function StaffAddInvoiceScreen() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label htmlFor="issueDate">Issue Date <span className="text-destructive">*</span></Label>
               <Input
                 id="issueDate"
@@ -469,7 +469,7 @@ export function StaffAddInvoiceScreen() {
                 data-testid="input-issue-date"
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label htmlFor="dueDate">Due Date <span className="text-destructive">*</span></Label>
               <Input
                 id="dueDate"
@@ -513,7 +513,7 @@ export function StaffAddInvoiceScreen() {
           ) : (
             <div className="flex flex-col gap-3">
               {items.map((item, index) => (
-                <Card key={item.id} className="p-3">
+                <Card key={item.id} className="p-4">
                   <div className="flex items-start gap-2">
                     <div className="flex-1 flex flex-col gap-2">
                       <Input

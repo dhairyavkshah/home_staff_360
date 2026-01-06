@@ -161,9 +161,9 @@ export function AddPersonScreen() {
 
       <ScrollContent>
         <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">Basic Information</h2>
+          <h2 className="text-base font-semibold">Basic Information</h2>
 
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-4">
             <div 
               className="relative w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover-elevate overflow-hidden border-2 border-dashed border-muted-foreground/30"
               onClick={() => setShowPhotoDialog(true)}
@@ -258,7 +258,7 @@ export function AddPersonScreen() {
             </DialogContent>
           </Dialog>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="name">Person/Vendor Name <span className="text-destructive">*</span></Label>
             <Input
               id="name"
@@ -270,7 +270,7 @@ export function AddPersonScreen() {
             {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="role">Role/Profession <span className="text-destructive">*</span></Label>
             <SearchableSelect
               value={role}
@@ -287,7 +287,7 @@ export function AddPersonScreen() {
             {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="phone">Phone Number <span className="text-destructive">*</span></Label>
             <Input
               id="phone"
@@ -302,11 +302,11 @@ export function AddPersonScreen() {
         </section>
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">
+          <h2 className="text-base font-semibold">
             {role === "Laundry" ? "Pay Details" : "Salary Details"}
           </h2>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="currency">Currency <span className="text-destructive">*</span></Label>
             <CurrencySelector
               value={currency}
@@ -317,7 +317,7 @@ export function AddPersonScreen() {
           </div>
 
           {currency === "OTHER" && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="customSymbol">Custom Currency Symbol <span className="text-destructive">*</span></Label>
               <Input
                 id="customSymbol"
@@ -331,7 +331,7 @@ export function AddPersonScreen() {
           )}
 
           {role !== "Laundry" && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="salaryType">Salary Type <span className="text-destructive">*</span></Label>
               <SearchableSelect
                 value={salaryType}
@@ -349,7 +349,7 @@ export function AddPersonScreen() {
             </div>
           )}
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="baseRate">
               {role === "Laundry" 
                 ? "Minimum Base Rate * (per item or cloth)"
@@ -373,7 +373,7 @@ export function AddPersonScreen() {
           </div>
 
           {role !== "Laundry" && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <div className="flex items-center gap-1">
                 <Label htmlFor="halfDayPercentage">Half Day %</Label>
                 <Tooltip>
@@ -404,7 +404,7 @@ export function AddPersonScreen() {
         </section>
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">Additional Notes</h2>
+          <h2 className="text-base font-semibold">Additional Notes</h2>
           <Textarea
             value={notes}
             onChange={(e) => { setNotes(e.target.value); markDirty(); }}

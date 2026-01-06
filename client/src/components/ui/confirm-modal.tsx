@@ -77,17 +77,19 @@ export function ConfirmModal({
           <div className={`w-14 h-14 rounded-full flex items-center justify-center ${iconClass}`}>
             <Icon className="w-7 h-7" />
           </div>
-          <DialogTitle className="text-xl" data-testid="modal-title">{title}</DialogTitle>
-          {description && (
-            <DialogDescription className="text-center" data-testid="modal-description">
-              {description}
-            </DialogDescription>
-          )}
+          <div className="flex flex-col gap-1">
+            <DialogTitle className="text-xl" data-testid="modal-title">{title}</DialogTitle>
+            {description && (
+              <DialogDescription className="text-center" data-testid="modal-description">
+                {description}
+              </DialogDescription>
+            )}
+          </div>
         </DialogHeader>
 
         {children && <div className="py-4">{children}</div>}
 
-        <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2">
+        <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3">
           <Button
             variant="outline"
             onClick={handleCancel}
@@ -134,12 +136,14 @@ export function AlertModal({
           <div className={`w-14 h-14 rounded-full flex items-center justify-center ${iconClass}`}>
             <Icon className="w-7 h-7" />
           </div>
-          <DialogTitle className="text-xl">{title}</DialogTitle>
-          {description && (
-            <DialogDescription className="text-center">
-              {description}
-            </DialogDescription>
-          )}
+          <div className="flex flex-col gap-1">
+            <DialogTitle className="text-xl">{title}</DialogTitle>
+            {description && (
+              <DialogDescription className="text-center">
+                {description}
+              </DialogDescription>
+            )}
+          </div>
         </DialogHeader>
         <DialogFooter>
           <Button

@@ -271,13 +271,13 @@ export function SharedSpacesTab() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-6">
       {invitations.length > 0 && (
-        <div>
-          <h4 className="font-medium mb-2 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-4">
+          <h4 className="font-medium text-sm text-muted-foreground">
             Pending Invitations ({invitations.length})
           </h4>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-4">
             {invitations.map((inv) => (
               <Card key={inv.id} className="p-4" data-testid={`card-invite-${inv.id}`}>
                 <div className="flex items-center justify-between gap-3">
@@ -342,7 +342,7 @@ export function SharedSpacesTab() {
       </div>
 
       {spaces.length === 0 ? (
-        <Card className="p-6">
+        <Card className="p-4">
           <div className="text-center text-muted-foreground">
             <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
             <p className="text-sm">No shared spaces yet</p>
@@ -352,7 +352,7 @@ export function SharedSpacesTab() {
           </div>
         </Card>
       ) : (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-4">
           {spaces.map((space) => (
             <Card
               key={space.id}
@@ -451,7 +451,7 @@ export function SharedSpacesTab() {
           <DialogHeader>
             <DialogTitle>Share {createType === "household" ? "Household" : "Business"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="flex flex-col gap-4 py-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
                 Select {createType === "household" ? "Household" : "Business"}
@@ -495,7 +495,7 @@ export function SharedSpacesTab() {
           <DialogHeader>
             <DialogTitle>Invite to {selectedSpace?.name}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="flex flex-col gap-4 py-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
                 Select Connection

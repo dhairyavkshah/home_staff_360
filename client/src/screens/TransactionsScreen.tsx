@@ -181,7 +181,7 @@ export function TransactionsScreen() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background" data-testid="screen-transactions">
+    <div className="h-screen max-w-md mx-auto flex flex-col bg-background" data-testid="screen-transactions">
       <div className="safe-area-top" />
 
       <Header
@@ -217,7 +217,7 @@ export function TransactionsScreen() {
             </Button>
           </div>
           <div className="px-4 py-4 overflow-y-auto flex-1 flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="person">{tLabel('staff', 'Staff')} <span className="text-destructive">*</span></Label>
               <SearchableSelect
                 value={selectedPersonId}
@@ -234,7 +234,7 @@ export function TransactionsScreen() {
               {errors.person && <p className="text-xs text-destructive">{errors.person}</p>}
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="category">{tLabel('category', 'Category')} <span className="text-destructive">*</span></Label>
               <SearchableSelect
                 value={category}
@@ -252,7 +252,7 @@ export function TransactionsScreen() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="description">{tLabel('description', 'Description')} <span className="text-destructive">*</span></Label>
               <Input
                 id="description"
@@ -264,7 +264,7 @@ export function TransactionsScreen() {
               {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="amount">{tLabel('amount', 'Amount')} <span className="text-destructive">*</span></Label>
               <Input
                 id="amount"
@@ -277,7 +277,7 @@ export function TransactionsScreen() {
               {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="date">{tLabel('date', 'Date')} <span className="text-destructive">*</span></Label>
               <Input
                 id="date"
@@ -313,7 +313,7 @@ export function TransactionsScreen() {
       />
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="content-container pt-3 pb-8 flex flex-col gap-2">
+        <div className="px-4 pt-4 pb-6 flex flex-col gap-6">
           <SearchBar
             placeholder={tLabel('searchTransactions', 'Search transactions...')}
             value={searchQuery}
@@ -325,7 +325,7 @@ export function TransactionsScreen() {
           />
 
           {transactions.length === 0 ? (
-            <Card className="p-4 flex flex-col items-center gap-2" data-testid="empty-state">
+            <Card className="p-4 flex flex-col items-center gap-3 rounded-lg" data-testid="empty-state">
               <div className="icon-halo-muted w-10 h-10">
                 <ArrowRightLeft className="w-5 h-5 text-muted-foreground" />
               </div>
@@ -335,13 +335,14 @@ export function TransactionsScreen() {
               </div>
             </Card>
           ) : (
-            transactions.map((tx) => (
+            <div className="flex flex-col gap-3">
+              {transactions.map((tx) => (
               <Card
                 key={tx.id}
-                className="p-3 hover-elevate"
+                className="p-4 hover-elevate rounded-lg"
                 data-testid={`card-transaction-${tx.id}`}
               >
-                <div className="flex items-start gap-2.5">
+                <div className="flex items-start gap-3">
                   <div 
                     className="icon-halo-primary w-9 h-9 flex-shrink-0 cursor-pointer"
                     onClick={() => navigate('person-detail', { personId: tx.personId })}
@@ -382,7 +383,8 @@ export function TransactionsScreen() {
                   </div>
                 </div>
               </Card>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </div>

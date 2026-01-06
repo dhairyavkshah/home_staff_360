@@ -188,7 +188,7 @@ export function ExpensesScreen() {
           </Card>
         ) : (
           <>
-            <div className="flex flex-col gap-1.5" data-testid="list-expenses">
+            <div className="flex flex-col gap-3" data-testid="list-expenses">
               {filteredExpenses.map((expense) => {
                 const status = getExpenseStatus(expense);
                 const config = statusConfig[status];

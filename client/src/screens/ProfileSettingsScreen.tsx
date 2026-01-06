@@ -282,12 +282,12 @@ export function ProfileSettingsScreen() {
 
       <ScrollContent>
         {step === "view" && (
-          <section className="flex flex-col gap-3">
+          <section className="flex flex-col gap-4">
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Account Information
             </h2>
 
-            <Card className="p-3 flex flex-col gap-3">
+            <Card className="p-4 flex flex-col gap-4">
               <button
                 className="flex items-center justify-between py-2 hover-elevate rounded-md px-2 -mx-2"
                 onClick={() => setStep("edit-name")}
@@ -343,9 +343,9 @@ export function ProfileSettingsScreen() {
         )}
 
         {step === "edit-name" && (
-          <section className="flex flex-col gap-4">
+          <section className="flex flex-col gap-6">
             <Card className="p-4 flex flex-col gap-4">
-              <div className="space-y-2">
+              <div className="flex flex-col gap-4">
                 <Label htmlFor="displayName">Display Name</Label>
                 <Input
                   id="displayName"
@@ -379,9 +379,9 @@ export function ProfileSettingsScreen() {
         )}
 
         {step === "change-password" && (
-          <section className="flex flex-col gap-4">
+          <section className="flex flex-col gap-6">
             <Card className="p-4 flex flex-col gap-4">
-              <div className="space-y-2">
+              <div className="flex flex-col gap-4">
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <div className="relative">
                   <Input
@@ -405,7 +405,7 @@ export function ProfileSettingsScreen() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-4">
                 <Label htmlFor="newPassword">New Password</Label>
                 <Input
                   id="newPassword"
@@ -417,7 +417,7 @@ export function ProfileSettingsScreen() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-4">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
                 <Input
                   id="confirmPassword"
@@ -449,15 +449,15 @@ export function ProfileSettingsScreen() {
         )}
 
         {step === "change-phone" && (
-          <section className="flex flex-col gap-4">
+          <section className="flex flex-col gap-6">
             <Card className="p-4 flex flex-col gap-4">
-              <div className="text-center mb-2">
+              <div className="text-center mb-4">
                 <p className="text-sm text-muted-foreground">
                   Your current phone: <strong>{profile?.phone}</strong>
                 </p>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-4">
                 <Label htmlFor="newPhone">New Phone Number</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -477,7 +477,7 @@ export function ProfileSettingsScreen() {
               </div>
 
               {profile?.hasPassword ? (
-                <div className="space-y-2">
+                <div className="flex flex-col gap-4">
                   <Label htmlFor="phonePassword">Confirm with Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -527,9 +527,9 @@ export function ProfileSettingsScreen() {
         )}
 
         {step === "verify-phone" && (
-          <section className="flex flex-col gap-4">
+          <section className="flex flex-col gap-6">
             <Card className="p-4 flex flex-col gap-4">
-              <div className="text-center mb-2">
+              <div className="text-center mb-4">
                 <Shield className="w-12 h-12 text-primary mx-auto mb-2" />
                 <p className="font-medium">Verify New Phone</p>
                 <p className="text-sm text-muted-foreground">
@@ -537,7 +537,7 @@ export function ProfileSettingsScreen() {
                 </p>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-4">
                 <Label htmlFor="otp">Verification Code</Label>
                 <Input
                   id="otp"

@@ -266,7 +266,7 @@ export function AddTransactionScreen() {
         <ScrollContent>
           <section className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">{tLabel('transactionDetails', 'Transaction Details')}</h2>
+              <h2 className="text-base font-semibold">{tLabel('transactionDetails', 'Transaction Details')}</h2>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-6 w-6" data-testid="button-info-readonly">
@@ -335,7 +335,7 @@ export function AddTransactionScreen() {
 
           {existingAttachments.length > 0 && (
             <section className="flex flex-col gap-4">
-              <h2 className="text-lg font-semibold">{tLabel('attachments', 'Attachments')}</h2>
+              <h2 className="text-base font-semibold">{tLabel('attachments', 'Attachments')}</h2>
               <div className="flex flex-col gap-2">
                 {existingAttachments.map((doc) => (
                   <Card key={doc.id} className="p-3 flex items-center gap-3">
@@ -401,7 +401,7 @@ export function AddTransactionScreen() {
 
       <ScrollContent>
         {currentBalance > 0 && (
-          <Card className="p-3 bg-info/10 border-info/20">
+          <Card className="p-4 bg-info/10 border-info/20 rounded-lg">
             <div className="flex items-start gap-2">
               <Info className="w-4 h-4 text-info shrink-0 mt-0.5" />
               <div className="text-sm">
@@ -420,9 +420,9 @@ export function AddTransactionScreen() {
         )}
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">{tLabel('transactionDetails', 'Transaction Details')}</h2>
+          <h2 className="text-base font-semibold">{tLabel('transactionDetails', 'Transaction Details')}</h2>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="category">{tLabel('category', 'Category')} <span className="text-destructive">*</span></Label>
             <SearchableSelect
               value={category}
@@ -440,7 +440,7 @@ export function AddTransactionScreen() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="description">{tLabel('description', 'Description')} <span className="text-destructive">*</span></Label>
             <Input
               id="description"
@@ -454,7 +454,7 @@ export function AddTransactionScreen() {
             {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="transactionNo">{tLabel('transactionNo', 'Transaction No.')}</Label>
             <Input
               id="transactionNo"
@@ -465,7 +465,7 @@ export function AddTransactionScreen() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="amount">{tLabel('amount', 'Amount')} <span className="text-destructive">*</span></Label>
             <Input
               id="amount"
@@ -478,7 +478,7 @@ export function AddTransactionScreen() {
             {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="date">{tLabel('date', 'Date')} <span className="text-destructive">*</span></Label>
             <Input
               id="date"
@@ -492,8 +492,8 @@ export function AddTransactionScreen() {
         </section>
 
         <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{tLabel('attachments', 'Attachments')}</h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-base font-semibold">{tLabel('attachments', 'Attachments')}</h2>
             <Button
               variant="outline"
               size="sm"
@@ -538,7 +538,7 @@ export function AddTransactionScreen() {
         </section>
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">{tLabel('status', 'Status')}</h2>
+          <h2 className="text-base font-semibold">{tLabel('status', 'Status')}</h2>
           <div className="flex items-center space-x-3">
             <Checkbox
               id="isPaid"

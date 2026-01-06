@@ -361,22 +361,26 @@ export function AuthScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-            <Users className="w-10 h-10 text-primary" />
+    <div className="min-h-screen bg-background flex flex-col" data-testid="screen-auth">
+      <div className="safe-area-top" />
+      <div className="flex-1 flex flex-col items-center justify-center px-4">
+        <div className="w-full max-w-md flex flex-col gap-6">
+          <div className="text-center flex flex-col items-center gap-4">
+            <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Users className="w-8 h-8 text-primary" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xl font-semibold">Home Staff 360</h1>
+              <p className="text-sm text-muted-foreground">
+                Connect, collaborate, and manage your household staff
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold">Home Staff 360</h1>
-          <p className="text-muted-foreground">
-            Connect, collaborate, and manage your household staff
-          </p>
-        </div>
 
-        <Card className="p-6">
+          <Card className="p-4">
           {step === "phone" && (
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="phone">Phone Number</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -386,7 +390,7 @@ export function AuthScreen() {
                     placeholder="+1234567890"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-8"
                     data-testid="input-phone"
                   />
                 </div>
@@ -396,6 +400,7 @@ export function AuthScreen() {
               </div>
 
               <Button
+                size="lg"
                 className="w-full"
                 onClick={handleCheckPhone}
                 disabled={isLoading}
@@ -414,13 +419,13 @@ export function AuthScreen() {
           )}
 
           {step === "password" && (
-            <div className="space-y-4">
-              <div className="text-center mb-4">
-                <p className="font-medium">Welcome back{displayName ? `, ${displayName}` : ""}!</p>
+            <div className="flex flex-col gap-4">
+              <div className="text-center flex flex-col gap-1">
+                <p className="text-base font-semibold">Welcome back{displayName ? `, ${displayName}` : ""}!</p>
                 <p className="text-sm text-muted-foreground">{phone}</p>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -430,14 +435,14 @@ export function AuthScreen() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 h-8"
                     data-testid="input-password"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -450,6 +455,7 @@ export function AuthScreen() {
               </div>
 
               <Button
+                size="lg"
                 className="w-full"
                 onClick={handleLogin}
                 disabled={isLoading}
@@ -462,11 +468,10 @@ export function AuthScreen() {
                 )}
               </Button>
 
-              <div className="flex justify-between gap-2 text-sm">
+              <div className="flex justify-between items-center gap-4 text-sm">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="p-0 h-auto text-primary"
                   onClick={handleBackToPhone}
                   data-testid="button-change-number"
                 >
@@ -475,7 +480,6 @@ export function AuthScreen() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="p-0 h-auto text-primary"
                   onClick={handleForgotPassword}
                   disabled={isLoading}
                   data-testid="button-forgot-password"
@@ -487,16 +491,18 @@ export function AuthScreen() {
           )}
 
           {step === "otp" && (
-            <div className="space-y-4">
-              <div className="text-center mb-4">
-                <Shield className="w-12 h-12 text-primary mx-auto mb-2" />
-                <p className="font-medium">Verify Your Phone</p>
-                <p className="text-sm text-muted-foreground">
-                  Enter the code sent to {phone}
-                </p>
+            <div className="flex flex-col gap-4">
+              <div className="text-center flex flex-col items-center gap-2">
+                <Shield className="w-10 h-10 text-primary" />
+                <div className="flex flex-col gap-1">
+                  <p className="text-base font-semibold">Verify Your Phone</p>
+                  <p className="text-sm text-muted-foreground">
+                    Enter the code sent to {phone}
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="otp">Verification Code</Label>
                 <Input
                   id="otp"
@@ -504,13 +510,14 @@ export function AuthScreen() {
                   placeholder="Enter OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="text-center text-xl tracking-widest"
+                  className="text-center text-xl tracking-widest h-8"
                   maxLength={6}
                   data-testid="input-otp"
                 />
               </div>
 
               <Button
+                size="lg"
                 className="w-full"
                 onClick={handleVerifyOtp}
                 disabled={isLoading}
@@ -523,11 +530,10 @@ export function AuthScreen() {
                 )}
               </Button>
 
-              <div className="flex justify-between items-center gap-2 text-sm">
+              <div className="flex justify-between items-center gap-4 text-sm">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="p-0 h-auto text-primary"
                   onClick={handleBackToPhone}
                   data-testid="button-change-number-otp"
                 >
@@ -536,7 +542,6 @@ export function AuthScreen() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="p-0 h-auto text-primary"
                   onClick={handleRequestOtp}
                   disabled={cooldown > 0 || isLoading}
                   data-testid="button-resend-otp"
@@ -555,16 +560,18 @@ export function AuthScreen() {
           )}
 
           {step === "reset-otp" && (
-            <div className="space-y-4">
-              <div className="text-center mb-4">
-                <KeyRound className="w-12 h-12 text-primary mx-auto mb-2" />
-                <p className="font-medium">Reset Your Password</p>
-                <p className="text-sm text-muted-foreground">
-                  Enter the reset code sent to {phone}
-                </p>
+            <div className="flex flex-col gap-4">
+              <div className="text-center flex flex-col items-center gap-2">
+                <KeyRound className="w-10 h-10 text-primary" />
+                <div className="flex flex-col gap-1">
+                  <p className="text-base font-semibold">Reset Your Password</p>
+                  <p className="text-sm text-muted-foreground">
+                    Enter the reset code sent to {phone}
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="reset-otp">Reset Code</Label>
                 <Input
                   id="reset-otp"
@@ -572,13 +579,14 @@ export function AuthScreen() {
                   placeholder="Enter reset code"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="text-center text-xl tracking-widest"
+                  className="text-center text-xl tracking-widest h-8"
                   maxLength={6}
                   data-testid="input-reset-otp"
                 />
               </div>
 
               <Button
+                size="lg"
                 className="w-full"
                 onClick={handleVerifyResetOtp}
                 disabled={isLoading || otp.length < 4}
@@ -588,11 +596,10 @@ export function AuthScreen() {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
 
-              <div className="flex justify-between items-center gap-2 text-sm">
+              <div className="flex justify-between items-center gap-4 text-sm">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="p-0 h-auto text-primary"
                   onClick={handleBackToPhone}
                   data-testid="button-back-reset"
                 >
@@ -601,7 +608,6 @@ export function AuthScreen() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="p-0 h-auto text-primary"
                   onClick={handleResendResetOtp}
                   disabled={cooldown > 0 || isLoading}
                   data-testid="button-resend-reset-otp"
@@ -620,16 +626,18 @@ export function AuthScreen() {
           )}
 
           {step === "reset-password" && (
-            <div className="space-y-4">
-              <div className="text-center mb-4">
-                <Lock className="w-12 h-12 text-primary mx-auto mb-2" />
-                <p className="font-medium">Set New Password</p>
-                <p className="text-sm text-muted-foreground">
-                  Create a new password for your account
-                </p>
+            <div className="flex flex-col gap-4">
+              <div className="text-center flex flex-col items-center gap-2">
+                <Lock className="w-10 h-10 text-primary" />
+                <div className="flex flex-col gap-1">
+                  <p className="text-base font-semibold">Set New Password</p>
+                  <p className="text-sm text-muted-foreground">
+                    Create a new password for your account
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="new-reset-password">New Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -639,14 +647,14 @@ export function AuthScreen() {
                     placeholder="At least 6 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 h-8"
                     data-testid="input-new-reset-password"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -658,7 +666,7 @@ export function AuthScreen() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="confirm-reset-password">Confirm Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -668,13 +676,14 @@ export function AuthScreen() {
                     placeholder="Re-enter password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-8"
                     data-testid="input-confirm-reset-password"
                   />
                 </div>
               </div>
 
               <Button
+                size="lg"
                 className="w-full"
                 onClick={handleResetPassword}
                 disabled={isLoading}
@@ -690,7 +699,7 @@ export function AuthScreen() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full p-0 h-auto text-primary"
+                className="w-full"
                 onClick={() => setStep("reset-otp")}
                 data-testid="button-back-to-reset-otp"
               >
@@ -700,16 +709,18 @@ export function AuthScreen() {
           )}
 
           {step === "set-password" && (
-            <div className="space-y-4">
-              <div className="text-center mb-4">
-                <Lock className="w-12 h-12 text-primary mx-auto mb-2" />
-                <p className="font-medium">Create Your Password</p>
-                <p className="text-sm text-muted-foreground">
-                  Secure your account for quick sign-in next time
-                </p>
+            <div className="flex flex-col gap-4">
+              <div className="text-center flex flex-col items-center gap-2">
+                <Lock className="w-10 h-10 text-primary" />
+                <div className="flex flex-col gap-1">
+                  <p className="text-base font-semibold">Create Your Password</p>
+                  <p className="text-sm text-muted-foreground">
+                    Secure your account for quick sign-in next time
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="new-password">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -719,14 +730,14 @@ export function AuthScreen() {
                     placeholder="At least 6 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 h-8"
                     data-testid="input-new-password"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -738,20 +749,24 @@ export function AuthScreen() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="confirm-password">Confirm Password</Label>
-                <Input
-                  id="confirm-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Re-enter password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10"
-                  data-testid="input-confirm-password"
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="confirm-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Re-enter password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10 h-8"
+                    data-testid="input-confirm-password"
+                  />
+                </div>
               </div>
 
               <Button
+                size="lg"
                 className="w-full"
                 onClick={handleSetPassword}
                 disabled={isLoading}
@@ -765,12 +780,14 @@ export function AuthScreen() {
               </Button>
             </div>
           )}
-        </Card>
+          </Card>
 
-        <p className="text-center text-xs text-muted-foreground">
-          Your data stays secure on your device. We only sync what you choose to share.
-        </p>
+          <p className="text-center text-xs text-muted-foreground">
+            Your data stays secure on your device. We only sync what you choose to share.
+          </p>
+        </div>
       </div>
+      <div className="safe-area-bottom" />
     </div>
   );
 }

@@ -159,7 +159,7 @@ export function PeopleScreen() {
         )}
 
         {people.length === 0 ? (
-          <Card className="p-4 flex flex-col items-center gap-2" data-testid="empty-state">
+          <Card className="p-4 flex flex-col items-center gap-3 rounded-lg" data-testid="empty-state">
             <div className="icon-halo-muted w-10 h-10">
               <Users className="w-5 h-5 text-muted-foreground" />
             </div>
@@ -180,13 +180,13 @@ export function PeopleScreen() {
           </div>
         ) : (
           <>
-            <div className="flex flex-col gap-1.5" data-testid="list-people">
+            <div className="flex flex-col gap-3" data-testid="list-people">
               {filteredPeople.map((person) => {
                 const isActive = person.isActive !== false;
                 return (
                   <div
                     key={person.id}
-                    className={`flex items-center gap-3 py-2.5 px-3 rounded-lg border bg-card hover-elevate cursor-pointer ${!isActive ? 'opacity-60' : ''}`}
+                    className={`flex items-center gap-3 p-4 rounded-lg border bg-card hover-elevate cursor-pointer ${!isActive ? 'opacity-60' : ''}`}
                     onClick={() => navigate("person-detail", { personId: person.id })}
                     data-testid={`card-person-${person.id}`}
                   >

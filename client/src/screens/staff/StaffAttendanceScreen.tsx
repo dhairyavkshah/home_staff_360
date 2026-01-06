@@ -172,7 +172,7 @@ export function StaffAttendanceScreen() {
           </div>
         </Card>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">{t("attendanceRecords")} ({attendance.length})</h3>
           </div>
@@ -190,7 +190,7 @@ export function StaffAttendanceScreen() {
               </Button>
             </Card>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               {attendance.map((entry) => (
                 <Card key={entry.id} className="p-4" data-testid={`card-attendance-${entry.id}`}>
                   <div className="flex items-center justify-between gap-3">

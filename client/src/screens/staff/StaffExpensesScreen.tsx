@@ -197,7 +197,7 @@ export function StaffExpensesScreen() {
           </Card>
         ) : (
           <>
-            <div className="flex flex-col gap-1.5" data-testid="list-expenses">
+            <div className="flex flex-col gap-3" data-testid="list-expenses">
               {filteredExpenses.map((expense) => {
                 const status = getExpenseStatus(expense);
                 const config = statusConfig[status];
@@ -206,7 +206,7 @@ export function StaffExpensesScreen() {
                 return (
                   <div
                     key={expense.id}
-                    className="flex items-center gap-3 py-2.5 px-3 rounded-lg border bg-card"
+                    className="flex items-center gap-3 p-4 rounded-lg border bg-card"
                     data-testid={`card-expense-${expense.id}`}
                   >
                     <div 

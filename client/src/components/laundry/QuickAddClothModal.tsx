@@ -283,7 +283,7 @@ export function QuickAddClothModal({
   const subtotal = quantity * (parseFloat(rate) || 0);
 
   const content = (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {step === 'select' ? (
         <>
           <div className="flex flex-col gap-2">
@@ -319,7 +319,7 @@ export function QuickAddClothModal({
           </ScrollArea>
         </>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-1">
               <ClothIcon type={selectedType} className="w-6 h-6 text-primary" />
@@ -327,7 +327,7 @@ export function QuickAddClothModal({
             <h3 className="text-base font-semibold">{selectedType}</h3>
           </div>
 
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <Label className="text-center text-muted-foreground text-sm">Quantity</Label>
               <div className="flex items-center justify-center gap-3">
@@ -381,7 +381,7 @@ export function QuickAddClothModal({
             </div>
           </div>
 
-          <div className="flex gap-2 pt-2 pb-safe">
+          <div className="flex gap-3 pt-2 pb-safe">
             <Button
               variant="outline"
               onClick={handleBack}

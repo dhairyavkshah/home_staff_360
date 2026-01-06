@@ -127,7 +127,7 @@ export function PinEntryScreen({
 
   return (
     <div className="min-h-screen bg-background page-enter flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm p-3 flex flex-col items-center gap-3 fade-in-up">
+      <Card className="w-full max-w-sm p-4 flex flex-col items-center gap-4 fade-in-up">
         <div className="icon-halo-primary w-12 h-12">
           <Lock className="w-6 h-6 text-primary" />
         </div>

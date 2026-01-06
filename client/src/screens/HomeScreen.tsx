@@ -208,7 +208,7 @@ export function HomeScreen() {
     <div className="h-screen flex flex-col bg-background" data-testid="screen-home" data-tour-id="tour-dashboard">
       <div className="safe-area-top" />
 
-      <header className="content-container py-3 min-h-14 flex-shrink-0">
+      <header className="px-4 py-3 min-h-14 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-semibold truncate" data-testid="text-welcome">
@@ -277,8 +277,8 @@ export function HomeScreen() {
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         <StorageWarningBanner />
-        <div className="content-container pt-4 pb-6 flex flex-col gap-4">
-          <section className="grid grid-cols-2 gap-2" data-testid="section-modules">
+        <div className="px-4 pt-4 pb-6 flex flex-col gap-6">
+          <section className="grid grid-cols-2 gap-3" data-testid="section-modules">
             {modules.map((module) => {
               const Icon = module.icon;
               const tourId = {
@@ -292,12 +292,12 @@ export function HomeScreen() {
               return (
                 <Card
                   key={module.id}
-                  className="p-3 hover-elevate cursor-pointer"
+                  className="p-4 hover-elevate cursor-pointer rounded-lg"
                   onClick={() => handleModuleClick(module.id, module.screen)}
                   data-testid={`card-module-${module.id}`}
                   data-tour-id={tourId}
                 >
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-3">
                     <div className={`${getHaloClass(module.color)} w-9 h-9`}>
                       <Icon className={`w-4.5 h-4.5 ${getIconClass(module.color)}`} />
                     </div>
@@ -311,11 +311,11 @@ export function HomeScreen() {
             })}
           </section>
 
-          <section className="flex flex-col gap-2" data-testid="section-quick-stats" data-tour-id="tour-overview-section">
+          <section className="flex flex-col gap-3" data-testid="section-quick-stats" data-tour-id="tour-overview-section">
             <h2 className="text-base font-semibold">{tLabel('overview', 'Overview')}</h2>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-3">
               <Card 
-                className="p-2.5 text-center hover-elevate cursor-pointer"
+                className="p-4 text-center hover-elevate cursor-pointer rounded-lg"
                 onClick={() => handleModuleClick('staff', 'people')}
                 data-testid="card-overview-active-staff"
               >
@@ -323,7 +323,7 @@ export function HomeScreen() {
                 <p className="text-[10px] text-muted-foreground">{tLabel('activeStaff', 'Active Staff')}</p>
               </Card>
               <Card 
-                className="p-2.5 text-center hover-elevate cursor-pointer"
+                className="p-4 text-center hover-elevate cursor-pointer rounded-lg"
                 onClick={() => handleModuleClick('payables', 'payables')}
                 data-testid="card-overview-payable"
               >
@@ -335,7 +335,7 @@ export function HomeScreen() {
                 <p className="text-[10px] text-muted-foreground">{tLabel('payable', 'Payable')}</p>
               </Card>
               <Card 
-                className="p-2.5 text-center hover-elevate cursor-pointer"
+                className="p-4 text-center hover-elevate cursor-pointer rounded-lg"
                 onClick={() => handleModuleClick('expenses', 'expenses')}
                 data-testid="card-overview-bills-due"
               >

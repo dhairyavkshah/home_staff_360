@@ -328,9 +328,9 @@ export function AddExpenseScreen() {
           {existingAttachments.length > 0 && (
             <section className="flex flex-col gap-4">
               <h2 className="text-lg font-semibold">{tLabel('attachments', 'Attachments')}</h2>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {existingAttachments.map((doc) => (
-                  <Card key={doc.id} className="p-3 flex items-center gap-3">
+                  <Card key={doc.id} className="p-4 flex items-center gap-3">
                     {doc.fileType.startsWith('image/') ? (
                       <ImageIcon className="w-5 h-5 text-primary" />
                     ) : (
@@ -498,10 +498,10 @@ export function AddExpenseScreen() {
           </div>
           
           {pendingAttachments.length > 0 && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               <Label className="text-sm text-muted-foreground">{tLabel('newAttachments', 'New Attachments')}</Label>
               {pendingAttachments.map((attachment, index) => (
-                <Card key={index} className="p-3 flex items-center gap-3">
+                <Card key={index} className="p-4 flex items-center gap-3">
                   {attachment.file.type.startsWith('image/') ? (
                     <img
                       src={attachment.preview}

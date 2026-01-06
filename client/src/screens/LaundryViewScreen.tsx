@@ -240,7 +240,7 @@ export function LaundryViewScreen() {
       />
 
       <ScrollContent>
-        <Card className="p-3">
+        <Card className="p-4">
           <div className="flex items-center justify-between gap-2 mb-3">
             <Button
               variant="ghost"
@@ -301,11 +301,11 @@ export function LaundryViewScreen() {
             </Button>
           </Card>
         ) : (
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-3">
             {filteredBatches.map((batch) => (
               <Card
                 key={batch.id}
-                className="p-3"
+                className="p-4"
                 data-testid={`card-laundry-${batch.id}`}
               >
                 <div className="flex items-start justify-between gap-2.5">

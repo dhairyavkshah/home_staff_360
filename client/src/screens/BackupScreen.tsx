@@ -267,9 +267,9 @@ export function BackupScreen() {
       />
 
       <ScrollContent>
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Export Data</h2>
-          <Card className="p-3 flex flex-col gap-3">
+          <Card className="p-4 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="icon-halo-primary w-9 h-9">
                 <Download className="w-4.5 h-4.5 text-primary" />
@@ -303,9 +303,9 @@ export function BackupScreen() {
           </Card>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Import Data</h2>
-          <Card className="p-3 flex flex-col gap-3">
+          <Card className="p-4 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="icon-halo-muted w-9 h-9">
                 <Upload className="w-4.5 h-4.5 text-muted-foreground" />

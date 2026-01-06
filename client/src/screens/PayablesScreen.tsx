@@ -128,7 +128,7 @@ export function PayablesScreen() {
       />
 
       <ScrollContent>
-          <Card className="p-4 bg-gradient-to-br from-warning/10 via-warning/5 to-transparent border-warning/20">
+          <Card className="p-4 bg-gradient-to-br from-warning/10 via-warning/5 to-transparent border-warning/20 rounded-lg">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="icon-halo-warning w-9 h-9">
@@ -151,7 +151,7 @@ export function PayablesScreen() {
           </Card>
 
           <div className="grid grid-cols-2 gap-3">
-            <Card className="p-3">
+            <Card className="p-4 rounded-lg">
               <div className="flex items-center gap-2">
                 <div className="icon-halo-info w-7 h-7">
                   <Clock className="w-3.5 h-3.5 text-info" />
@@ -164,7 +164,7 @@ export function PayablesScreen() {
                   : "None"}
               </p>
             </Card>
-            <Card className="p-3">
+            <Card className="p-4 rounded-lg">
               <div className="flex items-center gap-2">
                 <div className="icon-halo-destructive w-7 h-7">
                   <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
@@ -181,7 +181,7 @@ export function PayablesScreen() {
             <section className="flex flex-col gap-3">
               <h2 className="text-base font-semibold">Unpaid Laundry</h2>
               <Card 
-                className="p-3 hover-elevate cursor-pointer"
+                className="p-4 hover-elevate cursor-pointer rounded-lg"
                 onClick={() => navigate("laundry-view", { source: "payables" })}
                 data-testid="card-unpaid-laundry"
               >
@@ -213,7 +213,7 @@ export function PayablesScreen() {
             <h2 className="text-base font-semibold">Outstanding by Staff</h2>
             
             {peopleWithBalances.length === 0 && accountLevelUnpaidLaundry === 0 ? (
-              <Card className="p-4 flex flex-col items-center gap-2" data-testid="empty-state">
+              <Card className="p-4 flex flex-col items-center gap-3 rounded-lg" data-testid="empty-state">
                 <div className="icon-halo-muted w-10 h-10">
                   <Wallet className="w-5 h-5 text-muted-foreground" />
                 </div>
@@ -223,7 +223,7 @@ export function PayablesScreen() {
                 </div>
               </Card>
             ) : peopleWithBalances.length === 0 ? (
-              <Card className="p-4 flex flex-col items-center gap-2" data-testid="empty-state-staff">
+              <Card className="p-4 flex flex-col items-center gap-3 rounded-lg" data-testid="empty-state-staff">
                 <div className="icon-halo-muted w-10 h-10">
                   <Wallet className="w-5 h-5 text-muted-foreground" />
                 </div>
@@ -233,11 +233,11 @@ export function PayablesScreen() {
                 </div>
               </Card>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {peopleWithBalances.map((person) => (
                   <Card
                     key={person.id}
-                    className="p-3 hover-elevate cursor-pointer"
+                    className="p-4 hover-elevate cursor-pointer rounded-lg"
                     onClick={() => navigate("person-detail", { personId: person.id, source: "payables" })}
                     data-testid={`card-payable-${person.id}`}
                   >

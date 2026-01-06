@@ -59,14 +59,18 @@ export function LauncherScreen() {
   }, [navigate]);
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-background" data-testid="screen-launcher">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-14 h-14 rounded-2xl overflow-hidden">
-          <img src={appIconPath} alt="Home Staff 360" className="w-full h-full object-cover" />
+    <div className="h-screen flex flex-col bg-background" data-testid="screen-launcher">
+      <div className="safe-area-top" />
+      <div className="flex-1 flex flex-col items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden">
+            <img src={appIconPath} alt="Home Staff 360" className="w-full h-full object-cover" />
+          </div>
+          <h1 className="text-xl font-bold text-foreground">Home Staff 360</h1>
+          <p className="text-xs text-muted-foreground">Loading...</p>
         </div>
-        <h1 className="text-xl font-bold text-foreground">Home Staff 360</h1>
-        <p className="text-xs text-muted-foreground">Loading...</p>
       </div>
+      <div className="safe-area-bottom" />
     </div>
   );
 }

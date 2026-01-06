@@ -168,7 +168,7 @@ export function StaffAddClientHomeScreen() {
       />
 
       <ScrollContent>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <Label htmlFor="name">{tLabel("clientName", "Client Name")} <span className="text-destructive">*</span></Label>
           <Input
             id="name"
@@ -180,7 +180,7 @@ export function StaffAddClientHomeScreen() {
           {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <Label htmlFor="address">{t("address")}</Label>
           <Input
             id="address"
@@ -191,7 +191,7 @@ export function StaffAddClientHomeScreen() {
           />
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="contactName">{t("contactName")}</Label>
             <div className="flex items-center gap-2">
@@ -216,7 +216,7 @@ export function StaffAddClientHomeScreen() {
           />
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <Label htmlFor="contactPhone">{t("contactPhone")}</Label>
           <Input
             id="contactPhone"
@@ -227,7 +227,7 @@ export function StaffAddClientHomeScreen() {
           />
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <Label>{t("yourRole")} <span className="text-destructive">*</span></Label>
           <SearchableSelect
             value={role}
@@ -245,7 +245,7 @@ export function StaffAddClientHomeScreen() {
           {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <Label>{t("currency")} <span className="text-destructive">*</span></Label>
           <CurrencySelector
             value={currency}
@@ -256,7 +256,7 @@ export function StaffAddClientHomeScreen() {
         </div>
 
         {currency === "OTHER" && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label>{t("currencySymbol")} <span className="text-destructive">*</span></Label>
             <Input
               value={customCurrencySymbol}
@@ -269,7 +269,7 @@ export function StaffAddClientHomeScreen() {
         )}
 
         {role !== 'Laundry' && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label>{t("salaryType")} <span className="text-destructive">*</span></Label>
             <SearchableSelect
               value={salaryType}
@@ -284,7 +284,7 @@ export function StaffAddClientHomeScreen() {
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <Label htmlFor="rate">
             {role === 'Laundry' ? tLabel("ratePerItem", "Rate (per Item)") : t("rate")} <span className="text-destructive">*</span>
           </Label>
@@ -302,7 +302,7 @@ export function StaffAddClientHomeScreen() {
           {errors.rate && <p className="text-xs text-destructive">{errors.rate}</p>}
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+        <div className="flex items-center justify-between p-4 bg-muted rounded-md">
           <div>
             <p className="font-medium">{t("activeClient")}</p>
             <p className="text-sm text-muted-foreground">{t("currentlyWorkingHere")}</p>

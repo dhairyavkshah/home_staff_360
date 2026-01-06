@@ -190,7 +190,7 @@ export function PayNowModal({
               </p>
             </div>
 
-            <DialogFooter className="flex gap-2">
+            <DialogFooter className="flex gap-3">
               <Button variant="outline" onClick={() => setStep("method")}>
                 Back
               </Button>

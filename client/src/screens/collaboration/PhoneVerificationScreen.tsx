@@ -199,14 +199,14 @@ export function PhoneVerificationScreen() {
         onBack={handleBack}
       />
       <ScrollContent>
-        <div className="p-4 space-y-6">
+        <div className="flex flex-col gap-6">
           <div className="flex justify-center py-6">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
               <Shield className="w-10 h-10 text-primary" />
             </div>
           </div>
 
-          <div className="text-center space-y-2">
+          <div className="text-center flex flex-col gap-2">
             <h2 className="text-xl font-semibold">
               {step === "phone" ? t("verifyPhone") : t("enterOtp")}
             </h2>
@@ -217,10 +217,10 @@ export function PhoneVerificationScreen() {
             </p>
           </div>
 
-          <Card className="p-4 space-y-4">
+          <Card className="p-4 flex flex-col gap-4">
             {step === "phone" ? (
               <>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-4">
                   <Label>{t("enterPhoneNumber")}</Label>
                   <div className="flex gap-2">
                     <Select value={countryCode} onValueChange={setCountryCode}>
@@ -263,7 +263,7 @@ export function PhoneVerificationScreen() {
               </>
             ) : (
               <>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-4">
                   <Label htmlFor="otp">{t("enterOtp")}</Label>
                   <Input
                     id="otp"
@@ -320,11 +320,11 @@ export function PhoneVerificationScreen() {
             )}
           </Card>
 
-          <p className="text-center text-xs text-muted-foreground px-4">
+          <p className="text-center text-xs text-muted-foreground">
             OTP is valid for 30 minutes. Maximum 5 OTP requests allowed per hour.
           </p>
 
-          <p className="text-center text-xs text-muted-foreground px-4">
+          <p className="text-center text-xs text-muted-foreground">
             By continuing, you agree to our Terms of Service and Privacy Policy. Your phone number is used only for account verification.
           </p>
         </div>

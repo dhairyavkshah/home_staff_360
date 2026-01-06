@@ -198,7 +198,7 @@ export function ExpenseCalendarScreen() {
           </div>
         </Card>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h3 className="font-semibold">Upcoming Bills</h3>
           {expenses.filter((e) => !e.isPaid && e.dueDate >= today).length === 0 ? (
             <Card className="p-4 text-center text-muted-foreground">

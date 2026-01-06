@@ -354,7 +354,7 @@ export function AddLaundryScreen() {
           {existingBatch.pickupDelivery && (
             <section className="flex flex-col gap-4">
               <h2 className="text-lg font-semibold">Additional Services</h2>
-              <Card className="p-3 flex items-center justify-between gap-3">
+              <Card className="p-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <div className="icon-halo-muted w-9 h-9">
                     <Truck className="w-4 h-4 text-muted-foreground" />
@@ -368,7 +368,7 @@ export function AddLaundryScreen() {
             </section>
           )}
 
-          <Card className="p-3 bg-primary/5 border-primary/20">
+          <Card className="p-4 bg-primary/5 border-primary/20">
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Items ({viewTotalItems})</span>
@@ -581,7 +581,7 @@ export function AddLaundryScreen() {
         <section className="flex flex-col gap-4 fade-in-up" style={{ animationDelay: "100ms" }}>
           <h2 className="text-lg font-semibold">Additional Services</h2>
 
-          <Card className="p-3 flex flex-col gap-3">
+          <Card className="p-4 flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="icon-halo-muted w-9 h-9">
@@ -620,7 +620,7 @@ export function AddLaundryScreen() {
           </Card>
         </section>
 
-        <Card className="p-3 bg-primary/5 border-primary/20 fade-in-up" style={{ animationDelay: "150ms" }}>
+        <Card className="p-4 bg-primary/5 border-primary/20 fade-in-up" style={{ animationDelay: "150ms" }}>
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Items ({totalItems})</span>

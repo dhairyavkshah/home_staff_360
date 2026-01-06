@@ -152,7 +152,7 @@ export function PinSetupScreen() {
 
       <main className="p-4 flex flex-col items-center justify-center min-h-[70vh]">
         {step === "biometric" ? (
-          <Card className="w-full max-w-sm p-3 flex flex-col items-center gap-3 fade-in-up">
+          <Card className="w-full max-w-sm p-4 flex flex-col items-center gap-4 fade-in-up">
             <div className="icon-halo-primary w-12 h-12">
               <Fingerprint className="w-6 h-6 text-primary" />
             </div>
@@ -196,7 +196,7 @@ export function PinSetupScreen() {
             </p>
           </Card>
         ) : (
-          <Card className="w-full max-w-sm p-3 flex flex-col items-center gap-3 fade-in-up">
+          <Card className="w-full max-w-sm p-4 flex flex-col items-center gap-4 fade-in-up">
             <div className="icon-halo-primary w-12 h-12">
               <Lock className="w-6 h-6 text-primary" />
             </div>

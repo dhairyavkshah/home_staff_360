@@ -164,13 +164,13 @@ export function OnboardingScreen() {
       <div className="safe-area-top" />
 
       <div className="flex-1 overflow-y-auto">
-        <div className="content-container py-4 flex flex-col gap-4">
-          <div className="flex flex-col items-center text-center gap-2">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Icon className="w-6 h-6 text-primary" />
+        <div className="px-4 py-6 flex flex-col gap-6">
+          <div className="flex flex-col items-center text-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Icon className="w-7 h-7 text-primary" />
             </div>
-            <div>
-              <h1 className="text-lg font-semibold" data-testid="text-welcome-title">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xl font-semibold" data-testid="text-welcome-title">
                 {isHome ? "Home User Setup" : "Professional Setup"}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -179,15 +179,15 @@ export function OnboardingScreen() {
             </div>
           </div>
 
-          <Card className="p-4 flex flex-col gap-3">
+          <Card className="p-4 flex flex-col gap-4">
             <h2 className="text-sm font-semibold flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <User className="w-4 h-4 text-primary" />
               </div>
               Your Profile
             </h2>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="displayName">Your Name <span className="text-destructive">*</span></Label>
               <Input
                 id="displayName"
@@ -195,6 +195,7 @@ export function OnboardingScreen() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Enter your name"
+                className="h-8"
                 data-testid="input-display-name"
               />
               {errors.displayName && (
@@ -202,7 +203,7 @@ export function OnboardingScreen() {
               )}
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="accountName" className="flex items-center gap-1.5">
                 <Icon className="w-3.5 h-3.5" />
                 {accountLabel} Name <span className="text-destructive">*</span>
@@ -213,6 +214,7 @@ export function OnboardingScreen() {
                 value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
                 placeholder={isHome ? "My Home" : "My Business"}
+                className="h-8"
                 data-testid="input-account-name"
               />
               {errors.accountName && (
@@ -224,15 +226,15 @@ export function OnboardingScreen() {
             </div>
           </Card>
 
-          <Card className="p-4 flex flex-col gap-3">
+          <Card className="p-4 flex flex-col gap-4">
             <h2 className="text-sm font-semibold flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md bg-info/10 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-info/10 flex items-center justify-center">
                 <Globe className="w-4 h-4 text-info" />
               </div>
               Regional Settings
             </h2>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="country" className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
                 Country <span className="text-destructive">*</span>
@@ -252,7 +254,7 @@ export function OnboardingScreen() {
               )}
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="currency">Currency</Label>
               <CurrencySelector
                 value={currency}
@@ -264,7 +266,7 @@ export function OnboardingScreen() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="salaryDay" className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
                 Salary Cycle Start Day (1-31) <span className="text-destructive">*</span>
@@ -276,6 +278,7 @@ export function OnboardingScreen() {
                 max="31"
                 value={salaryStartDay}
                 onChange={(e) => setSalaryStartDay(e.target.value)}
+                className="h-8"
                 data-testid="input-salary-day"
               />
               {errors.salaryStartDay && (
@@ -286,7 +289,7 @@ export function OnboardingScreen() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="halfDay" className="flex items-center gap-1.5">
                 <Percent className="w-3.5 h-3.5" />
                 Half-Day Percentage <span className="text-destructive">*</span>
@@ -298,6 +301,7 @@ export function OnboardingScreen() {
                 max="100"
                 value={halfDayPercentage}
                 onChange={(e) => setHalfDayPercentage(e.target.value)}
+                className="h-8"
                 data-testid="input-half-day"
               />
               {errors.halfDayPercentage && (
@@ -309,16 +313,16 @@ export function OnboardingScreen() {
             </div>
           </Card>
 
-          <Card className="p-4 flex flex-col gap-3">
+          <Card className="p-4 flex flex-col gap-4">
             <h2 className="text-sm font-semibold flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md bg-success/10 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
                 <Lock className="w-4 h-4 text-success" />
               </div>
               Security
             </h2>
 
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex flex-col gap-0.5">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="appLock" className="flex items-center gap-1.5">
                   <Fingerprint className="w-3.5 h-3.5" />
                   Enable App Lock
@@ -343,12 +347,12 @@ export function OnboardingScreen() {
 
           <Card className="p-4 bg-primary/5 border-primary/20">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Shield className="w-4 h-4 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-5 h-5 text-primary" />
               </div>
-              <div>
+              <div className="flex flex-col gap-1">
                 <h3 className="text-sm font-semibold">100% Private</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-muted-foreground">
                   All your data stays on your device. No cloud, no accounts, complete privacy.
                 </p>
               </div>
@@ -356,6 +360,7 @@ export function OnboardingScreen() {
           </Card>
 
           <Button
+            size="lg"
             className="w-full"
             onClick={handleSubmit}
             data-testid="button-get-started"

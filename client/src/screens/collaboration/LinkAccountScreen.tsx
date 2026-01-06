@@ -137,7 +137,7 @@ export function LinkAccountScreen() {
         onBack={goBack}
       />
       <ScrollContent>
-        <div className="p-4 space-y-4">
+        <div className="flex flex-col gap-6">
           <Tabs defaultValue="create" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="create" data-testid="tab-create-invite">
@@ -148,9 +148,9 @@ export function LinkAccountScreen() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="create" className="space-y-4 mt-4">
-              <Card className="p-4 space-y-4">
-                <div className="text-center space-y-2">
+            <TabsContent value="create" className="flex flex-col gap-4 mt-4">
+              <Card className="p-4 flex flex-col gap-4">
+                <div className="text-center flex flex-col gap-2">
                   <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                     <QrCode className="w-8 h-8 text-primary" />
                   </div>
@@ -177,7 +177,7 @@ export function LinkAccountScreen() {
                     {t("createInviteCode")}
                   </Button>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-4">
                     <div className="p-4 bg-muted rounded-md text-center">
                       <p className="text-2xl font-mono font-bold tracking-wider">
                         {generatedCode}
@@ -216,9 +216,9 @@ export function LinkAccountScreen() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="accept" className="space-y-4 mt-4">
-              <Card className="p-4 space-y-4">
-                <div className="text-center space-y-2">
+            <TabsContent value="accept" className="flex flex-col gap-4 mt-4">
+              <Card className="p-4 flex flex-col gap-4">
+                <div className="text-center flex flex-col gap-2">
                   <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                     <Link2 className="w-8 h-8 text-primary" />
                   </div>
@@ -228,7 +228,7 @@ export function LinkAccountScreen() {
                   </p>
                 </div>
 
-                <div className="space-y-2">
+                <div className="flex flex-col gap-4">
                   <Label htmlFor="invite-code">{t("inviteCode")}</Label>
                   <Input
                     id="invite-code"

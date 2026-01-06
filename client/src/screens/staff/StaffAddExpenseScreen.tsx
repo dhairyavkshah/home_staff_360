@@ -328,7 +328,7 @@ export function StaffAddExpenseScreen() {
         <section className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">{t("expenseDetails")}</h2>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="title">{t("title")} <span className="text-destructive">*</span></Label>
             <Input
               id="title"
@@ -340,7 +340,7 @@ export function StaffAddExpenseScreen() {
             {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="category">{t("category")} <span className="text-destructive">*</span></Label>
             <SearchableSelect
               value={category}
@@ -353,7 +353,7 @@ export function StaffAddExpenseScreen() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="amount">{t("amount")} <span className="text-destructive">*</span></Label>
             <Input
               id="amount"
@@ -366,7 +366,7 @@ export function StaffAddExpenseScreen() {
             {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="dueDate">{t("dueDate")} <span className="text-destructive">*</span></Label>
             <Input
               id="dueDate"
@@ -378,7 +378,7 @@ export function StaffAddExpenseScreen() {
             {errors.dueDate && <p className="text-xs text-destructive">{errors.dueDate}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="vendor">{t("vendor")}</Label>
             <Input
               id="vendor"
@@ -390,7 +390,7 @@ export function StaffAddExpenseScreen() {
           </div>
 
           {clientHomes.length > 0 && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label htmlFor="clientHome">{t("relatedClient")} ({t("optional")})</Label>
               <SearchableSelect
                 value={clientHomeId}
@@ -407,7 +407,7 @@ export function StaffAddExpenseScreen() {
             </div>
           )}
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="recurrence">{t("recurrence")}</Label>
             <SearchableSelect
               value={recurrence}
@@ -425,7 +425,7 @@ export function StaffAddExpenseScreen() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="notes">{t("notes")}</Label>
             <Textarea
               id="notes"

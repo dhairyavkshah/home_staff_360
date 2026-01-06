@@ -189,7 +189,7 @@ export function StaffInvoiceViewScreen() {
       />
 
       <ScrollContent>
-        <Card className="p-4 mb-4">
+        <Card className="p-4">
           <div className="flex items-center justify-between mb-4">
             <Badge variant="outline" className={statusConfig.color}>
               <StatusIcon className="w-3 h-3 mr-1" />
@@ -221,7 +221,7 @@ export function StaffInvoiceViewScreen() {
           </div>
         </Card>
 
-        <Card className="p-4 mb-4">
+        <Card className="p-4">
           <h3 className="font-semibold mb-3">Client Details</h3>
           {client ? (
             <div className="text-sm space-y-1">
@@ -235,7 +235,7 @@ export function StaffInvoiceViewScreen() {
           )}
         </Card>
 
-        <Card className="p-4 mb-4">
+        <Card className="p-4">
           <h3 className="font-semibold mb-3">Items</h3>
           <div className="space-y-3">
             {invoice.items.map((item, index) => (
@@ -274,7 +274,7 @@ export function StaffInvoiceViewScreen() {
         </Card>
 
         {invoice.notes && (
-          <Card className="p-4 mb-4">
+          <Card className="p-4">
             <h3 className="font-semibold mb-2">Notes</h3>
             <p className="text-sm text-muted-foreground whitespace-pre-wrap">{invoice.notes}</p>
           </Card>

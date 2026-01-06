@@ -161,7 +161,7 @@ export function PersonDetailScreen() {
       <ScrollContent>
         {activeTab === "overview" && (
           <>
-            <Card className="p-6 bg-primary/5 border-primary/20">
+            <Card className="p-4 bg-primary/5 border-primary/20 rounded-lg">
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-1">{t("currentBalance")}</p>
                 <p className={`text-3xl font-bold ${balance > 0 ? "text-warning" : ""}`} data-testid="text-balance">
@@ -175,21 +175,21 @@ export function PersonDetailScreen() {
 
             <section className="flex flex-col gap-3">
               <h3 className="font-semibold">{t("details")}</h3>
-              <Card className="divide-y">
-                <div className="p-4 flex justify-between gap-2">
+              <Card className="divide-y rounded-lg">
+                <div className="p-4 flex justify-between gap-4">
                   <span className="text-muted-foreground">{t("salaryType")}</span>
                   <span className="font-medium">
                     {person.salaryType === "MONTHLY" ? t("monthly") : person.salaryType === "DAILY" ? t("daily") : t("hourly")}
                   </span>
                 </div>
-                <div className="p-4 flex justify-between gap-2">
+                <div className="p-4 flex justify-between gap-4">
                   <span className="text-muted-foreground">{t("baseRate")}</span>
                   <span className="font-medium">
                     {formatCurrency(person.baseRate, settings.currency, settings.customCurrencySymbol)}
                     {person.salaryType === "MONTHLY" ? t("perMonth") : person.salaryType === "DAILY" ? t("perDay") : t("perHour")}
                   </span>
                 </div>
-                <div className="p-4 flex justify-between gap-2">
+                <div className="p-4 flex justify-between gap-4">
                   <span className="text-muted-foreground">{t("halfDay")}</span>
                   <span className="font-medium">
                     {person.halfDayPercentage ?? settings.halfDayPercentage}%
@@ -215,7 +215,7 @@ export function PersonDetailScreen() {
 
         {activeTab === "attendance" && (
           <>
-            <Card className="p-4">
+            <Card className="p-4 rounded-lg">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-bold text-success">{attendanceSummary.full}</p>
@@ -239,9 +239,9 @@ export function PersonDetailScreen() {
                   {t("noAttendanceRecordsYet")}
                 </div>
               ) : (
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-3">
                   {recentAttendance.map((entry) => (
-                    <div key={entry.id} className="flex items-center gap-2 py-2 px-3 rounded-lg border bg-card">
+                    <div key={entry.id} className="flex items-center gap-3 p-4 rounded-lg border bg-card">
                       {getStatusIcon(entry.status)}
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">{formatShortDate(entry.date)}</p>
@@ -286,9 +286,9 @@ export function PersonDetailScreen() {
                   {t("noTransactionsYet")}
                 </div>
               ) : (
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-3">
                   {recentTransactions.map((tx) => (
-                    <div key={tx.id} className="flex items-center gap-2 py-2 px-3 rounded-lg border bg-card">
+                    <div key={tx.id} className="flex items-center gap-3 p-4 rounded-lg border bg-card">
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm truncate">{tx.description}</p>
                         <p className="text-xs text-muted-foreground">

@@ -461,7 +461,7 @@ export function StaffLogLaundryScreen() {
           <h2 className="text-lg font-semibold">{t("basicInformation") || "Basic Information"}</h2>
 
           {laundryBusinesses.length > 1 && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label htmlFor="business">{t("business") || "Business"} <span className="text-destructive">*</span></Label>
               <SearchableSelect
                 value={selectedBusinessId}
@@ -480,7 +480,7 @@ export function StaffLogLaundryScreen() {
             </div>
           )}
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="clientHome">{t("clientHomes")} <span className="text-destructive">*</span></Label>
             <SearchableSelect
               value={selectedHome}
@@ -497,7 +497,7 @@ export function StaffLogLaundryScreen() {
             {errors.selectedHome && <p className="text-xs text-destructive">{errors.selectedHome}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="date">{t("date")} <span className="text-destructive">*</span></Label>
             <Input
               id="date"
@@ -521,7 +521,7 @@ export function StaffLogLaundryScreen() {
             )}
           </div>
           
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="serviceType">{t("serviceType") || "Service Type"} <span className="text-destructive">*</span></Label>
             <SearchableSelect
               value={serviceType}

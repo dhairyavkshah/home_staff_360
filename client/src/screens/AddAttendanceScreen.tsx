@@ -118,7 +118,7 @@ export function AddAttendanceScreen() {
 
       <ScrollContent>
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="date">{t("date")}</Label>
             <Input
               id="date"
@@ -157,7 +157,7 @@ export function AddAttendanceScreen() {
         </section>
 
         {showHours && status !== "ABSENT" && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <Label htmlFor="hours">{t("hours")} <span className="text-destructive">*</span></Label>
             <Input
               id="hours"
@@ -171,7 +171,7 @@ export function AddAttendanceScreen() {
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           <Label htmlFor="note">{t("notes")}</Label>
           <Textarea
             id="note"

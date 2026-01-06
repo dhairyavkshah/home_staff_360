@@ -272,7 +272,7 @@ export function StaffLogAttendanceScreen() {
           </Card>
         ) : (
           <>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label>{t("clientHomes")}</Label>
               <SearchableSelect
                 value={selectedHome}
@@ -285,7 +285,7 @@ export function StaffLogAttendanceScreen() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label>{t("date")}</Label>
               <Input
                 type="date"
@@ -304,9 +304,9 @@ export function StaffLogAttendanceScreen() {
               </Card>
             )}
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label>{t("status")}</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-3">
                 <Button
                   variant={status === "FULL" ? "default" : "outline"}
                   onClick={() => { setStatus("FULL"); markDirty(); }}
@@ -338,7 +338,7 @@ export function StaffLogAttendanceScreen() {
             </div>
 
             {status !== "ABSENT" && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 <Label>{t("hoursWorked")}</Label>
                 <Input
                   type="number"
@@ -350,7 +350,7 @@ export function StaffLogAttendanceScreen() {
               </div>
             )}
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label>{t("notes")}</Label>
               <Textarea
                 value={note}

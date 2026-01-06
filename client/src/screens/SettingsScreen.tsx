@@ -251,13 +251,13 @@ export function SettingsScreen() {
       />
 
       <ScrollContent>
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("general")}</h2>
 
-          <Card className="p-3 flex flex-col gap-2.5">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="country" className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5" />
+          <Card className="p-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-4">
+              <Label htmlFor="country" className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
                 {t("country")}
               </Label>
               <CountrySelector
@@ -271,7 +271,7 @@ export function SettingsScreen() {
               />
             </div>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="currency">{t("currency")}</Label>
               <p className="text-xs text-muted-foreground">
                 {isHome 
@@ -286,7 +286,7 @@ export function SettingsScreen() {
             />
 
           {currency === "OTHER" && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <Label htmlFor="customSymbol">{t("currencySymbol")}</Label>
               <Input
                 id="customSymbol"
@@ -301,7 +301,7 @@ export function SettingsScreen() {
             </div>
           )}
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="language">{t("language")}</Label>
             <LanguageSelector
               value={pendingLanguage}
@@ -313,7 +313,7 @@ export function SettingsScreen() {
 
           {isHome && (
             <>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 <Label htmlFor="salaryStartDay">{t("salaryStartDay")}</Label>
                 <SearchableSelect
                   value={salaryStartDay.toString()}
@@ -329,7 +329,7 @@ export function SettingsScreen() {
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 <Label htmlFor="halfDayPercentage">{t("halfDayPercentageLabel")}</Label>
                 <Input
                   id="halfDayPercentage"
@@ -347,14 +347,14 @@ export function SettingsScreen() {
           </Card>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("account")}</h2>
           <button
             className="w-full text-left hover-elevate"
             onClick={() => navigate("profile-settings")}
             data-testid="button-profile-settings"
           >
-            <Card className="p-3">
+            <Card className="p-4">
               <div className="flex items-center gap-3">
                 <div className="icon-halo-primary w-9 h-9">
                   <User className="w-4.5 h-4.5 text-primary" />
@@ -383,14 +383,14 @@ export function SettingsScreen() {
           </button>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("support")}</h2>
           <button
             className="w-full text-left hover-elevate"
             onClick={() => navigate("support-developer")}
             data-testid="button-support"
           >
-            <Card className="p-3">
+            <Card className="p-4">
               <div className="flex items-center gap-3">
                 <div className="icon-halo-warning w-10 h-10">
                   <Crown className="w-5 h-5 text-pink-500 dark:text-pink-400" />
@@ -407,11 +407,11 @@ export function SettingsScreen() {
           </button>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("appMode")}</h2>
           <Card className="divide-y">
             <button
-              className={`w-full p-3 flex items-center gap-3 hover-elevate text-left ${appMode === "HOME" ? "bg-primary/5" : ""}`}
+              className={`w-full p-4 flex items-center gap-4 hover-elevate text-left ${appMode === "HOME" ? "bg-primary/5" : ""}`}
               onClick={() => handleAppModeSwitch("HOME")}
               data-testid="button-home-mode"
             >
@@ -425,7 +425,7 @@ export function SettingsScreen() {
               {appMode === "HOME" && <Check className="w-4 h-4 text-primary" />}
             </button>
             <button
-              className={`w-full p-3 flex items-center gap-3 hover-elevate text-left ${appMode === "STAFF" ? "bg-primary/5" : ""}`}
+              className={`w-full p-4 flex items-center gap-4 hover-elevate text-left ${appMode === "STAFF" ? "bg-primary/5" : ""}`}
               onClick={() => handleAppModeSwitch("STAFF")}
               data-testid="button-staff-mode"
             >
@@ -441,10 +441,10 @@ export function SettingsScreen() {
           </Card>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("security")}</h2>
           <Card className="divide-y">
-            <div className="p-3 flex items-center justify-between gap-3">
+            <div className="p-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="icon-halo-success w-9 h-9">
                   <Lock className="w-4.5 h-4.5 text-success" />
@@ -464,7 +464,7 @@ export function SettingsScreen() {
             </div>
             {isPinEnabled && (
               <button
-                className="w-full p-3 flex items-center gap-3 hover-elevate text-left"
+                className="w-full p-4 flex items-center gap-4 hover-elevate text-left"
                 onClick={() => navigate("pin-setup", { returnTo: "settings" })}
                 data-testid="button-change-pin"
               >
@@ -480,10 +480,10 @@ export function SettingsScreen() {
           </Card>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("appearance")}</h2>
-          <Card className="p-3">
-            <div className="flex items-center justify-between gap-3">
+          <Card className="p-4">
+            <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="icon-halo-muted w-9 h-9">
                   {theme === "dark" ? (
@@ -506,11 +506,11 @@ export function SettingsScreen() {
           </Card>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("feedback")}</h2>
           <Card className="divide-y">
-            <div className="p-3 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
+            <div className="p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
                 <div className="icon-halo-primary w-9 h-9">
                   <Vibrate className="w-4.5 h-4.5 text-primary" />
                 </div>
@@ -530,8 +530,8 @@ export function SettingsScreen() {
                 data-testid="switch-haptic-feedback"
               />
             </div>
-            <div className="p-3 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
+            <div className="p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
                 <div className="icon-halo-info w-9 h-9">
                   <Volume2 className="w-4.5 h-4.5 text-info" />
                 </div>
@@ -554,11 +554,11 @@ export function SettingsScreen() {
           </Card>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("help")}</h2>
           <Card className="divide-y">
             <button
-              className="w-full p-3 flex items-center gap-3 hover-elevate text-left"
+              className="w-full p-4 flex items-center gap-4 hover-elevate text-left"
               onClick={handleStartTour}
               data-testid="button-guided-tour"
             >
