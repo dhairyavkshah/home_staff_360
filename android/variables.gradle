@@ -4,7 +4,8 @@ ext {
     targetSdkVersion = 35
     
     // Kotlin version - override plugin defaults
-    kotlin_version = '1.9.22'
+    // Must be 2.0.x+ to read kotlinx-coroutines 1.10.2 metadata (compiled with Kotlin 2.1.0)
+    kotlin_version = '2.0.21'
     
     // AndroidX versions
     androidxActivityVersion = '1.9.2'
