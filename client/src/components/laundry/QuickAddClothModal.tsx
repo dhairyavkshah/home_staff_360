@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Minus, Plus, Check, Shirt } from "lucide-react";
+import { Minus, Plus, Check, Shirt, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -239,10 +239,19 @@ export function QuickAddClothModal({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[95vh] flex flex-col">
-          <DrawerHeader className="py-3 shrink-0">
-            <DrawerTitle>
+          <DrawerHeader className="py-3 pb-4 shrink-0 relative">
+            <DrawerTitle className="text-center">
               {step === 'select' ? 'Select Cloth Type' : 'Enter Quantity'}
             </DrawerTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-2"
+              onClick={() => onOpenChange(false)}
+              data-testid="button-close-modal"
+            >
+              <X className="w-5 h-5" />
+            </Button>
           </DrawerHeader>
           <div className="px-4 pb-4 overflow-y-auto flex-1 flex flex-col">
             {content}
