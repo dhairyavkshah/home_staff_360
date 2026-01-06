@@ -1200,3 +1200,86 @@ export const insertNotificationSchema = z.object({
 });
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+
+// ============================================
+// Offline-First Sync Queue Types (Client-side only)
+// ============================================
+
+export const syncOperationTypes = [
+  'submit_attendance',
+  'approve_attendance',
+  'reject_attendance',
+  'revise_attendance',
+  'submit_laundry',
+  'approve_laundry',
+  'reject_laundry',
+  'revise_laundry',
+  'create_binding',
+  'accept_connection',
+  'reject_connection',
+] as const;
+export type SyncOperationType = typeof syncOperationTypes[number];
+
+export const syncQueueStatuses = ['pending', 'in_progress', 'completed', 'failed', 'conflict'] as const;
+export type SyncQueueStatus = typeof syncQueueStatuses[number];
+
+export const syncQueueItemSchema = z.object({
+  id: z.string(),
+  operationType: z.enum(syncOperationTypes),
+  endpoint: z.string(),
+  method: z.enum(['POST', 'PATCH', 'DELETE']),
+  payload: z.string(), // JSON stringified payload
+  entityType: z.string().optional(), // attendance, laundry, binding
+  entityId: z.string().optional(),
+  bindingId: z.string().optional(),
+  status: z.enum(syncQueueStatuses),
+  retryCount: z.number().default(0),
+  maxRetries: z.number().default(3),
+  errorMessage: z.string().optional(),
+  createdAt: z.string(),
+  lastAttemptAt: z.string().optional(),
+  completedAt: z.string().optional(),
+  // For conflict detection
+  baseVersion: z.number().optional(),
+  clientRequestId: z.string(), // Idempotency key
+});
+export type SyncQueueItem = z.infer<typeof syncQueueItemSchema>;
+
+// Shared record view model for approval UI
+export const sharedRecordSchema = z.object({
+  id: z.string(),
+  type: z.enum(['attendance', 'laundry']),
+  bindingId: z.string(),
+  date: z.string(),
+  approvalStatus: z.enum(approvalStatuses),
+  submittedBy: z.string(),
+  submittedByRole: z.enum(userTypes),
+  submittedByName: z.string().optional(),
+  actionRequiredBy: z.string().optional(),
+  currentRevisionId: z.string().optional(),
+  rejectionRemarks: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string().optional(),
+  // Record-specific data stored as JSON
+  recordData: z.string(), // JSON payload
+  // Currency info
+  currency: z.string().optional(),
+});
+export type SharedRecord = z.infer<typeof sharedRecordSchema>;
+
+// Revision entry for history display
+export const revisionEntrySchema = z.object({
+  id: z.string(),
+  recordId: z.string(),
+  recordType: z.enum(['attendance', 'laundry']),
+  revisionNumber: z.number(),
+  action: z.enum(['submitted', 'approved', 'rejected', 'revised']),
+  actionBy: z.string(),
+  actionByRole: z.enum(userTypes),
+  actionByName: z.string().optional(),
+  remarks: z.string().optional(),
+  previousData: z.string().optional(), // JSON
+  newData: z.string().optional(), // JSON
+  createdAt: z.string(),
+});
+export type RevisionEntry = z.infer<typeof revisionEntrySchema>;

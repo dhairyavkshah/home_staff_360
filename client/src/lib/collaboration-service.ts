@@ -351,6 +351,13 @@ class CollaborationService {
     return this.apiRequest(`/shared-attendance?bindingId=${bindingId}`);
   }
 
+  async getSharedAttendanceById(attendanceId: string): Promise<{ 
+    attendance: any; 
+    revisions: any[] 
+  }> {
+    return this.apiRequest(`/shared-attendance/${attendanceId}`);
+  }
+
   async actionAttendance(
     attendanceId: string,
     action: "approve" | "reject",
@@ -382,6 +389,13 @@ class CollaborationService {
 
   async getSharedLaundry(bindingId: string): Promise<{ laundry: any[] }> {
     return this.apiRequest(`/shared-laundry?bindingId=${bindingId}`);
+  }
+
+  async getSharedLaundryById(laundryId: string): Promise<{ 
+    laundry: any; 
+    revisions: any[] 
+  }> {
+    return this.apiRequest(`/shared-laundry/${laundryId}`);
   }
 
   async actionLaundry(

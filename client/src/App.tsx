@@ -66,6 +66,7 @@ import { CollaborationHubScreen } from "@/screens/collaboration/CollaborationHub
 import { LinkAccountScreen } from "@/screens/collaboration/LinkAccountScreen";
 import { SyncActivityScreen } from "@/screens/collaboration/SyncActivityScreen";
 import { NotificationCenterScreen } from "@/screens/collaboration/NotificationCenterScreen";
+import { ApprovalDetailScreen } from "@/screens/collaboration/ApprovalDetailScreen";
 
 function MobileAppRouter() {
   const { currentScreen } = useNavigation();
@@ -176,6 +177,8 @@ function MobileAppRouter() {
       return <SyncActivityScreen />;
     case "notification-center":
       return <NotificationCenterScreen />;
+    case "approval-detail":
+      return <ApprovalDetailScreen />;
     default:
       return <LauncherScreen />;
   }

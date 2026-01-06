@@ -1032,6 +1032,67 @@ router.get("/api/shared-attendance", authenticateToken, async (req: Request, res
   }
 });
 
+// Get individual attendance record by ID
+router.get("/api/shared-attendance/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+
+    const record = await db.query.sharedAttendance.findFirst({
+      where: eq(sharedAttendance.id, id)
+    });
+
+    if (!record) {
+      return res.status(404).json({ error: "Attendance record not found" });
+    }
+
+    // Verify user has access via binding
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, record.bindingId)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    // Get the link to verify user access and check link status
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link || (link.homeUserId !== userId && link.staffUserId !== userId)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Check link status - only allow active links
+    if (link.status !== 'active') {
+      return res.status(403).json({ error: "Collaboration link is not active" });
+    }
+
+    // Get revision history
+    const revisions = await db.query.attendanceRevisions.findMany({
+      where: eq(attendanceRevisions.attendanceId, id),
+      orderBy: desc(attendanceRevisions.createdAt)
+    });
+
+    res.json({ 
+      attendance: record,
+      revisions: revisions.map(r => ({
+        id: r.id,
+        revisionNumber: r.revisionNumber,
+        action: r.action,
+        actionBy: r.actionBy,
+        actionByRole: r.actionBy === link.homeUserId ? 'HOME' : 'STAFF',
+        remarks: r.remarks,
+        createdAt: r.createdAt
+      }))
+    });
+  } catch (error) {
+    console.error("Get attendance by ID error:", error);
+    res.status(500).json({ error: "Failed to get attendance record" });
+  }
+});
+
 // Approve or reject attendance
 router.patch("/api/shared-attendance/:id/action", authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -1221,6 +1282,76 @@ router.get("/api/shared-laundry", authenticateToken, async (req: Request, res: R
   } catch (error) {
     console.error("Get laundry error:", error);
     res.status(500).json({ error: "Failed to get laundry" });
+  }
+});
+
+// Get individual laundry record by ID
+router.get("/api/shared-laundry/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+
+    const record = await db.query.sharedLaundry.findFirst({
+      where: eq(sharedLaundry.id, id)
+    });
+
+    if (!record) {
+      return res.status(404).json({ error: "Laundry record not found" });
+    }
+
+    // Verify user has access via binding
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, record.bindingId)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    // Get the link to verify user access and check link status
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link || (link.homeUserId !== userId && link.staffUserId !== userId)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Check link status - only allow active links
+    if (link.status !== 'active') {
+      return res.status(403).json({ error: "Collaboration link is not active" });
+    }
+
+    // Get revision history
+    const revisions = await db.query.laundryRevisions.findMany({
+      where: eq(laundryRevisions.laundryId, id),
+      orderBy: desc(laundryRevisions.createdAt)
+    });
+
+    // Parse items JSON
+    let items = [];
+    try {
+      items = typeof record.items === 'string' ? JSON.parse(record.items) : record.items;
+    } catch { }
+
+    res.json({ 
+      laundry: {
+        ...record,
+        items
+      },
+      revisions: revisions.map(r => ({
+        id: r.id,
+        revisionNumber: r.revisionNumber,
+        action: r.action,
+        actionBy: r.actionBy,
+        actionByRole: r.actionBy === link.homeUserId ? 'HOME' : 'STAFF',
+        remarks: r.remarks,
+        createdAt: r.createdAt
+      }))
+    });
+  } catch (error) {
+    console.error("Get laundry by ID error:", error);
+    res.status(500).json({ error: "Failed to get laundry record" });
   }
 });
 

@@ -67,8 +67,20 @@ export function NotificationCenterScreen() {
       }
     }
 
-    // For now, just mark as read - approval detail screen will be added in Phase 4
-    // TODO: Navigate to approval-detail screen when built
+    // Navigate to approval detail for attendance/laundry notifications
+    if (notification.entityType === "attendance" && notification.entityId) {
+      navigate("approval-detail", { 
+        entityType: "attendance", 
+        entityId: notification.entityId,
+        notificationType: notification.type
+      });
+    } else if (notification.entityType === "laundry" && notification.entityId) {
+      navigate("approval-detail", {
+        entityType: "laundry",
+        entityId: notification.entityId,
+        notificationType: notification.type
+      });
+    }
   }
 
   function getNotificationIcon(type: string) {

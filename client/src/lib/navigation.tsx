@@ -58,7 +58,8 @@ export type Screen =
   | "collaboration-hub"
   | "link-account"
   | "sync-activity"
-  | "notification-center";
+  | "notification-center"
+  | "approval-detail";
 
 interface NavigationData {
   personId?: string;
@@ -78,6 +79,10 @@ interface NavigationData {
   reportType?: string;
   reportTitle?: string;
   reportData?: unknown;
+  // Approval detail screen params
+  entityType?: "attendance" | "laundry";
+  entityId?: string;
+  notificationType?: string;
   [key: string]: unknown;
 }
 
