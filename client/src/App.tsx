@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { NavigationProvider, useNavigation } from "@/lib/navigation";
+import { DirtyTrackingProvider } from "@/lib/dirty-tracking";
 import { I18nProvider } from "@/lib/i18n/i18n-context";
 import { GuidedTourProvider } from "@/lib/guided-tour";
 import { SafeAreaProvider } from "@/lib/safe-area-provider";
@@ -173,10 +174,12 @@ function MobileAppWithSplash() {
 
   return (
     <NavigationProvider>
-      <GuidedTourProvider>
-        <MobileAppRouter />
-        <Toaster />
-      </GuidedTourProvider>
+      <DirtyTrackingProvider>
+        <GuidedTourProvider>
+          <MobileAppRouter />
+          <Toaster />
+        </GuidedTourProvider>
+      </DirtyTrackingProvider>
     </NavigationProvider>
   );
 }
