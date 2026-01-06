@@ -2,10 +2,15 @@ import type { Advertisement, InsertAdImpression } from "@shared/schema";
 
 const AD_LAST_SHOWN_KEY = "hm_ad_last_shown";
 const AD_SESSION_ID_KEY = "hm_ad_session_id";
+const AD_DEVICE_ID_KEY = "hm_ad_device_id";
 const AD_INTERVAL_MS = 300 * 1000;
 
 function generateSessionId(): string {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+function generateDeviceId(): string {
+  return `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
 class AdService {
@@ -14,6 +19,7 @@ class AdService {
 
   constructor() {
     this.ensureSessionId();
+    this.ensureDeviceId();
   }
 
   private ensureSessionId(): string {
@@ -25,8 +31,21 @@ class AdService {
     return sessionId;
   }
 
+  private ensureDeviceId(): string {
+    let deviceId = localStorage.getItem(AD_DEVICE_ID_KEY);
+    if (!deviceId) {
+      deviceId = generateDeviceId();
+      localStorage.setItem(AD_DEVICE_ID_KEY, deviceId);
+    }
+    return deviceId;
+  }
+
   getSessionId(): string {
     return this.ensureSessionId();
+  }
+
+  getDeviceId(): string {
+    return this.ensureDeviceId();
   }
 
   startTracking(): void {
@@ -85,18 +104,22 @@ class AdService {
       }
 
       const data = await response.json();
-      return data.ad || null;
+      if (data && data.id) {
+        return data as Advertisement;
+      }
+      return null;
     } catch (error) {
       console.error("Error fetching next ad:", error);
       return null;
     }
   }
 
-  async recordImpression(data: Omit<InsertAdImpression, "sessionId">): Promise<boolean> {
+  async recordImpression(data: Omit<InsertAdImpression, "sessionId" | "deviceId">): Promise<boolean> {
     try {
       const impressionData: InsertAdImpression = {
         ...data,
         sessionId: this.getSessionId(),
+        deviceId: this.getDeviceId(),
       };
 
       const response = await fetch("/api/ads/impression", {

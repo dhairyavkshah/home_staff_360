@@ -97,6 +97,18 @@ Home Staff 360 is a **privacy-first, offline-capable mobile/web application** de
 | `/api/admin/stats` | GET | Dashboard statistics |
 | `/api/admin/users` | GET | List/manage users |
 
+### Advertising System
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/ads/next` | GET | Get next ad to display (weighted random) |
+| `/api/ads/impression` | POST | Record ad impression with watch data |
+| `/api/admin/ads` | GET | List all ads (paginated) |
+| `/api/admin/ads` | POST | Create new advertisement |
+| `/api/admin/ads/:id` | GET | Get single ad details |
+| `/api/admin/ads/:id` | PATCH | Update advertisement |
+| `/api/admin/ads/:id` | DELETE | Delete/deactivate ad |
+| `/api/admin/ads/analytics` | GET | Get comprehensive ad analytics |
+
 ---
 
 ## Database Schema (PostgreSQL)
@@ -115,6 +127,33 @@ Home Staff 360 is a **privacy-first, offline-capable mobile/web application** de
 ### Shared Data Tables
 - `shared_laundry`: Laundry batches shared for approval
 - `shared_laundry_revisions`: Revision history for shared laundry
+
+### Advertising Tables
+- `advertisements`: Ad content (title, videoUrl, duration, weight, isActive, advertiser, targetUrl)
+- `ad_impressions`: Ad view tracking (adId, userId, watchedDuration, completed, skipped, clickedThrough)
+
+---
+
+## Advertising System
+
+### Overview
+- Ads display approximately every 5 minutes of app usage
+- Maximum ad duration: 30 seconds
+- Skip button appears after 5 seconds of watching
+- Equal weight distribution ensures fair rotation of all active ads
+
+### Features
+- **Video Ads**: Full-screen video overlay with Fluent 2 design
+- **Skip After 5s**: Users can skip ads after watching 5 seconds
+- **Click-through**: Optional "Learn More" button to visit advertiser
+- **Analytics**: Track impressions, completion rates, skip rates, CTR
+
+### Admin Management
+Access via `/admin/ads` after logging in as super admin:
+- Create, edit, delete advertisements
+- View detailed analytics per ad
+- User breakdown showing which users saw which ads
+- Schedule ads with start/end dates
 
 ---
 

@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, Smartphone, Link2, Activity, LogOut } from "lucide-react";
+import { Users, Smartphone, Link2, Activity, LogOut, Film } from "lucide-react";
 
 interface Stats {
   totalUsers: number;
@@ -128,6 +128,15 @@ export default function AdminDashboard() {
                 {adminUser.email}
               </span>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/admin/ads")}
+              data-testid="button-admin-ads"
+            >
+              <Film className="w-4 h-4 mr-2" />
+              Ads
+            </Button>
             <Button
               variant="outline"
               size="sm"
