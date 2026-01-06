@@ -3,39 +3,67 @@ import { Share } from "@capacitor/share";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Capacitor } from "@capacitor/core";
 
-export async function downloadAsFile(content: string, filename: string): Promise<boolean> {
+async function writeAndShareFile(content: string, filename: string, title: string): Promise<boolean> {
   const BOM = '\uFEFF';
   const fileContent = BOM + content;
 
+  try {
+    const writeResult = await Filesystem.writeFile({
+      path: filename,
+      data: fileContent,
+      directory: Directory.Cache,
+      encoding: Encoding.UTF8,
+    });
+
+    console.log('File written successfully:', writeResult.uri);
+
+    const uriResult = await Filesystem.getUri({
+      directory: Directory.Cache,
+      path: filename,
+    });
+
+    console.log('File URI obtained:', uriResult.uri);
+
+    const canShare = await Share.canShare();
+    if (!canShare.value) {
+      console.error('Share is not available on this device');
+      return false;
+    }
+
+    await Share.share({
+      title: title,
+      files: [uriResult.uri],
+      dialogTitle: title,
+    });
+    return true;
+  } catch (error) {
+    const errorMessage = (error as Error).message || String(error);
+    
+    if (errorMessage.includes('cancel') || 
+        errorMessage.includes('Cancel') ||
+        errorMessage.includes('dismissed') ||
+        errorMessage.includes('aborted')) {
+      console.log('Share was cancelled by user');
+      return false;
+    }
+    
+    console.error('Failed to save/share file:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    throw error;
+  }
+}
+
+export async function downloadAsFile(content: string, filename: string): Promise<boolean> {
   if (Capacitor.isNativePlatform()) {
     try {
-      await Filesystem.writeFile({
-        path: filename,
-        data: fileContent,
-        directory: Directory.Cache,
-        encoding: Encoding.UTF8,
-      });
-
-      const uriResult = await Filesystem.getUri({
-        directory: Directory.Cache,
-        path: filename,
-      });
-
-      await Share.share({
-        title: 'Save File',
-        files: [uriResult.uri],
-        dialogTitle: 'Save or Share File',
-      });
-      return true;
+      return await writeAndShareFile(content, filename, 'Save File');
     } catch (error) {
-      if ((error as Error).message?.includes('cancel') || 
-          (error as Error).message?.includes('Cancel')) {
-        return false;
-      }
-      console.error('Failed to save/share file:', error);
+      console.error('Native file sharing failed:', error);
       return false;
     }
   } else {
+    const BOM = '\uFEFF';
+    const fileContent = BOM + content;
     try {
       const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -59,38 +87,16 @@ export async function shareReport(options: {
   text: string;
   filename: string;
 }): Promise<boolean> {
-  const BOM = '\uFEFF';
-  const fileContent = BOM + options.text;
-
   if (Capacitor.isNativePlatform()) {
     try {
-      await Filesystem.writeFile({
-        path: options.filename,
-        data: fileContent,
-        directory: Directory.Cache,
-        encoding: Encoding.UTF8,
-      });
-
-      const uriResult = await Filesystem.getUri({
-        directory: Directory.Cache,
-        path: options.filename,
-      });
-
-      await Share.share({
-        title: options.title,
-        files: [uriResult.uri],
-        dialogTitle: options.title,
-      });
-      return true;
+      return await writeAndShareFile(options.text, options.filename, options.title);
     } catch (error) {
-      if ((error as Error).message?.includes('cancel') || 
-          (error as Error).message?.includes('Cancel')) {
-        return false;
-      }
-      console.error('Share failed:', error);
+      console.error('Native report sharing failed:', error);
       return false;
     }
   } else {
+    const BOM = '\uFEFF';
+    const fileContent = BOM + options.text;
     if (navigator.share) {
       try {
         const file = new File([fileContent], options.filename, { type: 'text/csv' });
