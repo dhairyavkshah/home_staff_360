@@ -5,7 +5,7 @@ import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 import { ExitAppDialog } from "@/components/ExitAppDialog";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useNavigation } from "@/lib/navigation";
-import { storage } from "@/lib/storage";
+import { registerDirtyTrackingContext } from "@/hooks/use-dirty-tracker";
 
 interface DirtyTrackingContextType {
   isDirty: boolean;
@@ -27,6 +27,11 @@ export function DirtyTrackingProvider({ children }: { children: ReactNode }) {
 
   const homeScreens = ["home", "staff-home"];
   const isOnHomeScreen = homeScreens.includes(currentScreen);
+
+  useEffect(() => {
+    registerDirtyTrackingContext({ setDirty: setIsDirty });
+    return () => registerDirtyTrackingContext(null);
+  }, []);
 
   const confirmNavigation = useCallback((callback: () => void) => {
     if (isDirty) {

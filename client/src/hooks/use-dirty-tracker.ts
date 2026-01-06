@@ -1,7 +1,17 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useContext } from "react";
 
 interface DirtyTrackerOptions<T extends Record<string, unknown>> {
   initialData?: T;
+}
+
+interface DirtyTrackingContextType {
+  setDirty: (dirty: boolean) => void;
+}
+
+const DirtyTrackingContext = { current: null as DirtyTrackingContextType | null };
+
+export function registerDirtyTrackingContext(context: DirtyTrackingContextType | null) {
+  DirtyTrackingContext.current = context;
 }
 
 export function useDirtyTracker<T extends Record<string, unknown>>(
@@ -66,21 +76,32 @@ export function useDirtyTracker<T extends Record<string, unknown>>(
 }
 
 export function useSimpleDirtyTracker() {
-  const [isDirty, setIsDirty] = useState(false);
+  const [isDirty, setIsDirtyLocal] = useState(false);
   const hasInteractedRef = useRef(false);
+
+  const setIsDirty = useCallback((dirty: boolean) => {
+    setIsDirtyLocal(dirty);
+    DirtyTrackingContext.current?.setDirty(dirty);
+  }, []);
 
   const markDirty = useCallback(() => {
     hasInteractedRef.current = true;
     setIsDirty(true);
-  }, []);
+  }, [setIsDirty]);
 
   const markClean = useCallback(() => {
     setIsDirty(false);
-  }, []);
+  }, [setIsDirty]);
 
   const reset = useCallback(() => {
     hasInteractedRef.current = false;
     setIsDirty(false);
+  }, [setIsDirty]);
+
+  useEffect(() => {
+    return () => {
+      DirtyTrackingContext.current?.setDirty(false);
+    };
   }, []);
 
   return {
