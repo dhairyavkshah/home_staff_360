@@ -13,6 +13,7 @@ import "@/lib/demo-data";
 
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminAds from "@/pages/admin/AdminAds";
 
 import { SplashScreen } from "@/screens/SplashScreen";
 import { LauncherScreen } from "@/screens/LauncherScreen";
@@ -69,6 +70,8 @@ import { NotificationCenterScreen } from "@/screens/collaboration/NotificationCe
 import { ApprovalDetailScreen } from "@/screens/collaboration/ApprovalDetailScreen";
 import { AuthScreen } from "@/screens/auth/AuthScreen";
 import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
+import { AdOverlay } from "@/components/AdOverlay";
+import { useAds } from "@/hooks/useAds";
 
 function MobileAppRouter() {
   const { currentScreen } = useNavigation();
@@ -190,6 +193,14 @@ function MobileAppRouter() {
   }
 }
 
+function AdManager() {
+  const { currentAd, dismissAd } = useAds();
+
+  if (!currentAd) return null;
+
+  return <AdOverlay ad={currentAd} onClose={dismissAd} />;
+}
+
 function MobileAppWithSplash() {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -206,6 +217,7 @@ function MobileAppWithSplash() {
       <DirtyTrackingProvider>
         <GuidedTourProvider>
           <MobileAppRouter />
+          <AdManager />
           <Toaster />
         </GuidedTourProvider>
       </DirtyTrackingProvider>
@@ -219,6 +231,7 @@ function AdminApp() {
       <TooltipProvider>
         <Switch>
           <Route path="/admin/dashboard" component={AdminDashboard} />
+          <Route path="/admin/ads" component={AdminAds} />
           <Route path="/admin" component={AdminLogin} />
         </Switch>
         <Toaster />
