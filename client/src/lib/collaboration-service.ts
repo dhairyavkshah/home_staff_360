@@ -56,6 +56,7 @@ export interface OtpResponse {
   expiresIn?: number;
   remainingAttempts?: number;
   cooldownSeconds?: number;
+  devOtp?: string; // Only present in development mode when SMS fails
 }
 
 export interface VerifyOtpResponse {

@@ -99,10 +99,19 @@ export function AuthScreen() {
       const result = await collaborationService.requestOtp(phone);
       if (result.success) {
         setCooldown(result.cooldownSeconds || 60);
-        toast({
-          title: "OTP Sent",
-          description: "Check your phone for the verification code",
-        });
+        
+        // In dev mode, if SMS failed, show the OTP directly
+        if (result.devOtp) {
+          toast({
+            title: "Dev Mode - OTP Code",
+            description: `Your code is: ${result.devOtp} (SMS not sent)`,
+          });
+        } else {
+          toast({
+            title: "OTP Sent",
+            description: "Check your phone for the verification code",
+          });
+        }
       }
     } catch (error: any) {
       toast({

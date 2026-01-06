@@ -266,6 +266,7 @@ router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
       })
       .where(eq(serverUsers.id, user.id));
 
+    let smsSent = false;
     if (process.env.TWILIO_PHONE_NUMBER && process.env.TWILIO_ACCOUNT_SID) {
       try {
         await twilioClient.messages.create({
@@ -273,6 +274,7 @@ router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
           to: normalizedPhone,
           from: process.env.TWILIO_PHONE_NUMBER
         });
+        smsSent = true;
       } catch (smsError) {
         console.error("SMS sending failed:", smsError);
         if (process.env.NODE_ENV === "development") {
@@ -285,14 +287,22 @@ router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
 
     const remainingAttempts = MAX_OTP_ATTEMPTS_PER_HOUR - newAttemptCount;
 
-    res.json({ 
+    // In development mode, include OTP in response for testing when SMS fails
+    const response: any = { 
       success: true, 
-      message: "OTP sent successfully",
+      message: smsSent ? "OTP sent successfully" : "OTP generated (check server logs in dev mode)",
       userId: user.id,
       expiresIn: OTP_EXPIRY_MINUTES * 60,
       remainingAttempts,
       cooldownSeconds: OTP_COOLDOWN_SECONDS
-    });
+    };
+    
+    // Return OTP in dev mode when SMS fails (for testing)
+    if (process.env.NODE_ENV === "development" && !smsSent) {
+      response.devOtp = otp;
+    }
+
+    res.json(response);
   } catch (error) {
     console.error("Request OTP error:", error);
     res.status(500).json({ error: "Failed to send OTP" });
@@ -783,6 +793,15 @@ router.put("/api/user/password", authenticateToken, async (req: Request, res: Re
 // Simple in-memory rate limiter for phone change requests
 const phoneChangeRateLimiter = new Map<string, { count: number; resetAt: number }>();
 
+// In-memory store for pending phone change OTPs (userId -> { newPhone, otpHash, expiresAt, attempts })
+interface PendingPhoneChange {
+  newPhone: string;
+  otpHash: string;
+  expiresAt: Date;
+  attempts: number;
+}
+const pendingPhoneChanges = new Map<string, PendingPhoneChange>();
+
 function checkPhoneChangeRateLimit(userId: string): boolean {
   const now = Date.now();
   const limit = phoneChangeRateLimiter.get(userId);
@@ -815,6 +834,8 @@ router.post("/api/user/phone/request-change", authenticateToken, async (req: Req
       return res.status(400).json({ error: "Valid phone number is required" });
     }
 
+    const normalizedNewPhone = normalizePhoneWithCountryCode(newPhone);
+
     const user = await db.query.serverUsers.findFirst({
       where: eq(serverUsers.id, userId)
     });
@@ -836,42 +857,41 @@ router.post("/api/user/phone/request-change", authenticateToken, async (req: Req
     }
 
     // Check if new phone is already in use
-    const existingUser = await findUserByPhone(newPhone);
+    const existingUser = await findUserByPhone(normalizedNewPhone);
     if (existingUser && existingUser.id !== userId) {
       return res.status(409).json({ error: "This phone number is already registered" });
     }
 
-    // Generate and send OTP to new phone
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    // Generate OTP and store in memory
+    const otp = generateOTP();
+    const otpHash = await bcrypt.hash(otp, 10);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Store pending phone change in OTP record
-    await db.insert(otpCodes).values({
-      id: uuidv4(),
-      phone: newPhone,
-      code: otp,
+    // Store pending phone change
+    pendingPhoneChanges.set(userId, {
+      newPhone: normalizedNewPhone,
+      otpHash,
       expiresAt,
-      verified: false,
       attempts: 0
-    }).onConflictDoUpdate({
-      target: otpCodes.phone,
-      set: { code: otp, expiresAt, verified: false, attempts: 0 }
     });
 
     // Send OTP via Twilio
-    if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER) {
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
       try {
         await twilioClient.messages.create({
           body: `Your Home Staff 360 phone change verification code is: ${otp}. This code will expire in 10 minutes.`,
-          from: TWILIO_PHONE_NUMBER,
-          to: newPhone
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: normalizedNewPhone
         });
       } catch (twilioError: any) {
         console.error("Twilio error:", twilioError);
-        return res.status(500).json({ error: "Failed to send verification code" });
+        // In dev mode, log OTP even if Twilio fails
+        if (process.env.NODE_ENV === "development") {
+          console.log(`[DEV] Phone change OTP for ${normalizedNewPhone}: ${otp}`);
+        }
       }
-    } else {
-      console.log(`[DEV] Phone change OTP for ${newPhone}: ${otp}`);
+    } else if (process.env.NODE_ENV === "development") {
+      console.log(`[DEV] Phone change OTP for ${normalizedNewPhone}: ${otp}`);
     }
 
     res.json({ 
@@ -895,29 +915,37 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
       return res.status(400).json({ error: "Phone number and OTP are required" });
     }
 
-    // Verify OTP first (outside transaction for early exit)
-    const otpRecord = await db.query.otpCodes.findFirst({
-      where: eq(otpCodes.phone, newPhone)
-    });
+    const normalizedNewPhone = normalizePhoneWithCountryCode(newPhone);
 
-    if (!otpRecord) {
+    // Get pending phone change from memory
+    const pending = pendingPhoneChanges.get(userId);
+
+    if (!pending) {
       return res.status(400).json({ error: "No verification code found. Please request a new one." });
     }
 
-    if (otpRecord.expiresAt < new Date()) {
+    if (pending.newPhone !== normalizedNewPhone) {
+      return res.status(400).json({ error: "Phone number mismatch. Please request a new verification code." });
+    }
+
+    if (pending.expiresAt < new Date()) {
+      pendingPhoneChanges.delete(userId);
       return res.status(400).json({ error: "Verification code has expired" });
     }
 
-    if (otpRecord.attempts >= 5) {
+    if (pending.attempts >= 5) {
+      pendingPhoneChanges.delete(userId);
       return res.status(429).json({ error: "Too many failed attempts. Please request a new code." });
     }
 
-    if (otpRecord.code !== otp) {
-      await db.update(otpCodes)
-        .set({ attempts: otpRecord.attempts + 1 })
-        .where(eq(otpCodes.id, otpRecord.id));
+    const isValidOTP = await bcrypt.compare(otp, pending.otpHash);
+    if (!isValidOTP) {
+      pending.attempts++;
       return res.status(400).json({ error: "Invalid verification code" });
     }
+
+    // OTP verified, remove from pending
+    pendingPhoneChanges.delete(userId);
 
     // Get user for notifications
     const user = await db.query.serverUsers.findFirst({
@@ -934,13 +962,8 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
     await db.transaction(async (tx) => {
       // Update user's phone number
       await tx.update(serverUsers)
-        .set({ phone: newPhone })
+        .set({ phone: normalizedNewPhone })
         .where(eq(serverUsers.id, userId));
-
-      // Mark OTP as verified
-      await tx.update(otpCodes)
-        .set({ verified: true })
-        .where(eq(otpCodes.id, otpRecord.id));
 
       // Create notification for user about phone change
       await tx.insert(notifications).values({
@@ -949,8 +972,8 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
         userMode: user.userType || 'HOME',
         type: 'system',
         title: 'Phone Number Changed',
-        message: `Your phone number has been changed from ${oldPhone} to ${newPhone}`,
-        payload: JSON.stringify({ oldPhone, newPhone }),
+        message: `Your phone number has been changed from ${oldPhone} to ${normalizedNewPhone}`,
+        payload: JSON.stringify({ oldPhone, newPhone: normalizedNewPhone }),
         createdAt: new Date()
       });
 
@@ -979,7 +1002,7 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
 
     // Generate new JWT with updated phone (after successful transaction)
     const newToken = jwt.sign(
-      { userId: user.id, phone: newPhone },
+      { userId: user.id, phone: normalizedNewPhone },
       JWT_SECRET,
       { expiresIn: '30d' }
     );
@@ -988,7 +1011,7 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
       success: true, 
       message: "Phone number updated successfully",
       token: newToken,
-      phone: newPhone
+      phone: normalizedNewPhone
     });
   } catch (error) {
     console.error("Confirm phone change error:", error);
