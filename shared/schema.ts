@@ -1135,6 +1135,378 @@ export const insertLaundryRevisionSchema = z.object({
 export type InsertLaundryRevision = z.infer<typeof insertLaundryRevisionSchema>;
 export type LaundryRevision = typeof laundryRevisions.$inferSelect;
 
+// ============================================
+// Collab Connections (Facebook-style Friends List)
+// ============================================
+
+export const connectionStatuses = ['pending', 'accepted', 'blocked'] as const;
+export type ConnectionStatus = typeof connectionStatuses[number];
+
+// Connection requests by phone number
+export const collabConnectionInvites = pgTable("collab_connection_invites", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  // Who is sending the invite
+  senderId: varchar("sender_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  senderMode: varchar("sender_mode", { length: 10 }).notNull(), // HOME or STAFF
+  // Target phone number (may not be registered yet)
+  targetPhone: varchar("target_phone", { length: 20 }).notNull(),
+  targetPhoneNormalized: varchar("target_phone_normalized", { length: 20 }).notNull(),
+  // If target is registered, link to their user
+  targetUserId: varchar("target_user_id", { length: 255 }).references(() => serverUsers.id),
+  // Status
+  status: varchar("status", { length: 20 }).default('pending').notNull(),
+  // Optional message
+  message: text("message"),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"),
+  respondedAt: timestamp("responded_at"),
+});
+
+export const collabConnectionInvitesRelations = relations(collabConnectionInvites, ({ one }) => ({
+  sender: one(serverUsers, {
+    fields: [collabConnectionInvites.senderId],
+    references: [serverUsers.id],
+    relationName: "inviteSender",
+  }),
+  target: one(serverUsers, {
+    fields: [collabConnectionInvites.targetUserId],
+    references: [serverUsers.id],
+    relationName: "inviteTarget",
+  }),
+}));
+
+export const insertCollabConnectionInviteSchema = z.object({
+  id: z.string().max(255),
+  senderId: z.string().max(255),
+  senderMode: z.enum(userTypes),
+  targetPhone: z.string().max(20),
+  targetPhoneNormalized: z.string().max(20),
+  targetUserId: z.string().max(255).optional(),
+  status: z.enum(connectionStatuses).optional(),
+  message: z.string().optional(),
+});
+export type InsertCollabConnectionInvite = z.infer<typeof insertCollabConnectionInviteSchema>;
+export type CollabConnectionInvite = typeof collabConnectionInvites.$inferSelect;
+
+// Established connections between users
+export const collabConnections = pgTable("collab_connections", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  // User A (the one who initiated, or alphabetically first)
+  userAId: varchar("user_a_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  userAMode: varchar("user_a_mode", { length: 10 }).notNull(),
+  // User B
+  userBId: varchar("user_b_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  userBMode: varchar("user_b_mode", { length: 10 }).notNull(),
+  // Connection metadata
+  status: varchar("status", { length: 20 }).default('accepted').notNull(),
+  nickname: varchar("nickname", { length: 100 }), // Optional nickname for the connection
+  // Who initiated (for history)
+  initiatedBy: varchar("initiated_by", { length: 255 }).references(() => serverUsers.id).notNull(),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const collabConnectionsRelations = relations(collabConnections, ({ one }) => ({
+  userA: one(serverUsers, {
+    fields: [collabConnections.userAId],
+    references: [serverUsers.id],
+    relationName: "connectionUserA",
+  }),
+  userB: one(serverUsers, {
+    fields: [collabConnections.userBId],
+    references: [serverUsers.id],
+    relationName: "connectionUserB",
+  }),
+  initiator: one(serverUsers, {
+    fields: [collabConnections.initiatedBy],
+    references: [serverUsers.id],
+    relationName: "connectionInitiator",
+  }),
+}));
+
+export const insertCollabConnectionSchema = z.object({
+  id: z.string().max(255),
+  userAId: z.string().max(255),
+  userAMode: z.enum(userTypes),
+  userBId: z.string().max(255),
+  userBMode: z.enum(userTypes),
+  status: z.enum(connectionStatuses).optional(),
+  nickname: z.string().max(100).optional(),
+  initiatedBy: z.string().max(255),
+});
+export type InsertCollabConnection = z.infer<typeof insertCollabConnectionSchema>;
+export type CollabConnection = typeof collabConnections.$inferSelect;
+
+// ============================================
+// Direct Messaging / Chat
+// ============================================
+
+export const chatTypes = ['direct', 'group'] as const;
+export type ChatType = typeof chatTypes[number];
+
+// Chat conversations
+export const collabChats = pgTable("collab_chats", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  type: varchar("type", { length: 20 }).default('direct').notNull(),
+  name: varchar("name", { length: 100 }), // For group chats
+  // For direct chats, store connection reference
+  connectionId: varchar("connection_id", { length: 255 }).references(() => collabConnections.id),
+  // Last activity for sorting
+  lastMessageAt: timestamp("last_message_at"),
+  lastMessagePreview: varchar("last_message_preview", { length: 200 }),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const collabChatsRelations = relations(collabChats, ({ one, many }) => ({
+  connection: one(collabConnections, {
+    fields: [collabChats.connectionId],
+    references: [collabConnections.id],
+  }),
+  participants: many(chatParticipants),
+  messages: many(chatMessages),
+}));
+
+export const insertCollabChatSchema = z.object({
+  id: z.string().max(255),
+  type: z.enum(chatTypes).optional(),
+  name: z.string().max(100).optional(),
+  connectionId: z.string().max(255).optional(),
+});
+export type InsertCollabChat = z.infer<typeof insertCollabChatSchema>;
+export type CollabChat = typeof collabChats.$inferSelect;
+
+// Chat participants
+export const chatParticipants = pgTable("chat_participants", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  chatId: varchar("chat_id", { length: 255 }).references(() => collabChats.id).notNull(),
+  userId: varchar("user_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  userMode: varchar("user_mode", { length: 10 }).notNull(),
+  // Role in group chats
+  role: varchar("role", { length: 20 }).default('member'),
+  // Read tracking
+  lastReadAt: timestamp("last_read_at"),
+  lastReadMessageId: varchar("last_read_message_id", { length: 255 }),
+  // Preferences
+  isMuted: boolean("is_muted").default(false),
+  // Timestamps
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  leftAt: timestamp("left_at"),
+});
+
+export const chatParticipantsRelations = relations(chatParticipants, ({ one }) => ({
+  chat: one(collabChats, {
+    fields: [chatParticipants.chatId],
+    references: [collabChats.id],
+  }),
+  user: one(serverUsers, {
+    fields: [chatParticipants.userId],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertChatParticipantSchema = z.object({
+  id: z.string().max(255),
+  chatId: z.string().max(255),
+  userId: z.string().max(255),
+  userMode: z.enum(userTypes),
+  role: z.string().max(20).optional(),
+});
+export type InsertChatParticipant = z.infer<typeof insertChatParticipantSchema>;
+export type ChatParticipant = typeof chatParticipants.$inferSelect;
+
+// Chat messages
+export const messageStatuses = ['pending', 'sent', 'delivered', 'read', 'failed'] as const;
+export type MessageStatus = typeof messageStatuses[number];
+
+export const chatMessages = pgTable("chat_messages", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  chatId: varchar("chat_id", { length: 255 }).references(() => collabChats.id).notNull(),
+  senderId: varchar("sender_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  senderMode: varchar("sender_mode", { length: 10 }).notNull(),
+  // Message content
+  content: text("content").notNull(),
+  // Status
+  status: varchar("status", { length: 20 }).default('sent').notNull(),
+  // Client ID for deduplication
+  clientMessageId: varchar("client_message_id", { length: 255 }),
+  // Reply reference
+  replyToId: varchar("reply_to_id", { length: 255 }),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  editedAt: timestamp("edited_at"),
+  deletedAt: timestamp("deleted_at"),
+});
+
+export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
+  chat: one(collabChats, {
+    fields: [chatMessages.chatId],
+    references: [collabChats.id],
+  }),
+  sender: one(serverUsers, {
+    fields: [chatMessages.senderId],
+    references: [serverUsers.id],
+  }),
+  replyTo: one(chatMessages, {
+    fields: [chatMessages.replyToId],
+    references: [chatMessages.id],
+    relationName: "messageReplies",
+  }),
+}));
+
+export const insertChatMessageSchema = z.object({
+  id: z.string().max(255),
+  chatId: z.string().max(255),
+  senderId: z.string().max(255),
+  senderMode: z.enum(userTypes),
+  content: z.string(),
+  status: z.enum(messageStatuses).optional(),
+  clientMessageId: z.string().max(255).optional(),
+  replyToId: z.string().max(255).optional(),
+});
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+
+// ============================================
+// Shared Spaces (Household/Business Groups)
+// ============================================
+
+export const shareRoles = ['admin', 'editor', 'viewer'] as const;
+export type ShareRole = typeof shareRoles[number];
+
+// Household shares - one household shared with many users
+export const householdShares = pgTable("household_shares", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  // Owner of the household (admin by default)
+  ownerId: varchar("owner_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  // Local household ID from owner's app
+  localHouseholdId: varchar("local_household_id", { length: 255 }).notNull(),
+  householdName: varchar("household_name", { length: 100 }).notNull(),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const householdSharesRelations = relations(householdShares, ({ one, many }) => ({
+  owner: one(serverUsers, {
+    fields: [householdShares.ownerId],
+    references: [serverUsers.id],
+  }),
+  members: many(householdShareMembers),
+}));
+
+export const insertHouseholdShareSchema = z.object({
+  id: z.string().max(255),
+  ownerId: z.string().max(255),
+  localHouseholdId: z.string().max(255),
+  householdName: z.string().max(100),
+});
+export type InsertHouseholdShare = z.infer<typeof insertHouseholdShareSchema>;
+export type HouseholdShare = typeof householdShares.$inferSelect;
+
+// Household share members
+export const householdShareMembers = pgTable("household_share_members", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  shareId: varchar("share_id", { length: 255 }).references(() => householdShares.id).notNull(),
+  userId: varchar("user_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  role: varchar("role", { length: 20 }).default('viewer').notNull(),
+  // Invitation status
+  status: varchar("status", { length: 20 }).default('pending').notNull(),
+  invitedAt: timestamp("invited_at").defaultNow().notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const householdShareMembersRelations = relations(householdShareMembers, ({ one }) => ({
+  share: one(householdShares, {
+    fields: [householdShareMembers.shareId],
+    references: [householdShares.id],
+  }),
+  user: one(serverUsers, {
+    fields: [householdShareMembers.userId],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertHouseholdShareMemberSchema = z.object({
+  id: z.string().max(255),
+  shareId: z.string().max(255),
+  userId: z.string().max(255),
+  role: z.enum(shareRoles).optional(),
+  status: z.string().max(20).optional(),
+});
+export type InsertHouseholdShareMember = z.infer<typeof insertHouseholdShareMemberSchema>;
+export type HouseholdShareMember = typeof householdShareMembers.$inferSelect;
+
+// Business shares - one business shared with many staff users
+export const businessShares = pgTable("business_shares", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  // Owner of the business (admin by default)
+  ownerId: varchar("owner_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  // Local business ID from owner's app
+  localBusinessId: varchar("local_business_id", { length: 255 }).notNull(),
+  businessName: varchar("business_name", { length: 100 }).notNull(),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const businessSharesRelations = relations(businessShares, ({ one, many }) => ({
+  owner: one(serverUsers, {
+    fields: [businessShares.ownerId],
+    references: [serverUsers.id],
+  }),
+  members: many(businessShareMembers),
+}));
+
+export const insertBusinessShareSchema = z.object({
+  id: z.string().max(255),
+  ownerId: z.string().max(255),
+  localBusinessId: z.string().max(255),
+  businessName: z.string().max(100),
+});
+export type InsertBusinessShare = z.infer<typeof insertBusinessShareSchema>;
+export type BusinessShare = typeof businessShares.$inferSelect;
+
+// Business share members
+export const businessShareMembers = pgTable("business_share_members", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  shareId: varchar("share_id", { length: 255 }).references(() => businessShares.id).notNull(),
+  userId: varchar("user_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  role: varchar("role", { length: 20 }).default('viewer').notNull(),
+  // Invitation status
+  status: varchar("status", { length: 20 }).default('pending').notNull(),
+  invitedAt: timestamp("invited_at").defaultNow().notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const businessShareMembersRelations = relations(businessShareMembers, ({ one }) => ({
+  share: one(businessShares, {
+    fields: [businessShareMembers.shareId],
+    references: [businessShares.id],
+  }),
+  user: one(serverUsers, {
+    fields: [businessShareMembers.userId],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertBusinessShareMemberSchema = z.object({
+  id: z.string().max(255),
+  shareId: z.string().max(255),
+  userId: z.string().max(255),
+  role: z.enum(shareRoles).optional(),
+  status: z.string().max(20).optional(),
+});
+export type InsertBusinessShareMember = z.infer<typeof insertBusinessShareMemberSchema>;
+export type BusinessShareMember = typeof businessShareMembers.$inferSelect;
+
 // Notification types
 export const notificationTypes = [
   'connection_request',
@@ -1147,6 +1519,9 @@ export const notificationTypes = [
   'laundry_approved',
   'laundry_rejected',
   'binding_created',
+  'chat_message',
+  'share_invitation',
+  'share_accepted',
 ] as const;
 export type NotificationType = typeof notificationTypes[number];
 
