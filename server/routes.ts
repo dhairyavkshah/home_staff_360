@@ -21,6 +21,8 @@ import {
   householdShareMembers,
   businessShares,
   businessShareMembers,
+  advertisements,
+  adImpressions,
   insertServerUserSchema,
   insertDeviceSchema,
   insertCollaborationLinkSchema,
@@ -30,6 +32,8 @@ import {
   insertSharedAttendanceSchema,
   insertSharedLaundrySchema,
   insertNotificationSchema,
+  insertAdvertisementSchema,
+  insertAdImpressionSchema,
   approvalStatuses
 } from "@shared/schema";
 import { eq, and, or, desc, sql } from "drizzle-orm";
@@ -4079,6 +4083,366 @@ router.post("/api/admin/seed-test-data", async (req: Request, res: Response) => 
       error: "Failed to seed test data", 
       details: error instanceof Error ? error.message : String(error) 
     });
+  }
+});
+
+// ============================================
+// Advertisement Endpoints
+// ============================================
+
+// GET /api/ads/next - Get next ad to display (weighted random selection)
+router.get("/api/ads/next", async (req: Request, res: Response) => {
+  try {
+    const now = new Date();
+    
+    // Get all active ads within valid date range
+    const activeAds = await db.query.advertisements.findMany({
+      where: and(
+        eq(advertisements.isActive, true),
+        or(
+          sql`${advertisements.startDate} IS NULL`,
+          sql`${advertisements.startDate} <= ${now}`
+        ),
+        or(
+          sql`${advertisements.endDate} IS NULL`,
+          sql`${advertisements.endDate} >= ${now}`
+        )
+      )
+    });
+
+    if (activeAds.length === 0) {
+      return res.status(404).json({ error: "No ads available" });
+    }
+
+    // Weighted random selection
+    const totalWeight = activeAds.reduce((sum, ad) => sum + (ad.weight || 1), 0);
+    let random = Math.random() * totalWeight;
+    
+    let selectedAd = activeAds[0];
+    for (const ad of activeAds) {
+      random -= ad.weight || 1;
+      if (random <= 0) {
+        selectedAd = ad;
+        break;
+      }
+    }
+
+    res.json({
+      id: selectedAd.id,
+      title: selectedAd.title,
+      videoUrl: selectedAd.videoUrl,
+      thumbnailUrl: selectedAd.thumbnailUrl,
+      duration: selectedAd.duration,
+      targetUrl: selectedAd.targetUrl
+    });
+  } catch (error) {
+    console.error("Get next ad error:", error);
+    res.status(500).json({ error: "Failed to get next ad" });
+  }
+});
+
+// POST /api/ads/impression - Record an ad impression
+router.post("/api/ads/impression", async (req: Request, res: Response) => {
+  try {
+    const validationResult = insertAdImpressionSchema.safeParse(req.body);
+    
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: "Invalid impression data",
+        details: validationResult.error.issues 
+      });
+    }
+
+    const data = validationResult.data;
+
+    // Verify ad exists
+    const ad = await db.query.advertisements.findFirst({
+      where: eq(advertisements.id, data.adId)
+    });
+
+    if (!ad) {
+      return res.status(404).json({ error: "Ad not found" });
+    }
+
+    const impressionId = uuidv4();
+
+    await db.insert(adImpressions).values({
+      id: impressionId,
+      adId: data.adId,
+      userId: data.userId || null,
+      sessionId: data.sessionId || null,
+      deviceId: data.deviceId || null,
+      watchedDuration: data.watchedDuration || 0,
+      completed: data.completed || false,
+      skipped: data.skipped || false,
+      skippedAt: data.skippedAt || null,
+      clickedThrough: data.clickedThrough || false
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Record impression error:", error);
+    res.status(500).json({ error: "Failed to record impression" });
+  }
+});
+
+// ============================================
+// Admin Advertisement Endpoints
+// ============================================
+
+// GET /api/admin/ads - List all ads with pagination
+router.get("/api/admin/ads", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { page = "1", limit = "20" } = req.query;
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const offset = (pageNum - 1) * limitNum;
+
+    const ads = await db.query.advertisements.findMany({
+      limit: limitNum,
+      offset,
+      orderBy: desc(advertisements.createdAt)
+    });
+
+    const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(advertisements);
+    const total = Number(countResult.count);
+
+    res.json({
+      ads,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    });
+  } catch (error) {
+    console.error("List ads error:", error);
+    res.status(500).json({ error: "Failed to list ads" });
+  }
+});
+
+// GET /api/admin/ads/analytics - Get aggregated analytics
+router.get("/api/admin/ads/analytics", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    // Get all ads with impression stats
+    const adsWithStats = await db.select({
+      id: advertisements.id,
+      title: advertisements.title,
+      isActive: advertisements.isActive,
+      totalImpressions: sql<number>`count(${adImpressions.id})`,
+      totalCompleted: sql<number>`sum(case when ${adImpressions.completed} then 1 else 0 end)`,
+      totalSkipped: sql<number>`sum(case when ${adImpressions.skipped} then 1 else 0 end)`,
+      totalClicks: sql<number>`sum(case when ${adImpressions.clickedThrough} then 1 else 0 end)`,
+      avgWatchDuration: sql<number>`avg(${adImpressions.watchedDuration})`
+    })
+    .from(advertisements)
+    .leftJoin(adImpressions, eq(advertisements.id, adImpressions.adId))
+    .groupBy(advertisements.id, advertisements.title, advertisements.isActive);
+
+    // Calculate rates for each ad
+    const analytics = adsWithStats.map(ad => ({
+      adId: ad.id,
+      title: ad.title,
+      isActive: ad.isActive,
+      totalImpressions: Number(ad.totalImpressions) || 0,
+      completionRate: ad.totalImpressions ? 
+        (Number(ad.totalCompleted) / Number(ad.totalImpressions) * 100).toFixed(2) + '%' : '0%',
+      skipRate: ad.totalImpressions ? 
+        (Number(ad.totalSkipped) / Number(ad.totalImpressions) * 100).toFixed(2) + '%' : '0%',
+      clickThroughRate: ad.totalImpressions ? 
+        (Number(ad.totalClicks) / Number(ad.totalImpressions) * 100).toFixed(2) + '%' : '0%',
+      avgWatchDuration: Number(ad.avgWatchDuration)?.toFixed(2) || '0'
+    }));
+
+    // User breakdown - which users saw which ads how many times
+    const userBreakdown = await db.select({
+      adId: adImpressions.adId,
+      adTitle: advertisements.title,
+      userId: adImpressions.userId,
+      impressionCount: sql<number>`count(*)`,
+      completedCount: sql<number>`sum(case when ${adImpressions.completed} then 1 else 0 end)`,
+      clickedCount: sql<number>`sum(case when ${adImpressions.clickedThrough} then 1 else 0 end)`
+    })
+    .from(adImpressions)
+    .innerJoin(advertisements, eq(adImpressions.adId, advertisements.id))
+    .where(sql`${adImpressions.userId} IS NOT NULL`)
+    .groupBy(adImpressions.adId, advertisements.title, adImpressions.userId);
+
+    // Overall totals
+    const [overallStats] = await db.select({
+      totalImpressions: sql<number>`count(*)`,
+      totalCompleted: sql<number>`sum(case when ${adImpressions.completed} then 1 else 0 end)`,
+      totalSkipped: sql<number>`sum(case when ${adImpressions.skipped} then 1 else 0 end)`,
+      totalClicks: sql<number>`sum(case when ${adImpressions.clickedThrough} then 1 else 0 end)`
+    })
+    .from(adImpressions);
+
+    res.json({
+      overview: {
+        totalImpressions: Number(overallStats?.totalImpressions) || 0,
+        overallCompletionRate: overallStats?.totalImpressions ? 
+          (Number(overallStats.totalCompleted) / Number(overallStats.totalImpressions) * 100).toFixed(2) + '%' : '0%',
+        overallSkipRate: overallStats?.totalImpressions ? 
+          (Number(overallStats.totalSkipped) / Number(overallStats.totalImpressions) * 100).toFixed(2) + '%' : '0%',
+        overallClickThroughRate: overallStats?.totalImpressions ? 
+          (Number(overallStats.totalClicks) / Number(overallStats.totalImpressions) * 100).toFixed(2) + '%' : '0%'
+      },
+      perAdAnalytics: analytics,
+      userBreakdown: userBreakdown.map(row => ({
+        adId: row.adId,
+        adTitle: row.adTitle,
+        userId: row.userId,
+        impressionCount: Number(row.impressionCount),
+        completedCount: Number(row.completedCount),
+        clickedCount: Number(row.clickedCount)
+      }))
+    });
+  } catch (error) {
+    console.error("Get analytics error:", error);
+    res.status(500).json({ error: "Failed to get analytics" });
+  }
+});
+
+// GET /api/admin/ads/:id - Get single ad details
+router.get("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const ad = await db.query.advertisements.findFirst({
+      where: eq(advertisements.id, id)
+    });
+
+    if (!ad) {
+      return res.status(404).json({ error: "Ad not found" });
+    }
+
+    res.json(ad);
+  } catch (error) {
+    console.error("Get ad error:", error);
+    res.status(500).json({ error: "Failed to get ad" });
+  }
+});
+
+// POST /api/admin/ads - Create new ad
+router.post("/api/admin/ads", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const validationResult = insertAdvertisementSchema.safeParse(req.body);
+    
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: "Invalid ad data",
+        details: validationResult.error.issues 
+      });
+    }
+
+    const data = validationResult.data;
+    const adId = uuidv4();
+
+    const [newAd] = await db.insert(advertisements).values({
+      id: adId,
+      title: data.title,
+      description: data.description || null,
+      videoUrl: data.videoUrl,
+      thumbnailUrl: data.thumbnailUrl || null,
+      duration: data.duration || 30,
+      weight: data.weight || 1,
+      isActive: data.isActive ?? true,
+      advertiser: data.advertiser || null,
+      targetUrl: data.targetUrl || null,
+      startDate: data.startDate || null,
+      endDate: data.endDate || null
+    }).returning();
+
+    res.status(201).json(newAd);
+  } catch (error) {
+    console.error("Create ad error:", error);
+    res.status(500).json({ error: "Failed to create ad" });
+  }
+});
+
+// PATCH /api/admin/ads/:id - Update ad
+router.patch("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const existingAd = await db.query.advertisements.findFirst({
+      where: eq(advertisements.id, id)
+    });
+
+    if (!existingAd) {
+      return res.status(404).json({ error: "Ad not found" });
+    }
+
+    const updateData: Partial<typeof advertisements.$inferInsert> = {};
+
+    if (req.body.title !== undefined) updateData.title = req.body.title;
+    if (req.body.description !== undefined) updateData.description = req.body.description;
+    if (req.body.videoUrl !== undefined) updateData.videoUrl = req.body.videoUrl;
+    if (req.body.thumbnailUrl !== undefined) updateData.thumbnailUrl = req.body.thumbnailUrl;
+    if (req.body.duration !== undefined) updateData.duration = req.body.duration;
+    if (req.body.weight !== undefined) updateData.weight = req.body.weight;
+    if (req.body.isActive !== undefined) updateData.isActive = req.body.isActive;
+    if (req.body.advertiser !== undefined) updateData.advertiser = req.body.advertiser;
+    if (req.body.targetUrl !== undefined) updateData.targetUrl = req.body.targetUrl;
+    if (req.body.startDate !== undefined) updateData.startDate = req.body.startDate ? new Date(req.body.startDate) : null;
+    if (req.body.endDate !== undefined) updateData.endDate = req.body.endDate ? new Date(req.body.endDate) : null;
+    updateData.updatedAt = new Date();
+
+    const [updatedAd] = await db.update(advertisements)
+      .set(updateData)
+      .where(eq(advertisements.id, id))
+      .returning();
+
+    res.json(updatedAd);
+  } catch (error) {
+    console.error("Update ad error:", error);
+    res.status(500).json({ error: "Failed to update ad" });
+  }
+});
+
+// DELETE /api/admin/ads/:id - Delete ad (soft delete if has impressions, hard delete otherwise)
+router.delete("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const existingAd = await db.query.advertisements.findFirst({
+      where: eq(advertisements.id, id)
+    });
+
+    if (!existingAd) {
+      return res.status(404).json({ error: "Ad not found" });
+    }
+
+    // Check if ad has any impressions
+    const [impressionCount] = await db.select({ count: sql<number>`count(*)` })
+      .from(adImpressions)
+      .where(eq(adImpressions.adId, id));
+
+    if (Number(impressionCount.count) > 0) {
+      // Soft delete - set isActive to false
+      await db.update(advertisements)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(eq(advertisements.id, id));
+
+      res.json({ 
+        success: true, 
+        message: "Ad deactivated (soft delete - has impressions)",
+        softDelete: true
+      });
+    } else {
+      // Hard delete - no impressions exist
+      await db.delete(advertisements).where(eq(advertisements.id, id));
+
+      res.json({ 
+        success: true, 
+        message: "Ad permanently deleted",
+        softDelete: false
+      });
+    }
+  } catch (error) {
+    console.error("Delete ad error:", error);
+    res.status(500).json({ error: "Failed to delete ad" });
   }
 });
 
