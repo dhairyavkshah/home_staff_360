@@ -53,6 +53,7 @@ export function SettingsScreen() {
   const [customSymbol, setCustomSymbol] = useState(modeSettings.customCurrencySymbol || "");
   const [salaryStartDay, setSalaryStartDay] = useState(isHome ? homeSettings.salaryStartDay : 1);
   const [halfDayPercentage, setHalfDayPercentage] = useState(isHome ? homeSettings.halfDayPercentage : 50);
+  const [pendingLanguage, setPendingLanguage] = useState<Language>(language);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showClearDataModal, setShowClearDataModal] = useState(false);
   const [showPinConfirmModal, setShowPinConfirmModal] = useState(false);
@@ -76,9 +77,9 @@ export function SettingsScreen() {
       customSymbol !== initialCustomSymbol ||
       salaryStartDay !== initialSalaryStartDay ||
       halfDayPercentage !== initialHalfDayPercentage ||
-      language !== initialLanguage
+      pendingLanguage !== initialLanguage
     );
-  }, [country, currency, customSymbol, salaryStartDay, halfDayPercentage, language, initialCountry, initialCurrency, initialCustomSymbol, initialSalaryStartDay, initialHalfDayPercentage, initialLanguage]);
+  }, [country, currency, customSymbol, salaryStartDay, halfDayPercentage, pendingLanguage, initialCountry, initialCurrency, initialCustomSymbol, initialSalaryStartDay, initialHalfDayPercentage, initialLanguage]);
 
   const handleBack = useCallback(() => {
     if (isDirty) {
@@ -89,6 +90,12 @@ export function SettingsScreen() {
   }, [isDirty, navigate, appMode]);
 
   const handleDiscardChanges = () => {
+    setCountry(initialCountry);
+    setCurrency(initialCurrency);
+    setCustomSymbol(initialCustomSymbol);
+    setSalaryStartDay(initialSalaryStartDay);
+    setHalfDayPercentage(initialHalfDayPercentage);
+    setPendingLanguage(initialLanguage);
     setShowUnsavedChangesModal(false);
     navigate(appMode === "STAFF" ? "staff-home" : "home");
   };
@@ -147,7 +154,7 @@ export function SettingsScreen() {
         customCurrencySymbol: currency === "OTHER" ? customSymbol : undefined,
         salaryStartDay,
         halfDayPercentage,
-        language,
+        language: pendingLanguage,
       };
       storage.saveHomeSettings(updatedHomeSettings);
       
@@ -157,7 +164,7 @@ export function SettingsScreen() {
         country,
         currency,
         customCurrencySymbol: currency === "OTHER" ? customSymbol : undefined,
-        language,
+        language: pendingLanguage,
         salaryStartDay,
         halfDayPercentage,
         darkMode: theme === "dark",
@@ -167,7 +174,7 @@ export function SettingsScreen() {
         vendorName: selectedAccount?.name || undefined,
         currency,
         customCurrencySymbol: currency === "OTHER" ? customSymbol : undefined,
-        language,
+        language: pendingLanguage,
       };
       storage.saveStaffSettings(updatedStaffSettings);
       
@@ -176,11 +183,12 @@ export function SettingsScreen() {
         country,
         currency,
         customCurrencySymbol: currency === "OTHER" ? customSymbol : undefined,
-        language,
+        language: pendingLanguage,
         darkMode: theme === "dark",
       });
     }
 
+    setLanguage(pendingLanguage);
     notifyCurrencyChange();
     toast({ title: t("settingsSaved") });
   };
@@ -296,8 +304,8 @@ export function SettingsScreen() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="language">{t("language")}</Label>
             <LanguageSelector
-              value={language}
-              onValueChange={(v) => setLanguage(v as Language)}
+              value={pendingLanguage}
+              onValueChange={(v) => setPendingLanguage(v as Language)}
               showIcon={false}
               data-testid="select-language"
             />
