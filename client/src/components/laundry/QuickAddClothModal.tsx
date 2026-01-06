@@ -297,20 +297,20 @@ export function QuickAddClothModal({
             />
           </div>
           <ScrollArea className="flex-1 -mx-2">
-            <div className="grid grid-cols-2 gap-2 px-2">
+            <div className="grid grid-cols-2 gap-1.5 px-2">
               {filteredTypes.map((type) => (
                 <Button
                   key={type}
                   variant="outline"
                   className={cn(
-                    "h-auto min-h-[52px] py-2.5 px-3 flex flex-col items-center gap-1 text-sm font-medium",
+                    "h-auto py-2 px-2.5 flex flex-row items-center justify-start gap-2 text-sm font-medium",
                     selectedType === type && "border-primary bg-primary/10"
                   )}
                   onClick={() => handleSelectType(type)}
                   data-testid={`button-cloth-type-${type.replace(/\s+/g, '-').toLowerCase()}`}
                 >
                   <ClothIcon type={type} className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-center leading-tight">{type}</span>
+                  <span className="text-left leading-tight truncate">{type}</span>
                 </Button>
               ))}
             </div>
