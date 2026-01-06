@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Settings, Users, Calendar, Shirt, FileText, Home, ChevronDown, Check, Building2, FolderOpen, Wallet, Receipt, ArrowRightLeft, Link2 } from "lucide-react";
+import { Settings, Users, Calendar, Shirt, FileText, Home, ChevronDown, Check, Building2, FolderOpen, Wallet, Receipt, ArrowRightLeft, Link2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -246,6 +246,14 @@ export function HomeScreen() {
             </DropdownMenu>
           </div>
           <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("notification-center")}
+              data-testid="button-notifications"
+            >
+              <Bell className="h-5 w-5" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"

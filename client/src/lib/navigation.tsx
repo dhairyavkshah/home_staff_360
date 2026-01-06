@@ -57,7 +57,8 @@ export type Screen =
   | "phone-verification"
   | "collaboration-hub"
   | "link-account"
-  | "sync-activity";
+  | "sync-activity"
+  | "notification-center";
 
 interface NavigationData {
   personId?: string;

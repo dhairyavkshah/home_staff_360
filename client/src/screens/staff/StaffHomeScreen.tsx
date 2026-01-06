@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Calendar, ClipboardList, Building2, Settings, Shirt, Briefcase, ChevronDown, Check, Users, FolderOpen, Receipt, FileText, Link2 } from "lucide-react";
+import { Calendar, ClipboardList, Building2, Settings, Shirt, Briefcase, ChevronDown, Check, Users, FolderOpen, Receipt, FileText, Link2, Bell } from "lucide-react";
 import { getCurrencyIcon, groupTotalsByCurrency, formatCurrencyTotals, mergeCurrencyTotals } from "@/lib/calculations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -322,6 +322,14 @@ export function StaffHomeScreen() {
             </DropdownMenu>
           </div>
           <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("notification-center")}
+              data-testid="button-notifications"
+            >
+              <Bell className="h-5 w-5" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"

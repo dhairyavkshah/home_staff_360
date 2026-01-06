@@ -30,6 +30,25 @@ export interface SyncMessage {
   createdAt: Date;
 }
 
+export interface AppNotification {
+  id: string;
+  userId: string;
+  userMode: "HOME" | "STAFF";
+  type: string;
+  title: string;
+  message?: string;
+  entityType?: string;
+  entityId?: string;
+  payload?: string;
+  actionRequired: boolean;
+  actionType?: string;
+  isRead: boolean;
+  readAt?: Date;
+  isActioned: boolean;
+  actionedAt?: Date;
+  createdAt: Date;
+}
+
 export interface OtpResponse {
   success: boolean;
   message?: string;
@@ -256,6 +275,124 @@ class CollaborationService {
 
   async acknowledgeMessage(_messageId: string): Promise<{ success: boolean }> {
     return { success: true };
+  }
+
+  // Notification methods
+  async getNotifications(mode?: "HOME" | "STAFF"): Promise<{
+    notifications: AppNotification[];
+    unreadCount: number;
+  }> {
+    const params = mode ? `?mode=${mode}` : "";
+    const response = await this.apiRequest<{
+      notifications: Array<AppNotification & { createdAt: string; readAt?: string; actionedAt?: string }>;
+      unreadCount: number;
+    }>(`/notifications${params}`);
+    
+    return {
+      notifications: (response.notifications || []).map(n => ({
+        ...n,
+        createdAt: parseDate(n.createdAt),
+        readAt: n.readAt ? parseDate(n.readAt) : undefined,
+        actionedAt: n.actionedAt ? parseDate(n.actionedAt) : undefined,
+      })),
+      unreadCount: response.unreadCount || 0,
+    };
+  }
+
+  async markNotificationRead(notificationId: string): Promise<{ success: boolean }> {
+    return this.apiRequest(`/notifications/${notificationId}/read`, {
+      method: "PATCH",
+    });
+  }
+
+  async markAllNotificationsRead(mode?: "HOME" | "STAFF"): Promise<{ success: boolean }> {
+    return this.apiRequest("/notifications/read-all", {
+      method: "POST",
+      body: JSON.stringify({ mode }),
+    });
+  }
+
+  // Bindings methods
+  async getBindings(): Promise<{ bindings: any[] }> {
+    return this.apiRequest("/bindings");
+  }
+
+  async createBinding(data: {
+    linkId: string;
+    homePersonId: string;
+    homePersonName?: string;
+    staffClientId: string;
+    staffClientName?: string;
+  }): Promise<{ success: boolean; binding?: any }> {
+    return this.apiRequest("/bindings", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Shared attendance methods
+  async submitAttendance(data: {
+    bindingId: string;
+    date: string;
+    status: string;
+    hoursWorked?: number;
+    note?: string;
+    recordSalaryType?: string;
+    recordRate?: number;
+    recordCurrency?: string;
+  }): Promise<{ success: boolean; attendanceId?: string; isRevision?: boolean }> {
+    return this.apiRequest("/shared-attendance", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getSharedAttendance(bindingId: string): Promise<{ attendance: any[] }> {
+    return this.apiRequest(`/shared-attendance?bindingId=${bindingId}`);
+  }
+
+  async actionAttendance(
+    attendanceId: string,
+    action: "approve" | "reject",
+    remarks?: string
+  ): Promise<{ success: boolean }> {
+    return this.apiRequest(`/shared-attendance/${attendanceId}/action`, {
+      method: "PATCH",
+      body: JSON.stringify({ action, remarks }),
+    });
+  }
+
+  // Shared laundry methods
+  async submitLaundry(data: {
+    bindingId: string;
+    date: string;
+    items: any[];
+    itemsTotal?: number;
+    pickupDelivery?: boolean;
+    pickupDeliveryCharge?: number;
+    total: number;
+    serviceType?: string;
+    recordCurrency?: string;
+  }): Promise<{ success: boolean; laundryId?: string }> {
+    return this.apiRequest("/shared-laundry", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getSharedLaundry(bindingId: string): Promise<{ laundry: any[] }> {
+    return this.apiRequest(`/shared-laundry?bindingId=${bindingId}`);
+  }
+
+  async actionLaundry(
+    laundryId: string,
+    action: "approve" | "reject",
+    remarks?: string
+  ): Promise<{ success: boolean }> {
+    return this.apiRequest(`/shared-laundry/${laundryId}/action`, {
+      method: "PATCH",
+      body: JSON.stringify({ action, remarks }),
+    });
   }
 
   logout() {

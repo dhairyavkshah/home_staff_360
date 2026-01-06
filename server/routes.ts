@@ -6,11 +6,22 @@ import {
   collaborationLinks, 
   collaborationMessages, 
   adminUsers,
+  collaborationBindings,
+  sharedAttendance,
+  attendanceRevisions,
+  sharedLaundry,
+  laundryRevisions,
+  notifications,
   insertServerUserSchema,
   insertDeviceSchema,
   insertCollaborationLinkSchema,
   insertCollaborationMessageSchema,
-  insertAdminUserSchema
+  insertAdminUserSchema,
+  insertCollaborationBindingSchema,
+  insertSharedAttendanceSchema,
+  insertSharedLaundrySchema,
+  insertNotificationSchema,
+  approvalStatuses
 } from "@shared/schema";
 import { eq, and, or, desc, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -773,6 +784,636 @@ router.patch("/api/admin/users/:userId", authenticateAdmin, async (req: Request,
     res.status(500).json({ error: "Failed to update user" });
   }
 });
+
+// ============ COLLABORATION BINDINGS API ============
+
+// Create a binding between home person and staff client
+router.post("/api/bindings", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { linkId, homePersonId, homePersonName, staffClientId, staffClientName } = req.body;
+    
+    if (!linkId || !homePersonId || !staffClientId) {
+      return res.status(400).json({ error: "linkId, homePersonId, and staffClientId are required" });
+    }
+
+    // Verify the collaboration link exists and is active
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, linkId)
+    });
+
+    if (!link || link.status !== 'active') {
+      return res.status(404).json({ error: "Active collaboration link not found" });
+    }
+
+    const bindingId = uuidv4();
+    const now = new Date();
+
+    await db.insert(collaborationBindings).values({
+      id: bindingId,
+      linkId,
+      homePersonId,
+      homePersonName: homePersonName || null,
+      staffClientId,
+      staffClientName: staffClientName || null,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now
+    });
+
+    // Create notifications for both users
+    await createNotification(link.homeUserId, 'HOME', 'binding_created', 
+      'New Staff Linked', `${staffClientName || 'A staff member'} has been linked to your household.`,
+      'binding', bindingId);
+    
+    await createNotification(link.staffUserId, 'STAFF', 'binding_created',
+      'New Client Linked', `${homePersonName || 'A client'} has been linked to your account.`,
+      'binding', bindingId);
+
+    res.json({ 
+      success: true, 
+      binding: { id: bindingId, linkId, homePersonId, staffClientId }
+    });
+  } catch (error) {
+    console.error("Create binding error:", error);
+    res.status(500).json({ error: "Failed to create binding" });
+  }
+});
+
+// Get bindings for a user
+router.get("/api/bindings", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    
+    // Get all collaboration links for this user
+    const userLinks = await db.query.collaborationLinks.findMany({
+      where: or(
+        eq(collaborationLinks.homeUserId, userId),
+        eq(collaborationLinks.staffUserId, userId)
+      )
+    });
+
+    const linkIds = userLinks.map(l => l.id);
+    
+    if (linkIds.length === 0) {
+      return res.json({ bindings: [] });
+    }
+
+    const bindings = await db.query.collaborationBindings.findMany({
+      where: sql`${collaborationBindings.linkId} IN (${sql.join(linkIds.map(id => sql`${id}`), sql`, `)})`
+    });
+
+    res.json({ bindings });
+  } catch (error) {
+    console.error("Get bindings error:", error);
+    res.status(500).json({ error: "Failed to get bindings" });
+  }
+});
+
+// ============ SHARED ATTENDANCE API WITH APPROVAL WORKFLOW ============
+
+// Submit attendance (creates pending record)
+router.post("/api/shared-attendance", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { bindingId, date, status, hoursWorked, note, recordSalaryType, recordRate, recordCurrency } = req.body;
+
+    if (!bindingId || !date || !status) {
+      return res.status(400).json({ error: "bindingId, date, and status are required" });
+    }
+
+    // Get binding to find the counterparty
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, bindingId)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    // Get the link to determine roles
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link) {
+      return res.status(404).json({ error: "Collaboration link not found" });
+    }
+
+    // Check for existing record on same date (only one allowed)
+    const existingRecord = await db.query.sharedAttendance.findFirst({
+      where: and(
+        eq(sharedAttendance.bindingId, bindingId),
+        eq(sharedAttendance.date, date)
+      )
+    });
+
+    if (existingRecord && existingRecord.approvalStatus === 'approved') {
+      return res.status(409).json({ 
+        error: "An approved attendance record already exists for this date",
+        existingRecordId: existingRecord.id
+      });
+    }
+
+    // Determine submitter role and counterparty
+    const isHomeUser = userId === link.homeUserId;
+    const submitterRole = isHomeUser ? 'HOME' : 'STAFF';
+    const counterpartyId = isHomeUser ? link.staffUserId : link.homeUserId;
+    const counterpartyMode = isHomeUser ? 'STAFF' : 'HOME';
+
+    const attendanceId = uuidv4();
+    const revisionId = uuidv4();
+    const now = new Date();
+
+    // If there's a pending/rejected record, update it as revised
+    if (existingRecord && (existingRecord.approvalStatus === 'pending' || existingRecord.approvalStatus === 'rejected')) {
+      await db.update(sharedAttendance)
+        .set({
+          status,
+          hoursWorked: hoursWorked || null,
+          note: note || null,
+          approvalStatus: 'pending',
+          submittedBy: userId,
+          submittedByRole: submitterRole,
+          actionRequiredBy: counterpartyId,
+          revisionCount: (existingRecord.revisionCount || 0) + 1,
+          updatedAt: now,
+          rejectedAt: null
+        })
+        .where(eq(sharedAttendance.id, existingRecord.id));
+
+      // Create revision record
+      await db.insert(attendanceRevisions).values({
+        id: revisionId,
+        attendanceId: existingRecord.id,
+        revisionNumber: (existingRecord.revisionCount || 0) + 1,
+        previousStatus: existingRecord.status,
+        newStatus: status,
+        action: 'revised',
+        actionBy: userId,
+        createdAt: now
+      });
+
+      // Notify counterparty
+      await createNotification(counterpartyId, counterpartyMode, 'attendance_submitted',
+        'Attendance Revised', `Attendance for ${date} has been revised. Please review.`,
+        'attendance', existingRecord.id, { status, date });
+
+      return res.json({ 
+        success: true, 
+        attendanceId: existingRecord.id,
+        isRevision: true
+      });
+    }
+
+    // Create new attendance record
+    await db.insert(sharedAttendance).values({
+      id: attendanceId,
+      bindingId,
+      date,
+      status,
+      hoursWorked: hoursWorked || null,
+      note: note || null,
+      approvalStatus: 'pending',
+      submittedBy: userId,
+      submittedByRole: submitterRole,
+      actionRequiredBy: counterpartyId,
+      currentRevisionId: revisionId,
+      revisionCount: 0,
+      recordSalaryType: recordSalaryType || null,
+      recordRate: recordRate || null,
+      recordCurrency: recordCurrency || null,
+      createdAt: now,
+      updatedAt: now
+    });
+
+    // Create initial revision record
+    await db.insert(attendanceRevisions).values({
+      id: revisionId,
+      attendanceId,
+      revisionNumber: 0,
+      newStatus: status,
+      action: 'submitted',
+      actionBy: userId,
+      createdAt: now
+    });
+
+    // Notify counterparty for approval
+    await createNotification(counterpartyId, counterpartyMode, 'attendance_submitted',
+      'Attendance Approval Needed', `Attendance for ${date} needs your approval.`,
+      'attendance', attendanceId, { status, date });
+
+    res.json({ success: true, attendanceId });
+  } catch (error) {
+    console.error("Submit attendance error:", error);
+    res.status(500).json({ error: "Failed to submit attendance" });
+  }
+});
+
+// Get attendance records for a binding
+router.get("/api/shared-attendance", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { bindingId, startDate, endDate } = req.query;
+
+    if (!bindingId) {
+      return res.status(400).json({ error: "bindingId is required" });
+    }
+
+    let query = eq(sharedAttendance.bindingId, bindingId as string);
+
+    const records = await db.query.sharedAttendance.findMany({
+      where: query,
+      orderBy: desc(sharedAttendance.date)
+    });
+
+    res.json({ attendance: records });
+  } catch (error) {
+    console.error("Get attendance error:", error);
+    res.status(500).json({ error: "Failed to get attendance" });
+  }
+});
+
+// Approve or reject attendance
+router.patch("/api/shared-attendance/:id/action", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+    const { action, remarks } = req.body;
+
+    if (!action || !['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ error: "action must be 'approve' or 'reject'" });
+    }
+
+    if (action === 'reject' && !remarks) {
+      return res.status(400).json({ error: "remarks are required when rejecting" });
+    }
+
+    const record = await db.query.sharedAttendance.findFirst({
+      where: eq(sharedAttendance.id, id)
+    });
+
+    if (!record) {
+      return res.status(404).json({ error: "Attendance record not found" });
+    }
+
+    if (record.actionRequiredBy !== userId) {
+      return res.status(403).json({ error: "You are not authorized to take action on this record" });
+    }
+
+    if (record.approvalStatus !== 'pending') {
+      return res.status(400).json({ error: "Record is not pending approval" });
+    }
+
+    const now = new Date();
+    const revisionId = uuidv4();
+
+    if (action === 'approve') {
+      await db.update(sharedAttendance)
+        .set({
+          approvalStatus: 'approved',
+          approvedAt: now,
+          updatedAt: now
+        })
+        .where(eq(sharedAttendance.id, id));
+
+      await db.insert(attendanceRevisions).values({
+        id: revisionId,
+        attendanceId: id,
+        revisionNumber: (record.revisionCount || 0) + 1,
+        action: 'approved',
+        actionBy: userId,
+        createdAt: now
+      });
+
+      // Notify submitter
+      await createNotification(record.submittedBy, record.submittedByRole as 'HOME' | 'STAFF', 
+        'attendance_approved', 'Attendance Approved', 
+        `Your attendance submission for ${record.date} has been approved.`,
+        'attendance', id);
+
+    } else {
+      await db.update(sharedAttendance)
+        .set({
+          approvalStatus: 'rejected',
+          rejectedAt: now,
+          actionRequiredBy: record.submittedBy, // Now the submitter needs to revise
+          updatedAt: now
+        })
+        .where(eq(sharedAttendance.id, id));
+
+      await db.insert(attendanceRevisions).values({
+        id: revisionId,
+        attendanceId: id,
+        revisionNumber: (record.revisionCount || 0) + 1,
+        remarks,
+        action: 'rejected',
+        actionBy: userId,
+        createdAt: now
+      });
+
+      // Notify submitter of rejection
+      await createNotification(record.submittedBy, record.submittedByRole as 'HOME' | 'STAFF',
+        'attendance_rejected', 'Attendance Rejected',
+        `Your attendance for ${record.date} was rejected: ${remarks}`,
+        'attendance', id, { remarks });
+    }
+
+    res.json({ success: true, action });
+  } catch (error) {
+    console.error("Attendance action error:", error);
+    res.status(500).json({ error: "Failed to process action" });
+  }
+});
+
+// ============ SHARED LAUNDRY API WITH APPROVAL WORKFLOW ============
+
+// Submit laundry (creates pending record)
+router.post("/api/shared-laundry", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { bindingId, date, items, itemsTotal, pickupDelivery, pickupDeliveryCharge, total, serviceType, recordCurrency } = req.body;
+
+    if (!bindingId || !date || !items || total === undefined) {
+      return res.status(400).json({ error: "bindingId, date, items, and total are required" });
+    }
+
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, bindingId)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link) {
+      return res.status(404).json({ error: "Collaboration link not found" });
+    }
+
+    const isHomeUser = userId === link.homeUserId;
+    const submitterRole = isHomeUser ? 'HOME' : 'STAFF';
+    const counterpartyId = isHomeUser ? link.staffUserId : link.homeUserId;
+    const counterpartyMode = isHomeUser ? 'STAFF' : 'HOME';
+
+    const laundryId = uuidv4();
+    const revisionId = uuidv4();
+    const now = new Date();
+
+    await db.insert(sharedLaundry).values({
+      id: laundryId,
+      bindingId,
+      date,
+      items: typeof items === 'string' ? items : JSON.stringify(items),
+      itemsTotal: itemsTotal || null,
+      pickupDelivery: pickupDelivery || false,
+      pickupDeliveryCharge: pickupDeliveryCharge || null,
+      total,
+      serviceType: serviceType || null,
+      approvalStatus: 'pending',
+      submittedBy: userId,
+      submittedByRole: submitterRole,
+      actionRequiredBy: counterpartyId,
+      currentRevisionId: revisionId,
+      revisionCount: 0,
+      recordCurrency: recordCurrency || null,
+      createdAt: now,
+      updatedAt: now
+    });
+
+    await db.insert(laundryRevisions).values({
+      id: revisionId,
+      laundryId,
+      revisionNumber: 0,
+      newData: typeof items === 'string' ? items : JSON.stringify(items),
+      action: 'submitted',
+      actionBy: userId,
+      createdAt: now
+    });
+
+    await createNotification(counterpartyId, counterpartyMode, 'laundry_submitted',
+      'Laundry Approval Needed', `Laundry batch for ${date} needs your approval.`,
+      'laundry', laundryId, { total, date });
+
+    res.json({ success: true, laundryId });
+  } catch (error) {
+    console.error("Submit laundry error:", error);
+    res.status(500).json({ error: "Failed to submit laundry" });
+  }
+});
+
+// Get laundry records for a binding
+router.get("/api/shared-laundry", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { bindingId } = req.query;
+
+    if (!bindingId) {
+      return res.status(400).json({ error: "bindingId is required" });
+    }
+
+    const records = await db.query.sharedLaundry.findMany({
+      where: eq(sharedLaundry.bindingId, bindingId as string),
+      orderBy: desc(sharedLaundry.date)
+    });
+
+    res.json({ laundry: records });
+  } catch (error) {
+    console.error("Get laundry error:", error);
+    res.status(500).json({ error: "Failed to get laundry" });
+  }
+});
+
+// Approve or reject laundry
+router.patch("/api/shared-laundry/:id/action", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+    const { action, remarks } = req.body;
+
+    if (!action || !['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ error: "action must be 'approve' or 'reject'" });
+    }
+
+    if (action === 'reject' && !remarks) {
+      return res.status(400).json({ error: "remarks are required when rejecting" });
+    }
+
+    const record = await db.query.sharedLaundry.findFirst({
+      where: eq(sharedLaundry.id, id)
+    });
+
+    if (!record) {
+      return res.status(404).json({ error: "Laundry record not found" });
+    }
+
+    if (record.actionRequiredBy !== userId) {
+      return res.status(403).json({ error: "You are not authorized to take action on this record" });
+    }
+
+    const now = new Date();
+    const revisionId = uuidv4();
+
+    if (action === 'approve') {
+      await db.update(sharedLaundry)
+        .set({
+          approvalStatus: 'approved',
+          approvedAt: now,
+          updatedAt: now
+        })
+        .where(eq(sharedLaundry.id, id));
+
+      await db.insert(laundryRevisions).values({
+        id: revisionId,
+        laundryId: id,
+        revisionNumber: (record.revisionCount || 0) + 1,
+        action: 'approved',
+        actionBy: userId,
+        createdAt: now
+      });
+
+      await createNotification(record.submittedBy, record.submittedByRole as 'HOME' | 'STAFF',
+        'laundry_approved', 'Laundry Approved',
+        `Your laundry submission for ${record.date} has been approved.`,
+        'laundry', id);
+
+    } else {
+      await db.update(sharedLaundry)
+        .set({
+          approvalStatus: 'rejected',
+          rejectedAt: now,
+          actionRequiredBy: record.submittedBy,
+          updatedAt: now
+        })
+        .where(eq(sharedLaundry.id, id));
+
+      await db.insert(laundryRevisions).values({
+        id: revisionId,
+        laundryId: id,
+        revisionNumber: (record.revisionCount || 0) + 1,
+        remarks,
+        action: 'rejected',
+        actionBy: userId,
+        createdAt: now
+      });
+
+      await createNotification(record.submittedBy, record.submittedByRole as 'HOME' | 'STAFF',
+        'laundry_rejected', 'Laundry Rejected',
+        `Your laundry for ${record.date} was rejected: ${remarks}`,
+        'laundry', id, { remarks });
+    }
+
+    res.json({ success: true, action });
+  } catch (error) {
+    console.error("Laundry action error:", error);
+    res.status(500).json({ error: "Failed to process action" });
+  }
+});
+
+// ============ NOTIFICATIONS API ============
+
+// Get notifications for current user
+router.get("/api/notifications", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { mode, unreadOnly } = req.query;
+
+    let conditions = [eq(notifications.userId, userId)];
+    
+    if (mode) {
+      conditions.push(eq(notifications.userMode, mode as string));
+    }
+
+    const userNotifications = await db.query.notifications.findMany({
+      where: and(...conditions),
+      orderBy: desc(notifications.createdAt),
+      limit: 50
+    });
+
+    // Count unread
+    const unreadCount = userNotifications.filter(n => !n.isRead).length;
+
+    res.json({ 
+      notifications: userNotifications,
+      unreadCount
+    });
+  } catch (error) {
+    console.error("Get notifications error:", error);
+    res.status(500).json({ error: "Failed to get notifications" });
+  }
+});
+
+// Mark notification as read
+router.patch("/api/notifications/:id/read", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+
+    await db.update(notifications)
+      .set({ isRead: true, readAt: new Date() })
+      .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Mark notification read error:", error);
+    res.status(500).json({ error: "Failed to mark notification as read" });
+  }
+});
+
+// Mark all notifications as read
+router.post("/api/notifications/read-all", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { mode } = req.body;
+
+    let conditions = [eq(notifications.userId, userId), eq(notifications.isRead, false)];
+    if (mode) {
+      conditions.push(eq(notifications.userMode, mode));
+    }
+
+    await db.update(notifications)
+      .set({ isRead: true, readAt: new Date() })
+      .where(and(...conditions));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Mark all read error:", error);
+    res.status(500).json({ error: "Failed to mark notifications as read" });
+  }
+});
+
+// Helper function to create notifications
+async function createNotification(
+  userId: string,
+  userMode: 'HOME' | 'STAFF',
+  type: string,
+  title: string,
+  message: string,
+  entityType?: string,
+  entityId?: string,
+  payload?: any
+) {
+  try {
+    await db.insert(notifications).values({
+      id: uuidv4(),
+      userId,
+      userMode,
+      type,
+      title,
+      message,
+      entityType: entityType || null,
+      entityId: entityId || null,
+      payload: payload ? JSON.stringify(payload) : null,
+      actionRequired: ['attendance_submitted', 'laundry_submitted', 'connection_request'].includes(type),
+      actionType: ['attendance_submitted', 'laundry_submitted'].includes(type) ? 'approve' : 
+                  type === 'connection_request' ? 'accept' : 'view',
+      isRead: false,
+      createdAt: new Date()
+    });
+  } catch (error) {
+    console.error("Failed to create notification:", error);
+  }
+}
 
 async function initializeDefaultAdmin() {
   const defaultEmail = process.env.ADMIN_DEFAULT_EMAIL;

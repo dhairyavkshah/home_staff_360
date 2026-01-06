@@ -65,6 +65,7 @@ import { PhoneVerificationScreen } from "@/screens/collaboration/PhoneVerificati
 import { CollaborationHubScreen } from "@/screens/collaboration/CollaborationHubScreen";
 import { LinkAccountScreen } from "@/screens/collaboration/LinkAccountScreen";
 import { SyncActivityScreen } from "@/screens/collaboration/SyncActivityScreen";
+import { NotificationCenterScreen } from "@/screens/collaboration/NotificationCenterScreen";
 
 function MobileAppRouter() {
   const { currentScreen } = useNavigation();
@@ -173,6 +174,8 @@ function MobileAppRouter() {
       return <LinkAccountScreen />;
     case "sync-activity":
       return <SyncActivityScreen />;
+    case "notification-center":
+      return <NotificationCenterScreen />;
     default:
       return <LauncherScreen />;
   }

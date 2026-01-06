@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, varchar, text, boolean, timestamp, integer, sql } from "drizzle-orm/pg-core";
+import { pgTable, varchar, text, boolean, timestamp, integer } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const STORAGE_KEYS = {
@@ -892,3 +892,311 @@ export const insertAdminUserSchema = z.object({
 });
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
 export type AdminUser = typeof adminUsers.$inferSelect;
+
+// ============ REAL-TIME COLLABORATION SYSTEM ============
+
+// Binding connects a home user's staff person with a staff user's client record
+export const collaborationBindings = pgTable("collaboration_bindings", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  linkId: varchar("link_id", { length: 255 }).references(() => collaborationLinks.id).notNull(),
+  // Home user side - person they employ
+  homePersonId: varchar("home_person_id", { length: 255 }).notNull(),
+  homePersonName: varchar("home_person_name", { length: 100 }),
+  // Staff user side - client they work for
+  staffClientId: varchar("staff_client_id", { length: 255 }).notNull(),
+  staffClientName: varchar("staff_client_name", { length: 100 }),
+  // Binding status
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const collaborationBindingsRelations = relations(collaborationBindings, ({ one, many }) => ({
+  link: one(collaborationLinks, {
+    fields: [collaborationBindings.linkId],
+    references: [collaborationLinks.id],
+  }),
+  attendanceRecords: many(sharedAttendance),
+  laundryRecords: many(sharedLaundry),
+}));
+
+export const insertCollaborationBindingSchema = z.object({
+  id: z.string().max(255),
+  linkId: z.string().max(255),
+  homePersonId: z.string().max(255),
+  homePersonName: z.string().max(100).optional(),
+  staffClientId: z.string().max(255),
+  staffClientName: z.string().max(100).optional(),
+  isActive: z.boolean().optional(),
+});
+export type InsertCollaborationBinding = z.infer<typeof insertCollaborationBindingSchema>;
+export type CollaborationBinding = typeof collaborationBindings.$inferSelect;
+
+// Approval workflow statuses
+export const approvalStatuses = ['pending', 'approved', 'rejected', 'revised'] as const;
+export type ApprovalStatus = typeof approvalStatuses[number];
+
+// Shared attendance - one record per binding per day with approval workflow
+export const sharedAttendance = pgTable("shared_attendance", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  bindingId: varchar("binding_id", { length: 255 }).references(() => collaborationBindings.id).notNull(),
+  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
+  status: varchar("status", { length: 20 }).notNull(), // FULL, HALF, ABSENT
+  hoursWorked: integer("hours_worked"),
+  note: text("note"),
+  // Approval workflow
+  approvalStatus: varchar("approval_status", { length: 20 }).default('pending').notNull(),
+  submittedBy: varchar("submitted_by", { length: 255 }).references(() => serverUsers.id).notNull(),
+  submittedByRole: varchar("submitted_by_role", { length: 10 }).notNull(), // HOME or STAFF
+  actionRequiredBy: varchar("action_required_by", { length: 255 }).references(() => serverUsers.id),
+  // Revision tracking
+  currentRevisionId: varchar("current_revision_id", { length: 255 }),
+  revisionCount: integer("revision_count").default(0),
+  // Rate snapshot for calculations
+  recordSalaryType: varchar("record_salary_type", { length: 20 }),
+  recordRate: integer("record_rate"),
+  recordCurrency: varchar("record_currency", { length: 10 }),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  approvedAt: timestamp("approved_at"),
+  rejectedAt: timestamp("rejected_at"),
+});
+
+export const sharedAttendanceRelations = relations(sharedAttendance, ({ one, many }) => ({
+  binding: one(collaborationBindings, {
+    fields: [sharedAttendance.bindingId],
+    references: [collaborationBindings.id],
+  }),
+  submitter: one(serverUsers, {
+    fields: [sharedAttendance.submittedBy],
+    references: [serverUsers.id],
+  }),
+  revisions: many(attendanceRevisions),
+}));
+
+export const insertSharedAttendanceSchema = z.object({
+  id: z.string().max(255),
+  bindingId: z.string().max(255),
+  date: z.string().max(10),
+  status: z.enum(attendanceStatuses),
+  hoursWorked: z.number().optional(),
+  note: z.string().optional(),
+  approvalStatus: z.enum(approvalStatuses).optional(),
+  submittedBy: z.string().max(255),
+  submittedByRole: z.enum(userTypes),
+  actionRequiredBy: z.string().max(255).optional(),
+  recordSalaryType: z.string().max(20).optional(),
+  recordRate: z.number().optional(),
+  recordCurrency: z.string().max(10).optional(),
+});
+export type InsertSharedAttendance = z.infer<typeof insertSharedAttendanceSchema>;
+export type SharedAttendance = typeof sharedAttendance.$inferSelect;
+
+// Attendance revisions - track changes and remarks
+export const attendanceRevisions = pgTable("attendance_revisions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  attendanceId: varchar("attendance_id", { length: 255 }).references(() => sharedAttendance.id).notNull(),
+  revisionNumber: integer("revision_number").notNull(),
+  // What changed
+  previousStatus: varchar("previous_status", { length: 20 }),
+  newStatus: varchar("new_status", { length: 20 }),
+  previousHours: integer("previous_hours"),
+  newHours: integer("new_hours"),
+  // Rejection/revision remarks
+  remarks: text("remarks"),
+  action: varchar("action", { length: 20 }).notNull(), // submitted, approved, rejected, revised
+  actionBy: varchar("action_by", { length: 255 }).references(() => serverUsers.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const attendanceRevisionsRelations = relations(attendanceRevisions, ({ one }) => ({
+  attendance: one(sharedAttendance, {
+    fields: [attendanceRevisions.attendanceId],
+    references: [sharedAttendance.id],
+  }),
+  actor: one(serverUsers, {
+    fields: [attendanceRevisions.actionBy],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertAttendanceRevisionSchema = z.object({
+  id: z.string().max(255),
+  attendanceId: z.string().max(255),
+  revisionNumber: z.number(),
+  previousStatus: z.string().max(20).optional(),
+  newStatus: z.string().max(20).optional(),
+  previousHours: z.number().optional(),
+  newHours: z.number().optional(),
+  remarks: z.string().optional(),
+  action: z.string().max(20),
+  actionBy: z.string().max(255),
+});
+export type InsertAttendanceRevision = z.infer<typeof insertAttendanceRevisionSchema>;
+export type AttendanceRevision = typeof attendanceRevisions.$inferSelect;
+
+// Shared laundry - one record per batch with approval workflow
+export const sharedLaundry = pgTable("shared_laundry", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  bindingId: varchar("binding_id", { length: 255 }).references(() => collaborationBindings.id).notNull(),
+  date: varchar("date", { length: 10 }).notNull(),
+  // Laundry details stored as JSON
+  items: text("items").notNull(), // JSON array of items
+  itemsTotal: integer("items_total"),
+  pickupDelivery: boolean("pickup_delivery").default(false),
+  pickupDeliveryCharge: integer("pickup_delivery_charge"),
+  total: integer("total").notNull(),
+  serviceType: varchar("service_type", { length: 50 }),
+  // Approval workflow
+  approvalStatus: varchar("approval_status", { length: 20 }).default('pending').notNull(),
+  submittedBy: varchar("submitted_by", { length: 255 }).references(() => serverUsers.id).notNull(),
+  submittedByRole: varchar("submitted_by_role", { length: 10 }).notNull(),
+  actionRequiredBy: varchar("action_required_by", { length: 255 }).references(() => serverUsers.id),
+  // Revision tracking
+  currentRevisionId: varchar("current_revision_id", { length: 255 }),
+  revisionCount: integer("revision_count").default(0),
+  // Currency snapshot
+  recordCurrency: varchar("record_currency", { length: 10 }),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  approvedAt: timestamp("approved_at"),
+  rejectedAt: timestamp("rejected_at"),
+});
+
+export const sharedLaundryRelations = relations(sharedLaundry, ({ one, many }) => ({
+  binding: one(collaborationBindings, {
+    fields: [sharedLaundry.bindingId],
+    references: [collaborationBindings.id],
+  }),
+  submitter: one(serverUsers, {
+    fields: [sharedLaundry.submittedBy],
+    references: [serverUsers.id],
+  }),
+  revisions: many(laundryRevisions),
+}));
+
+export const insertSharedLaundrySchema = z.object({
+  id: z.string().max(255),
+  bindingId: z.string().max(255),
+  date: z.string().max(10),
+  items: z.string(),
+  itemsTotal: z.number().optional(),
+  pickupDelivery: z.boolean().optional(),
+  pickupDeliveryCharge: z.number().optional(),
+  total: z.number(),
+  serviceType: z.string().max(50).optional(),
+  approvalStatus: z.enum(approvalStatuses).optional(),
+  submittedBy: z.string().max(255),
+  submittedByRole: z.enum(userTypes),
+  actionRequiredBy: z.string().max(255).optional(),
+  recordCurrency: z.string().max(10).optional(),
+});
+export type InsertSharedLaundry = z.infer<typeof insertSharedLaundrySchema>;
+export type SharedLaundry = typeof sharedLaundry.$inferSelect;
+
+// Laundry revisions
+export const laundryRevisions = pgTable("laundry_revisions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  laundryId: varchar("laundry_id", { length: 255 }).references(() => sharedLaundry.id).notNull(),
+  revisionNumber: integer("revision_number").notNull(),
+  // What changed - stored as JSON diff
+  previousData: text("previous_data"),
+  newData: text("new_data"),
+  // Remarks
+  remarks: text("remarks"),
+  action: varchar("action", { length: 20 }).notNull(),
+  actionBy: varchar("action_by", { length: 255 }).references(() => serverUsers.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const laundryRevisionsRelations = relations(laundryRevisions, ({ one }) => ({
+  laundry: one(sharedLaundry, {
+    fields: [laundryRevisions.laundryId],
+    references: [sharedLaundry.id],
+  }),
+  actor: one(serverUsers, {
+    fields: [laundryRevisions.actionBy],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertLaundryRevisionSchema = z.object({
+  id: z.string().max(255),
+  laundryId: z.string().max(255),
+  revisionNumber: z.number(),
+  previousData: z.string().optional(),
+  newData: z.string().optional(),
+  remarks: z.string().optional(),
+  action: z.string().max(20),
+  actionBy: z.string().max(255),
+});
+export type InsertLaundryRevision = z.infer<typeof insertLaundryRevisionSchema>;
+export type LaundryRevision = typeof laundryRevisions.$inferSelect;
+
+// Notification types
+export const notificationTypes = [
+  'connection_request',
+  'connection_accepted',
+  'connection_rejected',
+  'attendance_submitted',
+  'attendance_approved',
+  'attendance_rejected',
+  'laundry_submitted',
+  'laundry_approved',
+  'laundry_rejected',
+  'binding_created',
+] as const;
+export type NotificationType = typeof notificationTypes[number];
+
+// User notifications
+export const notifications = pgTable("notifications", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: varchar("user_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  userMode: varchar("user_mode", { length: 10 }).notNull(), // HOME or STAFF
+  type: varchar("type", { length: 50 }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message"),
+  // Related entity
+  entityType: varchar("entity_type", { length: 50 }), // attendance, laundry, connection
+  entityId: varchar("entity_id", { length: 255 }),
+  // Additional data as JSON
+  payload: text("payload"),
+  // Action required
+  actionRequired: boolean("action_required").default(false),
+  actionType: varchar("action_type", { length: 50 }), // approve, reject, view
+  // Status
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  isActioned: boolean("is_actioned").default(false),
+  actionedAt: timestamp("actioned_at"),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"),
+});
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(serverUsers, {
+    fields: [notifications.userId],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertNotificationSchema = z.object({
+  id: z.string().max(255),
+  userId: z.string().max(255),
+  userMode: z.enum(userTypes),
+  type: z.enum(notificationTypes),
+  title: z.string().max(255),
+  message: z.string().optional(),
+  entityType: z.string().max(50).optional(),
+  entityId: z.string().max(255).optional(),
+  payload: z.string().optional(),
+  actionRequired: z.boolean().optional(),
+  actionType: z.string().max(50).optional(),
+  isRead: z.boolean().optional(),
+  expiresAt: z.date().optional(),
+});
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
