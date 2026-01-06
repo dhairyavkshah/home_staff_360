@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Router, Route, Switch } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-provider";
@@ -9,6 +10,9 @@ import { GuidedTourProvider } from "@/lib/guided-tour";
 import { SafeAreaProvider } from "@/lib/safe-area-provider";
 import { storage } from "@/lib/storage";
 import "@/lib/demo-data";
+
+import AdminLogin from "@/pages/admin/AdminLogin";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
 
 import { SplashScreen } from "@/screens/SplashScreen";
 import { LauncherScreen } from "@/screens/LauncherScreen";
@@ -184,7 +188,27 @@ function MobileAppWithSplash() {
   );
 }
 
+function AdminApp() {
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="homestaff360-admin-theme">
+      <TooltipProvider>
+        <Switch>
+          <Route path="/admin/dashboard" component={AdminDashboard} />
+          <Route path="/admin" component={AdminLogin} />
+        </Switch>
+        <Toaster />
+      </TooltipProvider>
+    </ThemeProvider>
+  );
+}
+
 function App() {
+  const isAdminRoute = window.location.pathname.startsWith("/admin");
+
+  if (isAdminRoute) {
+    return <AdminApp />;
+  }
+
   return (
     <SafeAreaProvider>
       <ThemeProvider defaultTheme="light" storageKey="homestaff360-theme">
