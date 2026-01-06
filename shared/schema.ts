@@ -1580,6 +1580,71 @@ export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
 
 // ============================================
+// Advertisement System
+// ============================================
+
+export const advertisements = pgTable("advertisements", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  videoUrl: text("video_url").notNull(),
+  thumbnailUrl: text("thumbnail_url"),
+  duration: integer("duration").notNull().default(30), // in seconds, max 30
+  weight: integer("weight").notNull().default(1), // for equal distribution, all ads should have same weight
+  isActive: boolean("is_active").notNull().default(true),
+  advertiser: varchar("advertiser", { length: 255 }),
+  targetUrl: text("target_url"), // URL to open when user taps the ad
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAdvertisementSchema = z.object({
+  title: z.string().min(1).max(255),
+  description: z.string().optional(),
+  videoUrl: z.string().url(),
+  thumbnailUrl: z.string().url().optional(),
+  duration: z.number().min(1).max(30).default(30),
+  weight: z.number().min(1).default(1),
+  isActive: z.boolean().default(true),
+  advertiser: z.string().max(255).optional(),
+  targetUrl: z.string().url().optional(),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
+});
+export type InsertAdvertisement = z.infer<typeof insertAdvertisementSchema>;
+export type Advertisement = typeof advertisements.$inferSelect;
+
+export const adImpressions = pgTable("ad_impressions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  adId: varchar("ad_id", { length: 255 }).references(() => advertisements.id).notNull(),
+  userId: varchar("user_id", { length: 255 }).references(() => serverUsers.id),
+  sessionId: varchar("session_id", { length: 255 }), // For anonymous tracking
+  deviceId: varchar("device_id", { length: 255 }),
+  watchedDuration: integer("watched_duration").notNull().default(0), // seconds actually watched
+  completed: boolean("completed").notNull().default(false), // watched till end or skipped after 5s
+  skipped: boolean("skipped").notNull().default(false),
+  skippedAt: integer("skipped_at"), // seconds when skipped
+  clickedThrough: boolean("clicked_through").notNull().default(false), // tapped to go to advertiser
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAdImpressionSchema = z.object({
+  adId: z.string(),
+  userId: z.string().optional(),
+  sessionId: z.string().optional(),
+  deviceId: z.string().optional(),
+  watchedDuration: z.number().min(0).default(0),
+  completed: z.boolean().default(false),
+  skipped: z.boolean().default(false),
+  skippedAt: z.number().optional(),
+  clickedThrough: z.boolean().default(false),
+});
+export type InsertAdImpression = z.infer<typeof insertAdImpressionSchema>;
+export type AdImpression = typeof adImpressions.$inferSelect;
+
+// ============================================
 // Offline-First Sync Queue Types (Client-side only)
 // ============================================
 
