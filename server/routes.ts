@@ -42,28 +42,118 @@ function normalizePhoneWithCountryCode(phone: string): string {
   return normalized;
 }
 
+function extractDigits(phone: string): string {
+  return phone.replace(/\D/g, "");
+}
+
+function generatePhoneVariants(phone: string): string[] {
+  const normalized = normalizePhoneWithCountryCode(phone);
+  const digits = extractDigits(normalized);
+  
+  const variants: string[] = [normalized];
+  
+  if (normalized.startsWith("+")) {
+    variants.push(normalized.slice(1));
+  }
+  
+  if (digits.length >= 10) {
+    variants.push(digits);
+    variants.push(digits.slice(-10));
+    
+    if (digits.startsWith("0")) {
+      variants.push(digits.slice(1));
+    }
+    variants.push("0" + digits.slice(-10));
+  }
+  
+  return Array.from(new Set(variants));
+}
+
 async function findUserByPhone(phone: string) {
   const normalizedPhone = normalizePhoneWithCountryCode(phone);
+  const variants = generatePhoneVariants(phone);
   
   let user = await db.query.serverUsers.findFirst({
     where: eq(serverUsers.phone, normalizedPhone)
   });
   
   if (!user) {
-    const phoneWithoutPlus = normalizedPhone.startsWith("+") ? normalizedPhone.slice(1) : normalizedPhone;
-    user = await db.query.serverUsers.findFirst({
-      where: eq(serverUsers.phone, phoneWithoutPlus)
-    });
-    
-    if (user) {
-      await db.update(serverUsers)
-        .set({ phone: normalizedPhone })
-        .where(eq(serverUsers.id, user.id));
-      user = { ...user, phone: normalizedPhone };
+    for (const variant of variants) {
+      user = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.phone, variant)
+      });
+      if (user) {
+        await db.update(serverUsers)
+          .set({ phone: normalizedPhone })
+          .where(eq(serverUsers.id, user.id));
+        user = { ...user, phone: normalizedPhone };
+        break;
+      }
     }
   }
   
   return user;
+}
+
+async function findAndMergeDuplicateUsers(phone: string): Promise<typeof serverUsers.$inferSelect | null> {
+  const normalizedPhone = normalizePhoneWithCountryCode(phone);
+  const variants = generatePhoneVariants(phone);
+  
+  const duplicateUsers: (typeof serverUsers.$inferSelect)[] = [];
+  
+  for (const variant of variants) {
+    const users = await db.query.serverUsers.findMany({
+      where: eq(serverUsers.phone, variant)
+    });
+    duplicateUsers.push(...users);
+  }
+  
+  const uniqueUsers = duplicateUsers.filter((user, index, self) => 
+    self.findIndex(u => u.id === user.id) === index
+  );
+  
+  if (uniqueUsers.length === 0) return null;
+  if (uniqueUsers.length === 1) {
+    await db.update(serverUsers)
+      .set({ phone: normalizedPhone })
+      .where(eq(serverUsers.id, uniqueUsers[0].id));
+    return { ...uniqueUsers[0], phone: normalizedPhone };
+  }
+  
+  const primaryUser = uniqueUsers.reduce((best, current) => {
+    if (current.isVerified && !best.isVerified) return current;
+    if (current.displayName && !best.displayName) return current;
+    const currentDate = current.createdAt ? new Date(current.createdAt) : new Date();
+    const bestDate = best.createdAt ? new Date(best.createdAt) : new Date();
+    if (currentDate < bestDate) return current;
+    return best;
+  });
+  
+  const duplicateIds = uniqueUsers.filter(u => u.id !== primaryUser.id).map(u => u.id);
+  
+  for (const dupId of duplicateIds) {
+    await db.update(devices)
+      .set({ userId: primaryUser.id })
+      .where(eq(devices.userId, dupId));
+    
+    await db.update(collaborationLinks)
+      .set({ homeUserId: primaryUser.id })
+      .where(eq(collaborationLinks.homeUserId, dupId));
+    
+    await db.update(collaborationLinks)
+      .set({ staffUserId: primaryUser.id })
+      .where(eq(collaborationLinks.staffUserId, dupId));
+    
+    await db.delete(serverUsers).where(eq(serverUsers.id, dupId));
+  }
+  
+  await db.update(serverUsers)
+    .set({ phone: normalizedPhone })
+    .where(eq(serverUsers.id, primaryUser.id));
+  
+  console.log(`Merged ${duplicateIds.length} duplicate user records into primary user ${primaryUser.id}`);
+  
+  return { ...primaryUser, phone: normalizedPhone };
 }
 
 function canRequestOtp(user: { otpAttemptCount: number | null; otpAttemptResetAt: Date | null; otpLastSentAt: Date | null }): {
@@ -197,7 +287,7 @@ router.post("/api/auth/verify-otp", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Phone and OTP are required" });
     }
 
-    const user = await findUserByPhone(phone);
+    let user = await findUserByPhone(phone);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -215,6 +305,11 @@ router.post("/api/auth/verify-otp", async (req: Request, res: Response) => {
     
     if (!isValidOTP) {
       return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    const mergedUser = await findAndMergeDuplicateUsers(phone);
+    if (mergedUser) {
+      user = mergedUser;
     }
 
     await db.update(serverUsers)

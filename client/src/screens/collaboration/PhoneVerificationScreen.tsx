@@ -50,7 +50,7 @@ const COUNTRY_CODES = [
 ];
 
 export function PhoneVerificationScreen() {
-  const { navigate, goBack } = useNavigation();
+  const { navigate, goBack, data } = useNavigation();
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -152,7 +152,11 @@ export function PhoneVerificationScreen() {
           title: t("success"),
           description: t("phoneVerified"),
         });
-        navigate("collaboration-hub");
+        if (data.isOnboarding) {
+          navigate("role-selection");
+        } else {
+          navigate("collaboration-hub");
+        }
       } else {
         toast({
           title: t("error"),
@@ -169,7 +173,7 @@ export function PhoneVerificationScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [fullPhoneNumber, otp, toast, t, navigate]);
+  }, [fullPhoneNumber, otp, toast, t, navigate, data.isOnboarding]);
 
   const handleResendOtp = useCallback(async () => {
     if (!canResend) return;

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Calendar, ClipboardList, Building2, Settings, Shirt, Briefcase, ChevronDown, Check, Users, FolderOpen, Receipt, FileText } from "lucide-react";
+import { Calendar, ClipboardList, Building2, Settings, Shirt, Briefcase, ChevronDown, Check, Users, FolderOpen, Receipt, FileText, Link2 } from "lucide-react";
 import { getCurrencyIcon, groupTotalsByCurrency, formatCurrencyTotals, mergeCurrencyTotals } from "@/lib/calculations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -321,15 +321,25 @@ export function StaffHomeScreen() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("settings")}
-            data-testid="button-settings"
-            data-tour-id="tour-settings-button"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("collaboration-hub")}
+              data-testid="button-collaboration"
+            >
+              <Link2 className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("settings")}
+              data-testid="button-settings"
+              data-tour-id="tour-settings-button"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </header>
 

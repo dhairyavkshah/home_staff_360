@@ -3,6 +3,7 @@ import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { pinService } from "@/lib/pin-service";
 import { permissionsService } from "@/lib/permissions-service";
+import { collaborationService } from "@/lib/collaboration-service";
 import appIconPath from "@/assets/app-icon.png";
 
 export function LauncherScreen() {
@@ -12,6 +13,13 @@ export function LauncherScreen() {
     const checkAndNavigate = async () => {
       const settings = storage.getSettings();
       const profile = storage.getProfile();
+      
+      const isPhoneVerified = collaborationService.isAuthenticated();
+      
+      if (!isPhoneVerified) {
+        navigate("phone-verification", { isOnboarding: true });
+        return;
+      }
       
       const permissionsStatus = await permissionsService.checkAllPermissions();
       const permissionsGranted = permissionsService.areRequiredPermissionsGranted(permissionsStatus);
@@ -41,7 +49,6 @@ export function LauncherScreen() {
           navigate("onboarding", { userType: profile.type });
         }
       } else {
-        // No profile means fresh start - clear any stale permissions flag
         permissionsService.clearPermissionsGranted();
         navigate("role-selection");
       }

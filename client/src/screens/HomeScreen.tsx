@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Settings, Users, Calendar, Shirt, FileText, Home, ChevronDown, Check, Building2, FolderOpen, Wallet, Receipt, ArrowRightLeft } from "lucide-react";
+import { Settings, Users, Calendar, Shirt, FileText, Home, ChevronDown, Check, Building2, FolderOpen, Wallet, Receipt, ArrowRightLeft, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -245,15 +245,25 @@ export function HomeScreen() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("settings")}
-            data-testid="button-settings"
-            data-tour-id="tour-settings-button"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("collaboration-hub")}
+              data-testid="button-collaboration"
+            >
+              <Link2 className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("settings")}
+              data-testid="button-settings"
+              data-tour-id="tour-settings-button"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </header>
 

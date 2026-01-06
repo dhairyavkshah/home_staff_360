@@ -538,26 +538,6 @@ export function SettingsScreen() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("collaboration")}</h2>
-          <Card className="divide-y">
-            <button
-              className="w-full p-3 flex items-center gap-3 hover-elevate text-left"
-              onClick={() => navigate("collaboration-hub")}
-              data-testid="button-collaboration-hub"
-            >
-              <div className="icon-halo-primary w-9 h-9">
-                <Link2 className="w-4.5 h-4.5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-sm">{t("collaborationHub")}</p>
-                <p className="text-xs text-muted-foreground">{t("linkYourFirstAccount")}</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-          </Card>
-        </section>
-
-        <section className="flex flex-col gap-3">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("help")}</h2>
           <Card className="divide-y">
             <button
