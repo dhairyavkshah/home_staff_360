@@ -37,6 +37,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import twilio from "twilio";
 import { v4 as uuidv4 } from "uuid";
+import libphonenumber from "google-libphonenumber";
+const PhoneNumberUtil = libphonenumber.PhoneNumberUtil;
+const PhoneNumberFormat = libphonenumber.PhoneNumberFormat;
 
 const router = Router();
 
@@ -50,11 +53,67 @@ const twilioClient = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 
+const phoneUtil = PhoneNumberUtil.getInstance();
+
 function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// Validate and format phone number to E.164 format using libphonenumber
+interface PhoneValidationResult {
+  isValid: boolean;
+  e164: string | null;
+  error?: string;
+}
+
+function validateAndFormatPhone(phone: string, defaultRegion: string = 'IN'): PhoneValidationResult {
+  try {
+    // Clean the input
+    let cleaned = phone.replace(/[\s\-\(\)\.]/g, "");
+    
+    // Try to parse with the country code if provided
+    let parsedNumber;
+    if (cleaned.startsWith('+')) {
+      parsedNumber = phoneUtil.parse(cleaned);
+    } else {
+      // Try to parse with default region
+      parsedNumber = phoneUtil.parse(cleaned, defaultRegion);
+    }
+    
+    // Check if the number is valid
+    if (!phoneUtil.isValidNumber(parsedNumber)) {
+      const regionCode = phoneUtil.getRegionCodeForNumber(parsedNumber) || defaultRegion;
+      return {
+        isValid: false,
+        e164: null,
+        error: `Invalid phone number format for ${regionCode}. Please include country code (e.g., +91 for India, +1 for US).`
+      };
+    }
+    
+    // Format to E.164
+    const e164 = phoneUtil.format(parsedNumber, PhoneNumberFormat.E164);
+    
+    return {
+      isValid: true,
+      e164
+    };
+  } catch (error: any) {
+    return {
+      isValid: false,
+      e164: null,
+      error: "Invalid phone number. Please include country code (e.g., +919876543210 for India)."
+    };
+  }
+}
+
 function normalizePhoneWithCountryCode(phone: string): string {
+  // Try to validate and format properly
+  const result = validateAndFormatPhone(phone);
+  if (result.isValid && result.e164) {
+    return result.e164;
+  }
+  
+  // Fallback to simple normalization for backwards compatibility
   let normalized = phone.replace(/[\s\-\(\)]/g, "");
   if (!normalized.startsWith("+")) {
     normalized = "+" + normalized;
@@ -215,11 +274,15 @@ router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Valid phone number with country code is required" });
     }
 
-    const normalizedPhone = normalizePhoneWithCountryCode(phone);
-    
-    if (!normalizedPhone.match(/^\+\d{10,15}$/)) {
-      return res.status(400).json({ error: "Phone number must include country code (e.g., +1234567890)" });
+    // Validate and format phone number using libphonenumber
+    const phoneValidation = validateAndFormatPhone(phone);
+    if (!phoneValidation.isValid || !phoneValidation.e164) {
+      return res.status(400).json({ 
+        error: phoneValidation.error || "Invalid phone number format. Please include country code (e.g., +919876543210 for India, +12025551234 for US)."
+      });
     }
+
+    const normalizedPhone = phoneValidation.e164;
 
     let user = await findUserByPhone(phone);
 
@@ -518,11 +581,15 @@ router.post("/api/auth/forgot-password", async (req: Request, res: Response) => 
       return res.status(400).json({ error: "Valid phone number is required" });
     }
 
-    const normalizedPhone = normalizePhoneWithCountryCode(phone);
-    
-    if (!normalizedPhone.match(/^\+\d{10,15}$/)) {
-      return res.status(400).json({ error: "Phone number must include country code" });
+    // Validate and format phone number using libphonenumber
+    const phoneValidation = validateAndFormatPhone(phone);
+    if (!phoneValidation.isValid || !phoneValidation.e164) {
+      return res.status(400).json({ 
+        error: phoneValidation.error || "Invalid phone number format. Please include country code."
+      });
     }
+
+    const normalizedPhone = phoneValidation.e164;
 
     const user = await findUserByPhone(phone);
 
