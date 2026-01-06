@@ -57,7 +57,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         }`}
       >
         <p className="text-white/50 text-xs" data-testid="text-version">
-          {t("version")}: 1.0.1
+          {t("version")}: v2.0
         </p>
         <p className="text-white/40 text-xs" data-testid="text-branding">
           {t("craftedBy")}
