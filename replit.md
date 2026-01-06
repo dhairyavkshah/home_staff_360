@@ -1,7 +1,7 @@
 # Home Staff 360
 
 ## Current Version
-**Version 1.0.2** (versionCode 3) - January 2026
+**Version 1.0.1** (versionCode 2) - January 2026
 
 ## Overview
 Home Staff 360 is a **100% free, offline-first mobile/web application** for managing household staff and service businesses. It enables efficient tracking of attendance, payments, and expenses for domestic staff (Home User Mode) and allows service professionals to manage their clients and earnings (Staff User Mode). The application prioritizes privacy, storing all user data locally on the device with no server dependencies. It supports multi-currency and multi-language, offering a robust solution for personal and professional management.

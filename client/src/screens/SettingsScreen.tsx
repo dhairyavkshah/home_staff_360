@@ -587,7 +587,7 @@ export function SettingsScreen() {
             <div className="text-center flex flex-col gap-2">
               <div>
                 <p className="font-semibold text-base">Home Staff 360</p>
-                <p className="text-xs text-muted-foreground">{t("version")} 1.0.0</p>
+                <p className="text-xs text-muted-foreground">{t("version")}: 1.0.1</p>
               </div>
               <p className="text-sm text-muted-foreground">{t("appTagline")}</p>
               <p className="text-xs text-muted-foreground/70 pt-1">{t("craftedBy")}</p>
