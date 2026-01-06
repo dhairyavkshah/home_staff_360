@@ -53,7 +53,11 @@ export type Screen =
   | "staff-add-invoice"
   | "staff-invoice-view"
   | "report-preview"
-  | "feedback";
+  | "feedback"
+  | "phone-verification"
+  | "collaboration-hub"
+  | "link-account"
+  | "sync-activity";
 
 interface NavigationData {
   personId?: string;

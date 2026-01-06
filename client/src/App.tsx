@@ -61,6 +61,11 @@ import { StaffInvoicesScreen } from "@/screens/staff/StaffInvoicesScreen";
 import { StaffAddInvoiceScreen } from "@/screens/staff/StaffAddInvoiceScreen";
 import { StaffInvoiceViewScreen } from "@/screens/staff/StaffInvoiceViewScreen";
 
+import { PhoneVerificationScreen } from "@/screens/collaboration/PhoneVerificationScreen";
+import { CollaborationHubScreen } from "@/screens/collaboration/CollaborationHubScreen";
+import { LinkAccountScreen } from "@/screens/collaboration/LinkAccountScreen";
+import { SyncActivityScreen } from "@/screens/collaboration/SyncActivityScreen";
+
 function MobileAppRouter() {
   const { currentScreen } = useNavigation();
 
@@ -160,6 +165,14 @@ function MobileAppRouter() {
       return <StaffExpensesScreen />;
     case "staff-add-expense":
       return <StaffAddExpenseScreen />;
+    case "phone-verification":
+      return <PhoneVerificationScreen />;
+    case "collaboration-hub":
+      return <CollaborationHubScreen />;
+    case "link-account":
+      return <LinkAccountScreen />;
+    case "sync-activity":
+      return <SyncActivityScreen />;
     default:
       return <LauncherScreen />;
   }
