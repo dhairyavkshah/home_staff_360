@@ -49,8 +49,9 @@ export function LauncherScreen() {
           navigate("onboarding", { userType: profile.type });
         }
       } else {
+        // No profile exists - navigate to auth first, then role selection after authentication
         permissionsService.clearPermissionsGranted();
-        navigate("role-selection");
+        navigate("auth");
       }
     };
 

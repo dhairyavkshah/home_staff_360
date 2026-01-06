@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, CheckCheck, Clock, ChevronRight, Calendar, Shirt, Link2, AlertCircle, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { Bell, CheckCheck, Clock, ChevronRight, Calendar, Shirt, Link2, AlertCircle, CheckCircle, XCircle, ArrowLeft, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,14 +8,17 @@ import { useTranslation } from "@/lib/i18n/i18n-context";
 import { collaborationService, AppNotification } from "@/lib/collaboration-service";
 import { storage } from "@/lib/storage";
 import { format, formatDistanceToNow } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export function NotificationCenterScreen() {
   const { navigate, goBack } = useNavigation();
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
 
   const profile = storage.getProfile();
   const currentMode = profile?.type || "HOME";
@@ -49,8 +52,58 @@ export function NotificationCenterScreen() {
       await collaborationService.markAllNotificationsRead(currentMode as "HOME" | "STAFF");
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
+      toast({
+        title: "All notifications marked as read",
+      });
     } catch (err) {
       console.error("Failed to mark all as read:", err);
+      toast({
+        title: "Failed to mark as read",
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function handleDeleteNotification(e: React.MouseEvent, notificationId: string) {
+    e.stopPropagation();
+    try {
+      await collaborationService.deleteNotification(notificationId);
+      const deletedNotification = notifications.find(n => n.id === notificationId);
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      if (deletedNotification && !deletedNotification.isRead) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+      toast({
+        title: "Notification dismissed",
+      });
+    } catch (err) {
+      console.error("Failed to delete notification:", err);
+      toast({
+        title: "Failed to dismiss notification",
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function handleClearAll() {
+    if (notifications.length === 0) return;
+    
+    setIsClearing(true);
+    try {
+      await collaborationService.clearAllNotifications(currentMode as "HOME" | "STAFF");
+      setNotifications([]);
+      setUnreadCount(0);
+      toast({
+        title: "All notifications cleared",
+      });
+    } catch (err) {
+      console.error("Failed to clear notifications:", err);
+      toast({
+        title: "Failed to clear notifications",
+        variant: "destructive",
+      });
+    } finally {
+      setIsClearing(false);
     }
   }
 
@@ -167,17 +220,32 @@ export function NotificationCenterScreen() {
             <Badge variant="destructive" className="text-xs">{unreadCount}</Badge>
           )}
         </div>
-        {notifications.length > 0 && unreadCount > 0 && (
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleMarkAllRead}
-            data-testid="button-mark-all-read"
-          >
-            <CheckCheck className="w-4 h-4 mr-1" />
-            Mark all read
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {notifications.length > 0 && unreadCount > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleMarkAllRead}
+              data-testid="button-mark-all-read"
+            >
+              <CheckCheck className="w-4 h-4 mr-1" />
+              Mark all read
+            </Button>
+          )}
+          {notifications.length > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleClearAll}
+              disabled={isClearing}
+              className="text-destructive"
+              data-testid="button-clear-all"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Clear all
+            </Button>
+          )}
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto">
@@ -204,42 +272,57 @@ export function NotificationCenterScreen() {
         ) : (
           <div className="divide-y">
             {notifications.map((notification) => (
-              <button
+              <div
                 key={notification.id}
-                className={`w-full px-4 py-4 text-left hover-elevate flex items-start gap-4 ${
+                className={`w-full px-4 py-4 text-left hover-elevate flex items-start gap-4 group ${
                   !notification.isRead ? "bg-primary/5" : ""
                 }`}
-                onClick={() => handleNotificationClick(notification)}
                 data-testid={`notification-${notification.id}`}
               >
-                <div className={`p-2 rounded-full ${getNotificationColor(notification.type)}`}>
-                  {getNotificationIcon(notification.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className={`font-medium text-sm ${!notification.isRead ? "text-foreground" : "text-muted-foreground"}`}>
-                      {notification.title}
-                    </p>
-                    {!notification.isRead && (
-                      <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                <button
+                  className="flex items-start gap-4 flex-1 min-w-0"
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className={`p-2 rounded-full ${getNotificationColor(notification.type)}`}>
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={`font-medium text-sm ${!notification.isRead ? "text-foreground" : "text-muted-foreground"}`}>
+                        {notification.title}
+                      </p>
+                      {!notification.isRead && (
+                        <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                      )}
+                    </div>
+                    {notification.message && (
+                      <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
+                        {notification.message}
+                      </p>
                     )}
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(notification.createdAt, { addSuffix: true })}
+                      </span>
+                      {getStatusBadge(notification.type)}
+                    </div>
                   </div>
-                  {notification.message && (
-                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
-                      {notification.message}
-                    </p>
+                </button>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {notification.actionRequired && (
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   )}
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(notification.createdAt, { addSuffix: true })}
-                    </span>
-                    {getStatusBadge(notification.type)}
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => handleDeleteNotification(e, notification.id)}
+                    data-testid={`button-dismiss-${notification.id}`}
+                  >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </Button>
                 </div>
-                {notification.actionRequired && (
-                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                )}
-              </button>
+              </div>
             ))}
           </div>
         )}

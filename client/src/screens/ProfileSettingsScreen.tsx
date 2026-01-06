@@ -10,6 +10,8 @@ import {
   ChevronRight,
   Shield,
   RefreshCw,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,7 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 
-type ProfileStep = "view" | "edit-name" | "change-password" | "change-phone" | "verify-phone";
+type ProfileStep = "view" | "edit-name" | "change-password" | "change-phone" | "verify-phone" | "delete-account";
 
 export function ProfileSettingsScreen() {
   const { navigate, goBack } = useNavigation();
@@ -55,6 +57,9 @@ export function ProfileSettingsScreen() {
   const [phonePassword, setPhonePassword] = useState("");
   const [otp, setOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
+
+  // Delete account form
+  const [deletePassword, setDeletePassword] = useState("");
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -101,6 +106,7 @@ export function ProfileSettingsScreen() {
       setNewPhone("");
       setPhonePassword("");
       setOtp("");
+      setDeletePassword("");
     } else {
       navigate("settings");
     }
@@ -255,12 +261,45 @@ export function ProfileSettingsScreen() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      toast({
+        title: "Error",
+        description: "Please enter your password to confirm account deletion",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await collaborationService.deleteAccount(deletePassword);
+      if (result.success) {
+        toast({
+          title: "Account Deleted",
+          description: "Your account has been permanently deleted",
+        });
+        localStorage.clear();
+        navigate("auth");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getTitle = () => {
     switch (step) {
       case "edit-name": return "Edit Name";
       case "change-password": return "Change Password";
       case "change-phone": return "Change Phone Number";
       case "verify-phone": return "Verify New Phone";
+      case "delete-account": return "Delete Account";
       default: return "Profile";
     }
   };
@@ -337,6 +376,29 @@ export function ProfileSettingsScreen() {
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </Card>
+
+            <h2 className="text-sm font-medium text-destructive uppercase tracking-wide mt-6">
+              Danger Zone
+            </h2>
+
+            <Card className="p-4 border-destructive/30">
+              <button
+                className="flex items-center justify-between py-2 hover-elevate rounded-md px-2 -mx-2 w-full"
+                onClick={() => setStep("delete-account")}
+                data-testid="button-delete-account"
+              >
+                <div className="flex items-center gap-3">
+                  <Trash2 className="w-5 h-5 text-destructive" />
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-destructive">Delete Account</p>
+                    <p className="text-sm text-muted-foreground">
+                      Permanently delete your account and all data
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-destructive" />
               </button>
             </Card>
           </section>
@@ -578,6 +640,88 @@ export function ProfileSettingsScreen() {
                     <>
                       <RefreshCw className="w-3 h-3 mr-1" />
                       Resend Code
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Card>
+          </section>
+        )}
+
+        {step === "delete-account" && (
+          <section className="flex flex-col gap-6">
+            <Card className="p-4 flex flex-col gap-4 border-destructive/30">
+              <div className="flex flex-col items-center text-center mb-2">
+                <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-3">
+                  <AlertTriangle className="w-6 h-6 text-destructive" />
+                </div>
+                <h3 className="font-semibold text-destructive">Delete Your Account</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  This action is <strong>permanent and irreversible</strong>. 
+                  Once deleted, your account cannot be recovered.
+                </p>
+              </div>
+
+              <div className="bg-destructive/5 rounded-md p-3 text-sm space-y-2">
+                <p className="font-medium text-destructive">What will be deleted:</p>
+                <ul className="text-muted-foreground space-y-1 ml-4 list-disc">
+                  <li>Your profile and account information</li>
+                  <li>All your personal data stored on our servers</li>
+                  <li>Your connection links and pending invitations</li>
+                </ul>
+                <p className="font-medium text-muted-foreground mt-3">
+                  Data of connected users will NOT be affected.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 mt-2">
+                <Label htmlFor="deletePassword">Enter your password to confirm</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="deletePassword"
+                    type={showPassword ? "text" : "password"}
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="pl-10 pr-10"
+                    data-testid="input-delete-password"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setStep("view")}
+                  disabled={isLoading}
+                  data-testid="button-cancel-delete"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={handleDeleteAccount}
+                  disabled={isLoading || !deletePassword}
+                  data-testid="button-confirm-delete"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Account
                     </>
                   )}
                 </Button>

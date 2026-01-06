@@ -421,6 +421,19 @@ class CollaborationService {
     });
   }
 
+  async deleteNotification(notificationId: string): Promise<{ success: boolean }> {
+    return this.apiRequest(`/notifications/${notificationId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async clearAllNotifications(mode?: "HOME" | "STAFF"): Promise<{ success: boolean }> {
+    const params = mode ? `?mode=${mode}` : "";
+    return this.apiRequest(`/notifications${params}`, {
+      method: "DELETE",
+    });
+  }
+
   // Bindings methods
   async getBindings(): Promise<{ bindings: any[] }> {
     return this.apiRequest("/bindings");
@@ -520,6 +533,28 @@ class CollaborationService {
 
   logout() {
     this.clearToken();
+  }
+
+  async deleteAccount(password: string): Promise<{ 
+    success: boolean; 
+    message?: string;
+    error?: string;
+  }> {
+    const response = await this.apiRequest<{
+      success: boolean;
+      message?: string;
+      error?: string;
+    }>("/user/delete-account", {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    });
+
+    if (response.success) {
+      this.clearToken();
+      this.clearSavedCredentials();
+    }
+
+    return response;
   }
 
   getConnectionStatus(): "connected" | "disconnected" | "connecting" {

@@ -2176,6 +2176,43 @@ router.post("/api/notifications/read-all", authenticateToken, async (req: Reques
   }
 });
 
+// Delete a single notification
+router.delete("/api/notifications/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+
+    await db.delete(notifications)
+      .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete notification error:", error);
+    res.status(500).json({ error: "Failed to delete notification" });
+  }
+});
+
+// Clear all notifications
+router.delete("/api/notifications", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const mode = req.query.mode as string | undefined;
+
+    let conditions = [eq(notifications.userId, userId)];
+    if (mode) {
+      conditions.push(eq(notifications.userMode, mode));
+    }
+
+    await db.delete(notifications)
+      .where(and(...conditions));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Clear all notifications error:", error);
+    res.status(500).json({ error: "Failed to clear notifications" });
+  }
+});
+
 // Helper function to create notifications
 async function createNotification(
   userId: string,
@@ -3570,6 +3607,478 @@ router.delete("/api/shared-spaces/:id", authenticateToken, async (req: Request, 
   } catch (error) {
     console.error("Delete shared space error:", error);
     res.status(500).json({ error: "Failed to delete space" });
+  }
+});
+
+// Delete user account and all associated data
+router.post("/api/user/delete-account", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ error: "Password is required" });
+    }
+
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!user.passwordHash) {
+      return res.status(400).json({ error: "No password set for this account" });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+
+    // Delete all user data in a transaction
+    await db.transaction(async (tx) => {
+      // 1. Delete notifications
+      await tx.delete(notifications).where(eq(notifications.userId, userId));
+
+      // 2. Delete chat messages where user is sender
+      await tx.delete(chatMessages).where(eq(chatMessages.senderId, userId));
+
+      // 3. Delete chat participants where user is participant
+      await tx.delete(chatParticipants).where(eq(chatParticipants.userId, userId));
+
+      // 4. Get connections involving the user and delete related chats
+      const userConnections = await tx.query.collabConnections.findMany({
+        where: or(
+          eq(collabConnections.userAId, userId),
+          eq(collabConnections.userBId, userId)
+        )
+      });
+      
+      const connectionIds = userConnections.map(c => c.id);
+      
+      // Delete chats linked to these connections
+      for (const connId of connectionIds) {
+        // First delete messages and participants for chats in this connection
+        const chatsToDelete = await tx.query.collabChats.findMany({
+          where: eq(collabChats.connectionId, connId)
+        });
+        
+        for (const chat of chatsToDelete) {
+          await tx.delete(chatMessages).where(eq(chatMessages.chatId, chat.id));
+          await tx.delete(chatParticipants).where(eq(chatParticipants.chatId, chat.id));
+        }
+        
+        await tx.delete(collabChats).where(eq(collabChats.connectionId, connId));
+      }
+
+      // 5. Delete collab connections where user is involved
+      await tx.delete(collabConnections).where(
+        or(
+          eq(collabConnections.userAId, userId),
+          eq(collabConnections.userBId, userId)
+        )
+      );
+
+      // 6. Delete collab connection invites where user is sender or target
+      await tx.delete(collabConnectionInvites).where(
+        or(
+          eq(collabConnectionInvites.senderId, userId),
+          eq(collabConnectionInvites.targetUserId, userId)
+        )
+      );
+
+      // 7. Get collaboration links for this user
+      const userLinks = await tx.query.collaborationLinks.findMany({
+        where: or(
+          eq(collaborationLinks.homeUserId, userId),
+          eq(collaborationLinks.staffUserId, userId)
+        )
+      });
+      
+      const linkIds = userLinks.map(l => l.id);
+
+      // 8. Delete laundry revisions for laundry submitted by user or where user is actionBy
+      await tx.delete(laundryRevisions).where(eq(laundryRevisions.actionBy, userId));
+
+      // 9. Delete attendance revisions where user is actionBy
+      await tx.delete(attendanceRevisions).where(eq(attendanceRevisions.actionBy, userId));
+
+      // 10. For each link, delete shared laundry and attendance records
+      for (const linkId of linkIds) {
+        // Get bindings for this link
+        const linkBindings = await tx.query.collaborationBindings.findMany({
+          where: eq(collaborationBindings.linkId, linkId)
+        });
+        
+        const bindingIds = linkBindings.map(b => b.id);
+        
+        // Delete laundry revisions for laundry in these bindings
+        for (const bindingId of bindingIds) {
+          const laundryRecords = await tx.query.sharedLaundry.findMany({
+            where: eq(sharedLaundry.bindingId, bindingId)
+          });
+          
+          for (const laundry of laundryRecords) {
+            await tx.delete(laundryRevisions).where(eq(laundryRevisions.laundryId, laundry.id));
+          }
+          
+          const attendanceRecords = await tx.query.sharedAttendance.findMany({
+            where: eq(sharedAttendance.bindingId, bindingId)
+          });
+          
+          for (const attendance of attendanceRecords) {
+            await tx.delete(attendanceRevisions).where(eq(attendanceRevisions.attendanceId, attendance.id));
+          }
+          
+          // Delete shared laundry and attendance
+          await tx.delete(sharedLaundry).where(eq(sharedLaundry.bindingId, bindingId));
+          await tx.delete(sharedAttendance).where(eq(sharedAttendance.bindingId, bindingId));
+        }
+        
+        // Delete collaboration bindings
+        await tx.delete(collaborationBindings).where(eq(collaborationBindings.linkId, linkId));
+        
+        // Delete collaboration messages
+        await tx.delete(collaborationMessages).where(eq(collaborationMessages.linkId, linkId));
+      }
+
+      // 11. Delete collaboration links
+      await tx.delete(collaborationLinks).where(
+        or(
+          eq(collaborationLinks.homeUserId, userId),
+          eq(collaborationLinks.staffUserId, userId)
+        )
+      );
+
+      // 12. Delete household share members where user is member
+      await tx.delete(householdShareMembers).where(eq(householdShareMembers.userId, userId));
+
+      // 13. Delete household shares owned by user (and their members first)
+      const userHouseholdShares = await tx.query.householdShares.findMany({
+        where: eq(householdShares.ownerId, userId)
+      });
+      
+      for (const share of userHouseholdShares) {
+        await tx.delete(householdShareMembers).where(eq(householdShareMembers.shareId, share.id));
+      }
+      await tx.delete(householdShares).where(eq(householdShares.ownerId, userId));
+
+      // 14. Delete business share members where user is member
+      await tx.delete(businessShareMembers).where(eq(businessShareMembers.userId, userId));
+
+      // 15. Delete business shares owned by user (and their members first)
+      const userBusinessShares = await tx.query.businessShares.findMany({
+        where: eq(businessShares.ownerId, userId)
+      });
+      
+      for (const share of userBusinessShares) {
+        await tx.delete(businessShareMembers).where(eq(businessShareMembers.shareId, share.id));
+      }
+      await tx.delete(businessShares).where(eq(businessShares.ownerId, userId));
+
+      // 16. Delete devices
+      await tx.delete(devices).where(eq(devices.userId, userId));
+
+      // 17. Finally delete the user record
+      await tx.delete(serverUsers).where(eq(serverUsers.id, userId));
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete account error:", error);
+    res.status(500).json({ error: "Failed to delete account" });
+  }
+});
+
+// ============ TEST DATA SEEDING ENDPOINT ============
+
+router.post("/api/admin/seed-test-data", async (req: Request, res: Response) => {
+  try {
+    const TEST_PASSWORD = "Test123!";
+    const passwordHash = await bcrypt.hash(TEST_PASSWORD, 10);
+    
+    const summary = {
+      homeUsersCreated: 0,
+      staffUsersCreated: 0,
+      connectionsCreated: 0,
+      collaborationLinksCreated: 0,
+      bindingsCreated: 0,
+      attendanceRecordsCreated: 0,
+      laundryRecordsCreated: 0,
+      notificationsCreated: 0,
+      skippedExisting: 0,
+    };
+
+    // Helper function to generate dates for records
+    const getRandomDate = (daysBack: number): string => {
+      const date = new Date();
+      date.setDate(date.getDate() - Math.floor(Math.random() * daysBack));
+      return date.toISOString().split('T')[0];
+    };
+
+    // Create 12 home users
+    const homeUsers: { id: string; phone: string }[] = [];
+    for (let i = 1; i <= 12; i++) {
+      const phone = `+9199000010${i.toString().padStart(2, '0')}`;
+      const userId = `test_home_${i}`;
+      
+      const existingUser = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.phone, phone)
+      });
+      
+      if (existingUser) {
+        homeUsers.push({ id: existingUser.id, phone });
+        summary.skippedExisting++;
+      } else {
+        await db.insert(serverUsers).values({
+          id: userId,
+          phone,
+          passwordHash,
+          userType: 'HOME',
+          displayName: `Test Home User ${i}`,
+          isVerified: true,
+          onboardingCompleted: true,
+          isActive: true,
+        });
+        homeUsers.push({ id: userId, phone });
+        summary.homeUsersCreated++;
+      }
+    }
+
+    // Create 13 staff users
+    const staffUsers: { id: string; phone: string }[] = [];
+    for (let i = 1; i <= 13; i++) {
+      const phone = `+9199000020${i.toString().padStart(2, '0')}`;
+      const userId = `test_staff_${i}`;
+      
+      const existingUser = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.phone, phone)
+      });
+      
+      if (existingUser) {
+        staffUsers.push({ id: existingUser.id, phone });
+        summary.skippedExisting++;
+      } else {
+        await db.insert(serverUsers).values({
+          id: userId,
+          phone,
+          passwordHash,
+          userType: 'STAFF',
+          displayName: `Test Staff User ${i}`,
+          isVerified: true,
+          onboardingCompleted: true,
+          isActive: true,
+        });
+        staffUsers.push({ id: userId, phone });
+        summary.staffUsersCreated++;
+      }
+    }
+
+    // Create connections pattern:
+    // Home user 1 connects with Staff users 1-4
+    // Home user 2 connects with Staff users 2-5
+    // ... continues
+    // Leave home users 11-12 and staff users 11-13 without connections
+    
+    const connectionPairs: { homeIdx: number; staffIdx: number }[] = [];
+    for (let homeIdx = 0; homeIdx < 10; homeIdx++) {
+      for (let offset = 0; offset < 4 && (homeIdx + offset) < 10; offset++) {
+        const staffIdx = homeIdx + offset;
+        if (staffIdx < 10) {
+          connectionPairs.push({ homeIdx, staffIdx });
+        }
+      }
+    }
+
+    // Limit to 20 connections
+    const connectionsToCreate = connectionPairs.slice(0, 20);
+
+    for (const { homeIdx, staffIdx } of connectionsToCreate) {
+      const homeUser = homeUsers[homeIdx];
+      const staffUser = staffUsers[staffIdx];
+      
+      // Check if connection already exists
+      const existingConnection = await db.query.collabConnections.findFirst({
+        where: or(
+          and(
+            eq(collabConnections.userAId, homeUser.id),
+            eq(collabConnections.userBId, staffUser.id)
+          ),
+          and(
+            eq(collabConnections.userAId, staffUser.id),
+            eq(collabConnections.userBId, homeUser.id)
+          )
+        )
+      });
+      
+      if (existingConnection) {
+        summary.skippedExisting++;
+        continue;
+      }
+      
+      const connectionId = uuidv4();
+      await db.insert(collabConnections).values({
+        id: connectionId,
+        userAId: homeUser.id,
+        userAMode: 'HOME',
+        userBId: staffUser.id,
+        userBMode: 'STAFF',
+        status: 'accepted',
+        initiatedBy: homeUser.id,
+      });
+      summary.connectionsCreated++;
+
+      // Create collaboration link for this connection
+      const linkId = uuidv4();
+      const homeAccountId = `home_account_${homeIdx + 1}`;
+      const staffAccountId = `staff_account_${staffIdx + 1}`;
+      
+      const existingLink = await db.query.collaborationLinks.findFirst({
+        where: and(
+          eq(collaborationLinks.homeUserId, homeUser.id),
+          eq(collaborationLinks.staffUserId, staffUser.id)
+        )
+      });
+      
+      if (!existingLink) {
+        await db.insert(collaborationLinks).values({
+          id: linkId,
+          homeUserId: homeUser.id,
+          homeAccountId,
+          staffUserId: staffUser.id,
+          staffAccountId,
+          status: 'active',
+        });
+        summary.collaborationLinksCreated++;
+
+        // Create binding for this link
+        const bindingId = uuidv4();
+        const homePersonId = `person_${homeIdx + 1}_${staffIdx + 1}`;
+        const staffClientId = `client_${staffIdx + 1}_${homeIdx + 1}`;
+        
+        await db.insert(collaborationBindings).values({
+          id: bindingId,
+          linkId,
+          homePersonId,
+          homePersonName: `Staff Person ${staffIdx + 1}`,
+          staffClientId,
+          staffClientName: `Home Client ${homeIdx + 1}`,
+          isActive: true,
+        });
+        summary.bindingsCreated++;
+
+        // Create 5 shared attendance records for each binding using raw SQL
+        // (database has additional required columns not in Drizzle schema)
+        for (let a = 0; a < 5; a++) {
+          const attendanceId = uuidv4();
+          const attendanceDate = getRandomDate(30);
+          const statuses = ['FULL', 'HALF', 'ABSENT'];
+          const status = statuses[Math.floor(Math.random() * 3)];
+          const submittedByRole = Math.random() > 0.5 ? 'HOME' : 'STAFF';
+          const submittedBy = submittedByRole === 'HOME' ? homeUser.id : staffUser.id;
+          const actionRequiredBy = submittedByRole === 'HOME' ? staffUser.id : homeUser.id;
+          const hoursWorked = status === 'FULL' ? 8 : status === 'HALF' ? 4 : 0;
+          
+          await db.execute(sql`
+            INSERT INTO shared_attendance (
+              id, home_user_id, staff_user_id, binding_id, date, status, hours_worked, note,
+              approval_status, submitted_by, submitted_by_role, action_required_by,
+              record_salary_type, record_rate, record_currency, revision_count
+            ) VALUES (
+              ${attendanceId}, ${homeUser.id}, ${staffUser.id}, ${bindingId}, ${attendanceDate},
+              ${status}, ${hoursWorked}, ${'Test attendance record ' + (a + 1)},
+              'pending', ${submittedBy}, ${submittedByRole}, ${actionRequiredBy},
+              'DAILY', 500, 'INR', 0
+            )
+          `);
+          summary.attendanceRecordsCreated++;
+        }
+
+        // Create 3 shared laundry records for each binding using raw SQL
+        for (let l = 0; l < 3; l++) {
+          const laundryId = uuidv4();
+          const laundryDate = getRandomDate(30);
+          const submittedByRole = Math.random() > 0.5 ? 'HOME' : 'STAFF';
+          const submittedBy = submittedByRole === 'HOME' ? homeUser.id : staffUser.id;
+          const actionRequiredBy = submittedByRole === 'HOME' ? staffUser.id : homeUser.id;
+          
+          const items = JSON.stringify([
+            { id: uuidv4(), type: 'Shirt', quantity: 3, rate: 20, subtotal: 60 },
+            { id: uuidv4(), type: 'Pants', quantity: 2, rate: 30, subtotal: 60 },
+          ]);
+          
+          await db.execute(sql`
+            INSERT INTO shared_laundry (
+              id, home_user_id, staff_user_id, binding_id, date, items, items_total,
+              pickup_delivery, pickup_delivery_charge, total, service_type,
+              approval_status, submitted_by, submitted_by_role, action_required_by,
+              record_currency, revision_count
+            ) VALUES (
+              ${laundryId}, ${homeUser.id}, ${staffUser.id}, ${bindingId}, ${laundryDate},
+              ${items}, 120, false, 0, 120, 'Wash & Fold',
+              'pending', ${submittedBy}, ${submittedByRole}, ${actionRequiredBy},
+              'INR', 0
+            )
+          `);
+          summary.laundryRecordsCreated++;
+        }
+
+        // Create random notification records using raw SQL
+        // (database has different column names than Drizzle schema)
+        const notificationCategories = ['attendance_submitted', 'laundry_submitted'];
+        const numNotifications = Math.floor(Math.random() * 3) + 1;
+        
+        for (let n = 0; n < numNotifications; n++) {
+          const notificationCategory = notificationCategories[Math.floor(Math.random() * 2)];
+          const targetUser = Math.random() > 0.5 ? homeUser : staffUser;
+          const targetMode = targetUser.id === homeUser.id ? 'HOME' : 'STAFF';
+          const title = notificationCategory === 'attendance_submitted' 
+            ? 'New Attendance Record' 
+            : 'New Laundry Record';
+          const message = `A new ${notificationCategory === 'attendance_submitted' ? 'attendance' : 'laundry'} record requires your review.`;
+          const entityType = notificationCategory === 'attendance_submitted' ? 'attendance' : 'laundry';
+          const notificationId = uuidv4();
+          
+          await db.execute(sql`
+            INSERT INTO notifications (
+              id, user_id, category, title, message, status, user_mode,
+              action_required, action_type, is_read, entity_type
+            ) VALUES (
+              ${notificationId}, ${targetUser.id}, ${notificationCategory}, ${title}, ${message},
+              'unread', ${targetMode}, true, 'approve', false, ${entityType}
+            )
+          `);
+          summary.notificationsCreated++;
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: "Test data seeded successfully",
+      summary,
+      testCredentials: {
+        password: TEST_PASSWORD,
+        homeUsers: homeUsers.map((u, i) => ({ 
+          phone: u.phone, 
+          displayName: `Test Home User ${i + 1}`,
+          hasConnections: i < 10 
+        })),
+        staffUsers: staffUsers.map((u, i) => ({ 
+          phone: u.phone, 
+          displayName: `Test Staff User ${i + 1}`,
+          hasConnections: i < 10 
+        })),
+      }
+    });
+  } catch (error) {
+    console.error("Seed test data error:", error);
+    res.status(500).json({ 
+      error: "Failed to seed test data", 
+      details: error instanceof Error ? error.message : String(error) 
+    });
   }
 });
 
