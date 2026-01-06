@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowRightLeft, User, Link2, ChevronUp, ChevronDown, Trash2, Plus } from "lucide-react";
+import { ArrowRightLeft, User, Link2, Trash2, Plus, X } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +9,12 @@ import { Label } from "@/components/ui/label";
 import { SearchBar } from "@/components/SearchBar";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
@@ -189,21 +195,31 @@ export function TransactionsScreen() {
         rightAction={
           <Button 
             size="icon" 
-            onClick={() => { resetForm(); setShowAddForm(!showAddForm); }}
+            onClick={() => { resetForm(); setShowAddForm(true); }}
             data-testid="button-toggle-add-form"
           >
-            {showAddForm ? <ChevronUp className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+            <Plus className="h-5 w-5" />
           </Button>
         }
       />
 
-      {showAddForm && (
-        <div className="content-container pt-4 pb-4 flex-shrink-0 border-b">
-          <Card className="p-4 flex flex-col gap-4">
-            <h2 className="text-base font-semibold">
+      <Drawer open={showAddForm} onOpenChange={setShowAddForm}>
+        <DrawerContent className="max-h-[90vh] flex flex-col">
+          <DrawerHeader className="py-3 pb-4 shrink-0 relative">
+            <DrawerTitle className="text-center">
               {tLabel('addTransaction', 'Add Transaction')}
-            </h2>
-            
+            </DrawerTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-2"
+              onClick={() => setShowAddForm(false)}
+              data-testid="button-close-add-form"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </DrawerHeader>
+          <div className="px-4 pb-6 overflow-y-auto flex-1 flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="person">{tLabel('staff', 'Staff')} <span className="text-destructive">*</span></Label>
               <SearchableSelect
@@ -276,7 +292,7 @@ export function TransactionsScreen() {
               {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 pt-2">
               <Button variant="outline" className="flex-1" onClick={() => { resetForm(); setShowAddForm(false); }} data-testid="button-cancel">
                 {tLabel('cancel', 'Cancel')}
               </Button>
@@ -284,9 +300,9 @@ export function TransactionsScreen() {
                 {tLabel('save', 'Save')}
               </Button>
             </div>
-          </Card>
-        </div>
-      )}
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <ConfirmModal
         open={!!deleteConfirmId}
@@ -300,7 +316,7 @@ export function TransactionsScreen() {
       />
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="content-container pb-8 flex flex-col gap-2">
+        <div className="content-container pt-3 pb-8 flex flex-col gap-2">
           <SearchBar
             placeholder={tLabel('searchTransactions', 'Search transactions...')}
             value={searchQuery}
