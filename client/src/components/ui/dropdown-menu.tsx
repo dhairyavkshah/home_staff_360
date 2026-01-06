@@ -56,22 +56,29 @@ DropdownMenuSubContent.displayName =
 
 function getSafeAreaPadding() {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
-    return { top: 60, bottom: 60, left: 16, right: 16 };
+    return { top: 80, bottom: 80, left: 16, right: 16 };
   }
   
   const style = getComputedStyle(document.documentElement);
   const topValue = style.getPropertyValue('--app-safe-area-top')?.trim();
   const bottomValue = style.getPropertyValue('--app-safe-area-bottom')?.trim();
   
-  const parsedTop = topValue ? parseInt(topValue, 10) : 0;
-  const parsedBottom = bottomValue ? parseInt(bottomValue, 10) : 0;
+  // Parse values, stripping 'px' suffix if present
+  const parseValue = (val: string | undefined): number => {
+    if (!val) return 0;
+    const cleaned = val.replace('px', '').trim();
+    const parsed = parseInt(cleaned, 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
   
-  const safeTop = Number.isNaN(parsedTop) ? 0 : parsedTop;
-  const safeBottom = Number.isNaN(parsedBottom) ? 0 : parsedBottom;
+  const safeTop = parseValue(topValue);
+  const safeBottom = parseValue(bottomValue);
   
+  // Use larger minimum values to ensure dropdowns stay within visible area
+  // Samsung devices typically need at least 48px for status bar area + padding
   return { 
-    top: Math.max(safeTop, 24) + 16, 
-    bottom: Math.max(safeBottom, 24) + 16, 
+    top: Math.max(safeTop, 48) + 24, 
+    bottom: Math.max(safeBottom, 48) + 24, 
     left: 16, 
     right: 16 
   };

@@ -7,7 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
-import { calculatePersonBalanceWithCurrency, getUnpaidLaundryTotal, formatCurrency, getCurrencyIcon, formatRecordCurrency, groupTotalsByCurrency, formatCurrencyTotals, mergeCurrencyTotals, CurrencyTotal, calculateTotalPayableByCurrency } from "@/lib/calculations";
+import { calculatePersonBalanceWithCurrency, getUnpaidLaundryTotal, formatCurrency, getCurrencyIcon, formatRecordCurrency, groupTotalsByCurrency, formatCurrencyTotals, formatCurrencyTotalsAsInteger, mergeCurrencyTotals, CurrencyTotal, calculateTotalPayableByCurrency } from "@/lib/calculations";
 import { getCurrencySymbol, currencySymbols } from "@shared/schema";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
@@ -138,7 +138,7 @@ export function PayablesScreen() {
                   <p className="text-sm text-muted-foreground">Total Outstanding</p>
                   <p className="text-2xl font-bold" data-testid="text-total-payable">
                     {totalPayableByCurrency.length > 0 
-                      ? formatCurrencyTotals(totalPayableByCurrency)
+                      ? formatCurrencyTotalsAsInteger(totalPayableByCurrency)
                       : formatCurrency(0, settings.currency, settings.customCurrencySymbol)}
                   </p>
                 </div>
@@ -160,7 +160,7 @@ export function PayablesScreen() {
               </div>
               <p className="text-lg font-semibold mt-1">
                 {dueThisWeek > 0 
-                  ? formatCurrencyTotals(totalPayableByCurrency)
+                  ? formatCurrencyTotalsAsInteger(totalPayableByCurrency)
                   : "None"}
               </p>
             </Card>
@@ -198,7 +198,7 @@ export function PayablesScreen() {
                   <div className="flex items-center gap-2">
                     <div className="text-right">
                       <p className="font-semibold text-warning">
-                        {formatCurrencyTotals(accountLevelUnpaidLaundryByCurrency)}
+                        {formatCurrencyTotalsAsInteger(accountLevelUnpaidLaundryByCurrency)}
                       </p>
                       <p className="text-xs text-muted-foreground">unpaid</p>
                     </div>
@@ -262,7 +262,7 @@ export function PayablesScreen() {
                         <div className="text-right">
                           <p className="font-semibold text-warning">
                             {person.payableByCurrency.length > 0 
-                              ? formatCurrencyTotals(person.payableByCurrency)
+                              ? formatCurrencyTotalsAsInteger(person.payableByCurrency)
                               : formatRecordCurrency(person.balance, person.primaryCurrencySymbol, settings.currency, settings.customCurrencySymbol)}
                           </p>
                           <p className="text-xs text-muted-foreground">owed</p>

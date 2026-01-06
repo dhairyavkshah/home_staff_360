@@ -286,31 +286,36 @@ export function ReportsScreen() {
   };
 
   const handleShareLedger = async () => {
-    const lines: string[] = [];
-    lines.push("Home Staff 360 - Ledger Report");
-    lines.push(`Period: ${monthName}`);
-    lines.push("");
-    lines.push(`Total Wages: ${formatCurrency(reportData.totalWages, settings.currency, settings.customCurrencySymbol)}`);
-    lines.push(`Total Transactions: ${formatCurrency(reportData.totalTransactions, settings.currency, settings.customCurrencySymbol)}`);
-    lines.push(`Total Laundry: ${formatCurrency(reportData.totalLaundry, settings.currency, settings.customCurrencySymbol)}`);
-    lines.push(`Total Expenses: ${formatCurrency(reportData.totalExpenses, settings.currency, settings.customCurrencySymbol)}`);
-    lines.push(`Grand Total: ${formatCurrency(reportData.grandTotal, settings.currency, settings.customCurrencySymbol)}`);
-    lines.push("");
-    reportData.ledgerEntries.slice(0, 10).forEach((entry) => {
-      lines.push(`${formatShortDate(entry.date)} - ${entry.person}: ${entry.description} (${formatRecordCurrency(entry.amount, entry.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)})`);
-    });
-    if (reportData.ledgerEntries.length > 10) {
-      lines.push(`... and ${reportData.ledgerEntries.length - 10} more entries`);
-    }
+    try {
+      const lines: string[] = [];
+      lines.push("Home Staff 360 - Ledger Report");
+      lines.push(`Period: ${monthName}`);
+      lines.push("");
+      lines.push(`Total Wages: ${formatCurrency(reportData.totalWages, settings.currency, settings.customCurrencySymbol)}`);
+      lines.push(`Total Transactions: ${formatCurrency(reportData.totalTransactions, settings.currency, settings.customCurrencySymbol)}`);
+      lines.push(`Total Laundry: ${formatCurrency(reportData.totalLaundry, settings.currency, settings.customCurrencySymbol)}`);
+      lines.push(`Total Expenses: ${formatCurrency(reportData.totalExpenses, settings.currency, settings.customCurrencySymbol)}`);
+      lines.push(`Grand Total: ${formatCurrency(reportData.grandTotal, settings.currency, settings.customCurrencySymbol)}`);
+      lines.push("");
+      reportData.ledgerEntries.slice(0, 10).forEach((entry) => {
+        lines.push(`${formatShortDate(entry.date)} - ${entry.person}: ${entry.description} (${formatRecordCurrency(entry.amount, entry.recordCurrencySymbol, settings.currency, settings.customCurrencySymbol)})`);
+      });
+      if (reportData.ledgerEntries.length > 10) {
+        lines.push(`... and ${reportData.ledgerEntries.length - 10} more entries`);
+      }
 
-    const shared = await shareReport({
-      title: "Home Staff 360 Ledger Report",
-      text: lines.join("\n"),
-      filename: `homestaff360-ledger-${year}-${String(month + 1).padStart(2, "0")}.csv`,
-    });
+      const shared = await shareReport({
+        title: "Home Staff 360 Ledger Report",
+        text: lines.join("\n"),
+        filename: `homestaff360-ledger-${year}-${String(month + 1).padStart(2, "0")}.csv`,
+      });
 
-    if (shared) {
-      toast({ title: t("success"), description: t("reportShared") });
+      if (shared) {
+        toast({ title: t("success"), description: t("reportShared") });
+      }
+    } catch (error) {
+      console.error("Failed to share ledger report:", error);
+      toast({ title: t("error"), description: t("exportFailed"), variant: "destructive" });
     }
   };
 
@@ -325,15 +330,20 @@ export function ReportsScreen() {
   };
 
   const handleShareAttendance = async () => {
-    const content = generateAttendanceCSV(attendanceData.records, startDate, endDate);
-    const shared = await shareReport({
-      title: t("attendanceReport"),
-      text: content,
-      filename: `homestaff360-attendance-${year}-${String(month + 1).padStart(2, "0")}.csv`,
-    });
+    try {
+      const content = generateAttendanceCSV(attendanceData.records, startDate, endDate);
+      const shared = await shareReport({
+        title: t("attendanceReport"),
+        text: content,
+        filename: `homestaff360-attendance-${year}-${String(month + 1).padStart(2, "0")}.csv`,
+      });
 
-    if (shared) {
-      toast({ title: t("success"), description: t("reportShared") });
+      if (shared) {
+        toast({ title: t("success"), description: t("reportShared") });
+      }
+    } catch (error) {
+      console.error("Failed to share attendance report:", error);
+      toast({ title: t("error"), description: t("exportFailed"), variant: "destructive" });
     }
   };
 

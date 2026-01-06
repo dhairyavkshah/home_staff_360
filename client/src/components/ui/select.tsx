@@ -67,12 +67,43 @@ const SelectScrollDownButton = React.forwardRef<
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName
 
+function getSafeAreaPadding() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return { top: 80, bottom: 80, left: 16, right: 16 };
+  }
+  
+  const style = getComputedStyle(document.documentElement);
+  const topValue = style.getPropertyValue('--app-safe-area-top')?.trim();
+  const bottomValue = style.getPropertyValue('--app-safe-area-bottom')?.trim();
+  
+  // Parse values, stripping 'px' suffix if present
+  const parseValue = (val: string | undefined): number => {
+    if (!val) return 0;
+    const cleaned = val.replace('px', '').trim();
+    const parsed = parseInt(cleaned, 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+  
+  const safeTop = parseValue(topValue);
+  const safeBottom = parseValue(bottomValue);
+  
+  return { 
+    top: Math.max(safeTop, 48) + 24, 
+    bottom: Math.max(safeBottom, 48) + 24, 
+    left: 16, 
+    right: 16 
+  };
+}
+
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => {
-  const safeTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--app-safe-area-top') || '0', 10) || 24;
-  const safeBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--app-safe-area-bottom') || '0', 10) || 24;
+  const [safeAreaPadding, setSafeAreaPadding] = React.useState({ top: 80, bottom: 80, left: 16, right: 16 });
+  
+  React.useEffect(() => {
+    setSafeAreaPadding(getSafeAreaPadding());
+  }, []);
   
   return (
     <SelectPrimitive.Portal>
@@ -86,7 +117,7 @@ const SelectContent = React.forwardRef<
         )}
         position={position}
         sideOffset={8}
-        collisionPadding={{ top: safeTop + 16, bottom: safeBottom + 16, left: 16, right: 16 }}
+        collisionPadding={safeAreaPadding}
         avoidCollisions={true}
         {...props}
       >
