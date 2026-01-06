@@ -18,15 +18,20 @@ export function useDirtyTracker<T extends Record<string, unknown>>(
   options: DirtyTrackerOptions<T> = {}
 ) {
   const { initialData } = options;
-  const [isDirty, setIsDirty] = useState(false);
+  const [isDirty, setIsDirtyLocal] = useState(false);
   const baselineRef = useRef<T | undefined>(initialData);
   const currentDataRef = useRef<T | undefined>(initialData);
+
+  const setIsDirty = useCallback((dirty: boolean) => {
+    setIsDirtyLocal(dirty);
+    DirtyTrackingContext.current?.setDirty(dirty);
+  }, []);
 
   const setBaseline = useCallback((data: T) => {
     baselineRef.current = { ...data };
     currentDataRef.current = { ...data };
     setIsDirty(false);
-  }, []);
+  }, [setIsDirty]);
 
   const updateField = useCallback(<K extends keyof T>(field: K, value: T[K]) => {
     if (!currentDataRef.current) {
@@ -46,23 +51,29 @@ export function useDirtyTracker<T extends Record<string, unknown>>(
     });
     
     setIsDirty(hasChanges);
-  }, []);
+  }, [setIsDirty]);
 
   const markClean = useCallback(() => {
     if (currentDataRef.current) {
       baselineRef.current = { ...currentDataRef.current };
     }
     setIsDirty(false);
-  }, []);
+  }, [setIsDirty]);
 
   const markDirty = useCallback(() => {
     setIsDirty(true);
-  }, []);
+  }, [setIsDirty]);
 
   const reset = useCallback(() => {
     baselineRef.current = undefined;
     currentDataRef.current = undefined;
     setIsDirty(false);
+  }, [setIsDirty]);
+
+  useEffect(() => {
+    return () => {
+      DirtyTrackingContext.current?.setDirty(false);
+    };
   }, []);
 
   return {
