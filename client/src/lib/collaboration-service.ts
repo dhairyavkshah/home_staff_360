@@ -191,7 +191,7 @@ class CollaborationService {
       success: boolean;
       code: string;
       expiresAt: string;
-    }>("/collaboration/links", {
+    }>("/collaboration/create-link", {
       method: "POST",
       body: JSON.stringify({ linkType }),
     });
@@ -211,7 +211,7 @@ class CollaborationService {
       success: boolean;
       link?: ApiCollaborationLink;
       message?: string;
-    }>("/collaboration/links/accept", {
+    }>("/collaboration/accept-link", {
       method: "POST",
       body: JSON.stringify({ code }),
     });
@@ -234,10 +234,10 @@ class CollaborationService {
   }
 
   async getSyncMessages(linkId: string): Promise<SyncMessage[]> {
-    const response = await this.apiRequest<{ messages: Array<SyncMessage & { createdAt: string }> }>(
-      `/collaboration/sync/${linkId}/messages`
+    const response = await this.apiRequest<Array<SyncMessage & { createdAt: string }>>(
+      `/collaboration/${linkId}/messages`
     );
-    return (response.messages || []).map(msg => ({
+    return (response || []).map(msg => ({
       ...msg,
       createdAt: parseDate(msg.createdAt),
     }));
@@ -247,17 +247,15 @@ class CollaborationService {
     linkId: string,
     messageType: string,
     payload: Record<string, unknown>
-  ): Promise<{ success: boolean; message: SyncMessage }> {
-    return this.apiRequest(`/collaboration/sync/${linkId}/messages`, {
+  ): Promise<{ success: boolean; messageId: string }> {
+    return this.apiRequest(`/collaboration/messages`, {
       method: "POST",
-      body: JSON.stringify({ messageType, payload }),
+      body: JSON.stringify({ linkId, messageType, payload }),
     });
   }
 
-  async acknowledgeMessage(messageId: string): Promise<{ success: boolean }> {
-    return this.apiRequest(`/collaboration/sync/messages/${messageId}/ack`, {
-      method: "POST",
-    });
+  async acknowledgeMessage(_messageId: string): Promise<{ success: boolean }> {
+    return { success: true };
   }
 
   logout() {

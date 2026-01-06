@@ -463,10 +463,38 @@ router.get("/api/collaboration/links", authenticateToken, async (req: Request, r
       orderBy: desc(collaborationLinks.createdAt)
     });
 
-    res.json(links);
+    res.json({ links });
   } catch (error) {
     console.error("Get collaboration links error:", error);
     res.status(500).json({ error: "Failed to get collaboration links" });
+  }
+});
+
+router.delete("/api/collaboration/links/:linkId", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { linkId } = req.params;
+
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, linkId)
+    });
+
+    if (!link) {
+      return res.status(404).json({ error: "Link not found" });
+    }
+
+    if (link.homeUserId !== userId && link.staffUserId !== userId) {
+      return res.status(403).json({ error: "Not authorized to delete this link" });
+    }
+
+    await db.update(collaborationLinks)
+      .set({ status: "revoked", updatedAt: new Date() })
+      .where(eq(collaborationLinks.id, linkId));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Revoke collaboration link error:", error);
+    res.status(500).json({ error: "Failed to revoke collaboration link" });
   }
 });
 
