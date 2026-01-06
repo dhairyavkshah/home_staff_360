@@ -32,6 +32,21 @@ The application features a modern UI inspired by Samsung One UI and Material 3, 
 - **Limitations**: Soft limit of 1000 total records with warnings; 5MB per file for document storage.
 - **Donation Feature**: Optional donations via UPI (India) or PayPal (International) with tiered amounts and custom options.
 
+### Server-Side Components (v2.0)
+The application now includes optional server-side features for cross-device collaboration while maintaining local storage as the primary data source:
+
+- **User Authentication**: OTP-based phone verification via Twilio SMS
+- **Database**: PostgreSQL with Drizzle ORM
+- **API Endpoints**:
+  - `/api/auth/request-otp` - Request OTP for phone verification
+  - `/api/auth/verify-otp` - Verify OTP and get JWT token
+  - `/api/user/profile` - Get/update user profile
+  - `/api/devices/register` - Register device for sync
+  - `/api/collaboration/*` - Create/accept collaboration links, sync messages
+  - `/api/admin/*` - Admin dashboard endpoints (login, stats, user management)
+- **Database Tables**: users, devices, collaboration_links, collaboration_messages, admin_users
+- **Security**: JWT tokens (30-day expiry for users, 8-hour for admins), bcrypt password hashing
+
 ## External Dependencies
 
 - **Frontend Framework**: React with TypeScript
@@ -41,9 +56,20 @@ The application features a modern UI inspired by Samsung One UI and Material 3, 
 - **Icons**: `lucide-react`, `react-icons`
 - **Animation**: `framer-motion`
 - **State Management**: React Context
-- **Persistence**: Browser `localStorage`
+- **Persistence**: Browser `localStorage` (primary), PostgreSQL (optional sync)
 - **Biometric Authentication**: WebAuthn API
-- **Backend (Static Serving Only)**: Express.js
+- **Backend**: Express.js with PostgreSQL
+- **ORM**: Drizzle ORM
+- **SMS Provider**: Twilio
 - **Schema Validation**: Zod
 - **Mobile Packaging**: Capacitor (Android)
 - **CI/CD**: GitHub Actions
+
+## Environment Variables/Secrets
+- `DATABASE_URL` - PostgreSQL connection string
+- `TWILIO_ACCOUNT_SID` - Twilio account SID
+- `TWILIO_AUTH_TOKEN` - Twilio auth token  
+- `TWILIO_PHONE_NUMBER` - Twilio phone number for SMS
+- `ADMIN_DEFAULT_EMAIL` - Default super admin email
+- `ADMIN_DEFAULT_PASSWORD` - Default super admin password
+- `JWT_SECRET` - JWT signing secret (optional, has default)

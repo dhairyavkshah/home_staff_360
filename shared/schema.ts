@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { pgTable, varchar, text, boolean, timestamp, integer, sql } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 export const STORAGE_KEYS = {
   SETTINGS: 'hm_settings',
@@ -710,3 +712,180 @@ export const insertDocumentSchema = documentSchema.omit({ id: true, createdAt: t
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 
 export const DOCUMENT_STORAGE_KEY = 'hm_documents';
+
+// ============ SERVER-SIDE DATABASE SCHEMAS (Drizzle ORM) ============
+// These schemas match the existing database structure with varchar IDs
+
+export const userStatuses = ['pending_verification', 'active', 'suspended', 'archived'] as const;
+export type UserStatus = typeof userStatuses[number];
+
+export const serverUsers = pgTable("users", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  phone: varchar("phone", { length: 20 }).notNull(),
+  userType: varchar("user_type", { length: 50 }),
+  displayName: varchar("display_name", { length: 100 }),
+  avatarData: text("avatar_data"),
+  avatarUpdatedAt: timestamp("avatar_updated_at"),
+  planTier: varchar("plan_tier", { length: 50 }),
+  subscriptionStatus: varchar("subscription_status", { length: 50 }),
+  subscriptionExpiryDate: timestamp("subscription_expiry_date"),
+  otpHash: text("otp_hash"),
+  otpExpiresAt: timestamp("otp_expires_at"),
+  isVerified: boolean("is_verified").default(false),
+  preferredLanguage: varchar("preferred_language", { length: 10 }),
+  lastLoginAt: timestamp("last_login_at"),
+  lastActiveAt: timestamp("last_active_at"),
+  deviceInfo: text("device_info"),
+  isActive: boolean("is_active").default(true),
+  connectCount: integer("connect_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const serverUsersRelations = relations(serverUsers, ({ many }) => ({
+  devices: many(devices),
+  collaborationLinksAsHome: many(collaborationLinks, { relationName: "homeUser" }),
+  collaborationLinksAsStaff: many(collaborationLinks, { relationName: "staffUser" }),
+}));
+
+export const insertServerUserSchema = z.object({
+  id: z.string().max(255),
+  phone: z.string().min(10).max(20),
+  userType: z.string().max(50).optional(),
+  displayName: z.string().max(100).optional(),
+  isVerified: z.boolean().optional(),
+  preferredLanguage: z.string().max(10).optional(),
+});
+export type InsertServerUser = z.infer<typeof insertServerUserSchema>;
+export type ServerUser = typeof serverUsers.$inferSelect;
+
+export const devices = pgTable("devices", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: varchar("user_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  deviceId: varchar("device_id", { length: 255 }).notNull(),
+  platform: varchar("platform", { length: 50 }),
+  deviceName: varchar("device_name", { length: 100 }),
+  pushToken: text("push_token"),
+  lastSyncAt: timestamp("last_sync_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const devicesRelations = relations(devices, ({ one }) => ({
+  user: one(serverUsers, {
+    fields: [devices.userId],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertDeviceSchema = z.object({
+  id: z.string().max(255),
+  userId: z.string().max(255),
+  deviceId: z.string().max(255),
+  platform: z.string().max(50).optional(),
+  deviceName: z.string().max(100).optional(),
+  pushToken: z.string().optional(),
+  lastSyncAt: z.date().optional(),
+});
+export type InsertDevice = z.infer<typeof insertDeviceSchema>;
+export type Device = typeof devices.$inferSelect;
+
+export const collaborationStatuses = ['pending', 'active', 'suspended', 'revoked'] as const;
+export type CollaborationStatus = typeof collaborationStatuses[number];
+
+export const collaborationLinks = pgTable("collaboration_links", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  homeUserId: varchar("home_user_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  homeAccountId: varchar("home_account_id", { length: 100 }).notNull(),
+  staffUserId: varchar("staff_user_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  staffAccountId: varchar("staff_account_id", { length: 100 }).notNull(),
+  status: varchar("status", { length: 30 }).default('pending').notNull(),
+  invitationCode: varchar("invitation_code", { length: 50 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"),
+});
+
+export const collaborationLinksRelations = relations(collaborationLinks, ({ one, many }) => ({
+  homeUser: one(serverUsers, {
+    fields: [collaborationLinks.homeUserId],
+    references: [serverUsers.id],
+    relationName: "homeUser",
+  }),
+  staffUser: one(serverUsers, {
+    fields: [collaborationLinks.staffUserId],
+    references: [serverUsers.id],
+    relationName: "staffUser",
+  }),
+  messages: many(collaborationMessages),
+}));
+
+export const insertCollaborationLinkSchema = z.object({
+  id: z.string().max(255),
+  homeUserId: z.string().max(255),
+  homeAccountId: z.string().max(100),
+  staffUserId: z.string().max(255),
+  staffAccountId: z.string().max(100),
+  status: z.enum(collaborationStatuses).optional(),
+  invitationCode: z.string().max(50).optional(),
+  expiresAt: z.date().optional(),
+});
+export type InsertCollaborationLink = z.infer<typeof insertCollaborationLinkSchema>;
+export type CollaborationLink = typeof collaborationLinks.$inferSelect;
+
+export const collaborationMessages = pgTable("collaboration_messages", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  linkId: varchar("link_id", { length: 255 }).references(() => collaborationLinks.id).notNull(),
+  fromDeviceId: varchar("from_device_id", { length: 255 }).references(() => devices.id),
+  messageType: varchar("message_type", { length: 50 }).notNull(),
+  payload: text("payload").notNull(),
+  stateVersion: integer("state_version").default(1).notNull(),
+  isProcessed: boolean("is_processed").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const collaborationMessagesRelations = relations(collaborationMessages, ({ one }) => ({
+  link: one(collaborationLinks, {
+    fields: [collaborationMessages.linkId],
+    references: [collaborationLinks.id],
+  }),
+  fromDevice: one(devices, {
+    fields: [collaborationMessages.fromDeviceId],
+    references: [devices.id],
+  }),
+}));
+
+export const insertCollaborationMessageSchema = z.object({
+  id: z.string().max(255),
+  linkId: z.string().max(255),
+  fromDeviceId: z.string().max(255).optional(),
+  messageType: z.string().max(50),
+  payload: z.string(),
+  stateVersion: z.number().optional(),
+  isProcessed: z.boolean().optional(),
+});
+export type InsertCollaborationMessage = z.infer<typeof insertCollaborationMessageSchema>;
+export type CollaborationMessage = typeof collaborationMessages.$inferSelect;
+
+export const adminRoles = ['super_admin', 'admin', 'support'] as const;
+export type AdminRole = typeof adminRoles[number];
+
+export const adminUsers = pgTable("admin_users", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  email: varchar("email", { length: 255 }).unique().notNull(),
+  passwordHash: text("password_hash").notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  role: varchar("role", { length: 30 }).default('admin'),
+  isActive: boolean("is_active").default(true),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAdminUserSchema = z.object({
+  id: z.string().max(255),
+  email: z.string().email().max(255),
+  passwordHash: z.string(),
+  name: z.string().max(100),
+  role: z.enum(adminRoles).optional(),
+  isActive: z.boolean().optional(),
+});
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
+export type AdminUser = typeof adminUsers.$inferSelect;
