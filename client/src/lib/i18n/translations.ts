@@ -208,9 +208,7 @@ const en = {
   
   // App
   app: "App",
-  exitApp: "Exit App",
   closeApplication: "Close the application",
-  exitAppDescription: "To close the app, please use your device's home button or app switcher.",
   
   // Laundry
   laundry: "Laundry",
@@ -874,6 +872,16 @@ const en = {
   finishTour: "Finish",
   tourCompleted: "Tour Completed",
   replayTour: "Replay Tour",
+  
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "Unsaved Changes",
+  unsavedChangesDescription: "You have unsaved changes. Do you want to discard them?",
+  discardChanges: "Discard Changes",
+  continueEditing: "Continue Editing",
+  exitAppTitle: "Exit App",
+  exitAppDescription: "Are you sure you want to exit the app?",
+  exitApp: "Exit",
+  stayInApp: "Stay",
 };
 
 const hi: Partial<typeof en> = {
@@ -1080,9 +1088,7 @@ const hi: Partial<typeof en> = {
   
   // App
   app: "ऐप",
-  exitApp: "ऐप बंद करें",
   closeApplication: "एप्लिकेशन बंद करें",
-  exitAppDescription: "ऐप बंद करने के लिए अपने डिवाइस के होम बटन या ऐप स्विचर का उपयोग करें।",
   
   // Laundry
   laundry: "लॉन्ड्री",
@@ -1720,6 +1726,16 @@ const hi: Partial<typeof en> = {
   finishTour: "समाप्त करें",
   tourCompleted: "टूर पूर्ण",
   replayTour: "टूर दोहराएं",
+  
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "सहेजे नहीं गए परिवर्तन",
+  unsavedChangesDescription: "आपके पास सहेजे नहीं गए परिवर्तन हैं। क्या आप उन्हें त्यागना चाहते हैं?",
+  discardChanges: "परिवर्तन त्यागें",
+  continueEditing: "संपादन जारी रखें",
+  exitAppTitle: "ऐप बंद करें",
+  exitAppDescription: "क्या आप वाकई ऐप बंद करना चाहते हैं?",
+  exitApp: "बंद करें",
+  stayInApp: "रहें",
 };
 
 const gu: Partial<typeof en> = {
@@ -1892,9 +1908,7 @@ const gu: Partial<typeof en> = {
   deleteEverything: "બધું કાઢી નાખો અને નવેસરથી શરૂ કરો",
   deleteEverythingStartFresh: "બધું કાઢી નાખો અને નવેસરથી શરૂ કરો",
   app: "એપ",
-  exitApp: "એપ બંધ કરો",
   closeApplication: "એપ્લિકેશન બંધ કરો",
-  exitAppDescription: "એપ બંધ કરવા માટે તમારા ઉપકરણના હોમ બટન અથવા એપ સ્વિચરનો ઉપયોગ કરો.",
   laundry: "લોન્ડ્રી",
   addLaundry: "લોન્ડ્રી ઉમેરો",
   provider: "પ્રદાતા",
@@ -2189,6 +2203,16 @@ const gu: Partial<typeof en> = {
   biometricEnabledDesc: "હવે તમે તમારી ફિંગરપ્રિન્ટ અથવા ચહેરા સાથે અનલૉક કરી શકો છો.",
   biometricDataPrivacy: "તમારો બાયોમેટ્રિક ડેટા ક્યારેય તમારા ડિવાઇસમાંથી બહાર જતો નથી. અમને ફક્ત સફળતા/નિષ્ફળતા પ્રતિસાદ મળે છે.",
   biometricAuthFailed: "બાયોમેટ્રિક પ્રમાણીકરણ નિષ્ફળ",
+
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "સાચવેલા નથી ફેરફારો",
+  unsavedChangesDescription: "તમારી પાસે સાચવેલા નથી ફેરફારો છે. શું તમે તેમને કાઢી નાખવા માંગો છો?",
+  discardChanges: "ફેરફારો કાઢી નાખો",
+  continueEditing: "સંપાદન ચાલુ રાખો",
+  exitAppTitle: "એપમાંથી બહાર નીકળો",
+  exitAppDescription: "શું તમે ખરેખર એપમાંથી બહાર નીકળવા માંગો છો?",
+  exitApp: "બહાર નીકળો",
+  stayInApp: "રહો",
 };
 
 const kn: Partial<typeof en> = {
@@ -2361,9 +2385,7 @@ const kn: Partial<typeof en> = {
   deleteEverything: "ಎಲ್ಲವನ್ನೂ ಅಳಿಸಿ ಮತ್ತು ಹೊಸದಾಗಿ ಪ್ರಾರಂಭಿಸಿ",
   deleteEverythingStartFresh: "ಎಲ್ಲವನ್ನೂ ಅಳಿಸಿ ಮತ್ತು ಹೊಸದಾಗಿ ಪ್ರಾರಂಭಿಸಿ",
   app: "ಆ್ಯಪ್",
-  exitApp: "ಆ್ಯಪ್ ಮುಚ್ಚಿ",
   closeApplication: "ಅಪ್ಲಿಕೇಶನ್ ಮುಚ್ಚಿ",
-  exitAppDescription: "ಆ್ಯಪ್ ಮುಚ್ಚಲು ನಿಮ್ಮ ಸಾಧನದ ಹೋಮ್ ಬಟನ್ ಅಥವಾ ಆ್ಯಪ್ ಸ್ವಿಚರ್ ಬಳಸಿ.",
   laundry: "ಲಾಂಡ್ರಿ",
   addLaundry: "ಲಾಂಡ್ರಿ ಸೇರಿಸಿ",
   provider: "ಒದಗಿಸುವವರು",
@@ -2658,6 +2680,16 @@ const kn: Partial<typeof en> = {
   biometricEnabledDesc: "ಈಗ ನೀವು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅಥವಾ ಮುಖದೊಂದಿಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಬಹುದು.",
   biometricDataPrivacy: "ನಿಮ್ಮ ಬಯೋಮೆಟ್ರಿಕ್ ಡೇಟಾ ಎಂದಿಗೂ ನಿಮ್ಮ ಸಾಧನವನ್ನು ಬಿಟ್ಟು ಹೋಗುವುದಿಲ್ಲ. ನಾವು ಕೇವಲ ಯಶಸ್ಸು/ವೈಫಲ್ಯ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಪಡೆಯುತ್ತೇವೆ.",
   biometricAuthFailed: "ಬಯೋಮೆಟ್ರಿಕ್ ದೃಢೀಕರಣ ವಿಫಲವಾಗಿದೆ",
+
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "ಉಳಿಸದ ಬದಲಾವಣೆಗಳು",
+  unsavedChangesDescription: "ನೀವು ಉಳಿಸದ ಬದಲಾವಣೆಗಳನ್ನು ಹೊಂದಿದ್ದೀರಿ. ಅವುಗಳನ್ನು ತಳ್ಳಿಹಾಕಲು ಬಯಸುವಿರಾ?",
+  discardChanges: "ಬದಲಾವಣೆಗಳನ್ನು ತಳ್ಳಿಹಾಕಿ",
+  continueEditing: "ಸಂಪಾದನೆ ಮುಂದುವರಿಸಿ",
+  exitAppTitle: "ಆ್ಯಪ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ",
+  exitAppDescription: "ನೀವು ಖಚಿತವಾಗಿ ಆ್ಯಪ್‌ನಿಂದ ನಿರ್ಗಮಿಸಲು ಬಯಸುವಿರಾ?",
+  exitApp: "ನಿರ್ಗಮಿಸಿ",
+  stayInApp: "ಇರಿ",
 };
 
 const ml: Partial<typeof en> = {
@@ -2830,9 +2862,7 @@ const ml: Partial<typeof en> = {
   deleteEverything: "എല്ലാം ഇല്ലാതാക്കി പുതുതായി ആരംഭിക്കുക",
   deleteEverythingStartFresh: "എല്ലാം ഇല്ലാതാക്കി പുതുതായി ആരംഭിക്കുക",
   app: "ആപ്പ്",
-  exitApp: "ആപ്പ് അടയ്ക്കുക",
   closeApplication: "ആപ്ലിക്കേഷൻ അടയ്ക്കുക",
-  exitAppDescription: "ആപ്പ് അടയ്ക്കാൻ നിങ്ങളുടെ ഉപകരണത്തിന്റെ ഹോം ബട്ടൺ അല്ലെങ്കിൽ ആപ്പ് സ്വിച്ചർ ഉപയോഗിക്കുക.",
   laundry: "ലോൺഡ്രി",
   addLaundry: "ലോൺഡ്രി ചേർക്കുക",
   provider: "പ്രൊവൈഡർ",
@@ -3127,6 +3157,16 @@ const ml: Partial<typeof en> = {
   biometricEnabledDesc: "ഇപ്പോൾ നിങ്ങൾക്ക് നിങ്ങളുടെ ഫിംഗർപ്രിന്റോ മുഖമോ ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്യാം.",
   biometricDataPrivacy: "നിങ്ങളുടെ ബയോമെട്രിക് ഡാറ്റ ഒരിക്കലും നിങ്ങളുടെ ഉപകരണം വിടില്ല. ഞങ്ങൾക്ക് വിജയം/പരാജയം പ്രതികരണം മാത്രമേ ലഭിക്കൂ.",
   biometricAuthFailed: "ബയോമെട്രിക് ആധികാരികത പരാജയപ്പെട്ടു",
+
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "സേവ് ചെയ്യാത്ത മാറ്റങ്ങൾ",
+  unsavedChangesDescription: "നിങ്ങൾക്ക് സേവ് ചെയ്യാത്ത മാറ്റങ്ങളുണ്ട്. അവ ഉപേക്ഷിക്കണോ?",
+  discardChanges: "മാറ്റങ്ങൾ ഉപേക്ഷിക്കുക",
+  continueEditing: "എഡിറ്റിംഗ് തുടരുക",
+  exitAppTitle: "ആപ്പിൽ നിന്ന് പുറത്തുകടക്കുക",
+  exitAppDescription: "നിങ്ങൾ തീർച്ചയായും ആപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?",
+  exitApp: "പുറത്തുകടക്കുക",
+  stayInApp: "തുടരുക",
 };
 
 // Complete Spanish translations
@@ -3336,9 +3376,7 @@ const es: Partial<typeof en> = {
   
   // App
   app: "Aplicación",
-  exitApp: "Salir de la App",
   closeApplication: "Cerrar la aplicación",
-  exitAppDescription: "Para cerrar la app, use el botón de inicio o el selector de apps de su dispositivo.",
   
   // Laundry
   laundry: "Lavandería",
@@ -3817,6 +3855,16 @@ const es: Partial<typeof en> = {
   biometricEnabledDesc: "Ahora puedes desbloquear con tu huella digital o rostro.",
   biometricDataPrivacy: "Tus datos biométricos nunca salen de tu dispositivo. Solo recibimos respuesta de éxito/fallo.",
   biometricAuthFailed: "Autenticación biométrica falló",
+
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "Cambios sin guardar",
+  unsavedChangesDescription: "Tienes cambios sin guardar. ¿Quieres descartarlos?",
+  discardChanges: "Descartar cambios",
+  continueEditing: "Continuar editando",
+  exitAppTitle: "Salir de la aplicación",
+  exitAppDescription: "¿Estás seguro de que quieres salir de la aplicación?",
+  exitApp: "Salir",
+  stayInApp: "Quedarse",
 };
 const fr: Partial<typeof en> = {
   save: "Enregistrer", cancel: "Annuler", delete: "Supprimer", edit: "Modifier", view: "Voir", add: "Ajouter", back: "Retour", confirm: "Confirmer", loading: "Chargement...", error: "Erreur", success: "Succès", required: "Obligatoire", optional: "Optionnel", comingSoon: "Bientôt disponible",
@@ -3836,7 +3884,7 @@ const fr: Partial<typeof en> = {
   help: "Aide", seeGuidedTour: "Voir la visite guidée", learnHowToUseApp: "Apprenez à utiliser l'application efficacement",
   defaultCurrencyForStaff: "Devise par défaut pour les nouveaux membres du personnel. Chaque membre peut avoir sa propre devise.", defaultCurrencyForClients: "Devise par défaut pour les nouveaux clients. Chaque client peut avoir sa propre devise.",
   dataManagement: "Gestion des données", backupRestore: "Sauvegarde et restauration", backupAndRestore: "Sauvegarde et restauration", exportImportData: "Exporter ou importer vos données", clearAllData: "Effacer toutes les données", deleteEverything: "Tout supprimer et recommencer", deleteEverythingStartFresh: "Tout supprimer et recommencer",
-  app: "Application", exitApp: "Quitter l'application", closeApplication: "Fermer l'application", exitAppDescription: "Pour fermer l'application, veuillez utiliser le bouton d'accueil ou le gestionnaire d'applications de votre appareil.",
+  app: "Application", closeApplication: "Fermer l'application",
   laundry: "Blanchisserie", addLaundry: "Ajouter blanchisserie", provider: "Fournisseur", itemType: "Type d'article", quantity: "Quantité", rate: "Tarif", details: "Détails", totalAmount: "Montant total",
   welcomeToHomeStaff: "Bienvenue sur Home Staff 360", getStarted: "Commencer", selectYourRole: "Sélectionnez votre mode par défaut", chooseHowYouWillUse: "Choisissez comment vous utiliserez principalement l'application.", homeUserDescription: "Pour les utilisateurs qui gèrent le personnel domestique et les affaires du foyer", staffProfessionalDescription: "Pour les professionnels qui gèrent leur travail", homeFeature1: "Suivre la présence et les paiements du personnel", homeFeature2: "Gérer les factures et dépenses du foyer", homeFeature3: "Enregistrer les lots de blanchisserie avec les prix", homeFeature4: "Générer des rapports et exporter des données", staffFeature1: "Enregistrer la présence chez plusieurs clients", staffFeature2: "Suivre les revenus et dépenses personnelles", staffFeature3: "Gérer les travaux de blanchisserie et factures", staffFeature4: "Générer des rapports d'activité", continueAsHome: "Continuer en tant qu'utilisateur domestique", continueAsStaff: "Continuer en tant que personnel", canSwitchModes: "Vous pouvez basculer entre les modes et changer le mode par défaut dans les Paramètres.", hundredPercentPrivate: "100% Privé", privacyDescription: "Toutes vos données restent sur votre appareil. Pas de cloud, pas de comptes, confidentialité totale.", yourName: "Votre nom", firstName: "Prénom", createFirstHome: "Créer votre premier foyer", createFirstBusiness: "Créer votre première entreprise", homeName: "Nom du foyer", businessName: "Nom de l'entreprise", enableAppLock: "Activer le verrouillage", protectWithPin: "Protégez vos données avec un PIN à 4 chiffres", continue: "Continuer",
   subscriptionPlan: "Plan d'abonnement", appMode: "Mode de l'application", homeUserMode: "Mode utilisateur domestique", staffUserMode: "Mode personnel", staffVendorUserMode: "Mode personnel", manageYourHouseholdStaff: "Gérer votre personnel domestique", trackYourOwnWork: "Suivre votre propre travail et revenus", switchedToHomeMode: "Passé en mode utilisateur domestique", switchedToStaffMode: "Passé en mode personnel",
@@ -3945,6 +3993,15 @@ const fr: Partial<typeof en> = {
   tour: "Visite guidée", startTour: "Commencer la visite", skipTour: "Passer la visite", nextStep: "Suivant", previousStep: "Précédent", finishTour: "Terminer", tourCompleted: "Visite terminée", replayTour: "Rejouer la visite",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "Recommandé", googlePay: "Google Pay", payDirectlyWithGooglePay: "Payer directement avec Google Pay", paypal: "PayPal", paySecurelyWithPayPal: "Payer en toute sécurité avec PayPal", donate: "Faire un don", selectAnAmount: "Sélectionner un montant", whatYourSupportDoes: "Ce que fait votre soutien", helpsMaintainApp: "Aide à maintenir et améliorer l'application", supportsDevelopment: "Soutient le développement de nouvelles fonctionnalités", keepsAppAdFree: "Maintient l'application sans publicité et axée sur la confidentialité", enablesFasterBugFixes: "Permet des corrections de bugs et mises à jour plus rapides", donationsVoluntary: "Tous les dons sont volontaires. L'application est gratuite pour toujours, indépendamment des dons. Merci pour votre soutien !", country: "Pays", version: "Version", craftedBy: "Créé par Dhairya Shah (The Team 360)", thankYouForUsing: "Merci d'utiliser notre application", seeYouSoon: "À bientôt !", appTagline: "Offline-First Home & Staff Manager",
   searchClientHomes: "Rechercher des foyers clients...", business: "Entreprise", selectBusiness: "Sélectionner une entreprise",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "Modifications non enregistrées",
+  unsavedChangesDescription: "Vous avez des modifications non enregistrées. Voulez-vous les abandonner ?",
+  discardChanges: "Abandonner les modifications",
+  continueEditing: "Continuer l'édition",
+  exitAppTitle: "Quitter l'application",
+  exitAppDescription: "Êtes-vous sûr de vouloir quitter l'application ?",
+  exitApp: "Quitter",
+  stayInApp: "Rester",
 };
 const de: Partial<typeof en> = {
   save: "Speichern", cancel: "Abbrechen", delete: "Löschen", edit: "Bearbeiten", view: "Ansehen", add: "Hinzufügen", back: "Zurück", confirm: "Bestätigen", loading: "Wird geladen...", error: "Fehler", success: "Erfolg", required: "Erforderlich", optional: "Optional", comingSoon: "Demnächst verfügbar",
@@ -3964,7 +4021,7 @@ const de: Partial<typeof en> = {
   help: "Hilfe", seeGuidedTour: "Geführte Tour ansehen", learnHowToUseApp: "Lernen Sie die App effektiv zu nutzen",
   defaultCurrencyForStaff: "Standardwährung für neue Mitarbeiter. Jeder Mitarbeiter kann seine eigene Währung haben.", defaultCurrencyForClients: "Standardwährung für neue Kunden. Jeder Kunde kann seine eigene Währung haben.",
   dataManagement: "Datenverwaltung", backupRestore: "Sicherung und Wiederherstellung", backupAndRestore: "Sicherung und Wiederherstellung", exportImportData: "Daten exportieren oder importieren", clearAllData: "Alle Daten löschen", deleteEverything: "Alles löschen und neu beginnen", deleteEverythingStartFresh: "Alles löschen und neu beginnen",
-  app: "App", exitApp: "App beenden", closeApplication: "Anwendung schließen", exitAppDescription: "Um die App zu schließen, verwenden Sie bitte die Home-Taste oder den App-Umschalter Ihres Geräts.",
+  app: "App", closeApplication: "Anwendung schließen",
   laundry: "Wäsche", addLaundry: "Wäsche hinzufügen", provider: "Anbieter", itemType: "Artikeltyp", quantity: "Menge", rate: "Tarif", details: "Details", totalAmount: "Gesamtbetrag",
   welcomeToHomeStaff: "Willkommen bei Home Staff 360", getStarted: "Los geht's", selectYourRole: "Wählen Sie Ihren Standardmodus", chooseHowYouWillUse: "Wählen Sie, wie Sie die App hauptsächlich nutzen werden.", homeUserDescription: "Für Benutzer, die Haushaltspersonal und Haushaltsangelegenheiten verwalten", staffProfessionalDescription: "Für Serviceprofis, die ihre Arbeit verwalten", homeFeature1: "Anwesenheit und Gehaltszahlungen des Personals verfolgen", homeFeature2: "Haushaltsrechnungen und Ausgaben verwalten", homeFeature3: "Wäschepartien mit Preisen erfassen", homeFeature4: "Berichte erstellen und Daten exportieren", staffFeature1: "Anwesenheit bei mehreren Kunden protokollieren", staffFeature2: "Einnahmen und persönliche Ausgaben verfolgen", staffFeature3: "Wäscheaufträge und Rechnungen verwalten", staffFeature4: "Geschäftsberichte erstellen", continueAsHome: "Als Heimbenutzer fortfahren", continueAsStaff: "Als Personalbenutzer fortfahren", canSwitchModes: "Sie können zwischen den Modi wechseln und den Standardmodus in den Einstellungen einfach ändern.", hundredPercentPrivate: "100% Privat", privacyDescription: "Alle Ihre Daten bleiben auf Ihrem Gerät. Keine Cloud, keine Konten, vollständige Privatsphäre.", yourName: "Ihr Name", firstName: "Vorname", createFirstHome: "Erstellen Sie Ihren ersten Haushalt", createFirstBusiness: "Erstellen Sie Ihr erstes Unternehmen", homeName: "Haushaltsname", businessName: "Unternehmensname", enableAppLock: "App-Sperre aktivieren", protectWithPin: "Schützen Sie Ihre Daten mit einer 4-stelligen PIN", continue: "Weiter",
   subscriptionPlan: "Abonnementplan", appMode: "App-Modus", homeUserMode: "Heimbenutzer-Modus", staffUserMode: "Personal-Modus", staffVendorUserMode: "Personal-Modus", manageYourHouseholdStaff: "Ihr Haushaltspersonal verwalten", trackYourOwnWork: "Ihre eigene Arbeit und Einnahmen verfolgen", switchedToHomeMode: "Zu Heimbenutzer-Modus gewechselt", switchedToStaffMode: "Zu Personal-Modus gewechselt",
@@ -4073,6 +4130,15 @@ const de: Partial<typeof en> = {
   tour: "Tour", startTour: "Tour starten", skipTour: "Tour überspringen", nextStep: "Weiter", previousStep: "Zurück", finishTour: "Fertig", tourCompleted: "Tour abgeschlossen", replayTour: "Tour wiederholen",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "Empfohlen", googlePay: "Google Pay", payDirectlyWithGooglePay: "Direkt mit Google Pay bezahlen", paypal: "PayPal", paySecurelyWithPayPal: "Sicher mit PayPal bezahlen", donate: "Spenden", selectAnAmount: "Betrag auswählen", whatYourSupportDoes: "Was Ihre Unterstützung bewirkt", helpsMaintainApp: "Hilft bei der Wartung und Verbesserung der App", supportsDevelopment: "Unterstützt die Entwicklung neuer Funktionen", keepsAppAdFree: "Hält die App werbefrei und datenschutzorientiert", enablesFasterBugFixes: "Ermöglicht schnellere Fehlerbehebungen und Updates", donationsVoluntary: "Alle Spenden sind freiwillig. Die App ist für immer kostenlos, unabhängig von Spenden. Danke für Ihre Unterstützung!", country: "Land", version: "Version", craftedBy: "Erstellt von Dhairya Shah (The Team 360)", thankYouForUsing: "Danke, dass Sie unsere App nutzen", seeYouSoon: "Bis bald!", appTagline: "Offline-First Home & Staff Manager",
   searchClientHomes: "Kundenhaushalte suchen...", business: "Unternehmen", selectBusiness: "Unternehmen auswählen",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "Nicht gespeicherte Änderungen",
+  unsavedChangesDescription: "Sie haben nicht gespeicherte Änderungen. Möchten Sie diese verwerfen?",
+  discardChanges: "Änderungen verwerfen",
+  continueEditing: "Weiter bearbeiten",
+  exitAppTitle: "App beenden",
+  exitAppDescription: "Sind Sie sicher, dass Sie die App beenden möchten?",
+  exitApp: "Beenden",
+  stayInApp: "Bleiben",
 };
 const ar: Partial<typeof en> = {
   save: "حفظ", cancel: "إلغاء", delete: "حذف", edit: "تعديل", view: "عرض", add: "إضافة", back: "رجوع", confirm: "تأكيد", loading: "جاري التحميل...", error: "خطأ", success: "نجاح", required: "مطلوب", optional: "اختياري", comingSoon: "قريباً",
@@ -4092,7 +4158,7 @@ const ar: Partial<typeof en> = {
   help: "المساعدة", seeGuidedTour: "مشاهدة الجولة الإرشادية", learnHowToUseApp: "تعلم كيفية استخدام التطبيق بفعالية",
   defaultCurrencyForStaff: "العملة الافتراضية للموظفين الجدد. يمكن لكل موظف أن يكون لديه عملته الخاصة.", defaultCurrencyForClients: "العملة الافتراضية للعملاء الجدد. يمكن لكل عميل أن يكون لديه عملته الخاصة.",
   dataManagement: "إدارة البيانات", backupRestore: "النسخ الاحتياطي والاستعادة", backupAndRestore: "النسخ الاحتياطي والاستعادة", exportImportData: "تصدير أو استيراد بياناتك", clearAllData: "مسح جميع البيانات", deleteEverything: "حذف كل شيء والبدء من جديد", deleteEverythingStartFresh: "حذف كل شيء والبدء من جديد",
-  app: "التطبيق", exitApp: "الخروج من التطبيق", closeApplication: "إغلاق التطبيق", exitAppDescription: "لإغلاق التطبيق، استخدم زر الرئيسية أو مبدل التطبيقات في جهازك.",
+  app: "التطبيق", closeApplication: "إغلاق التطبيق",
   laundry: "الغسيل", addLaundry: "إضافة غسيل", provider: "مزود الخدمة", itemType: "نوع العنصر", quantity: "الكمية", rate: "السعر", details: "التفاصيل", totalAmount: "المبلغ الإجمالي",
   welcomeToHomeStaff: "مرحباً بك في Home Staff 360", getStarted: "ابدأ الآن", selectYourRole: "اختر وضعك الافتراضي", chooseHowYouWillUse: "اختر كيف ستستخدم التطبيق بشكل أساسي.", homeUserDescription: "للمستخدمين الذين يديرون العمالة المنزلية وشؤون المنزل", staffProfessionalDescription: "لمحترفي الخدمة الذين يديرون عملهم", homeFeature1: "تتبع حضور الموظفين ومدفوعات الرواتب", homeFeature2: "إدارة فواتير ونفقات المنزل", homeFeature3: "تسجيل دفعات الغسيل مع الأسعار", homeFeature4: "إنشاء التقارير وتصدير البيانات", staffFeature1: "تسجيل الحضور في منازل عملاء متعددة", staffFeature2: "تتبع الأرباح والنفقات الشخصية", staffFeature3: "إدارة أعمال الغسيل والفواتير", staffFeature4: "إنشاء تقارير الأعمال", continueAsHome: "المتابعة كمستخدم منزلي", continueAsStaff: "المتابعة كمستخدم موظف", canSwitchModes: "يمكنك التبديل بين الأوضاع وتغيير الوضع الافتراضي من الإعدادات بسهولة.", hundredPercentPrivate: "100% خاص", privacyDescription: "جميع بياناتك تبقى على جهازك. لا سحابة، لا حسابات، خصوصية تامة.", yourName: "اسمك", firstName: "الاسم الأول", createFirstHome: "إنشاء أول منزل لك", createFirstBusiness: "إنشاء أول عمل لك", homeName: "اسم المنزل", businessName: "اسم العمل", enableAppLock: "تفعيل قفل التطبيق", protectWithPin: "احمِ بياناتك برمز PIN من 4 أرقام", continue: "متابعة",
   subscriptionPlan: "خطة الاشتراك", appMode: "وضع التطبيق", homeUserMode: "وضع المستخدم المنزلي", staffUserMode: "وضع الموظف", staffVendorUserMode: "وضع الموظف", manageYourHouseholdStaff: "إدارة موظفي منزلك", trackYourOwnWork: "تتبع عملك ودخلك", switchedToHomeMode: "تم التبديل إلى وضع المستخدم المنزلي", switchedToStaffMode: "تم التبديل إلى وضع الموظف",
@@ -4201,6 +4267,15 @@ const ar: Partial<typeof en> = {
   tour: "جولة", startTour: "بدء الجولة", skipTour: "تخطي الجولة", nextStep: "التالي", previousStep: "السابق", finishTour: "إنهاء", tourCompleted: "اكتملت الجولة", replayTour: "إعادة الجولة",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "موصى به", googlePay: "Google Pay", payDirectlyWithGooglePay: "ادفع مباشرة باستخدام Google Pay", paypal: "PayPal", paySecurelyWithPayPal: "ادفع بأمان باستخدام PayPal", donate: "تبرع", selectAnAmount: "اختر مبلغاً", whatYourSupportDoes: "ماذا يفعل دعمك", helpsMaintainApp: "يساعد في صيانة وتحسين التطبيق", supportsDevelopment: "يدعم تطوير ميزات جديدة", keepsAppAdFree: "يحافظ على التطبيق خالياً من الإعلانات ومركّزاً على الخصوصية", enablesFasterBugFixes: "يتيح إصلاحات أسرع للأخطاء والتحديثات", donationsVoluntary: "جميع التبرعات طوعية. التطبيق مجاني للأبد بغض النظر عن التبرعات. شكراً لدعمكم!", country: "البلد", version: "الإصدار", craftedBy: "صُنع بواسطة Dhairya Shah (The Team 360)", thankYouForUsing: "شكراً لاستخدام تطبيقنا", seeYouSoon: "نراكم قريباً!", appTagline: "Offline-First Home & Staff Manager",
   searchClientHomes: "البحث في منازل العملاء...", business: "عمل", selectBusiness: "اختر العمل",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "تغييرات غير محفوظة",
+  unsavedChangesDescription: "لديك تغييرات غير محفوظة. هل تريد تجاهلها؟",
+  discardChanges: "تجاهل التغييرات",
+  continueEditing: "متابعة التحرير",
+  exitAppTitle: "الخروج من التطبيق",
+  exitAppDescription: "هل أنت متأكد من أنك تريد الخروج من التطبيق؟",
+  exitApp: "خروج",
+  stayInApp: "البقاء",
 };
 const zh: Partial<typeof en> = {
   save: "保存", cancel: "取消", delete: "删除", edit: "编辑", view: "查看", add: "添加", back: "返回", confirm: "确认", loading: "加载中...", error: "错误", success: "成功", required: "必填", optional: "可选", comingSoon: "即将推出",
@@ -4220,7 +4295,7 @@ const zh: Partial<typeof en> = {
   help: "帮助", seeGuidedTour: "查看引导教程", learnHowToUseApp: "学习如何有效使用应用",
   defaultCurrencyForStaff: "新员工的默认货币。每位员工可以有自己的货币。", defaultCurrencyForClients: "新客户的默认货币。每位客户可以有自己的货币。",
   dataManagement: "数据管理", backupRestore: "备份和恢复", backupAndRestore: "备份和恢复", exportImportData: "导出或导入您的数据", clearAllData: "清除所有数据", deleteEverything: "删除所有内容并重新开始", deleteEverythingStartFresh: "删除所有内容并重新开始",
-  app: "应用", exitApp: "退出应用", closeApplication: "关闭应用", exitAppDescription: "要关闭应用，请使用设备的主页按钮或应用切换器。",
+  app: "应用", closeApplication: "关闭应用",
   laundry: "洗衣", addLaundry: "添加洗衣", provider: "服务提供商", itemType: "物品类型", quantity: "数量", rate: "费率", details: "详情", totalAmount: "总金额",
   welcomeToHomeStaff: "欢迎使用 Home Staff 360", getStarted: "开始使用", selectYourRole: "选择您的默认模式", chooseHowYouWillUse: "选择您主要使用应用的方式。", homeUserDescription: "适用于管理家庭员工和家庭事务的用户", staffProfessionalDescription: "适用于管理工作的服务专业人员", homeFeature1: "跟踪员工出勤和工资支付", homeFeature2: "管理家庭账单和支出", homeFeature3: "记录带价格的洗衣批次", homeFeature4: "生成报告并导出数据", staffFeature1: "在多个客户家庭记录出勤", staffFeature2: "跟踪收入和个人支出", staffFeature3: "管理洗衣工作和发票", staffFeature4: "生成业务报告", continueAsHome: "以家庭用户身份继续", continueAsStaff: "以员工用户身份继续", canSwitchModes: "您可以在模式之间切换，并从设置中轻松更改默认模式。", hundredPercentPrivate: "100% 私密", privacyDescription: "您的所有数据都保留在您的设备上。没有云，没有账户，完全隐私。", yourName: "您的姓名", firstName: "名字", createFirstHome: "创建您的第一个家庭", createFirstBusiness: "创建您的第一个企业", homeName: "家庭名称", businessName: "企业名称", enableAppLock: "启用应用锁", protectWithPin: "使用4位PIN保护您的数据", continue: "继续",
   subscriptionPlan: "订阅计划", appMode: "应用模式", homeUserMode: "家庭用户模式", staffUserMode: "员工模式", staffVendorUserMode: "员工模式", manageYourHouseholdStaff: "管理您的家政人员", trackYourOwnWork: "追踪您的工作和收入", switchedToHomeMode: "已切换到家庭用户模式", switchedToStaffMode: "已切换到员工模式",
@@ -4328,6 +4403,15 @@ const zh: Partial<typeof en> = {
   reportTemplate: "报告模板", salaryReport: "薪资报告", salaryReportDesc: "员工薪资摘要和付款历史", expenseReport: "支出报告", expenseReportDesc: "家庭支出摘要", laundryReport: "洗衣报告", laundryReportDesc: "洗衣服务记录和费用", summary: "摘要", detailed: "详细", byCategory: "按类别", byStaff: "按员工", byClient: "按客户", generatePdf: "生成PDF", downloadCsv: "下载CSV", shareReport: "分享报告",
   tour: "导览", startTour: "开始导览", skipTour: "跳过导览", nextStep: "下一步", previousStep: "上一步", finishTour: "完成", tourCompleted: "导览完成", replayTour: "重新导览",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "推荐", googlePay: "Google Pay", payDirectlyWithGooglePay: "使用 Google Pay 直接付款", paypal: "PayPal", paySecurelyWithPayPal: "使用 PayPal 安全付款", donate: "捐赠", selectAnAmount: "选择金额", whatYourSupportDoes: "您的支持能做什么", helpsMaintainApp: "帮助维护和改进应用", supportsDevelopment: "支持新功能的开发", keepsAppAdFree: "保持应用无广告且注重隐私", enablesFasterBugFixes: "实现更快的错误修复和更新", donationsVoluntary: "所有捐赠都是自愿的。无论是否捐赠，应用永久免费。感谢您的支持！", country: "国家", version: "版本", craftedBy: "由 Dhairya Shah (The Team 360) 精心打造", thankYouForUsing: "感谢您使用我们的应用", seeYouSoon: "再见！", appTagline: "Offline-First Home & Staff Manager",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "未保存的更改",
+  unsavedChangesDescription: "您有未保存的更改。是否要放弃它们？",
+  discardChanges: "放弃更改",
+  continueEditing: "继续编辑",
+  exitAppTitle: "退出应用",
+  exitAppDescription: "您确定要退出应用吗？",
+  exitApp: "退出",
+  stayInApp: "留下",
 };
 const ja: Partial<typeof en> = {
   save: "保存", cancel: "キャンセル", delete: "削除", edit: "編集", view: "表示", add: "追加", back: "戻る", confirm: "確認", loading: "読み込み中...", error: "エラー", success: "成功", required: "必須", optional: "任意", comingSoon: "近日公開",
@@ -4347,7 +4431,7 @@ const ja: Partial<typeof en> = {
   help: "ヘルプ", seeGuidedTour: "ガイドツアーを見る", learnHowToUseApp: "アプリを効果的に使用する方法を学ぶ",
   defaultCurrencyForStaff: "新しいスタッフの既定通貨。各スタッフは独自の通貨を持つことができます。", defaultCurrencyForClients: "新しいクライアントの既定通貨。各クライアントは独自の通貨を持つことができます。",
   dataManagement: "データ管理", backupRestore: "バックアップと復元", backupAndRestore: "バックアップと復元", exportImportData: "データをエクスポートまたはインポート", clearAllData: "すべてのデータを消去", deleteEverything: "すべて削除してやり直す", deleteEverythingStartFresh: "すべて削除してやり直す",
-  app: "アプリ", exitApp: "アプリを終了", closeApplication: "アプリケーションを閉じる", exitAppDescription: "アプリを閉じるには、デバイスのホームボタンまたはアプリスイッチャーを使用してください。",
+  app: "アプリ", closeApplication: "アプリケーションを閉じる",
   laundry: "洗濯", addLaundry: "洗濯を追加", provider: "提供者", itemType: "アイテムタイプ", quantity: "数量", rate: "料金", details: "詳細", totalAmount: "合計金額",
   welcomeToHomeStaff: "Home Staff 360へようこそ", getStarted: "始める", selectYourRole: "デフォルトモードを選択", chooseHowYouWillUse: "主にアプリをどのように使用するかを選択してください。", homeUserDescription: "家庭のスタッフと家庭の事務を管理するユーザー向け", staffProfessionalDescription: "仕事を管理するサービス専門家向け", homeFeature1: "スタッフの出勤と給与支払いを追跡", homeFeature2: "家庭の請求書と経費を管理", homeFeature3: "価格付きの洗濯バッチを記録", homeFeature4: "レポートを生成してデータをエクスポート", staffFeature1: "複数のクライアント宅で出勤を記録", staffFeature2: "収入と個人的な経費を追跡", staffFeature3: "洗濯の仕事と請求書を管理", staffFeature4: "ビジネスレポートを生成", continueAsHome: "ホームユーザーとして続行", continueAsStaff: "スタッフユーザーとして続行", canSwitchModes: "モード間の切り替えや設定からデフォルトモードの変更が簡単にできます。", hundredPercentPrivate: "100% プライベート", privacyDescription: "すべてのデータはデバイスに保存されます。クラウドなし、アカウントなし、完全なプライバシー。", yourName: "あなたの名前", firstName: "名", createFirstHome: "最初の家庭を作成", createFirstBusiness: "最初のビジネスを作成", homeName: "家庭名", businessName: "ビジネス名", enableAppLock: "アプリロックを有効化", protectWithPin: "4桁のPINでデータを保護", continue: "続ける",
   subscriptionPlan: "サブスクリプションプラン", appMode: "アプリモード", homeUserMode: "ホームユーザーモード", staffUserMode: "スタッフモード", staffVendorUserMode: "スタッフモード", manageYourHouseholdStaff: "家事スタッフを管理", trackYourOwnWork: "自分の仕事と収入を追跡", switchedToHomeMode: "ホームユーザーモードに切り替えました", switchedToStaffMode: "スタッフモードに切り替えました",
@@ -4386,6 +4470,15 @@ const ja: Partial<typeof en> = {
   reportTemplate: "レポートテンプレート", salaryReport: "給与レポート", salaryReportDesc: "スタッフの給与概要と支払い履歴", expenseReport: "経費レポート", expenseReportDesc: "家庭の経費概要", laundryReport: "洗濯レポート", laundryReportDesc: "洗濯サービスの記録とコスト", summary: "概要", detailed: "詳細", byCategory: "カテゴリー別", byStaff: "スタッフ別", byClient: "クライアント別", generatePdf: "PDFを生成", downloadCsv: "CSVをダウンロード", shareReport: "レポートを共有",
   tour: "ツアー", startTour: "ツアーを開始", skipTour: "ツアーをスキップ", nextStep: "次へ", previousStep: "前へ", finishTour: "完了", tourCompleted: "ツアー完了", replayTour: "ツアーを再生",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "おすすめ", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Payで直接支払う", paypal: "PayPal", paySecurelyWithPayPal: "PayPalで安全に支払う", donate: "寄付", selectAnAmount: "金額を選択", whatYourSupportDoes: "あなたのサポートでできること", helpsMaintainApp: "アプリの維持と改善に役立ちます", supportsDevelopment: "新機能の開発をサポートします", keepsAppAdFree: "アプリを広告なしでプライバシー重視に保ちます", enablesFasterBugFixes: "より速いバグ修正とアップデートを可能にします", donationsVoluntary: "すべての寄付は任意です。寄付に関係なく、アプリは永久に無料です。ご支援ありがとうございます！", country: "国", version: "バージョン", craftedBy: "Dhairya Shah (The Team 360) が心を込めて作成", thankYouForUsing: "アプリをご利用いただきありがとうございます", seeYouSoon: "またお会いしましょう！", appTagline: "Offline-First Home & Staff Manager",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "未保存の変更",
+  unsavedChangesDescription: "未保存の変更があります。破棄しますか？",
+  discardChanges: "変更を破棄",
+  continueEditing: "編集を続ける",
+  exitAppTitle: "アプリを終了",
+  exitAppDescription: "アプリを終了してもよろしいですか？",
+  exitApp: "終了",
+  stayInApp: "留まる",
 };
 const pt: Partial<typeof en> = {
   save: "Salvar", cancel: "Cancelar", delete: "Excluir", edit: "Editar", view: "Visualizar", add: "Adicionar", back: "Voltar", confirm: "Confirmar", loading: "Carregando...", error: "Erro", success: "Sucesso", required: "Obrigatório", optional: "Opcional", comingSoon: "Em breve",
@@ -4405,7 +4498,7 @@ const pt: Partial<typeof en> = {
   help: "Ajuda", seeGuidedTour: "Ver Tour Guiado", learnHowToUseApp: "Aprenda a usar o app de forma eficaz",
   defaultCurrencyForStaff: "Moeda padrão para novos funcionários. Cada funcionário pode ter sua própria moeda.", defaultCurrencyForClients: "Moeda padrão para novos clientes. Cada cliente pode ter sua própria moeda.",
   dataManagement: "Gerenciamento de Dados", backupRestore: "Backup e Restauração", backupAndRestore: "Backup e Restauração", exportImportData: "Exportar ou importar seus dados", clearAllData: "Limpar Todos os Dados", deleteEverything: "Excluir tudo e começar do zero", deleteEverythingStartFresh: "Excluir tudo e começar do zero",
-  app: "App", exitApp: "Sair do App", closeApplication: "Fechar Aplicativo", exitAppDescription: "Para fechar o aplicativo, use o botão home ou o alternador de apps do seu dispositivo.",
+  app: "App", closeApplication: "Fechar Aplicativo",
   laundry: "Lavanderia", addLaundry: "Adicionar Lavanderia", provider: "Prestador", itemType: "Tipo de Item", quantity: "Quantidade", rate: "Taxa", details: "Detalhes", totalAmount: "Valor Total",
   welcomeToHomeStaff: "Bem-vindo ao Home Staff 360", getStarted: "Começar", selectYourRole: "Selecione seu modo padrão", chooseHowYouWillUse: "Escolha como você usará o aplicativo principalmente.", homeUserDescription: "Para usuários que gerenciam funcionários domésticos e assuntos do lar", staffProfessionalDescription: "Para profissionais de serviço que gerenciam seu trabalho", homeFeature1: "Acompanhar presença e pagamentos de salário dos funcionários", homeFeature2: "Gerenciar contas e despesas domésticas", homeFeature3: "Registrar lotes de lavanderia com preços", homeFeature4: "Gerar relatórios e exportar dados", staffFeature1: "Registrar presença em várias casas de clientes", staffFeature2: "Acompanhar ganhos e despesas pessoais", staffFeature3: "Gerenciar trabalhos de lavanderia e faturas", staffFeature4: "Gerar relatórios de negócios", continueAsHome: "Continuar como Usuário Doméstico", continueAsStaff: "Continuar como Usuário Funcionário", canSwitchModes: "Você pode alternar entre os modos e alterar facilmente o modo padrão nas Configurações.", hundredPercentPrivate: "100% Privado", privacyDescription: "Todos os seus dados permanecem no seu dispositivo. Sem nuvem, sem contas, privacidade total.", yourName: "Seu Nome", firstName: "Nome", createFirstHome: "Crie seu primeiro lar", createFirstBusiness: "Crie seu primeiro negócio", homeName: "Nome do Lar", businessName: "Nome do Negócio", enableAppLock: "Habilitar Bloqueio do App", protectWithPin: "Proteja seus dados com um PIN de 4 dígitos", continue: "Continuar",
   subscriptionPlan: "Plano de Assinatura", appMode: "Modo do App", homeUserMode: "Modo Usuário Doméstico", staffUserMode: "Modo Funcionário", staffVendorUserMode: "Modo Funcionário", manageYourHouseholdStaff: "Gerencie seus funcionários domésticos", trackYourOwnWork: "Rastreie seu próprio trabalho e renda", switchedToHomeMode: "Mudou para Modo Usuário Doméstico", switchedToStaffMode: "Mudou para Modo Funcionário",
@@ -4514,6 +4607,15 @@ const pt: Partial<typeof en> = {
   tour: "Tour", startTour: "Iniciar Tour", skipTour: "Pular Tour", nextStep: "Próximo", previousStep: "Anterior", finishTour: "Finalizar", tourCompleted: "Tour Concluído", replayTour: "Repetir Tour",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "Recomendado", googlePay: "Google Pay", payDirectlyWithGooglePay: "Pague diretamente com Google Pay", paypal: "PayPal", paySecurelyWithPayPal: "Pague com segurança com PayPal", donate: "Doar", selectAnAmount: "Selecione um Valor", whatYourSupportDoes: "O que Seu Apoio Faz", helpsMaintainApp: "Ajuda a manter e melhorar o aplicativo", supportsDevelopment: "Apoia o desenvolvimento de novos recursos", keepsAppAdFree: "Mantém o aplicativo sem anúncios e focado em privacidade", enablesFasterBugFixes: "Permite correções de bugs e atualizações mais rápidas", donationsVoluntary: "Todas as doações são voluntárias. O aplicativo é gratuito para sempre, independentemente de doações. Obrigado pelo seu apoio!", country: "País", version: "Versão", craftedBy: "Criado por Dhairya Shah (The Team 360)", thankYouForUsing: "Obrigado por usar nosso aplicativo", seeYouSoon: "Até breve!", appTagline: "Offline-First Home & Staff Manager",
   searchClientHomes: "Pesquisar casas de clientes...", business: "Negócio", selectBusiness: "Selecionar negócio",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "Alterações Não Salvas",
+  unsavedChangesDescription: "Você tem alterações não salvas. Deseja descartá-las?",
+  discardChanges: "Descartar Alterações",
+  continueEditing: "Continuar Editando",
+  exitAppTitle: "Sair do App",
+  exitAppDescription: "Tem certeza de que deseja sair do app?",
+  exitApp: "Sair",
+  stayInApp: "Ficar",
 };
 
 // Marathi - Complete translations
@@ -4535,7 +4637,7 @@ const mr: Partial<typeof en> = {
   help: "मदत", seeGuidedTour: "मार्गदर्शित टूर पहा", learnHowToUseApp: "अॅप प्रभावीपणे कसे वापरायचे ते शिका",
   defaultCurrencyForStaff: "नवीन स्टाफ सदस्यांसाठी डीफॉल्ट चलन. प्रत्येक स्टाफ सदस्याचे स्वतःचे चलन असू शकते.", defaultCurrencyForClients: "नवीन क्लायंट्ससाठी डीफॉल्ट चलन. प्रत्येक क्लायंटचे स्वतःचे चलन असू शकते.",
   dataManagement: "डेटा व्यवस्थापन", backupRestore: "बॅकअप आणि पुनर्संचय", backupAndRestore: "बॅकअप आणि पुनर्संचय", exportImportData: "तुमचा डेटा निर्यात किंवा आयात करा", clearAllData: "सर्व डेटा साफ करा", deleteEverything: "सर्वकाही हटवा आणि नव्याने सुरू करा", deleteEverythingStartFresh: "सर्वकाही हटवा आणि नव्याने सुरू करा",
-  app: "अॅप", exitApp: "अॅप बंद करा", closeApplication: "अॅप्लिकेशन बंद करा", exitAppDescription: "अॅप बंद करण्यासाठी, कृपया तुमच्या डिव्हाइसचे होम बटण किंवा अॅप स्विचर वापरा.",
+  app: "अॅप", closeApplication: "अॅप्लिकेशन बंद करा",
   laundry: "लॉन्ड्री", addLaundry: "लॉन्ड्री जोडा", provider: "प्रदाता", itemType: "वस्तू प्रकार", quantity: "प्रमाण", rate: "दर", details: "तपशील", totalAmount: "एकूण रक्कम",
   welcomeToHomeStaff: "होम स्टाफ 360 मध्ये स्वागत आहे", getStarted: "सुरू करा", selectYourRole: "तुमचा डीफॉल्ट मोड निवडा", chooseHowYouWillUse: "तुम्ही मुख्यतः अॅप कसे वापराल ते निवडा.", homeUserDescription: "घरातील कर्मचारी आणि घरगुती बाबी व्यवस्थापित करणाऱ्या वापरकर्त्यांसाठी", staffProfessionalDescription: "त्यांचे काम व्यवस्थापित करणाऱ्या सेवा व्यावसायिकांसाठी", homeFeature1: "कर्मचारी उपस्थिती आणि पगार देयके ट्रॅक करा", homeFeature2: "घरगुती बिले आणि खर्च व्यवस्थापित करा", homeFeature3: "किंमतीसह लॉन्ड्री बॅच रेकॉर्ड करा", homeFeature4: "अहवाल तयार करा आणि डेटा निर्यात करा", staffFeature1: "अनेक क्लायंट घरांमध्ये उपस्थिती नोंदवा", staffFeature2: "कमाई आणि वैयक्तिक खर्च ट्रॅक करा", staffFeature3: "लॉन्ड्री जॉब आणि बीजक व्यवस्थापित करा", staffFeature4: "व्यवसाय अहवाल तयार करा", continueAsHome: "होम युजर म्हणून सुरू ठेवा", continueAsStaff: "स्टाफ युजर म्हणून सुरू ठेवा", canSwitchModes: "तुम्ही मोड्समध्ये स्विच करू शकता आणि सेटिंग्जमधून डीफॉल्ट मोड सहज बदलू शकता.", hundredPercentPrivate: "100% खाजगी", privacyDescription: "तुमचा सर्व डेटा तुमच्या डिव्हाइसवर राहतो. क्लाउड नाही, खाती नाही, पूर्ण गोपनीयता.", yourName: "तुमचे नाव", firstName: "पहिले नाव", createFirstHome: "तुमचे पहिले घर तयार करा", createFirstBusiness: "तुमचा पहिला व्यवसाय तयार करा", homeName: "घराचे नाव", businessName: "व्यवसायाचे नाव", enableAppLock: "अॅप लॉक सक्षम करा", protectWithPin: "तुमचा डेटा 4-अंकी PIN ने संरक्षित करा", continue: "सुरू ठेवा",
   subscriptionPlan: "सदस्यता योजना", appMode: "अॅप मोड", homeUserMode: "होम युजर मोड", staffUserMode: "स्टाफ युजर मोड", staffVendorUserMode: "स्टाफ युजर मोड", manageYourHouseholdStaff: "तुमचे घरगुती कर्मचारी व्यवस्थापित करा", trackYourOwnWork: "तुमचे स्वतःचे काम आणि कमाई ट्रॅक करा", switchedToHomeMode: "होम युजर मोड वर स्विच केले", switchedToStaffMode: "स्टाफ युजर मोड वर स्विच केले",
@@ -4575,6 +4677,15 @@ const mr: Partial<typeof en> = {
   tour: "टूर", startTour: "टूर सुरू करा", skipTour: "टूर वगळा", nextStep: "पुढे", previousStep: "मागे", finishTour: "समाप्त करा", tourCompleted: "टूर पूर्ण", replayTour: "टूर पुन्हा प्ले करा",
   youAreNowSupporter: "तुम्ही आता समर्थक आहात!", paymentVerification: "पेमेंट पडताळणी", aboutTheDeveloper: "डेव्हलपरबद्दल", independentDeveloper: "भारतातील स्वतंत्र डेव्हलपर", basedInIndia: "भारतात स्थित", buildingApps: "जीवन सोपे करणारी अॅप्स बनवत आहे", developerDescription: "उपयुक्त आणि व्यक्ती-केंद्रित अॅप्स तयार करण्यासाठी उत्साही सोलो-प्रेन्योरने बनवलेले. होम स्टाफ 360 हे घरांना त्यांचे घरगुती कर्मचारी सहजपणे व्यवस्थापित करण्यासाठी प्रेम आणि समर्पणाने डिझाइन केले आहे, तसेच घरगुती सेवा उद्योगातील व्यावसायिकांना त्यांचे काम आणि कमाई सहजपणे व्यवस्थापित करण्यास सक्षम करते. तुमचे समर्थन हा प्रकल्प जिवंत आणि वाढत ठेवते!", chooseAmount: "रक्कम निवडा", orEnterCustomAmount: "किंवा कस्टम रक्कम प्रविष्ट करा", supporter: "समर्थक", openingUpiApp: "UPI अॅप उघडत आहे", chooseUpiApp: "पेमेंट पूर्ण करण्यासाठी तुमचे आवडते UPI अॅप निवडा", unableToOpenUpi: "UPI उघडण्यात अक्षम", useUpiIdManually: "कृपया मॅन्युअली पेमेंट करण्यासाठी खालील UPI ID वापरा", openingPayPal: "PayPal उघडत आहे", redirectingToPayPal: "PayPal वर पुनर्निर्देशित करत आहे...", unableToOpenPayPal: "PayPal उघडण्यात अक्षम", cannotVerifyUpi: "आम्ही UPI पेमेंट्स स्वयंचलितपणे पडताळू शकत नाही. कृपया मॅन्युअली पुष्टी करा.", yesIContributed: "हो, मी योगदान दिले", noNotYet: "नाही / अजून नाही", completePaymentOnPayPal: "PayPal वर पेमेंट पूर्ण करा", didPaymentGoThrough: "तुमची {amount} ची समर्थन व्यवहार पूर्ण झाली का?", pleaseTryAgain: "कृपया पुन्हा प्रयत्न करा",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "शिफारस केलेले", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay सह थेट पैसे द्या", paypal: "PayPal", paySecurelyWithPayPal: "PayPal सह सुरक्षितपणे पैसे द्या", donate: "दान करा", selectAnAmount: "रक्कम निवडा", whatYourSupportDoes: "तुमचा पाठिंबा काय करतो", helpsMaintainApp: "अॅप राखण्यात आणि सुधारण्यात मदत करते", supportsDevelopment: "नवीन वैशिष्ट्यांच्या विकासाला पाठिंबा देते", keepsAppAdFree: "अॅप जाहिरात-मुक्त आणि गोपनीयता-केंद्रित ठेवते", enablesFasterBugFixes: "जलद बग फिक्सेस आणि अपडेट्स सक्षम करते", donationsVoluntary: "सर्व देणग्या स्वैच्छिक आहेत. देणग्यांशिवाय अॅप कायमस्वरूपी मोफत आहे. तुमच्या पाठिंब्याबद्दल धन्यवाद!", country: "देश", version: "आवृत्ती", craftedBy: "Dhairya Shah (The Team 360) यांनी तयार केलेले", thankYouForUsing: "आमचे अॅप वापरल्याबद्दल धन्यवाद", seeYouSoon: "लवकरच भेटू!", appTagline: "Offline-First Home & Staff Manager",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "न जतन केलेले बदल",
+  unsavedChangesDescription: "तुमच्याकडे न जतन केलेले बदल आहेत. तुम्हाला ते टाकून द्यायचे आहेत का?",
+  discardChanges: "बदल टाकून द्या",
+  continueEditing: "संपादन सुरू ठेवा",
+  exitAppTitle: "अॅप बाहेर पडा",
+  exitAppDescription: "तुम्हाला खात्री आहे की तुम्हाला अॅप बाहेर पडायचे आहे?",
+  exitApp: "बाहेर पडा",
+  stayInApp: "राहा",
 };
 // Punjabi - Complete translations
 const pa: Partial<typeof en> = {
@@ -4595,7 +4706,7 @@ const pa: Partial<typeof en> = {
   help: "ਮਦਦ", seeGuidedTour: "ਗਾਈਡਿਡ ਟੂਰ ਦੇਖੋ", learnHowToUseApp: "ਐਪ ਨੂੰ ਪ੍ਰਭਾਵਸ਼ਾਲੀ ਢੰਗ ਨਾਲ ਵਰਤਣਾ ਸਿੱਖੋ",
   defaultCurrencyForStaff: "ਨਵੇਂ ਸਟਾਫ ਮੈਂਬਰਾਂ ਲਈ ਡਿਫਾਲਟ ਮੁਦਰਾ। ਹਰ ਸਟਾਫ ਮੈਂਬਰ ਦੀ ਆਪਣੀ ਮੁਦਰਾ ਹੋ ਸਕਦੀ ਹੈ।", defaultCurrencyForClients: "ਨਵੇਂ ਗਾਹਕਾਂ ਲਈ ਡਿਫਾਲਟ ਮੁਦਰਾ। ਹਰ ਗਾਹਕ ਦੀ ਆਪਣੀ ਮੁਦਰਾ ਹੋ ਸਕਦੀ ਹੈ।",
   dataManagement: "ਡਾਟਾ ਪ੍ਰਬੰਧਨ", backupRestore: "ਬੈਕਅੱਪ ਅਤੇ ਰੀਸਟੋਰ", backupAndRestore: "ਬੈਕਅੱਪ ਅਤੇ ਰੀਸਟੋਰ", exportImportData: "ਆਪਣਾ ਡਾਟਾ ਐਕਸਪੋਰਟ ਜਾਂ ਇੰਪੋਰਟ ਕਰੋ", clearAllData: "ਸਾਰਾ ਡਾਟਾ ਸਾਫ਼ ਕਰੋ", deleteEverything: "ਸਭ ਕੁਝ ਮਿਟਾਓ ਅਤੇ ਨਵੇਂ ਸਿਰੇ ਤੋਂ ਸ਼ੁਰੂ ਕਰੋ", deleteEverythingStartFresh: "ਸਭ ਕੁਝ ਮਿਟਾਓ ਅਤੇ ਨਵੇਂ ਸਿਰੇ ਤੋਂ ਸ਼ੁਰੂ ਕਰੋ",
-  app: "ਐਪ", exitApp: "ਐਪ ਬੰਦ ਕਰੋ", closeApplication: "ਐਪਲੀਕੇਸ਼ਨ ਬੰਦ ਕਰੋ", exitAppDescription: "ਐਪ ਬੰਦ ਕਰਨ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਡਿਵਾਈਸ ਦਾ ਹੋਮ ਬਟਨ ਜਾਂ ਐਪ ਸਵਿੱਚਰ ਵਰਤੋ।",
+  app: "ਐਪ", closeApplication: "ਐਪਲੀਕੇਸ਼ਨ ਬੰਦ ਕਰੋ",
   laundry: "ਲਾਂਡਰੀ", addLaundry: "ਲਾਂਡਰੀ ਜੋੜੋ", provider: "ਪ੍ਰਦਾਤਾ", itemType: "ਵਸਤੂ ਕਿਸਮ", quantity: "ਮਾਤਰਾ", rate: "ਦਰ", details: "ਵੇਰਵੇ", totalAmount: "ਕੁੱਲ ਰਕਮ",
   welcomeToHomeStaff: "ਹੋਮ ਸਟਾਫ 360 ਵਿੱਚ ਸੁਆਗਤ ਹੈ", getStarted: "ਸ਼ੁਰੂ ਕਰੋ", selectYourRole: "ਆਪਣਾ ਡਿਫੌਲਟ ਮੋਡ ਚੁਣੋ", chooseHowYouWillUse: "ਚੁਣੋ ਕਿ ਤੁਸੀਂ ਮੁੱਖ ਤੌਰ ਤੇ ਐਪ ਕਿਵੇਂ ਵਰਤੋਗੇ।", homeUserDescription: "ਘਰੇਲੂ ਸਟਾਫ ਅਤੇ ਘਰ ਦੇ ਮਾਮਲੇ ਪ੍ਰਬੰਧਿਤ ਕਰਨ ਵਾਲੇ ਉਪਭੋਗਤਾਵਾਂ ਲਈ", staffProfessionalDescription: "ਆਪਣਾ ਕੰਮ ਪ੍ਰਬੰਧਿਤ ਕਰਨ ਵਾਲੇ ਸੇਵਾ ਪੇਸ਼ੇਵਰਾਂ ਲਈ", homeFeature1: "ਸਟਾਫ ਹਾਜ਼ਰੀ ਅਤੇ ਤਨਖਾਹ ਭੁਗਤਾਨ ਟ੍ਰੈਕ ਕਰੋ", homeFeature2: "ਘਰੇਲੂ ਬਿੱਲ ਅਤੇ ਖਰਚੇ ਪ੍ਰਬੰਧਿਤ ਕਰੋ", homeFeature3: "ਕੀਮਤਾਂ ਨਾਲ ਲਾਂਡਰੀ ਬੈਚ ਰਿਕਾਰਡ ਕਰੋ", homeFeature4: "ਰਿਪੋਰਟਾਂ ਬਣਾਓ ਅਤੇ ਡਾਟਾ ਐਕਸਪੋਰਟ ਕਰੋ", staffFeature1: "ਕਈ ਗਾਹਕ ਘਰਾਂ ਵਿੱਚ ਹਾਜ਼ਰੀ ਲੌਗ ਕਰੋ", staffFeature2: "ਕਮਾਈ ਅਤੇ ਨਿੱਜੀ ਖਰਚੇ ਟ੍ਰੈਕ ਕਰੋ", staffFeature3: "ਲਾਂਡਰੀ ਜੌਬ ਅਤੇ ਇਨਵੌਇਸ ਪ੍ਰਬੰਧਿਤ ਕਰੋ", staffFeature4: "ਕਾਰੋਬਾਰੀ ਰਿਪੋਰਟਾਂ ਬਣਾਓ", continueAsHome: "ਹੋਮ ਯੂਜ਼ਰ ਵਜੋਂ ਜਾਰੀ ਰੱਖੋ", continueAsStaff: "ਸਟਾਫ ਯੂਜ਼ਰ ਵਜੋਂ ਜਾਰੀ ਰੱਖੋ", canSwitchModes: "ਤੁਸੀਂ ਮੋਡਾਂ ਵਿਚਕਾਰ ਬਦਲ ਸਕਦੇ ਹੋ ਅਤੇ ਸੈਟਿੰਗਜ਼ ਤੋਂ ਡਿਫੌਲਟ ਮੋਡ ਆਸਾਨੀ ਨਾਲ ਬਦਲ ਸਕਦੇ ਹੋ।", hundredPercentPrivate: "100% ਨਿੱਜੀ", privacyDescription: "ਤੁਹਾਡਾ ਸਾਰਾ ਡਾਟਾ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਤੇ ਰਹਿੰਦਾ ਹੈ। ਕੋਈ ਕਲਾਊਡ ਨਹੀਂ, ਕੋਈ ਖਾਤੇ ਨਹੀਂ, ਪੂਰੀ ਗੋਪਨੀਯਤਾ।", yourName: "ਤੁਹਾਡਾ ਨਾਮ", firstName: "ਪਹਿਲਾ ਨਾਮ", createFirstHome: "ਆਪਣਾ ਪਹਿਲਾ ਘਰ ਬਣਾਓ", createFirstBusiness: "ਆਪਣਾ ਪਹਿਲਾ ਕਾਰੋਬਾਰ ਬਣਾਓ", homeName: "ਘਰ ਦਾ ਨਾਮ", businessName: "ਕਾਰੋਬਾਰ ਦਾ ਨਾਮ", enableAppLock: "ਐਪ ਲੌਕ ਚਾਲੂ ਕਰੋ", protectWithPin: "ਆਪਣੇ ਡਾਟੇ ਨੂੰ 4-ਅੰਕੀ PIN ਨਾਲ ਸੁਰੱਖਿਅਤ ਕਰੋ", continue: "ਜਾਰੀ ਰੱਖੋ",
   subscriptionPlan: "ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਯੋਜਨਾ", appMode: "ਐਪ ਮੋਡ", homeUserMode: "ਹੋਮ ਯੂਜ਼ਰ ਮੋਡ", staffUserMode: "ਸਟਾਫ ਯੂਜ਼ਰ ਮੋਡ", staffVendorUserMode: "ਸਟਾਫ ਯੂਜ਼ਰ ਮੋਡ", manageYourHouseholdStaff: "ਆਪਣੇ ਘਰੇਲੂ ਸਟਾਫ ਦਾ ਪ੍ਰਬੰਧ ਕਰੋ", trackYourOwnWork: "ਆਪਣੇ ਕੰਮ ਅਤੇ ਕਮਾਈ ਨੂੰ ਟ੍ਰੈਕ ਕਰੋ", switchedToHomeMode: "ਹੋਮ ਯੂਜ਼ਰ ਮੋਡ ਤੇ ਬਦਲਿਆ", switchedToStaffMode: "ਸਟਾਫ ਯੂਜ਼ਰ ਮੋਡ ਤੇ ਬਦਲਿਆ",
@@ -4635,6 +4746,15 @@ const pa: Partial<typeof en> = {
   tour: "ਟੂਰ", startTour: "ਟੂਰ ਸ਼ੁਰੂ ਕਰੋ", skipTour: "ਟੂਰ ਛੱਡੋ", nextStep: "ਅਗਲਾ", previousStep: "ਪਿਛਲਾ", finishTour: "ਖਤਮ ਕਰੋ", tourCompleted: "ਟੂਰ ਪੂਰਾ", replayTour: "ਟੂਰ ਦੁਬਾਰਾ ਚਲਾਓ",
   youAreNowSupporter: "ਤੁਸੀਂ ਹੁਣ ਸਮਰਥਕ ਹੋ!", paymentVerification: "ਭੁਗਤਾਨ ਤਸਦੀਕ", aboutTheDeveloper: "ਡਿਵੈਲਪਰ ਬਾਰੇ", independentDeveloper: "ਭਾਰਤ ਤੋਂ ਸੁਤੰਤਰ ਡਿਵੈਲਪਰ", basedInIndia: "ਭਾਰਤ ਵਿੱਚ ਸਥਿਤ", buildingApps: "ਜ਼ਿੰਦਗੀ ਨੂੰ ਆਸਾਨ ਬਣਾਉਣ ਵਾਲੇ ਐਪ ਬਣਾ ਰਿਹਾ ਹੈ", developerDescription: "ਉਪਯੋਗੀ ਅਤੇ ਵਿਅਕਤੀ-ਕੇਂਦਰਿਤ ਐਪਸ ਬਣਾਉਣ ਲਈ ਉਤਸ਼ਾਹੀ ਸੋਲੋ-ਪ੍ਰੇਨਿਓਰ ਦੁਆਰਾ ਬਣਾਇਆ ਗਿਆ। ਹੋਮ ਸਟਾਫ 360 ਨੂੰ ਘਰਾਂ ਨੂੰ ਉਹਨਾਂ ਦੇ ਘਰੇਲੂ ਸਟਾਫ਼ ਨੂੰ ਆਸਾਨੀ ਨਾਲ ਪ੍ਰਬੰਧਿਤ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਨ ਲਈ ਪਿਆਰ ਅਤੇ ਸਮਰਪਣ ਨਾਲ ਡਿਜ਼ਾਈਨ ਕੀਤਾ ਗਿਆ ਹੈ, ਨਾਲ ਹੀ ਘਰੇਲੂ ਸੇਵਾ ਉਦਯੋਗਾਂ ਵਿੱਚ ਪੇਸ਼ੇਵਰਾਂ ਨੂੰ ਆਪਣੇ ਕੰਮ ਅਤੇ ਕਮਾਈ ਨੂੰ ਆਸਾਨੀ ਨਾਲ ਵਿਵਸਥਿਤ ਕਰਨ ਲਈ ਸ਼ਕਤੀ ਦਿੱਤੀ ਗਈ ਹੈ। ਤੁਹਾਡੀ ਸਹਾਇਤਾ ਇਸ ਪ੍ਰੋਜੈਕਟ ਨੂੰ ਜ਼ਿੰਦਾ ਅਤੇ ਵਧਦਾ ਰੱਖਦੀ ਹੈ!", chooseAmount: "ਰਕਮ ਚੁਣੋ", orEnterCustomAmount: "ਜਾਂ ਕਸਟਮ ਰਕਮ ਦਰਜ ਕਰੋ", supporter: "ਸਮਰਥਕ", openingUpiApp: "UPI ਐਪ ਖੋਲ੍ਹ ਰਿਹਾ ਹੈ", chooseUpiApp: "ਭੁਗਤਾਨ ਪੂਰਾ ਕਰਨ ਲਈ ਆਪਣਾ ਪਸੰਦੀਦਾ UPI ਐਪ ਚੁਣੋ", unableToOpenUpi: "UPI ਖੋਲ੍ਹਣ ਵਿੱਚ ਅਸਮਰੱਥ", useUpiIdManually: "ਕਿਰਪਾ ਕਰਕੇ ਹੱਥੀਂ ਭੁਗਤਾਨ ਕਰਨ ਲਈ ਹੇਠਾਂ ਦਿੱਤੀ UPI ID ਵਰਤੋ", openingPayPal: "PayPal ਖੋਲ੍ਹ ਰਿਹਾ ਹੈ", redirectingToPayPal: "PayPal 'ਤੇ ਰੀਡਾਇਰੈਕਟ ਕਰ ਰਿਹਾ ਹੈ...", unableToOpenPayPal: "PayPal ਖੋਲ੍ਹਣ ਵਿੱਚ ਅਸਮਰੱਥ", cannotVerifyUpi: "ਅਸੀਂ UPI ਭੁਗਤਾਨ ਸਵੈਚਲਿਤ ਤੌਰ 'ਤੇ ਤਸਦੀਕ ਨਹੀਂ ਕਰ ਸਕਦੇ। ਕਿਰਪਾ ਕਰਕੇ ਹੱਥੀਂ ਪੁਸ਼ਟੀ ਕਰੋ।", yesIContributed: "ਹਾਂ, ਮੈਂ ਯੋਗਦਾਨ ਦਿੱਤਾ", noNotYet: "ਨਹੀਂ / ਅਜੇ ਨਹੀਂ", completePaymentOnPayPal: "PayPal 'ਤੇ ਭੁਗਤਾਨ ਪੂਰਾ ਕਰੋ", didPaymentGoThrough: "ਕੀ ਤੁਹਾਡਾ {amount} ਦਾ ਸਹਾਇਤਾ ਲੈਣ-ਦੇਣ ਪੂਰਾ ਹੋਇਆ?", pleaseTryAgain: "ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "ਸਿਫਾਰਸ਼ ਕੀਤਾ", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay ਨਾਲ ਸਿੱਧਾ ਭੁਗਤਾਨ ਕਰੋ", paypal: "PayPal", paySecurelyWithPayPal: "PayPal ਨਾਲ ਸੁਰੱਖਿਅਤ ਭੁਗਤਾਨ ਕਰੋ", donate: "ਦਾਨ ਕਰੋ", selectAnAmount: "ਰਕਮ ਚੁਣੋ", whatYourSupportDoes: "ਤੁਹਾਡੀ ਸਹਾਇਤਾ ਕੀ ਕਰਦੀ ਹੈ", helpsMaintainApp: "ਐਪ ਨੂੰ ਬਣਾਈ ਰੱਖਣ ਅਤੇ ਸੁਧਾਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦੀ ਹੈ", supportsDevelopment: "ਨਵੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੇ ਵਿਕਾਸ ਨੂੰ ਸਹਾਇਤਾ ਦਿੰਦੀ ਹੈ", keepsAppAdFree: "ਐਪ ਨੂੰ ਇਸ਼ਤਿਹਾਰ-ਮੁਕਤ ਅਤੇ ਗੋਪਨੀਯਤਾ-ਕੇਂਦ੍ਰਿਤ ਰੱਖਦੀ ਹੈ", enablesFasterBugFixes: "ਤੇਜ਼ ਬੱਗ ਫਿਕਸ ਅਤੇ ਅੱਪਡੇਟ ਸਮਰੱਥ ਬਣਾਉਂਦੀ ਹੈ", donationsVoluntary: "ਸਾਰੇ ਦਾਨ ਸਵੈ-ਇੱਛਤ ਹਨ। ਦਾਨ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਐਪ ਹਮੇਸ਼ਾ ਮੁਫਤ ਹੈ। ਤੁਹਾਡੀ ਸਹਾਇਤਾ ਲਈ ਧੰਨਵਾਦ!", country: "ਦੇਸ਼", version: "ਸੰਸਕਰਣ", craftedBy: "Dhairya Shah (The Team 360) ਦੁਆਰਾ ਬਣਾਇਆ ਗਿਆ", thankYouForUsing: "ਸਾਡੀ ਐਪ ਵਰਤਣ ਲਈ ਧੰਨਵਾਦ", seeYouSoon: "ਜਲਦੀ ਮਿਲਾਂਗੇ!", appTagline: "Offline-First Home & Staff Manager",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "ਬਿਨਾਂ ਸੇਵ ਕੀਤੇ ਬਦਲਾਅ",
+  unsavedChangesDescription: "ਤੁਹਾਡੇ ਕੋਲ ਬਿਨਾਂ ਸੇਵ ਕੀਤੇ ਬਦਲਾਅ ਹਨ। ਕੀ ਤੁਸੀਂ ਇਨ੍ਹਾਂ ਨੂੰ ਰੱਦ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?",
+  discardChanges: "ਬਦਲਾਅ ਰੱਦ ਕਰੋ",
+  continueEditing: "ਸੰਪਾਦਨ ਜਾਰੀ ਰੱਖੋ",
+  exitAppTitle: "ਐਪ ਬੰਦ ਕਰੋ",
+  exitAppDescription: "ਕੀ ਤੁਸੀਂ ਯਕੀਨੀ ਹੋ ਕਿ ਤੁਸੀਂ ਐਪ ਬੰਦ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?",
+  exitApp: "ਬਾਹਰ ਜਾਓ",
+  stayInApp: "ਰਹੋ",
 };
 const te: Partial<typeof en> = {
   save: "సేవ్ చేయండి", cancel: "రద్దు చేయండి", delete: "తొలగించు", edit: "సవరించు", view: "చూడండి", add: "జోడించు", back: "వెనుకకు", confirm: "నిర్ధారించు", loading: "లోడ్ అవుతోంది...", error: "లోపం", success: "విజయం", required: "అవసరం", optional: "ఐచ్ఛికం", comingSoon: "త్వరలో వస్తోంది",
@@ -4654,7 +4774,7 @@ const te: Partial<typeof en> = {
   help: "సహాయం", seeGuidedTour: "గైడెడ్ టూర్ చూడండి", learnHowToUseApp: "యాప్‌ను సమర్థవంతంగా ఉపయోగించడం నేర్చుకోండి",
   defaultCurrencyForStaff: "కొత్త స్టాఫ్ సభ్యులకు డిఫాల్ట్ కరెన్సీ. ప్రతి స్టాఫ్ సభ్యునికి వారి స్వంత కరెన్సీ ఉండవచ్చు.", defaultCurrencyForClients: "కొత్త క్లయింట్‌లకు డిఫాల్ట్ కరెన్సీ. ప్రతి క్లయింట్‌కు వారి స్వంత కరెన్సీ ఉండవచ్చు.",
   dataManagement: "డేటా నిర్వహణ", backupRestore: "బ్యాకప్ & పునరుద్ధరణ", backupAndRestore: "బ్యాకప్ & పునరుద్ధరణ", exportImportData: "మీ డేటాను ఎగుమతి లేదా దిగుమతి చేయండి", clearAllData: "అన్ని డేటా క్లియర్ చేయండి", deleteEverything: "అన్నీ తొలగించి తాజాగా ప్రారంభించండి", deleteEverythingStartFresh: "అన్నీ తొలగించి తాజాగా ప్రారంభించండి",
-  app: "యాప్", exitApp: "యాప్ నుండి నిష్క్రమించండి", closeApplication: "అప్లికేషన్ మూసివేయండి", exitAppDescription: "యాప్ మూసివేయడానికి, దయచేసి మీ పరికరం హోమ్ బటన్ లేదా యాప్ స్విచర్ ఉపయోగించండి.",
+  app: "యాప్", closeApplication: "అప్లికేషన్ మూసివేయండి",
   laundry: "లాండ్రీ", addLaundry: "లాండ్రీ జోడించండి", provider: "ప్రొవైడర్", itemType: "వస్తు రకం", quantity: "పరిమాణం", rate: "రేటు", details: "వివరాలు", totalAmount: "మొత్తం మొత్తం",
   welcomeToHomeStaff: "Home Staff 360కి స్వాగతం", getStarted: "ప్రారంభించండి", selectYourRole: "మీ డిఫాల్ట్ మోడ్ ఎంచుకోండి", chooseHowYouWillUse: "మీరు ప్రధానంగా యాప్‌ను ఎలా ఉపయోగిస్తారో ఎంచుకోండి.", homeUserDescription: "ఇంట్లో గృహ సిబ్బంది మరియు గృహ వ్యవహారాలను నిర్వహించే వినియోగదారుల కోసం", staffProfessionalDescription: "తమ పనిని నిర్వహించే సేవా నిపుణుల కోసం", homeFeature1: "సిబ్బంది హాజరు & జీతం చెల్లింపులను ట్రాక్ చేయండి", homeFeature2: "గృహ బిల్లులు & ఖర్చులను నిర్వహించండి", homeFeature3: "ధరలతో లాండ్రీ బ్యాచ్‌లను రికార్డ్ చేయండి", homeFeature4: "నివేదికలు రూపొందించండి & డేటాను ఎగుమతి చేయండి", staffFeature1: "బహుళ క్లయింట్ ఇళ్లలో హాజరును లాగ్ చేయండి", staffFeature2: "ఆదాయం & వ్యక్తిగత ఖర్చులను ట్రాక్ చేయండి", staffFeature3: "లాండ్రీ జాబ్‌లు & ఇన్‌వాయిస్‌లను నిర్వహించండి", staffFeature4: "వ్యాపార నివేదికలు రూపొందించండి", continueAsHome: "హోమ్ యూజర్‌గా కొనసాగించు", continueAsStaff: "స్టాఫ్ యూజర్‌గా కొనసాగించు", canSwitchModes: "మీరు మోడ్‌ల మధ్య మారవచ్చు మరియు సెట్టింగ్‌ల నుండి డిఫాల్ట్ మోడ్‌ను సులభంగా మార్చవచ్చు.", hundredPercentPrivate: "100% ప్రైవేట్", privacyDescription: "మీ మొత్తం డేటా మీ పరికరంలో ఉంటుంది. క్లౌడ్ లేదు, ఖాతాలు లేవు, పూర్తి గోప్యత.", yourName: "మీ పేరు", firstName: "మొదటి పేరు", createFirstHome: "మీ మొదటి గృహం సృష్టించండి", createFirstBusiness: "మీ మొదటి వ్యాపారం సృష్టించండి", homeName: "గృహం పేరు", businessName: "వ్యాపార పేరు", enableAppLock: "యాప్ లాక్ ప్రారంభించండి", protectWithPin: "మీ డేటాను 4-అంకెల PIN తో రక్షించండి", continue: "కొనసాగించండి",
   subscriptionPlan: "సబ్‌స్క్రిప్షన్ ప్లాన్", appMode: "యాప్ మోడ్", homeUserMode: "హోమ్ యూజర్ మోడ్", staffUserMode: "స్టాఫ్ యూజర్ మోడ్", staffVendorUserMode: "స్టాఫ్ యూజర్ మోడ్", manageYourHouseholdStaff: "మీ గృహ సిబ్బందిని నిర్వహించండి", trackYourOwnWork: "మీ స్వంత పని మరియు ఆదాయాన్ని ట్రాక్ చేయండి", switchedToHomeMode: "హోమ్ యూజర్ మోడ్‌కు మారారు", switchedToStaffMode: "స్టాఫ్ యూజర్ మోడ్‌కు మారారు",
@@ -4762,6 +4882,16 @@ const te: Partial<typeof en> = {
   reportTemplate: "నివేదిక టెంప్లేట్", salaryReport: "జీతం నివేదిక", salaryReportDesc: "సిబ్బంది జీతం సారాంశం మరియు చెల్లింపు చరిత్ర", expenseReport: "ఖర్చు నివేదిక", expenseReportDesc: "గృహ ఖర్చు సారాంశం", laundryReport: "లాండ్రీ నివేదిక", laundryReportDesc: "లాండ్రీ సేవ రికార్డులు మరియు ఖర్చులు", summary: "సారాంశం", detailed: "వివరమైన", byCategory: "వర్గం వారీగా", byStaff: "సిబ్బంది వారీగా", byClient: "క్లయింట్ వారీగా", generatePdf: "PDF రూపొందించండి", downloadCsv: "CSV డౌన్‌లోడ్ చేయండి", shareReport: "నివేదిక పంచుకోండి",
   tour: "టూర్", startTour: "టూర్ ప్రారంభించండి", skipTour: "టూర్ స్కిప్ చేయండి", nextStep: "తదుపరి", previousStep: "మునుపటి", finishTour: "ముగించండి", tourCompleted: "టూర్ పూర్తయింది", replayTour: "టూర్ మళ్ళీ ప్లే చేయండి",
   youAreNowSupporter: "మీరు ఇప్పుడు మద్దతుదారు!", paymentVerification: "చెల్లింపు ధృవీకరణ", aboutTheDeveloper: "డెవలపర్ గురించి", independentDeveloper: "భారతదేశం నుండి స్వతంత్ర డెవలపర్", basedInIndia: "భారతదేశంలో ఆధారపడి", buildingApps: "జీవితాన్ని సులభతరం చేసే యాప్‌లను నిర్మిస్తున్నారు", developerDescription: "ఉపయోగకరమైన మరియు వ్యక్తి-కేంద్రీకృత యాప్‌లను నిర్మించడంలో ఆసక్తి ఉన్న ఒక సోలో-ప్రెన్యూర్ చేత నిర్మించబడింది. హోమ్ స్టాఫ్ 360 ను కుటుంబాలకు వారి గృహ సిబ్బందిని సులభంగా నిర్వహించడంలో సహాయపడటానికి ప్రేమ మరియు అంకితభావంతో రూపొందించబడింది, అదే సమయంలో గృహ సేవా పరిశ్రమలలో నిపుణులకు వారి పని మరియు ఆదాయాన్ని సులభంగా నిర్వహించడానికి సాధికారత కల్పిస్తుంది. మీ మద్దతు ఈ ప్రాజెక్ట్‌ను సజీవంగా మరియు ఎదుగుతూ ఉంచుతుంది!", chooseAmount: "మొత్తాన్ని ఎంచుకోండి", orEnterCustomAmount: "లేదా కస్టమ్ మొత్తాన్ని నమోదు చేయండి", supporter: "మద్దతుదారు", openingUpiApp: "UPI యాప్ తెరుస్తోంది", chooseUpiApp: "చెల్లింపును పూర్తి చేయడానికి మీకు ఇష్టమైన UPI యాప్‌ను ఎంచుకోండి", unableToOpenUpi: "UPI తెరవడం సాధ్యం కాలేదు", useUpiIdManually: "దయచేసి మాన్యువల్‌గా చెల్లించడానికి క్రింది UPI ID వాడండి", openingPayPal: "PayPal తెరుస్తోంది", redirectingToPayPal: "PayPal కు రీడైరెక్ట్ అవుతోంది...", unableToOpenPayPal: "PayPal తెరవడం సాధ్యం కాలేదు", cannotVerifyUpi: "UPI చెల్లింపులను మేము స్వయంచాలకంగా ధృవీకరించలేము. దయచేసి మాన్యువల్‌గా నిర్ధారించండి.", yesIContributed: "అవును, నేను సహకరించాను", noNotYet: "లేదు / ఇంకా లేదు", completePaymentOnPayPal: "PayPal లో చెల్లింపును పూర్తి చేయండి", didPaymentGoThrough: "మీ {amount} మద్దతు లావాదేవీ విజయవంతమైందా?", pleaseTryAgain: "దయచేసి మళ్ళీ ప్రయత్నించండి",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "సిఫార్సు చేయబడింది", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay తో నేరుగా చెల్లించండి", paypal: "PayPal", paySecurelyWithPayPal: "PayPal తో సురక్షితంగా చెల్లించండి", donate: "దానం చేయండి", selectAnAmount: "మొత్తాన్ని ఎంచుకోండి", whatYourSupportDoes: "మీ మద్దతు ఏమి చేస్తుంది", helpsMaintainApp: "యాప్‌ను నిర్వహించడానికి మరియు మెరుగుపరచడానికి సహాయపడుతుంది", supportsDevelopment: "కొత్త ఫీచర్ల అభివృద్ధికి మద్దతు ఇస్తుంది", keepsAppAdFree: "యాప్‌ను ప్రకటన-రహితంగా మరియు గోప్యత-కేంద్రీకృతంగా ఉంచుతుంది", enablesFasterBugFixes: "వేగవంతమైన బగ్ ఫిక్సులు మరియు అప్‌డేట్‌లను ఎనేబుల్ చేస్తుంది", donationsVoluntary: "అన్ని విరాళాలు స్వచ్ఛందమైనవి. విరాళాలతో సంబంధం లేకుండా యాప్ ఎల్లప్పుడూ ఉచితం. మీ మద్దతుకు ధన్యవాదాలు!", country: "దేశం", version: "సంస్కరణ", craftedBy: "Dhairya Shah (The Team 360) చే తయారు చేయబడింది", thankYouForUsing: "మా యాప్‌ను ఉపయోగించినందుకు ధన్యవాదాలు", seeYouSoon: "త్వరలో కలుద్దాం!", appTagline: "Offline-First Home & Staff Manager",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "సేవ్ చేయని మార్పులు",
+  unsavedChangesDescription: "మీకు సేవ్ చేయని మార్పులు ఉన్నాయి. మీరు వాటిని విస్మరించాలనుకుంటున్నారా?",
+  discardChanges: "మార్పులను విస్మరించు",
+  continueEditing: "సవరణ కొనసాగించు",
+  exitAppTitle: "యాప్ నుండి నిష్క్రమించు",
+  exitAppDescription: "మీరు యాప్ నుండి నిష్క్రమించాలనుకుంటున్నారా?",
+  exitApp: "నిష్క్రమించు",
+  stayInApp: "ఉండు",
 };
 const ta: Partial<typeof en> = {
   save: "சேமி", cancel: "ரத்து செய்", delete: "நீக்கு", edit: "திருத்து", view: "பார்", add: "சேர்", back: "பின்", confirm: "உறுதிப்படுத்து", loading: "ஏற்றுகிறது...", error: "பிழை", success: "வெற்றி", required: "தேவை", optional: "விருப்ப", comingSoon: "விரைவில் வரும்",
@@ -4781,7 +4911,7 @@ const ta: Partial<typeof en> = {
   help: "உதவி", seeGuidedTour: "வழிகாட்டி சுற்றுப்பயணம் பார்க்கவும்", learnHowToUseApp: "செயலியை திறமையாக பயன்படுத்த கற்றுக்கொள்ளுங்கள்",
   defaultCurrencyForStaff: "புதிய ஊழியர்களுக்கான இயல்புநிலை நாணயம். ஒவ்வொரு ஊழியருக்கும் அவர்களின் சொந்த நாணயம் இருக்கலாம்.", defaultCurrencyForClients: "புதிய வாடிக்கையாளர்களுக்கான இயல்புநிலை நாணயம். ஒவ்வொரு வாடிக்கையாளருக்கும் அவர்களின் சொந்த நாணயம் இருக்கலாம்.",
   dataManagement: "தரவு மேலாண்மை", backupRestore: "காப்புப்பிரதி & மீட்டெடு", backupAndRestore: "காப்புப்பிரதி & மீட்டெடு", exportImportData: "உங்கள் தரவை ஏற்றுமதி அல்லது இறக்குமதி செய்யவும்", clearAllData: "அனைத்து தரவையும் அழிக்கவும்", deleteEverything: "எல்லாவற்றையும் நீக்கி புதிதாக தொடங்கவும்", deleteEverythingStartFresh: "எல்லாவற்றையும் நீக்கி புதிதாக தொடங்கவும்",
-  app: "செயலி", exitApp: "செயலியை மூடு", closeApplication: "செயலியை மூடவும்", exitAppDescription: "செயலியை மூட, உங்கள் சாதனத்தின் முகப்பு பொத்தான் அல்லது செயலி மாற்றியைப் பயன்படுத்தவும்.",
+  app: "செயலி", closeApplication: "செயலியை மூடவும்",
   laundry: "சலவை", addLaundry: "சலவை சேர்க்கவும்", provider: "வழங்குநர்", itemType: "பொருள் வகை", quantity: "அளவு", rate: "விகிதம்", details: "விவரங்கள்", totalAmount: "மொத்த தொகை",
   welcomeToHomeStaff: "Home Staff 360 க்கு வரவேற்கிறோம்", getStarted: "தொடங்கவும்", selectYourRole: "உங்கள் இயல்புநிலை பயன்முறையை தேர்ந்தெடுக்கவும்", chooseHowYouWillUse: "நீங்கள் முக்கியமாக செயலியை எவ்வாறு பயன்படுத்துவீர்கள் என்பதை தேர்ந்தெடுக்கவும்.", homeUserDescription: "வீட்டு ஊழியர்களையும் வீட்டு விவகாரங்களையும் நிர்வகிக்கும் பயனர்களுக்கு", staffProfessionalDescription: "தங்கள் வேலையை நிர்வகிக்கும் சேவை தொழில்முறை நிபுணர்களுக்கு", homeFeature1: "ஊழியர் வருகை & சம்பள பணம் செலுத்துதலை கண்காணிக்கவும்", homeFeature2: "வீட்டு பில்கள் & செலவுகளை நிர்வகிக்கவும்", homeFeature3: "விலைகளுடன் சலவை தொகுதிகளை பதிவு செய்யவும்", homeFeature4: "அறிக்கைகளை உருவாக்கி தரவை ஏற்றுமதி செய்யவும்", staffFeature1: "பல வாடிக்கையாளர் வீடுகளில் வருகையை பதிவு செய்யவும்", staffFeature2: "வருமானம் & தனிப்பட்ட செலவுகளை கண்காணிக்கவும்", staffFeature3: "சலவை வேலைகள் & விலைப்பட்டியல்களை நிர்வகிக்கவும்", staffFeature4: "வணிக அறிக்கைகளை உருவாக்கவும்", continueAsHome: "வீட்டு பயனராக தொடரவும்", continueAsStaff: "ஊழியர் பயனராக தொடரவும்", canSwitchModes: "நீங்கள் பயன்முறைகளுக்கு இடையில் மாறலாம் மற்றும் அமைப்புகளில் இருந்து இயல்புநிலை பயன்முறையை எளிதாக மாற்றலாம்.", hundredPercentPrivate: "100% தனிப்பட்ட", privacyDescription: "உங்கள் அனைத்து தரவும் உங்கள் சாதனத்தில் இருக்கும். கிளவுட் இல்லை, கணக்குகள் இல்லை, முழு தனியுரிமை.", yourName: "உங்கள் பெயர்", firstName: "முதல் பெயர்", createFirstHome: "உங்கள் முதல் வீட்டை உருவாக்கவும்", createFirstBusiness: "உங்கள் முதல் வணிகத்தை உருவாக்கவும்", homeName: "வீட்டின் பெயர்", businessName: "வணிகத்தின் பெயர்", enableAppLock: "செயலி பூட்டை இயக்கவும்", protectWithPin: "உங்கள் தரவை 4 இலக்க PIN உடன் பாதுகாக்கவும்", continue: "தொடரவும்",
   subscriptionPlan: "சந்தா திட்டம்", appMode: "செயலி பயன்முறை", homeUserMode: "வீட்டு பயனர் பயன்முறை", staffUserMode: "ஊழியர் பயனர் பயன்முறை", staffVendorUserMode: "ஊழியர் பயனர் பயன்முறை", manageYourHouseholdStaff: "உங்கள் வீட்டு ஊழியர்களை நிர்வகிக்கவும்", trackYourOwnWork: "உங்கள் சொந்த வேலை மற்றும் வருமானத்தைக் கண்காணிக்கவும்", switchedToHomeMode: "வீட்டு பயனர் பயன்முறைக்கு மாறியது", switchedToStaffMode: "ஊழியர் பயனர் பயன்முறைக்கு மாறியது",
@@ -4890,6 +5020,15 @@ const ta: Partial<typeof en> = {
   tour: "சுற்றுலா", startTour: "சுற்றுலா தொடங்கவும்", skipTour: "சுற்றுலா தவிர்க்கவும்", nextStep: "அடுத்து", previousStep: "முந்தைய", finishTour: "முடிக்கவும்", tourCompleted: "சுற்றுலா முடிந்தது", replayTour: "சுற்றுலா மீண்டும் இயக்கவும்",
   youAreNowSupporter: "நீங்கள் இப்போது ஆதரவாளர்!", paymentVerification: "கட்டண சரிபார்ப்பு", aboutTheDeveloper: "டெவலப்பர் பற்றி", independentDeveloper: "இந்தியாவின் சுதந்திர டெவலப்பர்", basedInIndia: "இந்தியாவில் அமைந்துள்ளது", buildingApps: "வாழ்க்கையை எளிதாக்கும் ஆப்களை உருவாக்குகிறது", developerDescription: "பயனுள்ள மற்றும் நபர்-மையமான ஆப்களை உருவாக்குவதில் ஆர்வமுள்ள ஒரு சோலோ-ப்ரெனியூரால் உருவாக்கப்பட்டது. ஹோம் ஸ்டாஃப் 360 வீடுகளுக்கு அவர்களின் வீட்டு ஊழியர்களை எளிதாக நிர்வகிக்க அன்பு மற்றும் அர்ப்பணிப்புடன் வடிவமைக்கப்பட்டுள்ளது, அதே நேரத்தில் வீட்டு சேவை தொழில்களில் நிபுணர்களுக்கு தங்கள் வேலை மற்றும் வருமானத்தை எளிதாக ஒழுங்கமைக்க உதவுகிறது. உங்கள் ஆதரவு இந்த திட்டத்தை உயிருடன் வளர்ந்து கொண்டிருக்கும்!", chooseAmount: "தொகையைத் தேர்வு செய்யவும்", orEnterCustomAmount: "அல்லது தனிப்பயன் தொகையை உள்ளிடவும்", supporter: "ஆதரவாளர்", openingUpiApp: "UPI ஆப் திறக்கிறது", chooseUpiApp: "கட்டணத்தை முடிக்க உங்கள் விருப்பமான UPI ஆப்பைத் தேர்வு செய்யவும்", unableToOpenUpi: "UPI திறக்க இயலவில்லை", useUpiIdManually: "தயவுசெய்து கைமுறையாக செலுத்த கீழே உள்ள UPI ID ஐப் பயன்படுத்தவும்", openingPayPal: "PayPal திறக்கிறது", redirectingToPayPal: "PayPal-க்கு திருப்பி விடப்படுகிறது...", unableToOpenPayPal: "PayPal திறக்க இயலவில்லை", cannotVerifyUpi: "UPI கட்டணங்களை நாங்கள் தானாகச் சரிபார்க்க முடியாது. தயவுசெய்து கைமுறையாக உறுதிப்படுத்தவும்.", yesIContributed: "ஆம், நான் பங்களித்தேன்", noNotYet: "இல்லை / இன்னும் இல்லை", completePaymentOnPayPal: "PayPal-இல் கட்டணத்தை முடிக்கவும்", didPaymentGoThrough: "உங்கள் {amount} ஆதரவு பரிவர்த்தனை நடந்ததா?", pleaseTryAgain: "தயவுசெய்து மீண்டும் முயற்சிக்கவும்",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "பரிந்துரைக்கப்பட்டது", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay மூலம் நேரடியாக செலுத்தவும்", paypal: "PayPal", paySecurelyWithPayPal: "PayPal மூலம் பாதுகாப்பாக செலுத்தவும்", donate: "நன்கொடை", selectAnAmount: "தொகையைத் தேர்வு செய்யவும்", whatYourSupportDoes: "உங்கள் ஆதரவு என்ன செய்கிறது", helpsMaintainApp: "ஆப்பை பராமரிக்கவும் மேம்படுத்தவும் உதவுகிறது", supportsDevelopment: "புதிய அம்சங்களின் வளர்ச்சியை ஆதரிக்கிறது", keepsAppAdFree: "ஆப்பை விளம்பரமற்றதாகவும் தனியுரிமை-மையமாகவும் வைக்கிறது", enablesFasterBugFixes: "வேகமான பிழை திருத்தங்களையும் புதுப்பிப்புகளையும் செயல்படுத்துகிறது", donationsVoluntary: "அனைத்து நன்கொடைகளும் தன்னார்வமானவை. நன்கொடைகளைப் பொருட்படுத்தாமல் ஆப் எப்போதும் இலவசம். உங்கள் ஆதரவுக்கு நன்றி!", country: "நாடு", version: "பதிப்பு", craftedBy: "Dhairya Shah (The Team 360) ஆல் உருவாக்கப்பட்டது", thankYouForUsing: "எங்கள் ஆப்பைப் பயன்படுத்தியதற்கு நன்றி", seeYouSoon: "விரைவில் சந்திப்போம்!", appTagline: "Offline-First Home & Staff Manager",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "சேமிக்கப்படாத மாற்றங்கள்",
+  unsavedChangesDescription: "உங்களிடம் சேமிக்கப்படாத மாற்றங்கள் உள்ளன. அவற்றை நிராகரிக்க விரும்புகிறீர்களா?",
+  discardChanges: "மாற்றங்களை நிராகரி",
+  continueEditing: "திருத்தத்தைத் தொடரவும்",
+  exitAppTitle: "ஆப்பை மூடு",
+  exitAppDescription: "நீங்கள் ஆப்பை மூட விரும்புகிறீர்களா?",
+  exitApp: "வெளியேறு",
+  stayInApp: "இருங்கள்",
 };
 const ur: Partial<typeof en> = {
   // Common - عام
@@ -5097,9 +5236,7 @@ const ur: Partial<typeof en> = {
 
   // App - ایپ
   app: "ایپ",
-  exitApp: "ایپ بند کریں",
   closeApplication: "ایپلیکیشن بند کریں",
-  exitAppDescription: "ایپ بند کرنے کے لیے، براہ کرم اپنے ڈیوائس کا ہوم بٹن یا ایپ سوئچر استعمال کریں۔",
 
   // Laundry - لانڈری
   laundry: "لانڈری",
@@ -5752,6 +5889,15 @@ const ur: Partial<typeof en> = {
   finishTour: "ختم کریں",
   tourCompleted: "ٹور مکمل",
   replayTour: "ٹور دوبارہ چلائیں",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "غیر محفوظ شدہ تبدیلیاں",
+  unsavedChangesDescription: "آپ کے پاس غیر محفوظ شدہ تبدیلیاں ہیں۔ کیا آپ انہیں ضائع کرنا چاہتے ہیں؟",
+  discardChanges: "تبدیلیاں ضائع کریں",
+  continueEditing: "ترمیم جاری رکھیں",
+  exitAppTitle: "ایپ سے باہر نکلیں",
+  exitAppDescription: "کیا آپ واقعی ایپ سے باہر نکلنا چاہتے ہیں؟",
+  exitApp: "باہر نکلیں",
+  stayInApp: "رہیں",
 };
 const bn: Partial<typeof en> = {
   save: "সংরক্ষণ করুন",
@@ -5945,9 +6091,7 @@ const bn: Partial<typeof en> = {
   deleteEverythingStartFresh: "সব মুছে নতুন করে শুরু করুন",
 
   app: "অ্যাপ",
-  exitApp: "অ্যাপ বন্ধ করুন",
   closeApplication: "অ্যাপ্লিকেশন বন্ধ করুন",
-  exitAppDescription: "অ্যাপ বন্ধ করতে, আপনার ডিভাইসের হোম বাটন বা অ্যাপ সুইচার ব্যবহার করুন।",
 
   laundry: "লন্ড্রি",
   addLaundry: "লন্ড্রি যোগ করুন",
@@ -6521,7 +6665,16 @@ const bn: Partial<typeof en> = {
   finishTour: "শেষ করুন",
   tourCompleted: "ট্যুর সম্পন্ন",
   replayTour: "ট্যুর আবার দেখুন",
-  youAreNowSupporter: "আপনি এখন একজন সাপোর্টার!", paymentVerification: "পেমেন্ট যাচাইকরণ", aboutTheDeveloper: "ডেভেলপার সম্পর্কে", independentDeveloper: "ভারতের স্বাধীন ডেভেলপার", basedInIndia: "ভারতে অবস্থিত", buildingApps: "জীবনকে সহজ করে এমন অ্যাপ তৈরি করছেন", developerDescription: "উপযোগী এবং মানুষ-কেন্দ্রিক অ্যাপ তৈরি করতে আগ্রহী একজন সোলো-প্রেনিউর দ্বারা নির্মিত। হোম স্টাফ 360 কে পরিবারগুলিকে তাদের গৃহকর্মী সহজে পরিচালনা করতে সাহায্য করার জন্য ভালোবাসা এবং নিষ্ঠার সাথে ডিজাইন করা হয়েছে, সেইসাথে গৃহ সেবা শিল্পের পেশাদারদের তাদের কাজ এবং উপার্জন সহজে সংগঠিত করার ক্ষমতা দিয়েছে। আপনার সাপোর্ট এই প্রকল্পটিকে জীবিত এবং বর্ধনশীল রাখে!", chooseAmount: "পরিমাণ নির্বাচন করুন", orEnterCustomAmount: "অথবা কাস্টম পরিমাণ লিখুন", supporter: "সাপোর্টার", openingUpiApp: "UPI অ্যাপ খোলা হচ্ছে", chooseUpiApp: "পেমেন্ট সম্পন্ন করতে আপনার পছন্দের UPI অ্যাপ নির্বাচন করুন", unableToOpenUpi: "UPI খুলতে অক্ষম", useUpiIdManually: "দয়া করে ম্যানুয়ালি পেমেন্ট করতে নীচের UPI ID ব্যবহার করুন", openingPayPal: "PayPal খোলা হচ্ছে", redirectingToPayPal: "PayPal-এ রিডাইরেক্ট করা হচ্ছে...", unableToOpenPayPal: "PayPal খুলতে অক্ষম", cannotVerifyUpi: "আমরা স্বয়ংক্রিয়ভাবে UPI পেমেন্ট যাচাই করতে পারি না। দয়া করে ম্যানুয়ালি নিশ্চিত করুন।", yesIContributed: "হ্যাঁ, আমি অবদান রেখেছি", noNotYet: "না / এখনও না", completePaymentOnPayPal: "PayPal-এ পেমেন্ট সম্পন্ন করুন", didPaymentGoThrough: "আপনার {amount} এর সাপোর্ট লেনদেন সফল হয়েছে?", pleaseTryAgain: "দয়া করে আবার চেষ্টা করুন",
+  youAreNowSupporter: "আপনি এখন একজন সাপোর্টার!", paymentVerification: "পেমেন্ট যাচাইকরণ", aboutTheDeveloper: "ডেভেলপার সম্পর্কে",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "অসংরক্ষিত পরিবর্তন",
+  unsavedChangesDescription: "আপনার অসংরক্ষিত পরিবর্তন আছে। আপনি কি সেগুলি বাতিল করতে চান?",
+  discardChanges: "পরিবর্তন বাতিল করুন",
+  continueEditing: "সম্পাদনা চালিয়ে যান",
+  exitAppTitle: "অ্যাপ থেকে বের হন",
+  exitAppDescription: "আপনি কি সত্যিই অ্যাপ থেকে বের হতে চান?",
+  exitApp: "বের হন",
+  stayInApp: "থাকুন", independentDeveloper: "ভারতের স্বাধীন ডেভেলপার", basedInIndia: "ভারতে অবস্থিত", buildingApps: "জীবনকে সহজ করে এমন অ্যাপ তৈরি করছেন", developerDescription: "উপযোগী এবং মানুষ-কেন্দ্রিক অ্যাপ তৈরি করতে আগ্রহী একজন সোলো-প্রেনিউর দ্বারা নির্মিত। হোম স্টাফ 360 কে পরিবারগুলিকে তাদের গৃহকর্মী সহজে পরিচালনা করতে সাহায্য করার জন্য ভালোবাসা এবং নিষ্ঠার সাথে ডিজাইন করা হয়েছে, সেইসাথে গৃহ সেবা শিল্পের পেশাদারদের তাদের কাজ এবং উপার্জন সহজে সংগঠিত করার ক্ষমতা দিয়েছে। আপনার সাপোর্ট এই প্রকল্পটিকে জীবিত এবং বর্ধনশীল রাখে!", chooseAmount: "পরিমাণ নির্বাচন করুন", orEnterCustomAmount: "অথবা কাস্টম পরিমাণ লিখুন", supporter: "সাপোর্টার", openingUpiApp: "UPI অ্যাপ খোলা হচ্ছে", chooseUpiApp: "পেমেন্ট সম্পন্ন করতে আপনার পছন্দের UPI অ্যাপ নির্বাচন করুন", unableToOpenUpi: "UPI খুলতে অক্ষম", useUpiIdManually: "দয়া করে ম্যানুয়ালি পেমেন্ট করতে নীচের UPI ID ব্যবহার করুন", openingPayPal: "PayPal খোলা হচ্ছে", redirectingToPayPal: "PayPal-এ রিডাইরেক্ট করা হচ্ছে...", unableToOpenPayPal: "PayPal খুলতে অক্ষম", cannotVerifyUpi: "আমরা স্বয়ংক্রিয়ভাবে UPI পেমেন্ট যাচাই করতে পারি না। দয়া করে ম্যানুয়ালি নিশ্চিত করুন।", yesIContributed: "হ্যাঁ, আমি অবদান রেখেছি", noNotYet: "না / এখনও না", completePaymentOnPayPal: "PayPal-এ পেমেন্ট সম্পন্ন করুন", didPaymentGoThrough: "আপনার {amount} এর সাপোর্ট লেনদেন সফল হয়েছে?", pleaseTryAgain: "দয়া করে আবার চেষ্টা করুন",
   upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "প্রস্তাবিত", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay দিয়ে সরাসরি পেমেন্ট করুন", paypal: "PayPal", paySecurelyWithPayPal: "PayPal দিয়ে নিরাপদে পেমেন্ট করুন", donate: "দান করুন", selectAnAmount: "একটি পরিমাণ নির্বাচন করুন", whatYourSupportDoes: "আপনার সাপোর্ট কী করে", helpsMaintainApp: "অ্যাপ রক্ষণাবেক্ষণ ও উন্নত করতে সাহায্য করে", supportsDevelopment: "নতুন বৈশিষ্ট্যের উন্নয়নে সাহায্য করে", keepsAppAdFree: "অ্যাপটিকে বিজ্ঞাপন-মুক্ত এবং গোপনীয়তা-কেন্দ্রিক রাখে", enablesFasterBugFixes: "দ্রুত বাগ ফিক্স এবং আপডেট সক্ষম করে", donationsVoluntary: "সমস্ত দান স্বেচ্ছাসেবী। দান নির্বিশেষে অ্যাপটি চিরকাল বিনামূল্যে। আপনার সাপোর্টের জন্য ধন্যবাদ!", country: "দেশ", version: "সংস্করণ", craftedBy: "Dhairya Shah (The Team 360) দ্বারা তৈরি", thankYouForUsing: "আমাদের অ্যাপ ব্যবহার করার জন্য ধন্যবাদ", seeYouSoon: "শীঘ্রই দেখা হবে!", appTagline: "Offline-First Home & Staff Manager",
 };
 const or: Partial<typeof en> = {
@@ -6730,9 +6883,7 @@ const or: Partial<typeof en> = {
 
   // App
   app: "ଆପ୍",
-  exitApp: "ଆପ୍ ବନ୍ଦ କରନ୍ତୁ",
   closeApplication: "ଆପ୍ଲିକେସନ ବନ୍ଦ କରନ୍ତୁ",
-  exitAppDescription: "ଆପ୍ ବନ୍ଦ କରିବାକୁ ଆପଣଙ୍କ ଡିଭାଇସର ହୋମ ବଟନ ବା ଆପ୍ ସ୍ୱିଚର ବ୍ୟବହାର କରନ୍ତୁ।",
 
   // Laundry
   laundry: "ଲଣ୍ଡ୍ରି",
@@ -7385,6 +7536,15 @@ const or: Partial<typeof en> = {
   finishTour: "ସମାପ୍ତ",
   tourCompleted: "ଟୁର ସମ୍ପୂର୍ଣ୍ଣ",
   replayTour: "ଟୁର ପୁନଃପ୍ଲେ କରନ୍ତୁ",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "ସଞ୍ଚିତ ନହୋଇଥିବା ପରିବର୍ତ୍ତନ",
+  unsavedChangesDescription: "ଆପଣଙ୍କର ସଞ୍ଚିତ ନହୋଇଥିବା ପରିବର୍ତ୍ତନ ଅଛି। ଆପଣ ସେଗୁଡ଼ିକୁ ବାତିଲ କରିବାକୁ ଚାହୁଁଛନ୍ତି କି?",
+  discardChanges: "ପରିବର୍ତ୍ତନ ବାତିଲ କରନ୍ତୁ",
+  continueEditing: "ସମ୍ପାଦନା ଜାରି ରଖନ୍ତୁ",
+  exitAppTitle: "ଆପରୁ ବାହାରନ୍ତୁ",
+  exitAppDescription: "ଆପଣ ନିଶ୍ଚିତ ଯେ ଆପଣ ଆପରୁ ବାହାରିବାକୁ ଚାହୁଁଛନ୍ତି?",
+  exitApp: "ବାହାରନ୍ତୁ",
+  stayInApp: "ରୁହନ୍ତୁ",
 };
 const as: Partial<typeof en> = {
   // Common
@@ -7592,9 +7752,7 @@ const as: Partial<typeof en> = {
 
   // App
   app: "এপ",
-  exitApp: "এপ বন্ধ কৰক",
   closeApplication: "এপ্লিকেশ্বন বন্ধ কৰক",
-  exitAppDescription: "এপ বন্ধ কৰিবলৈ, আপোনাৰ ডিভাইচৰ হোম বুটাম বা এপ চুইচাৰ ব্যৱহাৰ কৰক।",
 
   // Laundry
   laundry: "লণ্ড্ৰী",
@@ -8247,6 +8405,15 @@ const as: Partial<typeof en> = {
   finishTour: "সমাপ্ত কৰক",
   tourCompleted: "টুৰ সম্পূৰ্ণ হৈছে",
   replayTour: "টুৰ পুনৰ চলাওক",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "সংৰক্ষণ নকৰা পৰিৱৰ্তন",
+  unsavedChangesDescription: "আপোনাৰ সংৰক্ষণ নকৰা পৰিৱৰ্তন আছে। আপুনি সেইবোৰ পৰিত্যাগ কৰিব বিচাৰে নেকি?",
+  discardChanges: "পৰিৱৰ্তন পৰিত্যাগ কৰক",
+  continueEditing: "সম্পাদনা অব্যাহত ৰাখক",
+  exitAppTitle: "এপৰ পৰা ওলাওক",
+  exitAppDescription: "আপুনি নিশ্চিতনে যে আপুনি এপৰ পৰা ওলাব বিচাৰে?",
+  exitApp: "ওলাওক",
+  stayInApp: "থাকক",
 };
 
 const ru: Partial<typeof en> = {
@@ -8455,9 +8622,7 @@ const ru: Partial<typeof en> = {
   
   // App
   app: "Приложение",
-  exitApp: "Выйти из приложения",
   closeApplication: "Закрыть приложение",
-  exitAppDescription: "Чтобы закрыть приложение, используйте кнопку «Домой» или переключатель приложений на вашем устройстве.",
   
   // Laundry
   laundry: "Прачечная",
@@ -9110,6 +9275,15 @@ const ru: Partial<typeof en> = {
   finishTour: "Завершить",
   tourCompleted: "Обзор завершён",
   replayTour: "Повторить обзор",
+  // Dirty Tracking & Exit Confirmation
+  unsavedChangesTitle: "Несохранённые изменения",
+  unsavedChangesDescription: "У вас есть несохранённые изменения. Вы хотите их отменить?",
+  discardChanges: "Отменить изменения",
+  continueEditing: "Продолжить редактирование",
+  exitAppTitle: "Выход из приложения",
+  exitAppDescription: "Вы уверены, что хотите выйти из приложения?",
+  exitApp: "Выход",
+  stayInApp: "Остаться",
 };
 
 export const translations: Record<Language, Partial<typeof en>> & { en: typeof en } = {
