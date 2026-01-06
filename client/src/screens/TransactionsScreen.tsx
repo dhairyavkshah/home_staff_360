@@ -12,8 +12,6 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
 } from "@/components/ui/drawer";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
@@ -205,21 +203,20 @@ export function TransactionsScreen() {
 
       <Drawer open={showAddForm} onOpenChange={setShowAddForm}>
         <DrawerContent className="max-h-[90vh] flex flex-col">
-          <DrawerHeader className="py-3 pb-4 shrink-0 relative">
-            <DrawerTitle className="text-center">
+          <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b">
+            <h2 className="text-lg font-semibold">
               {tLabel('addTransaction', 'Add Transaction')}
-            </DrawerTitle>
+            </h2>
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-2"
               onClick={() => setShowAddForm(false)}
               data-testid="button-close-add-form"
             >
               <X className="w-5 h-5" />
             </Button>
-          </DrawerHeader>
-          <div className="px-4 pb-6 overflow-y-auto flex-1 flex flex-col gap-4">
+          </div>
+          <div className="px-4 py-4 overflow-y-auto flex-1 flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="person">{tLabel('staff', 'Staff')} <span className="text-destructive">*</span></Label>
               <SearchableSelect

@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { Minus, Plus, Check, Shirt, X } from "lucide-react";
+import { 
+  Minus, Plus, Check, X,
+  Shirt, BriefcaseBusiness, Baby, Bed, Bath,
+  Circle, Square, RectangleVertical, Sparkles
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +16,6 @@ import {
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LAUNDRY_ITEM_TYPES, type LaundryItemType } from "@shared/schema";
@@ -28,17 +30,74 @@ interface QuickAddClothModalProps {
   keepOpenAfterAdd?: boolean;
 }
 
-const CLOTH_TYPE_ICONS: Record<string, string> = {
-  'Shirt': 'shirt',
-  'T-shirt': 'tshirt',
-  'Pants': 'pants',
-  'Jeans': 'jeans',
-  'Saree': 'saree',
-  'Kurta': 'kurta',
-  'Dress': 'dress',
-  '3 Piece Suit': 'suit',
-  '4 Piece Suit': 'suit',
-  'Blazer': 'blazer',
+const getClothIcon = (type: string) => {
+  const iconClass = "w-4 h-4 text-muted-foreground shrink-0";
+  switch (type) {
+    case 'Shirt':
+    case 'T-shirt':
+    case 'Kurta':
+      return <Shirt className={iconClass} />;
+    case 'Pants':
+    case 'Jeans':
+      return <RectangleVertical className={iconClass} />;
+    case 'Dress':
+    case 'Gown':
+    case 'Wedding Dress':
+      return <Sparkles className={iconClass} />;
+    case 'Saree':
+    case 'Salwar Suit':
+      return <Circle className={iconClass} />;
+    case 'Blazer':
+    case 'Jacket':
+    case '3 Piece Suit':
+    case '4 Piece Suit':
+      return <BriefcaseBusiness className={iconClass} />;
+    case 'Bedsheet':
+    case 'Blanket':
+    case 'Pillow Cover':
+      return <Bed className={iconClass} />;
+    case 'Towel':
+      return <Bath className={iconClass} />;
+    case 'Baby Cloth':
+      return <Baby className={iconClass} />;
+    default:
+      return <Square className={iconClass} />;
+  }
+};
+
+const getClothIconLarge = (type: string) => {
+  const iconClass = "w-6 h-6 text-primary";
+  switch (type) {
+    case 'Shirt':
+    case 'T-shirt':
+    case 'Kurta':
+      return <Shirt className={iconClass} />;
+    case 'Pants':
+    case 'Jeans':
+      return <RectangleVertical className={iconClass} />;
+    case 'Dress':
+    case 'Gown':
+    case 'Wedding Dress':
+      return <Sparkles className={iconClass} />;
+    case 'Saree':
+    case 'Salwar Suit':
+      return <Circle className={iconClass} />;
+    case 'Blazer':
+    case 'Jacket':
+    case '3 Piece Suit':
+    case '4 Piece Suit':
+      return <BriefcaseBusiness className={iconClass} />;
+    case 'Bedsheet':
+    case 'Blanket':
+    case 'Pillow Cover':
+      return <Bed className={iconClass} />;
+    case 'Towel':
+      return <Bath className={iconClass} />;
+    case 'Baby Cloth':
+      return <Baby className={iconClass} />;
+    default:
+      return <Square className={iconClass} />;
+  }
 };
 
 export function QuickAddClothModal({
@@ -133,7 +192,7 @@ export function QuickAddClothModal({
                   onClick={() => handleSelectType(type)}
                   data-testid={`button-cloth-type-${type.replace(/\s+/g, '-').toLowerCase()}`}
                 >
-                  <Shirt className="w-4 h-4 text-muted-foreground shrink-0" />
+                  {getClothIcon(type)}
                   <span className="text-center leading-tight">{type}</span>
                 </Button>
               ))}
@@ -144,7 +203,7 @@ export function QuickAddClothModal({
         <div className="flex flex-col gap-3">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-1">
-              <Shirt className="w-6 h-6 text-primary" />
+              {getClothIconLarge(selectedType)}
             </div>
             <h3 className="text-base font-semibold">{selectedType}</h3>
           </div>
@@ -239,21 +298,20 @@ export function QuickAddClothModal({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[95vh] flex flex-col">
-          <DrawerHeader className="py-3 pb-4 shrink-0 relative">
-            <DrawerTitle className="text-center">
+          <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b">
+            <h2 className="text-lg font-semibold">
               {step === 'select' ? 'Select Cloth Type' : 'Enter Quantity'}
-            </DrawerTitle>
+            </h2>
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-2"
               onClick={() => onOpenChange(false)}
               data-testid="button-close-modal"
             >
               <X className="w-5 h-5" />
             </Button>
-          </DrawerHeader>
-          <div className="px-4 pb-4 overflow-y-auto flex-1 flex flex-col">
+          </div>
+          <div className="px-4 py-3 overflow-y-auto flex-1 flex flex-col">
             {content}
           </div>
         </DrawerContent>
