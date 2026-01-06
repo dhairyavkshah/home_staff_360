@@ -19,12 +19,17 @@ android {
     
     signingConfigs {
         release {
-            def keystoreFile = System.getenv("KEYSTORE_FILE")
-            if (keystoreFile != null && file(keystoreFile).exists()) {
-                storeFile file(keystoreFile)
-                storePassword System.getenv("KEYSTORE_PASSWORD")
-                keyAlias System.getenv("KEY_ALIAS")
-                keyPassword System.getenv("KEY_PASSWORD")
+            def keystoreFilePath = System.getenv("KEYSTORE_FILE")
+            if (keystoreFilePath) {
+                def ksFile = file(keystoreFilePath)
+                if (ksFile.exists()) {
+                    storeFile ksFile
+                    storePassword System.getenv("KEYSTORE_PASSWORD")
+                    keyAlias System.getenv("KEY_ALIAS")
+                    keyPassword System.getenv("KEY_PASSWORD")
+                } else {
+                    println "WARNING: Keystore file not found at: ${keystoreFilePath}"
+                }
             }
         }
     }
@@ -33,9 +38,16 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            def keystoreFile = System.getenv("KEYSTORE_FILE")
-            if (keystoreFile != null && file(keystoreFile).exists()) {
-                signingConfig signingConfigs.release
+            def keystoreFilePath = System.getenv("KEYSTORE_FILE")
+            if (keystoreFilePath) {
+                def ksFile = file(keystoreFilePath)
+                if (ksFile.exists()) {
+                    signingConfig signingConfigs.release
+                } else {
+                    println "WARNING: Release build will be unsigned - keystore not found"
+                }
+            } else {
+                println "WARNING: Release build will be unsigned - KEYSTORE_FILE not set"
             }
         }
     }
