@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-import { 
-  Minus, Plus, Check, X,
-  Shirt, BriefcaseBusiness, Baby, Bed, Bath,
-  Circle, Square, RectangleVertical, Sparkles
-} from "lucide-react";
+import { Minus, Plus, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,73 +26,194 @@ interface QuickAddClothModalProps {
   keepOpenAfterAdd?: boolean;
 }
 
-const getClothIcon = (type: string) => {
-  const iconClass = "w-4 h-4 text-muted-foreground shrink-0";
-  switch (type) {
-    case 'Shirt':
-    case 'T-shirt':
-    case 'Kurta':
-      return <Shirt className={iconClass} />;
-    case 'Pants':
-    case 'Jeans':
-      return <RectangleVertical className={iconClass} />;
-    case 'Dress':
-    case 'Gown':
-    case 'Wedding Dress':
-      return <Sparkles className={iconClass} />;
-    case 'Saree':
-    case 'Salwar Suit':
-      return <Circle className={iconClass} />;
-    case 'Blazer':
-    case 'Jacket':
-    case '3 Piece Suit':
-    case '4 Piece Suit':
-      return <BriefcaseBusiness className={iconClass} />;
-    case 'Bedsheet':
-    case 'Blanket':
-    case 'Pillow Cover':
-      return <Bed className={iconClass} />;
-    case 'Towel':
-      return <Bath className={iconClass} />;
-    case 'Baby Cloth':
-      return <Baby className={iconClass} />;
-    default:
-      return <Square className={iconClass} />;
-  }
-};
+const IconShirt = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2v-10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"/>
+  </svg>
+);
 
-const getClothIconLarge = (type: string) => {
-  const iconClass = "w-6 h-6 text-primary";
+const IconTShirt = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2v-10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"/>
+  </svg>
+);
+
+const IconPants = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 2h14v4l-2 16h-3l-2-12-2 12H7L5 6V2z"/>
+  </svg>
+);
+
+const IconJeans = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 2h14v4l-2 16h-3l-2-12-2 12H7L5 6V2z"/>
+    <path d="M9 6h6M8 10h2M14 10h2"/>
+  </svg>
+);
+
+const IconBedsheet = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="16" rx="2"/>
+    <path d="M3 10h18"/>
+  </svg>
+);
+
+const IconTowel = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="4" y="2" width="16" height="20" rx="2"/>
+    <path d="M8 6h8M8 10h8M8 14h4"/>
+  </svg>
+);
+
+const IconSaree = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4c0 0 4 2 8 2s8-2 8-2"/>
+    <path d="M4 4v16c0 1 1 2 2 2h12c1 0 2-1 2-2V4"/>
+    <path d="M8 10c2 1 6 1 8 0"/>
+    <path d="M8 14c2 1 6 1 8 0"/>
+  </svg>
+);
+
+const IconKurta = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 2l4 4v4h-3v12H7V10H4V6l4-4"/>
+    <path d="M8 2h8"/>
+    <path d="M12 2v6"/>
+  </svg>
+);
+
+const IconDress = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 2l2 4h8l2-4"/>
+    <path d="M8 6l-4 16h16l-4-16"/>
+    <path d="M12 6v4"/>
+  </svg>
+);
+
+const IconJacket = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 2l4 4v14c0 1-1 2-2 2H6c-1 0-2-1-2-2V6l4-4h8z"/>
+    <path d="M8 2v4h8V2"/>
+    <path d="M4 10h4v6"/>
+    <path d="M20 10h-4v6"/>
+  </svg>
+);
+
+const IconBlanket = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="3"/>
+    <path d="M2 8c3-2 6 2 10 0s7 2 10 0"/>
+  </svg>
+);
+
+const IconPillowCover = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="6" width="20" height="12" rx="4"/>
+    <path d="M6 6v12M18 6v12"/>
+  </svg>
+);
+
+const IconBlazer = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 2l-4 6v12c0 1 1 2 2 2h16c1 0 2-1 2-2V8l-4-6H6z"/>
+    <path d="M12 2v20"/>
+    <path d="M8 2l4 8 4-8"/>
+  </svg>
+);
+
+const IconSuit = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 2l-4 6v12c0 1 1 2 2 2h16c1 0 2-1 2-2V8l-4-6H6z"/>
+    <path d="M12 2l-2 6 2 2 2-2-2-6"/>
+    <path d="M10 14h4"/>
+  </svg>
+);
+
+const IconSalwarSuit = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 2h8l2 8H6l2-8z"/>
+    <path d="M6 10l2 12h2l2-8 2 8h2l2-12"/>
+  </svg>
+);
+
+const IconGown = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 2l-2 4h12l-2-4H8z"/>
+    <path d="M6 6l-2 16h16l-2-16"/>
+    <path d="M12 6v4"/>
+    <path d="M8 14c2 2 6 2 8 0"/>
+  </svg>
+);
+
+const IconBabyCloth = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 4a4 4 0 01-8 0"/>
+    <path d="M5 6l-2 4h4v10c0 1 1 2 2 2h6c1 0 2-1 2-2V10h4l-2-4"/>
+    <circle cx="10" cy="14" r="1"/>
+    <circle cx="14" cy="14" r="1"/>
+  </svg>
+);
+
+const IconWeddingDress = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 2l-2 4h12l-2-4H8z"/>
+    <path d="M6 6c-2 8-4 16 6 16s8-8 6-16"/>
+    <path d="M12 6v3"/>
+    <path d="M9 12l3 2 3-2"/>
+  </svg>
+);
+
+const IconOther = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+);
+
+const ClothIcon = ({ type, className = "" }: { type: string; className?: string }) => {
+  const baseClass = `shrink-0 ${className}`;
+  
   switch (type) {
     case 'Shirt':
+      return <IconShirt className={baseClass} />;
     case 'T-shirt':
-    case 'Kurta':
-      return <Shirt className={iconClass} />;
+      return <IconTShirt className={baseClass} />;
     case 'Pants':
+      return <IconPants className={baseClass} />;
     case 'Jeans':
-      return <RectangleVertical className={iconClass} />;
-    case 'Dress':
-    case 'Gown':
-    case 'Wedding Dress':
-      return <Sparkles className={iconClass} />;
+      return <IconJeans className={baseClass} />;
+    case 'Bedsheet':
+      return <IconBedsheet className={baseClass} />;
+    case 'Towel':
+      return <IconTowel className={baseClass} />;
     case 'Saree':
-    case 'Salwar Suit':
-      return <Circle className={iconClass} />;
-    case 'Blazer':
+      return <IconSaree className={baseClass} />;
+    case 'Kurta':
+      return <IconKurta className={baseClass} />;
+    case 'Dress':
+      return <IconDress className={baseClass} />;
     case 'Jacket':
+      return <IconJacket className={baseClass} />;
+    case 'Blanket':
+      return <IconBlanket className={baseClass} />;
+    case 'Pillow Cover':
+      return <IconPillowCover className={baseClass} />;
+    case 'Blazer':
+      return <IconBlazer className={baseClass} />;
     case '3 Piece Suit':
     case '4 Piece Suit':
-      return <BriefcaseBusiness className={iconClass} />;
-    case 'Bedsheet':
-    case 'Blanket':
-    case 'Pillow Cover':
-      return <Bed className={iconClass} />;
-    case 'Towel':
-      return <Bath className={iconClass} />;
+      return <IconSuit className={baseClass} />;
+    case 'Salwar Suit':
+      return <IconSalwarSuit className={baseClass} />;
+    case 'Gown':
+      return <IconGown className={baseClass} />;
     case 'Baby Cloth':
-      return <Baby className={iconClass} />;
+      return <IconBabyCloth className={baseClass} />;
+    case 'Wedding Dress':
+      return <IconWeddingDress className={baseClass} />;
+    case 'Other':
     default:
-      return <Square className={iconClass} />;
+      return <IconOther className={baseClass} />;
   }
 };
 
@@ -192,7 +309,7 @@ export function QuickAddClothModal({
                   onClick={() => handleSelectType(type)}
                   data-testid={`button-cloth-type-${type.replace(/\s+/g, '-').toLowerCase()}`}
                 >
-                  {getClothIcon(type)}
+                  <ClothIcon type={type} className="w-4 h-4 text-muted-foreground" />
                   <span className="text-center leading-tight">{type}</span>
                 </Button>
               ))}
@@ -203,7 +320,7 @@ export function QuickAddClothModal({
         <div className="flex flex-col gap-3">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-1">
-              {getClothIconLarge(selectedType)}
+              <ClothIcon type={selectedType} className="w-6 h-6 text-primary" />
             </div>
             <h3 className="text-base font-semibold">{selectedType}</h3>
           </div>
