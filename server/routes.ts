@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import crypto from "crypto";
+import { logger, logSecurityEvent, logDatabaseError } from "./logger";
 import { db, withTransaction } from "./db";
 import {
   emitNewMessage,
@@ -618,7 +619,7 @@ router.post("/api/auth/verify-otp", rateLimitMiddleware('auth'), async (req: Req
     // Resolve any pending phone links for this user (auto-connections)
     const resolvedLinks = await resolvePendingPhoneLinks(user.id, user.phone);
     if (resolvedLinks > 0) {
-      console.log(`[Auth] Resolved ${resolvedLinks} pending connection(s) for user ${user.id}`);
+      logger.info("Resolved pending connections", { userId: user.id, resolvedCount: resolvedLinks });
     }
 
     const token = jwt.sign(
@@ -645,7 +646,7 @@ router.post("/api/auth/verify-otp", rateLimitMiddleware('auth'), async (req: Req
       }
     });
   } catch (error) {
-    console.error("Verify OTP error:", error);
+    logDatabaseError("verifyOTP", error);
     res.status(500).json({ error: "Failed to verify OTP" });
   }
 });

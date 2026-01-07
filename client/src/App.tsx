@@ -94,6 +94,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Heart } from "lucide-react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function MobileAppRouter() {
   const { currentScreen } = useNavigation();
@@ -313,19 +314,25 @@ function App() {
   const isAdminRoute = window.location.pathname.startsWith("/admin");
 
   if (isAdminRoute) {
-    return <AdminApp />;
+    return (
+      <ErrorBoundary>
+        <AdminApp />
+      </ErrorBoundary>
+    );
   }
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider defaultTheme="light" storageKey="homestaff360-theme">
-        <I18nProvider>
-          <TooltipProvider>
-            <MobileAppWithSplash />
-          </TooltipProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider defaultTheme="light" storageKey="homestaff360-theme">
+          <I18nProvider>
+            <TooltipProvider>
+              <MobileAppWithSplash />
+            </TooltipProvider>
+          </I18nProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 
