@@ -91,6 +91,72 @@ const PhoneNumberFormat = libphonenumber.PhoneNumberFormat;
 
 const router = Router();
 
+// ============================================
+// Standardized API Error Response System
+// ============================================
+interface APIErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+  timestamp: string;
+}
+
+interface APISuccessResponse<T = any> {
+  success: true;
+  data: T;
+  timestamp?: string;
+}
+
+const ERROR_CODES = {
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  AUTHENTICATION_REQUIRED: 'AUTHENTICATION_REQUIRED',
+  AUTHORIZATION_DENIED: 'AUTHORIZATION_DENIED',
+  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
+  RATE_LIMITED: 'RATE_LIMITED',
+  CONFLICT: 'CONFLICT',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  BAD_REQUEST: 'BAD_REQUEST',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+} as const;
+
+class APIError extends Error {
+  constructor(
+    public statusCode: number,
+    public code: keyof typeof ERROR_CODES,
+    message: string,
+    public details?: any
+  ) {
+    super(message);
+    this.name = 'APIError';
+  }
+}
+
+function apiError(res: Response, statusCode: number, code: string, message: string, details?: any): Response {
+  const response: APIErrorResponse = {
+    success: false,
+    error: {
+      code,
+      message,
+      ...(details && { details })
+    },
+    timestamp: new Date().toISOString()
+  };
+  return res.status(statusCode).json(response);
+}
+
+function apiSuccess<T>(res: Response, data: T, statusCode: number = 200): Response {
+  const response: APISuccessResponse<T> = {
+    success: true,
+    data
+  };
+  return res.status(statusCode).json(response);
+}
+
+// ============================================
+
 const JWT_SECRET: string = (() => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
@@ -166,10 +232,10 @@ function rateLimitMiddleware(action: string) {
     
     if (!result.allowed) {
       res.setHeader('Retry-After', result.retryAfter || 60);
-      return res.status(429).json({ 
-        error: "Too many requests. Please try again later.",
-        retryAfter: result.retryAfter
-      });
+      return apiError(res, 429, ERROR_CODES.RATE_LIMITED, 
+        "Too many requests. Please try again later.", 
+        { retryAfter: result.retryAfter }
+      );
     }
     next();
   };
@@ -910,12 +976,12 @@ function authenticateToken(req: Request, res: Response, next: Function) {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ error: "Authentication required" });
+    return apiError(res, 401, ERROR_CODES.AUTHENTICATION_REQUIRED, "Authentication required");
   }
 
   jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
     if (err) {
-      return res.status(403).json({ error: "Invalid or expired token" });
+      return apiError(res, 403, ERROR_CODES.AUTHORIZATION_DENIED, "Invalid or expired token");
     }
     (req as any).user = decoded;
     next();
