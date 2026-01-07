@@ -1961,3 +1961,145 @@ export const insertBackupLogSchema = z.object({
 });
 export type InsertBackupLog = z.infer<typeof insertBackupLogSchema>;
 export type BackupLog = typeof backupLogs.$inferSelect;
+
+// ============================================
+// Maintenance Notification System
+// ============================================
+
+export const maintenanceSeverities = ['info', 'warning', 'critical'] as const;
+export type MaintenanceSeverity = typeof maintenanceSeverities[number];
+
+export const maintenanceRecurrenceTypes = ['none', 'weekly', 'monthly'] as const;
+export type MaintenanceRecurrence = typeof maintenanceRecurrenceTypes[number];
+
+export const maintenanceStatuses = ['draft', 'scheduled', 'active', 'completed', 'cancelled'] as const;
+export type MaintenanceStatus = typeof maintenanceStatuses[number];
+
+export const maintenanceWindows = pgTable("maintenance_windows", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  severity: varchar("severity", { length: 20 }).default('info').notNull(),
+  startAt: timestamp("start_at").notNull(),
+  endAt: timestamp("end_at"),
+  durationMinutes: integer("duration_minutes").default(60).notNull(),
+  recurrence: varchar("recurrence", { length: 20 }).default('none').notNull(),
+  weekday: integer("weekday"), // 0-6 for weekly recurrence
+  dayOfMonth: integer("day_of_month"), // 1-31 for monthly recurrence
+  forceLogout: boolean("force_logout").default(false).notNull(),
+  showMaintenancePage: boolean("show_maintenance_page").default(true).notNull(),
+  status: varchar("status", { length: 20 }).default('draft').notNull(),
+  createdById: varchar("created_by_id", { length: 255 }).references(() => adminUsers.id),
+  updatedById: varchar("updated_by_id", { length: 255 }).references(() => adminUsers.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const maintenanceWindowsRelations = relations(maintenanceWindows, ({ one, many }) => ({
+  createdBy: one(adminUsers, {
+    fields: [maintenanceWindows.createdById],
+    references: [adminUsers.id],
+    relationName: "windowsCreated",
+  }),
+  updatedBy: one(adminUsers, {
+    fields: [maintenanceWindows.updatedById],
+    references: [adminUsers.id],
+    relationName: "windowsUpdated",
+  }),
+  broadcasts: many(maintenanceBroadcasts),
+}));
+
+export const insertMaintenanceWindowSchema = z.object({
+  title: z.string().min(1).max(200),
+  message: z.string().min(1).max(2000),
+  severity: z.enum(maintenanceSeverities).optional(),
+  startAt: z.date().or(z.string()),
+  endAt: z.date().or(z.string()).optional().nullable(),
+  durationMinutes: z.number().int().min(1).max(1440).optional(),
+  recurrence: z.enum(maintenanceRecurrenceTypes).optional(),
+  weekday: z.number().int().min(0).max(6).optional().nullable(),
+  dayOfMonth: z.number().int().min(1).max(31).optional().nullable(),
+  forceLogout: z.boolean().optional(),
+  showMaintenancePage: z.boolean().optional(),
+  status: z.enum(maintenanceStatuses).optional(),
+  createdById: z.string().max(255).optional(),
+});
+export type InsertMaintenanceWindow = z.infer<typeof insertMaintenanceWindowSchema>;
+export type MaintenanceWindow = typeof maintenanceWindows.$inferSelect;
+
+export const maintenanceBroadcasts = pgTable("maintenance_broadcasts", {
+  id: serial("id").primaryKey(),
+  windowId: integer("window_id").references(() => maintenanceWindows.id),
+  broadcastType: varchar("broadcast_type", { length: 20 }).default('adhoc').notNull(), // scheduled, adhoc
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  severity: varchar("severity", { length: 20 }).default('info').notNull(),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+  forceLogout: boolean("force_logout").default(false).notNull(),
+  targetUserCount: integer("target_user_count"),
+  deliveredCount: integer("delivered_count").default(0),
+  createdById: varchar("created_by_id", { length: 255 }).references(() => adminUsers.id),
+});
+
+export const maintenanceBroadcastsRelations = relations(maintenanceBroadcasts, ({ one }) => ({
+  window: one(maintenanceWindows, {
+    fields: [maintenanceBroadcasts.windowId],
+    references: [maintenanceWindows.id],
+  }),
+  createdBy: one(adminUsers, {
+    fields: [maintenanceBroadcasts.createdById],
+    references: [adminUsers.id],
+  }),
+}));
+
+export const insertMaintenanceBroadcastSchema = z.object({
+  windowId: z.number().optional().nullable(),
+  broadcastType: z.enum(['scheduled', 'adhoc']).optional(),
+  title: z.string().min(1).max(200),
+  message: z.string().min(1).max(2000),
+  severity: z.enum(maintenanceSeverities).optional(),
+  forceLogout: z.boolean().optional(),
+  targetUserCount: z.number().optional(),
+  deliveredCount: z.number().optional(),
+  createdById: z.string().max(255).optional(),
+});
+export type InsertMaintenanceBroadcast = z.infer<typeof insertMaintenanceBroadcastSchema>;
+export type MaintenanceBroadcast = typeof maintenanceBroadcasts.$inferSelect;
+
+// Active maintenance session - tracks current maintenance state
+export const maintenanceSessions = pgTable("maintenance_sessions", {
+  id: serial("id").primaryKey(),
+  windowId: integer("window_id").references(() => maintenanceWindows.id),
+  isActive: boolean("is_active").default(true).notNull(),
+  startedAt: timestamp("started_at").defaultNow().notNull(),
+  endedAt: timestamp("ended_at"),
+  forceLogoutEnabled: boolean("force_logout_enabled").default(false).notNull(),
+  maintenancePageEnabled: boolean("maintenance_page_enabled").default(true).notNull(),
+  endTime: timestamp("end_time"),
+  message: text("message"),
+  activatedById: varchar("activated_by_id", { length: 255 }).references(() => adminUsers.id),
+});
+
+export const maintenanceSessionsRelations = relations(maintenanceSessions, ({ one }) => ({
+  window: one(maintenanceWindows, {
+    fields: [maintenanceSessions.windowId],
+    references: [maintenanceWindows.id],
+  }),
+  activatedBy: one(adminUsers, {
+    fields: [maintenanceSessions.activatedById],
+    references: [adminUsers.id],
+  }),
+}));
+
+export const insertMaintenanceSessionSchema = z.object({
+  windowId: z.number().optional().nullable(),
+  isActive: z.boolean().optional(),
+  endedAt: z.date().optional().nullable(),
+  forceLogoutEnabled: z.boolean().optional(),
+  maintenancePageEnabled: z.boolean().optional(),
+  endTime: z.date().or(z.string()).optional().nullable(),
+  message: z.string().optional().nullable(),
+  activatedById: z.string().max(255).optional(),
+});
+export type InsertMaintenanceSession = z.infer<typeof insertMaintenanceSessionSchema>;
+export type MaintenanceSession = typeof maintenanceSessions.$inferSelect;

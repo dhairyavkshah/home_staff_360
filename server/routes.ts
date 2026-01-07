@@ -7,6 +7,7 @@ import {
   collaborationMessages, 
   adminUsers,
   adminRolesTable,
+  adminInvitations,
   collaborationBindings,
   sharedAttendance,
   attendanceRevisions,
@@ -5530,6 +5531,336 @@ router.delete("/api/admin/backups/:id", authenticateAdmin, async (req: Request, 
   } catch (error) {
     console.error("Delete backup error:", error);
     res.status(500).json({ error: "Failed to delete backup" });
+  }
+});
+
+// ============ SYSTEM-WIDE BACKUP ENDPOINTS (Super Admin Only) ============
+
+// Helper function to check if admin is super_admin or owner
+async function isSuperAdmin(adminId: string): Promise<boolean> {
+  const admin = await db.query.adminUsers.findFirst({
+    where: eq(adminUsers.id, adminId),
+    with: {
+      role: true
+    }
+  });
+  
+  if (!admin || !admin.role) return false;
+  return admin.role.name === 'super_admin' || admin.role.name === 'owner';
+}
+
+// POST /api/admin/system-backup - Create a full database snapshot
+router.post("/api/admin/system-backup", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).admin?.adminId;
+    
+    // Check if admin is super_admin or owner
+    const hasAccess = await isSuperAdmin(adminId);
+    if (!hasAccess) {
+      return res.status(403).json({ error: "Only super administrators can create system backups" });
+    }
+
+    // Fetch all data from all tables
+    const [
+      usersData,
+      devicesData,
+      collaborationLinksData,
+      collaborationMessagesData,
+      adminRolesData,
+      adminUsersData,
+      adminInvitationsData,
+      collaborationBindingsData,
+      sharedAttendanceData,
+      attendanceRevisionsData,
+      sharedLaundryData,
+      laundryRevisionsData,
+      collabConnectionInvitesData,
+      collabConnectionsData,
+      collabChatsData,
+      chatParticipantsData,
+      chatMessagesData,
+      householdSharesData,
+      householdShareMembersData,
+      businessSharesData,
+      businessShareMembersData,
+      notificationsData,
+      advertisementsData,
+      adSettingsData,
+      adImpressionsData,
+      userBackupsData,
+      backupLogsData
+    ] = await Promise.all([
+      db.select().from(serverUsers),
+      db.select().from(devices),
+      db.select().from(collaborationLinks),
+      db.select().from(collaborationMessages),
+      db.select().from(adminRolesTable),
+      db.select().from(adminUsers),
+      db.select().from(adminInvitations),
+      db.select().from(collaborationBindings),
+      db.select().from(sharedAttendance),
+      db.select().from(attendanceRevisions),
+      db.select().from(sharedLaundry),
+      db.select().from(laundryRevisions),
+      db.select().from(collabConnectionInvites),
+      db.select().from(collabConnections),
+      db.select().from(collabChats),
+      db.select().from(chatParticipants),
+      db.select().from(chatMessages),
+      db.select().from(householdShares),
+      db.select().from(householdShareMembers),
+      db.select().from(businessShares),
+      db.select().from(businessShareMembers),
+      db.select().from(notifications),
+      db.select().from(advertisements),
+      db.select().from(adSettings),
+      db.select().from(adImpressions),
+      db.select().from(userBackups),
+      db.select().from(backupLogs)
+    ]);
+
+    const backupData = {
+      version: "1.0",
+      createdAt: new Date().toISOString(),
+      createdBy: adminId,
+      tables: {
+        server_users: usersData,
+        devices: devicesData,
+        collaboration_links: collaborationLinksData,
+        collaboration_messages: collaborationMessagesData,
+        admin_roles: adminRolesData,
+        admin_users: adminUsersData,
+        admin_invitations: adminInvitationsData,
+        collaboration_bindings: collaborationBindingsData,
+        shared_attendance: sharedAttendanceData,
+        attendance_revisions: attendanceRevisionsData,
+        shared_laundry: sharedLaundryData,
+        laundry_revisions: laundryRevisionsData,
+        collab_connection_invites: collabConnectionInvitesData,
+        collab_connections: collabConnectionsData,
+        collab_chats: collabChatsData,
+        chat_participants: chatParticipantsData,
+        chat_messages: chatMessagesData,
+        household_shares: householdSharesData,
+        household_share_members: householdShareMembersData,
+        business_shares: businessSharesData,
+        business_share_members: businessShareMembersData,
+        notifications: notificationsData,
+        advertisements: advertisementsData,
+        ad_settings: adSettingsData,
+        ad_impressions: adImpressionsData,
+        user_backups: userBackupsData,
+        backup_logs: backupLogsData
+      }
+    };
+
+    res.json(backupData);
+  } catch (error) {
+    console.error("System backup error:", error);
+    res.status(500).json({ error: "Failed to create system backup" });
+  }
+});
+
+// POST /api/admin/system-restore - Restore database from uploaded JSON backup
+router.post("/api/admin/system-restore", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).admin?.adminId;
+    
+    // Check if admin is super_admin or owner
+    const hasAccess = await isSuperAdmin(adminId);
+    if (!hasAccess) {
+      return res.status(403).json({ error: "Only super administrators can restore system backups" });
+    }
+
+    const backupData = req.body;
+
+    // Validate backup structure
+    if (!backupData || !backupData.version || !backupData.tables) {
+      return res.status(400).json({ error: "Invalid backup format" });
+    }
+
+    if (backupData.version !== "1.0") {
+      return res.status(400).json({ error: `Unsupported backup version: ${backupData.version}` });
+    }
+
+    // Perform restoration in a transaction
+    await db.transaction(async (tx) => {
+      // Delete existing data in reverse dependency order
+      // First, delete tables with foreign key dependencies
+      if (backupData.tables.backup_logs) {
+        await tx.delete(backupLogs);
+      }
+      if (backupData.tables.user_backups) {
+        await tx.delete(userBackups);
+      }
+      if (backupData.tables.ad_impressions) {
+        await tx.delete(adImpressions);
+      }
+      if (backupData.tables.ad_settings) {
+        await tx.delete(adSettings);
+      }
+      if (backupData.tables.advertisements) {
+        await tx.delete(advertisements);
+      }
+      if (backupData.tables.notifications) {
+        await tx.delete(notifications);
+      }
+      if (backupData.tables.business_share_members) {
+        await tx.delete(businessShareMembers);
+      }
+      if (backupData.tables.business_shares) {
+        await tx.delete(businessShares);
+      }
+      if (backupData.tables.household_share_members) {
+        await tx.delete(householdShareMembers);
+      }
+      if (backupData.tables.household_shares) {
+        await tx.delete(householdShares);
+      }
+      if (backupData.tables.chat_messages) {
+        await tx.delete(chatMessages);
+      }
+      if (backupData.tables.chat_participants) {
+        await tx.delete(chatParticipants);
+      }
+      if (backupData.tables.collab_chats) {
+        await tx.delete(collabChats);
+      }
+      if (backupData.tables.collab_connections) {
+        await tx.delete(collabConnections);
+      }
+      if (backupData.tables.collab_connection_invites) {
+        await tx.delete(collabConnectionInvites);
+      }
+      if (backupData.tables.laundry_revisions) {
+        await tx.delete(laundryRevisions);
+      }
+      if (backupData.tables.shared_laundry) {
+        await tx.delete(sharedLaundry);
+      }
+      if (backupData.tables.attendance_revisions) {
+        await tx.delete(attendanceRevisions);
+      }
+      if (backupData.tables.shared_attendance) {
+        await tx.delete(sharedAttendance);
+      }
+      if (backupData.tables.collaboration_bindings) {
+        await tx.delete(collaborationBindings);
+      }
+      if (backupData.tables.collaboration_messages) {
+        await tx.delete(collaborationMessages);
+      }
+      if (backupData.tables.collaboration_links) {
+        await tx.delete(collaborationLinks);
+      }
+      if (backupData.tables.devices) {
+        await tx.delete(devices);
+      }
+      if (backupData.tables.admin_invitations) {
+        await tx.delete(adminInvitations);
+      }
+      if (backupData.tables.admin_users) {
+        await tx.delete(adminUsers);
+      }
+      if (backupData.tables.admin_roles) {
+        await tx.delete(adminRolesTable);
+      }
+      if (backupData.tables.server_users) {
+        await tx.delete(serverUsers);
+      }
+
+      // Re-insert data in dependency order (parent tables first)
+      if (backupData.tables.admin_roles && backupData.tables.admin_roles.length > 0) {
+        await tx.insert(adminRolesTable).values(backupData.tables.admin_roles);
+      }
+      if (backupData.tables.server_users && backupData.tables.server_users.length > 0) {
+        await tx.insert(serverUsers).values(backupData.tables.server_users);
+      }
+      if (backupData.tables.admin_users && backupData.tables.admin_users.length > 0) {
+        await tx.insert(adminUsers).values(backupData.tables.admin_users);
+      }
+      if (backupData.tables.admin_invitations && backupData.tables.admin_invitations.length > 0) {
+        await tx.insert(adminInvitations).values(backupData.tables.admin_invitations);
+      }
+      if (backupData.tables.devices && backupData.tables.devices.length > 0) {
+        await tx.insert(devices).values(backupData.tables.devices);
+      }
+      if (backupData.tables.collaboration_links && backupData.tables.collaboration_links.length > 0) {
+        await tx.insert(collaborationLinks).values(backupData.tables.collaboration_links);
+      }
+      if (backupData.tables.collaboration_messages && backupData.tables.collaboration_messages.length > 0) {
+        await tx.insert(collaborationMessages).values(backupData.tables.collaboration_messages);
+      }
+      if (backupData.tables.collaboration_bindings && backupData.tables.collaboration_bindings.length > 0) {
+        await tx.insert(collaborationBindings).values(backupData.tables.collaboration_bindings);
+      }
+      if (backupData.tables.shared_attendance && backupData.tables.shared_attendance.length > 0) {
+        await tx.insert(sharedAttendance).values(backupData.tables.shared_attendance);
+      }
+      if (backupData.tables.attendance_revisions && backupData.tables.attendance_revisions.length > 0) {
+        await tx.insert(attendanceRevisions).values(backupData.tables.attendance_revisions);
+      }
+      if (backupData.tables.shared_laundry && backupData.tables.shared_laundry.length > 0) {
+        await tx.insert(sharedLaundry).values(backupData.tables.shared_laundry);
+      }
+      if (backupData.tables.laundry_revisions && backupData.tables.laundry_revisions.length > 0) {
+        await tx.insert(laundryRevisions).values(backupData.tables.laundry_revisions);
+      }
+      if (backupData.tables.collab_connection_invites && backupData.tables.collab_connection_invites.length > 0) {
+        await tx.insert(collabConnectionInvites).values(backupData.tables.collab_connection_invites);
+      }
+      if (backupData.tables.collab_connections && backupData.tables.collab_connections.length > 0) {
+        await tx.insert(collabConnections).values(backupData.tables.collab_connections);
+      }
+      if (backupData.tables.collab_chats && backupData.tables.collab_chats.length > 0) {
+        await tx.insert(collabChats).values(backupData.tables.collab_chats);
+      }
+      if (backupData.tables.chat_participants && backupData.tables.chat_participants.length > 0) {
+        await tx.insert(chatParticipants).values(backupData.tables.chat_participants);
+      }
+      if (backupData.tables.chat_messages && backupData.tables.chat_messages.length > 0) {
+        await tx.insert(chatMessages).values(backupData.tables.chat_messages);
+      }
+      if (backupData.tables.household_shares && backupData.tables.household_shares.length > 0) {
+        await tx.insert(householdShares).values(backupData.tables.household_shares);
+      }
+      if (backupData.tables.household_share_members && backupData.tables.household_share_members.length > 0) {
+        await tx.insert(householdShareMembers).values(backupData.tables.household_share_members);
+      }
+      if (backupData.tables.business_shares && backupData.tables.business_shares.length > 0) {
+        await tx.insert(businessShares).values(backupData.tables.business_shares);
+      }
+      if (backupData.tables.business_share_members && backupData.tables.business_share_members.length > 0) {
+        await tx.insert(businessShareMembers).values(backupData.tables.business_share_members);
+      }
+      if (backupData.tables.notifications && backupData.tables.notifications.length > 0) {
+        await tx.insert(notifications).values(backupData.tables.notifications);
+      }
+      if (backupData.tables.advertisements && backupData.tables.advertisements.length > 0) {
+        await tx.insert(advertisements).values(backupData.tables.advertisements);
+      }
+      if (backupData.tables.ad_settings && backupData.tables.ad_settings.length > 0) {
+        await tx.insert(adSettings).values(backupData.tables.ad_settings);
+      }
+      if (backupData.tables.ad_impressions && backupData.tables.ad_impressions.length > 0) {
+        await tx.insert(adImpressions).values(backupData.tables.ad_impressions);
+      }
+      if (backupData.tables.user_backups && backupData.tables.user_backups.length > 0) {
+        await tx.insert(userBackups).values(backupData.tables.user_backups);
+      }
+      if (backupData.tables.backup_logs && backupData.tables.backup_logs.length > 0) {
+        await tx.insert(backupLogs).values(backupData.tables.backup_logs);
+      }
+    });
+
+    res.json({
+      success: true,
+      message: "System restored successfully",
+      restoredAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("System restore error:", error);
+    res.status(500).json({ error: "Failed to restore system backup" });
   }
 });
 
