@@ -111,6 +111,29 @@ export function emitNewMessage(chatId: string | number, message: any, participan
   }
 }
 
+export function emitMessageUpdated(chatId: string | number, messageId: string, data: any, participantIds: string[]) {
+  if (io) {
+    io.to(`chat:${chatId}`).emit("chat:message-updated", data);
+    console.log(`[Realtime] Emitting chat:message-updated to chat:${chatId}`, messageId);
+    
+    participantIds.forEach((userId) => {
+      io!.to(`user:${userId}`).emit("chat:message-updated", { chatId, ...data });
+    });
+  }
+}
+
+export function emitMessageDeleted(chatId: string | number, messageId: string, participantIds: string[]) {
+  if (io) {
+    const data = { chatId, messageId, deletedAt: new Date().toISOString() };
+    io.to(`chat:${chatId}`).emit("chat:message-deleted", data);
+    console.log(`[Realtime] Emitting chat:message-deleted to chat:${chatId}`, messageId);
+    
+    participantIds.forEach((userId) => {
+      io!.to(`user:${userId}`).emit("chat:message-deleted", data);
+    });
+  }
+}
+
 export function emitNotification(userId: string, notification: any) {
   emitToUser(userId, "notifications:created", notification);
 }

@@ -3,6 +3,8 @@ import crypto from "crypto";
 import { db } from "./db";
 import {
   emitNewMessage,
+  emitMessageUpdated,
+  emitMessageDeleted,
   emitNotification,
   emitNotificationRead,
   emitAllNotificationsRead,
@@ -3068,16 +3070,20 @@ router.post("/api/chats/:chatId/messages", authenticateToken, async (req: Reques
 
     const now = new Date();
     const messageId = uuidv4();
+    const editableUntil = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now
 
     await db.insert(chatMessages).values({
       id: messageId,
       chatId,
       senderId: userId,
       senderMode: senderMode || participation.userMode,
+      messageType: 'text',
       content: content.trim(),
       status: 'sent',
       clientMessageId: clientMessageId || null,
       replyToId: replyToId || null,
+      editableUntil,
+      isDeleted: false,
       createdAt: now
     });
 
@@ -3136,6 +3142,8 @@ router.post("/api/chats/:chatId/messages", authenticateToken, async (req: Reques
       messageType: 'text',
       content: content.trim(),
       createdAt: now.toISOString(),
+      editableUntil: editableUntil.toISOString(),
+      isDeleted: false,
       isOwn: false
     };
 
@@ -3155,6 +3163,146 @@ router.post("/api/chats/:chatId/messages", authenticateToken, async (req: Reques
   } catch (error) {
     console.error("Send message error:", error);
     res.status(500).json({ error: "Failed to send message" });
+  }
+});
+
+// Edit a message (within 5 minute window)
+router.patch("/api/chats/:chatId/messages/:messageId", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { chatId, messageId } = req.params;
+    const { content } = req.body;
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ error: "Message content is required" });
+    }
+
+    // Get the message
+    const message = await db.query.chatMessages.findFirst({
+      where: and(
+        eq(chatMessages.id, messageId),
+        eq(chatMessages.chatId, chatId)
+      )
+    });
+
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    if (message.senderId !== userId) {
+      return res.status(403).json({ error: "You can only edit your own messages" });
+    }
+
+    if (message.isDeleted) {
+      return res.status(400).json({ error: "Cannot edit a deleted message" });
+    }
+
+    // Check edit window
+    const now = new Date();
+    if (message.editableUntil && now > message.editableUntil) {
+      return res.status(403).json({ error: "Edit window has expired (5 minutes)" });
+    }
+
+    // Update the message
+    await db.update(chatMessages)
+      .set({
+        content: content.trim(),
+        editedAt: now
+      })
+      .where(eq(chatMessages.id, messageId));
+
+    // Get all participants for notification
+    const participants = await db.query.chatParticipants.findMany({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+    const participantIds = participants.map(p => p.userId);
+
+    // Emit real-time update
+    emitMessageUpdated(chatId, messageId, {
+      id: messageId,
+      chatId,
+      content: content.trim(),
+      editedAt: now.toISOString()
+    }, participantIds);
+
+    res.json({ 
+      success: true, 
+      message: {
+        id: messageId,
+        content: content.trim(),
+        editedAt: now.toISOString()
+      }
+    });
+  } catch (error) {
+    console.error("Edit message error:", error);
+    res.status(500).json({ error: "Failed to edit message" });
+  }
+});
+
+// Delete a message (within 5 minute window)
+router.delete("/api/chats/:chatId/messages/:messageId", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { chatId, messageId } = req.params;
+
+    // Get the message
+    const message = await db.query.chatMessages.findFirst({
+      where: and(
+        eq(chatMessages.id, messageId),
+        eq(chatMessages.chatId, chatId)
+      )
+    });
+
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    if (message.senderId !== userId) {
+      return res.status(403).json({ error: "You can only delete your own messages" });
+    }
+
+    if (message.isDeleted) {
+      return res.status(400).json({ error: "Message already deleted" });
+    }
+
+    // Check delete window
+    const now = new Date();
+    if (message.editableUntil && now > message.editableUntil) {
+      return res.status(403).json({ error: "Delete window has expired (5 minutes)" });
+    }
+
+    // Soft delete the message
+    await db.update(chatMessages)
+      .set({
+        isDeleted: true,
+        deletedAt: now,
+        content: "[This message was deleted]"
+      })
+      .where(eq(chatMessages.id, messageId));
+
+    // Get all participants for notification
+    const participants = await db.query.chatParticipants.findMany({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+    const participantIds = participants.map(p => p.userId);
+
+    // Emit real-time delete
+    emitMessageDeleted(chatId, messageId, participantIds);
+
+    res.json({ 
+      success: true, 
+      messageId,
+      deletedAt: now.toISOString()
+    });
+  } catch (error) {
+    console.error("Delete message error:", error);
+    res.status(500).json({ error: "Failed to delete message" });
   }
 });
 
