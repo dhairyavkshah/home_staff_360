@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Bell, CheckCheck, Clock, ChevronRight, Calendar, Shirt, Link2, AlertCircle, CheckCircle, XCircle, ArrowLeft, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { collaborationService, AppNotification } from "@/lib/collaboration-servi
 import { storage } from "@/lib/storage";
 import { format, formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
 
 export function NotificationCenterScreen() {
   const { navigate, goBack } = useNavigation();
@@ -22,6 +23,24 @@ export function NotificationCenterScreen() {
 
   const profile = storage.getProfile();
   const currentMode = profile?.type || "HOME";
+
+  useRealtimeConnection();
+
+  const handleNewNotification = useCallback((notification: AppNotification) => {
+    setNotifications((prev) => {
+      if (prev.some((n) => n.id === notification.id)) return prev;
+      return [notification, ...prev];
+    });
+    setUnreadCount((prev) => prev + 1);
+  }, []);
+
+  const handleAllNotificationsRead = useCallback(() => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    setUnreadCount(0);
+  }, []);
+
+  useRealtime("notifications:created", handleNewNotification);
+  useRealtime("notifications:all-read", handleAllNotificationsRead);
 
   useEffect(() => {
     loadNotifications();

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   ArrowLeft,
   Send,
@@ -14,6 +14,7 @@ import { useNavigation, useNavigationData } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
 import { formatDistanceToNow } from "date-fns";
+import { useRealtime, useRealtimeChat, useRealtimeConnection } from "@/hooks/use-realtime";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +57,20 @@ export function ChatScreen() {
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+
+  useRealtimeConnection();
+  useRealtimeChat(chatId || null);
+
+  const handleNewMessage = useCallback((message: any) => {
+    if (message.chatId !== chatId) return;
+    
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === message.id)) return prev;
+      return [...prev, { ...message, isOwn: false }];
+    });
+  }, [chatId]);
+
+  useRealtime("chat:new-message", handleNewMessage);
 
   useEffect(() => {
     if (chatId) {

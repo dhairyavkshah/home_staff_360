@@ -1,5 +1,4 @@
 import { io, Socket } from "socket.io-client";
-import { queryClient } from "./queryClient";
 
 type RealtimeEventHandler = (data: any) => void;
 
@@ -10,18 +9,26 @@ class RealtimeService {
   private maxReconnectAttempts = 5;
   private currentChatId: number | null = null;
   private isConnecting = false;
+  private connectionPromise: Promise<void> | null = null;
+  private connectionRefCount = 0;
+  private currentToken: string | null = null;
+  private listenersSetup = false;
 
   connect(token: string): Promise<void> {
-    if (this.socket?.connected || this.isConnecting) {
+    this.connectionRefCount++;
+    this.currentToken = token;
+    
+    if (this.socket?.connected) {
       return Promise.resolve();
+    }
+
+    if (this.isConnecting && this.connectionPromise) {
+      return this.connectionPromise;
     }
 
     this.isConnecting = true;
 
-    return new Promise((resolve, reject) => {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = window.location.host;
-      
+    this.connectionPromise = new Promise((resolve, reject) => {
       this.socket = io(`${window.location.origin}`, {
         auth: { token },
         transports: ["websocket", "polling"],
@@ -57,70 +64,43 @@ class RealtimeService {
         console.log("[Realtime] Disconnected:", reason);
       });
 
-      this.setupEventListeners();
+      if (!this.listenersSetup) {
+        this.setupEventListeners();
+        this.listenersSetup = true;
+      }
     });
+
+    return this.connectionPromise;
   }
 
   private setupEventListeners() {
     if (!this.socket) return;
 
-    this.socket.on("chat:new-message", (message) => {
-      console.log("[Realtime] New message received:", message);
-      this.emit("chat:new-message", message);
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
-      if (message.chatId) {
-        queryClient.invalidateQueries({ queryKey: ["/api/chats", message.chatId, "messages"] });
-      }
-    });
+    const events = [
+      "chat:new-message",
+      "chat:message-received",
+      "chat:typing",
+      "notifications:created",
+      "notifications:read",
+      "notifications:all-read",
+      "connections:invite-received",
+      "connections:status-changed",
+      "connections:removed",
+    ];
 
-    this.socket.on("chat:message-received", ({ chatId, message }) => {
-      console.log("[Realtime] Message received for chat:", chatId);
-      this.emit("chat:message-received", { chatId, message });
-      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+    events.forEach((event) => {
+      this.socket!.on(event, (data) => {
+        this.emit(event, data);
+      });
     });
+  }
 
-    this.socket.on("chat:typing", ({ chatId, userId, isTyping }) => {
-      this.emit("chat:typing", { chatId, userId, isTyping });
-    });
-
-    this.socket.on("notifications:created", (notification) => {
-      console.log("[Realtime] New notification:", notification);
-      this.emit("notifications:created", notification);
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-    });
-
-    this.socket.on("notifications:read", ({ id }) => {
-      this.emit("notifications:read", { id });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-    });
-
-    this.socket.on("notifications:all-read", () => {
-      this.emit("notifications:all-read", {});
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-    });
-
-    this.socket.on("connections:invite-received", (connection) => {
-      console.log("[Realtime] Invite received:", connection);
-      this.emit("connections:invite-received", connection);
-      queryClient.invalidateQueries({ queryKey: ["/api/connections/invites/received"] });
-    });
-
-    this.socket.on("connections:status-changed", (connection) => {
-      console.log("[Realtime] Connection status changed:", connection);
-      this.emit("connections:status-changed", connection);
-      queryClient.invalidateQueries({ queryKey: ["/api/connections"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/connections/invites/sent"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/connections/invites/received"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
-    });
-
-    this.socket.on("connections:removed", ({ id }) => {
-      console.log("[Realtime] Connection removed:", id);
-      this.emit("connections:removed", { id });
-      queryClient.invalidateQueries({ queryKey: ["/api/connections"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
-    });
+  release() {
+    this.connectionRefCount = Math.max(0, this.connectionRefCount - 1);
+    
+    if (this.connectionRefCount === 0) {
+      this.disconnect();
+    }
   }
 
   disconnect() {
@@ -131,6 +111,15 @@ class RealtimeService {
     this.eventHandlers.clear();
     this.currentChatId = null;
     this.isConnecting = false;
+    this.connectionPromise = null;
+    this.connectionRefCount = 0;
+    this.currentToken = null;
+    this.listenersSetup = false;
+  }
+
+  forceDisconnect() {
+    this.connectionRefCount = 0;
+    this.disconnect();
   }
 
   joinChat(chatId: number) {
@@ -155,7 +144,7 @@ class RealtimeService {
     }
   }
 
-  on(event: string, handler: RealtimeEventHandler) {
+  on(event: string, handler: RealtimeEventHandler): () => void {
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, new Set());
     }
@@ -179,6 +168,10 @@ class RealtimeService {
 
   isConnected(): boolean {
     return this.socket?.connected || false;
+  }
+  
+  getRefCount(): number {
+    return this.connectionRefCount;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Search,
   UserPlus,
@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
 import { storage } from "@/lib/storage";
+import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,6 +86,24 @@ export function ConnectionsTab() {
 
   const profile = storage.getProfile();
   const currentMode = profile?.type || "HOME";
+
+  useRealtimeConnection();
+
+  const handleInviteReceived = useCallback(() => {
+    loadData();
+  }, []);
+
+  const handleConnectionStatusChanged = useCallback(() => {
+    loadData();
+  }, []);
+
+  const handleConnectionRemoved = useCallback(({ id }: { id: string }) => {
+    setConnections((prev) => prev.filter((c) => c.id !== id));
+  }, []);
+
+  useRealtime("connections:invite-received", handleInviteReceived);
+  useRealtime("connections:status-changed", handleConnectionStatusChanged);
+  useRealtime("connections:removed", handleConnectionRemoved);
 
   useEffect(() => {
     loadData();

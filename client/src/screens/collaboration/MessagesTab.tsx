@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   MessageCircle,
   RefreshCw,
@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
 import { formatDistanceToNow } from "date-fns";
+import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
 
 interface ChatParticipant {
   id: string;
@@ -40,6 +41,29 @@ export function MessagesTab() {
   
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  useRealtimeConnection();
+
+  const handleNewMessage = useCallback((message: any) => {
+    setChats((prev) =>
+      prev.map((chat) =>
+        chat.id === message.chatId
+          ? {
+              ...chat,
+              lastMessageAt: message.createdAt,
+              lastMessagePreview: message.content,
+              unreadCount: (chat.unreadCount || 0) + 1,
+            }
+          : chat
+      ).sort((a, b) => {
+        const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+        const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+        return bTime - aTime;
+      })
+    );
+  }, []);
+
+  useRealtime("chat:new-message", handleNewMessage);
 
   useEffect(() => {
     loadChats();
