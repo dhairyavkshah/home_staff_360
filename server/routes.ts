@@ -1843,10 +1843,28 @@ router.post("/api/shared-attendance", authenticateToken, async (req: Request, re
 // Get attendance records for a binding
 router.get("/api/shared-attendance", authenticateToken, async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user?.userId;
     const { bindingId, startDate, endDate } = req.query;
 
     if (!bindingId) {
       return res.status(400).json({ error: "bindingId is required" });
+    }
+
+    // SECURITY: Verify user has access to this binding
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, bindingId as string)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link || (link.homeUserId !== userId && link.staffUserId !== userId)) {
+      return res.status(403).json({ error: "Access denied" });
     }
 
     let query = eq(sharedAttendance.bindingId, bindingId as string);
@@ -2124,10 +2142,28 @@ router.post("/api/shared-laundry", authenticateToken, async (req: Request, res: 
 // Get laundry records for a binding
 router.get("/api/shared-laundry", authenticateToken, async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user?.userId;
     const { bindingId } = req.query;
 
     if (!bindingId) {
       return res.status(400).json({ error: "bindingId is required" });
+    }
+
+    // SECURITY: Verify user has access to this binding
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, bindingId as string)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link || (link.homeUserId !== userId && link.staffUserId !== userId)) {
+      return res.status(403).json({ error: "Access denied" });
     }
 
     const records = await db.query.sharedLaundry.findMany({
