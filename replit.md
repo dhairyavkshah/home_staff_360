@@ -121,7 +121,10 @@ Home Staff 360 is a **privacy-first, offline-capable mobile/web application** de
 
 ### Collaboration Tables
 - `collab_connections`: Bidirectional connections between users
-- `direct_messages`: Messages between connected users
+- `collab_chats`: Chat sessions between connected users
+- `chat_messages`: Messages with edit/delete support (5-minute window)
+- `chat_participants`: Chat membership and mute settings
+- `pending_phone_links`: Auto-connection invites for unregistered users
 - `notifications`: User notifications
 
 ### Shared Data Tables
@@ -154,6 +157,30 @@ Access via `/admin/ads` after logging in as super admin:
 - View detailed analytics per ad
 - User breakdown showing which users saw which ads
 - Schedule ads with start/end dates
+
+---
+
+## Real-Time Features
+
+### Chat System
+- **Message Edit/Delete**: Users can edit or delete messages within 5 minutes of sending
+- **Real-time Delivery**: Messages, edits, and deletions broadcast instantly via Socket.IO
+- **Dual Delivery Pattern**: Events sent to both chat rooms and direct user channels for reliability
+- **Mobile-Friendly Actions**: Tap on messages to reveal edit/delete buttons (hover on desktop)
+
+### Live Collaboration Events
+| Event | Description |
+|-------|-------------|
+| `chat:new-message` | New message in a chat |
+| `chat:message-updated` | Message edited |
+| `chat:message-deleted` | Message deleted |
+| `collab:attendance-update` | Attendance record created/approved/rejected |
+| `collab:laundry-update` | Laundry batch created/approved/rejected |
+
+### Auto-Connection System
+- When adding staff/clients, system automatically creates connection invites
+- If user is not registered, creates a pending_phone_link
+- Pending links auto-resolve when user registers with that phone number
 
 ---
 
