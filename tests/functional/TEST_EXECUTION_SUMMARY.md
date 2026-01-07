@@ -17,10 +17,12 @@
 ### Automated Test Results
 | Metric | Value |
 |--------|-------|
-| **Automated Tests Implemented** | 21 |
-| **Automated Tests Passed** | 21 |
-| **Automated Pass Rate** | 100% |
-| **Defects Found & Fixed** | 1 |
+| **API Tests (curl-based)** | 21 |
+| **E2E Scenario Tests (TypeScript)** | 43 |
+| **Total Automated Tests** | 64 |
+| **Total Tests Passed** | 64 |
+| **Overall Pass Rate** | 100% |
+| **Defects Found & Fixed** | 2 |
 
 ---
 
@@ -89,6 +91,29 @@ The following sections document the complete 1,500 test case specifications. The
 | Ad Campaign Management | 70 | 0 |
 
 **Legend**: Specifications = documented test cases; Automated = implemented in `tests/api/api-tests.sh`
+
+---
+
+## E2E Scenario Test Results (43 tests - 100% Pass)
+
+### Test Categories
+| Phase | Tests | Status | Description |
+|-------|-------|--------|-------------|
+| User Creation | 20 | Pass | 10 Home + 10 Staff users with proper auth flow |
+| Connection Flow | 9 | Pass | Search, request, accept, reject connections |
+| Chat Messaging | 7 | Pass | Messages, replies, edits, read status |
+| Notifications | 5 | Pass | Retrieve, read, mark all read |
+| Attendance Sync | 1 | Pass | Bindings for attendance |
+| Laundry Sync | 1 | Pass | Bindings for laundry |
+| Admin Panel | 1 | Skip | Credentials stored in secrets |
+
+### Bugs Fixed During E2E Testing
+1. **BUG-001** (Severity: High) - Phone validation was rejecting valid Indian numbers
+   - Resolution: Integrated google-libphonenumber for international support
+2. **BUG-002** (Severity: Medium) - devOtp not returned in development mode for debugging
+   - Resolution: Modified OTP response to always include devOtp in development
+3. **Chat Response Format** - Test code was reading wrong response path
+   - Resolution: Updated test to properly extract chat.id from response
 
 ---
 

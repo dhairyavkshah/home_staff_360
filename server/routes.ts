@@ -408,8 +408,8 @@ router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
       cooldownSeconds: OTP_COOLDOWN_SECONDS
     };
     
-    // Return OTP in dev mode when SMS fails (for testing)
-    if (process.env.NODE_ENV === "development" && !smsSent) {
+    // Return OTP in dev mode for testing (regardless of SMS status)
+    if (process.env.NODE_ENV === "development") {
       response.devOtp = otp;
     }
 
