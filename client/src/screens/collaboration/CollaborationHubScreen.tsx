@@ -11,10 +11,13 @@ import {
   WifiOff,
   MessageCircle,
   Share2,
+  CloudOff,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
@@ -29,11 +32,13 @@ import { storage } from "@/lib/storage";
 import { ConnectionsTab } from "./ConnectionsTab";
 import { MessagesTab } from "./MessagesTab";
 import { SharedSpacesTab } from "./SharedSpacesTab";
+import { useAutoSync } from "@/hooks/useAutoSync";
 
 export function CollaborationHubScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const autoSync = useAutoSync();
 
   const [activeTab, setActiveTab] = useState("connections");
   const [links, setLinks] = useState<CollaborationLink[]>([]);
@@ -235,20 +240,40 @@ export function CollaborationHubScreen() {
         </div>
       )}
 
-      <Card
-        className="p-4 hover-elevate cursor-pointer"
-        onClick={() => navigate("sync-activity")}
-        data-testid="card-sync-activity"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-            <Clock className="w-5 h-5 text-muted-foreground" />
+      <Card className="p-4" data-testid="card-auto-sync">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              autoSync.isEnabled && autoSync.status.isOnline
+                ? "bg-green-100 dark:bg-green-900/30"
+                : "bg-muted"
+            }`}>
+              {autoSync.isEnabled && autoSync.status.isOnline ? (
+                <Zap className="w-5 h-5 text-green-600 dark:text-green-400" />
+              ) : (
+                <CloudOff className="w-5 h-5 text-muted-foreground" />
+              )}
+            </div>
+            <div>
+              <p className="font-medium">{t("autoSync")}</p>
+              <p className="text-sm text-muted-foreground">
+                {autoSync.onlineCount > 0
+                  ? `${autoSync.onlineCount} ${t("connectionsOnline")}`
+                  : t("noConnectionsOnline")}
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="font-medium">{t("syncActivity")}</p>
-            <p className="text-sm text-muted-foreground">{t("recentSync")}</p>
-          </div>
+          <Switch
+            checked={autoSync.isEnabled}
+            onCheckedChange={autoSync.setEnabled}
+            data-testid="switch-auto-sync"
+          />
         </div>
+        {autoSync.status.lastSyncAt && (
+          <p className="text-xs text-muted-foreground mt-2 ml-13">
+            {t("lastSync")}: {new Date(autoSync.status.lastSyncAt).toLocaleTimeString()}
+          </p>
+        )}
       </Card>
     </div>
   );

@@ -8,7 +8,10 @@ import {
   emitAllNotificationsRead,
   emitConnectionInvite,
   emitConnectionUpdated,
-  emitConnectionRemoved
+  emitConnectionRemoved,
+  emitSyncData,
+  isUserOnline,
+  getOnlineUserIds
 } from "./realtime";
 import { 
   serverUsers, 
@@ -3195,6 +3198,108 @@ router.get("/api/chats/by-connection/:connectionId", authenticateToken, async (r
   } catch (error) {
     console.error("Get chat by connection error:", error);
     res.status(500).json({ error: "Failed to get chat" });
+  }
+});
+
+// ============ REAL-TIME AUTO-SYNC API ============
+
+// Push sync data to connected users
+router.post("/api/sync/push", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { type, action, data, timestamp } = req.body;
+
+    if (!type || !action || !data) {
+      return res.status(400).json({ error: "Missing required fields: type, action, data" });
+    }
+
+    // Get all accepted connections for this user
+    const connections = await db.query.collabConnections.findMany({
+      where: and(
+        or(
+          eq(collabConnections.userAId, userId),
+          eq(collabConnections.userBId, userId)
+        ),
+        eq(collabConnections.status, "accepted")
+      )
+    });
+
+    // Get connected user IDs who are online
+    const connectedUserIds = connections.map(c => 
+      c.userAId === userId ? c.userBId : c.userAId
+    );
+    
+    // User IDs are strings (UUIDs)
+    const onlineConnectedUserIds = connectedUserIds.filter(id => isUserOnline(id));
+
+    if (onlineConnectedUserIds.length > 0) {
+      const syncPayload = {
+        type,
+        action,
+        data,
+        timestamp: timestamp || Date.now(),
+        senderId: userId,
+      };
+
+      emitSyncData(onlineConnectedUserIds, syncPayload);
+    }
+
+    res.json({ 
+      success: true, 
+      syncedTo: onlineConnectedUserIds.length,
+      totalConnections: connectedUserIds.length
+    });
+  } catch (error) {
+    console.error("Sync push error:", error);
+    res.status(500).json({ error: "Failed to push sync data" });
+  }
+});
+
+// Get sync status for authenticated user
+router.get("/api/sync/status", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    // Get all accepted connections
+    const connections = await db.query.collabConnections.findMany({
+      where: and(
+        or(
+          eq(collabConnections.userAId, userId),
+          eq(collabConnections.userBId, userId)
+        ),
+        eq(collabConnections.status, "accepted")
+      )
+    });
+
+    const connectedUserIds = connections.map(c => 
+      c.userAId === userId ? c.userBId : c.userAId
+    );
+
+    // Get online status for each connection
+    const onlineUsers = await Promise.all(connectedUserIds.map(async (connId) => {
+      const user = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.id, connId)
+      });
+      return {
+        userId: connId,
+        displayName: user?.displayName,
+        isOnline: isUserOnline(connId)
+      };
+    }));
+
+    // Check if the current user is online (has active socket connection)
+    const currentUserOnline = isUserOnline(userId);
+
+    res.json({
+      autoSyncEnabled: true,
+      isUserOnline: currentUserOnline,
+      totalConnections: connections.length,
+      onlineConnections: onlineUsers.filter(u => u.isOnline).length,
+      connectedUsers: onlineUsers
+    });
+  } catch (error) {
+    console.error("Sync status error:", error);
+    res.status(500).json({ error: "Failed to get sync status" });
   }
 });
 

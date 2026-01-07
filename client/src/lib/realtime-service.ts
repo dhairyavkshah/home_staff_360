@@ -86,6 +86,10 @@ class RealtimeService {
       "connections:invite-received",
       "connections:status-changed",
       "connections:removed",
+      "sync:data-changed",
+      "sync:user-online",
+      "sync:user-offline",
+      "sync:request-sync",
     ];
 
     events.forEach((event) => {

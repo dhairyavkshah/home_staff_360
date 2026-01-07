@@ -5,13 +5,13 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "home-staff-360-jwt-secret-key-2024";
 
 interface AuthenticatedSocket extends Socket {
-  userId?: number;
+  userId?: string;
   userPhone?: string;
 }
 
 let io: SocketIOServer | null = null;
 
-const userSockets = new Map<number, Set<string>>();
+const userSockets = new Map<string, Set<string>>();
 
 export function initRealtime(server: HTTPServer): SocketIOServer {
   io = new SocketIOServer(server, {
@@ -30,7 +30,7 @@ export function initRealtime(server: HTTPServer): SocketIOServer {
     }
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: number; phone: string };
+      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; phone: string };
       socket.userId = decoded.userId;
       socket.userPhone = decoded.phone;
       next();
@@ -88,7 +88,7 @@ export function getIO(): SocketIOServer | null {
   return io;
 }
 
-export function emitToUser(userId: number, event: string, data: any) {
+export function emitToUser(userId: string, event: string, data: any) {
   if (io) {
     io.to(`user:${userId}`).emit(event, data);
   }
@@ -100,7 +100,7 @@ export function emitToChat(chatId: number, event: string, data: any) {
   }
 }
 
-export function emitNewMessage(chatId: number, message: any, participantIds: number[]) {
+export function emitNewMessage(chatId: number, message: any, participantIds: string[]) {
   if (io) {
     io.to(`chat:${chatId}`).emit("chat:new-message", message);
     
@@ -110,28 +110,54 @@ export function emitNewMessage(chatId: number, message: any, participantIds: num
   }
 }
 
-export function emitNotification(userId: number, notification: any) {
+export function emitNotification(userId: string, notification: any) {
   emitToUser(userId, "notifications:created", notification);
 }
 
-export function emitNotificationRead(userId: number, notificationId: number) {
+export function emitNotificationRead(userId: string, notificationId: number) {
   emitToUser(userId, "notifications:read", { id: notificationId });
 }
 
-export function emitAllNotificationsRead(userId: number) {
+export function emitAllNotificationsRead(userId: string) {
   emitToUser(userId, "notifications:all-read", {});
 }
 
-export function emitConnectionInvite(toUserId: number, connection: any) {
+export function emitConnectionInvite(toUserId: string, connection: any) {
   emitToUser(toUserId, "connections:invite-received", connection);
 }
 
-export function emitConnectionUpdated(userId1: number, userId2: number, connection: any) {
+export function emitConnectionUpdated(userId1: string, userId2: string, connection: any) {
   emitToUser(userId1, "connections:status-changed", connection);
   emitToUser(userId2, "connections:status-changed", connection);
 }
 
-export function emitConnectionRemoved(userId1: number, userId2: number, connectionId: number) {
+export function emitConnectionRemoved(userId1: string, userId2: string, connectionId: number) {
   emitToUser(userId1, "connections:removed", { id: connectionId });
   emitToUser(userId2, "connections:removed", { id: connectionId });
+}
+
+export function emitSyncData(toUserIds: string[], payload: any) {
+  toUserIds.forEach((userId) => {
+    emitToUser(userId, "sync:data-changed", payload);
+  });
+}
+
+export function emitUserOnline(toUserIds: string[], userId: string) {
+  toUserIds.forEach((targetId) => {
+    emitToUser(targetId, "sync:user-online", { userId });
+  });
+}
+
+export function emitUserOffline(toUserIds: string[], userId: string) {
+  toUserIds.forEach((targetId) => {
+    emitToUser(targetId, "sync:user-offline", { userId });
+  });
+}
+
+export function isUserOnline(userId: string): boolean {
+  return userSockets.has(userId) && (userSockets.get(userId)?.size || 0) > 0;
+}
+
+export function getOnlineUserIds(): string[] {
+  return Array.from(userSockets.keys());
 }
