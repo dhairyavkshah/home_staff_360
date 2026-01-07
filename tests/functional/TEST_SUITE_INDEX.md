@@ -1,6 +1,6 @@
 # Home Staff 360 - Functional Test Suite Index
 
-## Version 2.0 | January 7, 2026
+## Version 1.0 | January 7, 2026
 
 ---
 
@@ -152,4 +152,4 @@ Each test case follows this format:
 ---
 
 *Document generated: January 7, 2026*
-*Home Staff 360 v2.0*
+*Home Staff 360 v1.0*

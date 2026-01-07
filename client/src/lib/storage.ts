@@ -697,7 +697,7 @@ export const storage = {
   exportBackup(): BackupData {
     const profile = this.getProfile();
     return {
-      version: "2.0",
+      version: "1.0",
       exportDate: new Date().toISOString(),
       settings: this.getSettings(),
       profile: profile || undefined,

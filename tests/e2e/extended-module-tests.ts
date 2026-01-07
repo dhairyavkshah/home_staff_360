@@ -1,5 +1,5 @@
 /**
- * Home Staff 360 v2.0 - Extended E2E Module Tests
+ * Home Staff 360 v1.0 - Extended E2E Module Tests
  * 
  * Comprehensive tests for modules with server-side API support:
  * - Payments/Payables: Tests via shared-attendance (wages calculation) and transactions
@@ -951,7 +951,7 @@ function printSummary() {
 
 export async function main() {
   console.log('====================================================');
-  console.log(' Home Staff 360 v2.0 - Extended E2E Module Tests');
+  console.log(' Home Staff 360 v1.0 - Extended E2E Module Tests');
   console.log('====================================================');
   console.log(`\nBase URL: ${BASE_URL}`);
   console.log(`Test started at: ${new Date().toISOString()}\n`);

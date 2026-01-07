@@ -4,11 +4,11 @@
 
 ---
 
-## Version 2.0.0
+## Version 1.0.0
 
 **Release Date: January 2026**
 
-### What's New in Version 2.0
+### What's New in Version 1.0
 
 Home Staff 360 is now a **fully live, real-time platform** for household and staff management. This major update transforms the app from a local tool to a connected collaboration platform.
 
@@ -179,7 +179,7 @@ INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, 
 ### Google Play Console Format (500 characters max)
 
 ```
-Version 2.0 - Now Live & Real-Time!
+Version 1.0 - Now Live & Real-Time!
 
 MAJOR UPDATE:
 - Live real-time collaboration with staff and clients
@@ -203,7 +203,7 @@ Connect and collaborate with your household team instantly!
 ### Short What's New (150 characters)
 
 ```
-v2.0: Live real-time collaboration! Instant messaging, auto-connections, 21 languages, enhanced security. Manage staff together!
+v1.0: Live real-time collaboration! Instant messaging, auto-connections, 21 languages, enhanced security. Manage staff together!
 ```
 
 **Character Count: 129**
@@ -214,9 +214,7 @@ v2.0: Live real-time collaboration! Instant messaging, auto-connections, 21 lang
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| 2.0.0 | Jan 2026 | Live real-time platform, collaboration, messaging |
-| 1.5.0 | - | Staff mode, invoices, multi-currency |
-| 1.0.0 | - | Initial release, basic features |
+| 1.0.0 | Jan 2026 | Live real-time platform, collaboration, messaging |
 
 ---
 

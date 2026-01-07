@@ -1,5 +1,5 @@
 /**
- * Home Staff 360 v2.0 - End-to-End Scenario Tests
+ * Home Staff 360 v1.0 - End-to-End Scenario Tests
  * 
  * Creates 10 home users + 10 staff users and tests:
  * - Connection/invite flows (send, accept, reject)
@@ -791,7 +791,7 @@ function printSummary() {
 // Main execution
 async function main() {
   console.log('='.repeat(60));
-  console.log('HOME STAFF 360 v2.0 - END-TO-END SCENARIO TESTS');
+  console.log('HOME STAFF 360 v1.0 - END-TO-END SCENARIO TESTS');
   console.log('='.repeat(60));
   console.log(`Target: ${BASE_URL}`);
   console.log(`Date: ${new Date().toISOString()}`);

@@ -1,7 +1,7 @@
-# Home Staff 360 v2.0
+# Home Staff 360 v1.0
 
 ## Overview
-Home Staff 360 is a live, real-time household staff management platform designed for managing household staff and service businesses. Version 2.0 features full online collaboration with phone+password authentication, real-time messaging, and live data synchronization across all connected users.
+Home Staff 360 is a live, real-time household staff management platform designed for managing household staff and service businesses. Version 1.0 features full online collaboration with phone+password authentication, real-time messaging, and live data synchronization across all connected users.
 
 It operates in two core modes:
 - **Home User Mode**: For household managers to track domestic staff attendance, payments, expenses, and laundry batches with real-time collaboration.
@@ -18,7 +18,7 @@ The business vision is to provide a comprehensive, real-time solution for househ
 ## System Architecture
 
 ### Live Real-Time Architecture
-Home Staff 360 v2.0 is a fully live, cloud-connected application using a client-server architecture with real-time capabilities:
+Home Staff 360 v1.0 is a fully live, cloud-connected application using a client-server architecture with real-time capabilities:
 - **Client**: React with TanStack for UI and Socket.IO Client for live updates.
 - **Server**: Express.js for REST APIs and Socket.IO Server for real-time events.
 - **Database**: PostgreSQL as the primary data store.

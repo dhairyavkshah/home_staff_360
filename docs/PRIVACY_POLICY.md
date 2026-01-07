@@ -39,7 +39,7 @@ Home Staff 360 ("we," "our," or "us") is committed to protecting your privacy. T
 
 ### 2.1 Live Cloud Architecture
 
-Home Staff 360 v2.0 operates as a **live, cloud-connected service**:
+Home Staff 360 v1.0 operates as a **live, cloud-connected service**:
 
 - **Primary Storage**: All your data is securely stored on our cloud servers
 - **Real-Time Sync**: Data syncs instantly across all your connected devices

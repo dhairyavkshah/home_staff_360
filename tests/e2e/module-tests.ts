@@ -1,5 +1,5 @@
 /**
- * Home Staff 360 v2.0 - Comprehensive E2E Module Tests
+ * Home Staff 360 v1.0 - Comprehensive E2E Module Tests
  * 
  * Tests collaboration modules with cross-user sync verification:
  * - User creation and connection setup
@@ -799,7 +799,7 @@ function printSummary() {
 // ============ MAIN EXECUTION ============
 async function main() {
   console.log('='.repeat(60));
-  console.log('  Home Staff 360 v2.0 - Comprehensive E2E Module Tests');
+  console.log('  Home Staff 360 v1.0 - Comprehensive E2E Module Tests');
   console.log('='.repeat(60));
   console.log(`\nTarget: ${BASE_URL}`);
   console.log(`Started: ${new Date().toISOString()}\n`);
