@@ -34,7 +34,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { 
-  ArrowLeft, 
   Plus, 
   Database, 
   RotateCcw, 
@@ -54,6 +53,7 @@ import {
   Table
 } from "lucide-react";
 import { format } from "date-fns";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 interface SystemBackup {
   id: number;
@@ -399,36 +399,24 @@ export default function AdminBackups() {
 
   if (isLoading && backups.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/admin/dashboard")}
-            data-testid="button-back-dashboard"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold">System Backups</h1>
-            <p className="text-sm text-muted-foreground">Create and manage full database backups</p>
-          </div>
+    <AdminLayout>
+      <div className="space-y-6">
+        <div className="flex justify-end">
           <Button onClick={handleCreateBackup} data-testid="button-create-backup">
             <Plus className="w-4 h-4 mr-2" />
             Create Backup
           </Button>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
         {successMessage && (
           <div className="p-4 rounded-lg bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 flex items-center gap-2">
             <CheckCircle className="w-5 h-5" />
@@ -657,7 +645,6 @@ export default function AdminBackups() {
             )}
           </CardContent>
         </Card>
-      </main>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="max-w-md">
@@ -954,6 +941,7 @@ export default function AdminBackups() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

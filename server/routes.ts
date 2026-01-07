@@ -1467,6 +1467,44 @@ router.post("/api/admin/login", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/api/admin/change-password", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const adminId = (req as any).adminId;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current and new passwords are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "New password must be at least 6 characters" });
+    }
+
+    const admin = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.id, adminId)
+    });
+
+    if (!admin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    const isValidPassword = await bcrypt.compare(currentPassword, admin.passwordHash);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    await db.update(adminUsers)
+      .set({ passwordHash: newPasswordHash })
+      .where(eq(adminUsers.id, adminId));
+
+    res.json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Admin change password error:", error);
+    res.status(500).json({ error: "Failed to change password" });
+  }
+});
+
 router.get("/api/admin/stats", authenticateAdmin, async (req: Request, res: Response) => {
   try {
     const [userCountResult] = await db.select({ count: sql<number>`count(*)` }).from(serverUsers);

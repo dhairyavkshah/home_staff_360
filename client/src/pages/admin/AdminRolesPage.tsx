@@ -12,7 +12,8 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Shield, Crown, User, Pencil, Lock, ChevronDown, ChevronRight } from "lucide-react";
+import { Shield, Crown, User, Pencil, Lock, ChevronDown, ChevronRight } from "lucide-react";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 interface AdminRole {
   id: number;
@@ -192,34 +193,17 @@ export default function AdminRolesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/admin/dashboard")}
-            data-testid="button-back-dashboard"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold">Admin Roles</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage role hierarchy and permissions
-            </p>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-6 space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -323,7 +307,6 @@ export default function AdminRolesPage() {
             </div>
           </CardContent>
         </Card>
-      </main>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-md">
@@ -377,6 +360,7 @@ export default function AdminRolesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

@@ -11,8 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, Smartphone, Link2, Activity, LogOut, Film, UserCog, Archive, Shield, UsersRound, Wrench, Search, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Users, Smartphone, Link2, Activity, Search, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Archive } from "lucide-react";
 import * as XLSX from "xlsx";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 interface Stats {
   totalUsers: number;
@@ -321,94 +322,17 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-semibold">Home Staff 360</h1>
-            <p className="text-sm text-muted-foreground">Super Admin Dashboard</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {adminUser && (
-              <span className="text-sm text-muted-foreground hidden sm:block mr-2">
-                {adminUser.email}
-              </span>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLocation("/admin/team")}
-              data-testid="button-admin-team"
-            >
-              <UsersRound className="w-4 h-4 mr-2" />
-              Team
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLocation("/admin/roles")}
-              data-testid="button-admin-roles"
-            >
-              <Shield className="w-4 h-4 mr-2" />
-              Roles
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLocation("/admin/ads")}
-              data-testid="button-admin-ads"
-            >
-              <Film className="w-4 h-4 mr-2" />
-              Ads
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLocation("/admin/admins")}
-              data-testid="button-admin-admins"
-            >
-              <UserCog className="w-4 h-4 mr-2" />
-              Admins
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLocation("/admin/backups")}
-              data-testid="button-admin-backups"
-            >
-              <Archive className="w-4 h-4 mr-2" />
-              Backups
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLocation("/admin/maintenance")}
-              data-testid="button-admin-maintenance"
-            >
-              <Wrench className="w-4 h-4 mr-2" />
-              Maintenance
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              data-testid="button-admin-logout"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-6 space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
@@ -627,7 +551,7 @@ export default function AdminDashboard() {
             {totalPages > 1 && renderPagination()}
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

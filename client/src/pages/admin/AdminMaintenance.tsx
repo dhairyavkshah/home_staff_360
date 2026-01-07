@@ -28,7 +28,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { 
-  ArrowLeft, 
   Plus, 
   Pencil, 
   Trash2, 
@@ -45,6 +44,7 @@ import {
   History
 } from "lucide-react";
 import { format } from "date-fns";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 interface MaintenanceWindow {
   id: number;
@@ -408,29 +408,17 @@ export default function AdminMaintenance() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="flex items-center gap-4 p-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/admin/dashboard")}
-            data-testid="button-back"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-semibold">Maintenance Management</h1>
-        </div>
-      </header>
-
-      <main className="p-4 space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
         {activeSession && (
           <Card className="border-destructive">
             <CardHeader className="pb-2">
@@ -667,7 +655,6 @@ export default function AdminMaintenance() {
             )}
           </TabsContent>
         </Tabs>
-      </main>
 
       <Dialog open={isWindowDialogOpen} onOpenChange={setIsWindowDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
@@ -982,6 +969,7 @@ export default function AdminMaintenance() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

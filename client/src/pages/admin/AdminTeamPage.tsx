@@ -21,8 +21,9 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Pencil, Users, Shield, Crown, User, UserPlus } from "lucide-react";
+import { Plus, Pencil, Users, Shield, Crown, User, UserPlus } from "lucide-react";
 import { format } from "date-fns";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 interface AdminRole {
   id: number;
@@ -267,36 +268,24 @@ export default function AdminTeamPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/admin/dashboard")}
-            data-testid="button-back-dashboard"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold">Admin Team</h1>
-            <p className="text-sm text-muted-foreground">Manage your admin team members</p>
-          </div>
+    <AdminLayout>
+      <div className="space-y-6">
+        <div className="flex justify-end">
           <Button onClick={handleInviteAdmin} data-testid="button-invite-admin">
             <UserPlus className="w-4 h-4 mr-2" />
             Invite Admin
           </Button>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4 pb-2">
             <div>
@@ -409,7 +398,6 @@ export default function AdminTeamPage() {
             </div>
           </CardContent>
         </Card>
-      </main>
 
       <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
         <DialogContent className="max-w-md">
@@ -549,6 +537,7 @@ export default function AdminTeamPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

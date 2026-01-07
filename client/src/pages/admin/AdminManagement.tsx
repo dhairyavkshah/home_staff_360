@@ -21,8 +21,9 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Pencil, UserCog, Shield, Crown, User } from "lucide-react";
+import { Plus, Pencil, UserCog, Shield, Crown, User } from "lucide-react";
 import { format } from "date-fns";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 interface AdminRole {
   id: number;
@@ -262,36 +263,24 @@ export default function AdminManagement() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/admin/dashboard")}
-            data-testid="button-back-dashboard"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold">Admin Management</h1>
-            <p className="text-sm text-muted-foreground">Manage admin users and roles</p>
-          </div>
+    <AdminLayout>
+      <div className="space-y-6">
+        <div className="flex justify-end">
           <Button onClick={handleInviteAdmin} data-testid="button-invite-admin">
             <Plus className="w-4 h-4 mr-2" />
             Invite Admin
           </Button>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4 pb-2">
             <CardTitle className="flex items-center gap-2">
@@ -411,7 +400,6 @@ export default function AdminManagement() {
             </div>
           </CardContent>
         </Card>
-      </main>
 
       <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
         <DialogContent className="max-w-md">
@@ -551,6 +539,7 @@ export default function AdminManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

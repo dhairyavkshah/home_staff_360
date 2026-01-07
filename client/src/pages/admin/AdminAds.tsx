@@ -29,7 +29,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { 
-  ArrowLeft, 
   Plus, 
   Pencil, 
   Trash2, 
@@ -43,6 +42,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 interface Ad {
   id: number;
@@ -320,36 +320,24 @@ export default function AdminAds() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/admin/dashboard")}
-            data-testid="button-back-dashboard"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold">Ads Management</h1>
-            <p className="text-sm text-muted-foreground">Manage advertisements and view analytics</p>
-          </div>
+    <AdminLayout>
+      <div className="space-y-6">
+        <div className="flex justify-end">
           <Button onClick={handleCreateAd} data-testid="button-create-ad">
             <Plus className="w-4 h-4 mr-2" />
             Create Ad
           </Button>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4 pb-2">
             <CardTitle>Global Ad Settings</CardTitle>
@@ -581,7 +569,6 @@ export default function AdminAds() {
             </div>
           </CardContent>
         </Card>
-      </main>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
@@ -829,6 +816,7 @@ export default function AdminAds() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
