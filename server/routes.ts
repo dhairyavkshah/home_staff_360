@@ -46,7 +46,16 @@ import {
   insertBackupLogSchema,
   backupTypes,
   backupStatuses,
-  backupLogActions
+  backupLogActions,
+  maintenanceWindows,
+  maintenanceBroadcasts,
+  maintenanceSessions,
+  insertMaintenanceWindowSchema,
+  insertMaintenanceBroadcastSchema,
+  insertMaintenanceSessionSchema,
+  maintenanceSeverities,
+  maintenanceRecurrenceTypes,
+  maintenanceStatuses
 } from "@shared/schema";
 import { eq, and, or, desc, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -5861,6 +5870,419 @@ router.post("/api/admin/system-restore", authenticateAdmin, async (req: Request,
   } catch (error) {
     console.error("System restore error:", error);
     res.status(500).json({ error: "Failed to restore system backup" });
+  }
+});
+
+// ============ MAINTENANCE NOTIFICATION SYSTEM ============
+
+// GET /api/admin/maintenance/windows - List all maintenance windows
+router.get("/api/admin/maintenance/windows", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { status, limit = 50, offset = 0 } = req.query;
+
+    let query = db.select().from(maintenanceWindows);
+    
+    if (status) {
+      query = query.where(eq(maintenanceWindows.status, status as string)) as any;
+    }
+
+    const windows = await query
+      .orderBy(desc(maintenanceWindows.createdAt))
+      .limit(Number(limit))
+      .offset(Number(offset));
+
+    const [{ count }] = await db.select({ count: sql<number>`count(*)` })
+      .from(maintenanceWindows);
+
+    res.json({
+      windows,
+      total: Number(count),
+      limit: Number(limit),
+      offset: Number(offset)
+    });
+  } catch (error) {
+    console.error("List maintenance windows error:", error);
+    res.status(500).json({ error: "Failed to list maintenance windows" });
+  }
+});
+
+// POST /api/admin/maintenance/windows - Create new maintenance window
+router.post("/api/admin/maintenance/windows", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const parsed = insertMaintenanceWindowSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.message });
+    }
+
+    const [window] = await db.insert(maintenanceWindows).values({
+      ...parsed.data,
+      startAt: new Date(parsed.data.startAt),
+      endAt: parsed.data.endAt ? new Date(parsed.data.endAt) : null,
+      createdById: adminId,
+      updatedById: adminId
+    }).returning();
+
+    res.json(window);
+  } catch (error) {
+    console.error("Create maintenance window error:", error);
+    res.status(500).json({ error: "Failed to create maintenance window" });
+  }
+});
+
+// GET /api/admin/maintenance/windows/:id - Get single window details
+router.get("/api/admin/maintenance/windows/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const window = await db.query.maintenanceWindows.findFirst({
+      where: eq(maintenanceWindows.id, Number(id))
+    });
+
+    if (!window) {
+      return res.status(404).json({ error: "Maintenance window not found" });
+    }
+
+    // Get associated broadcasts
+    const broadcasts = await db.select().from(maintenanceBroadcasts)
+      .where(eq(maintenanceBroadcasts.windowId, Number(id)))
+      .orderBy(desc(maintenanceBroadcasts.sentAt));
+
+    res.json({ ...window, broadcasts });
+  } catch (error) {
+    console.error("Get maintenance window error:", error);
+    res.status(500).json({ error: "Failed to get maintenance window" });
+  }
+});
+
+// PATCH /api/admin/maintenance/windows/:id - Update maintenance window
+router.patch("/api/admin/maintenance/windows/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { id } = req.params;
+
+    const existing = await db.query.maintenanceWindows.findFirst({
+      where: eq(maintenanceWindows.id, Number(id))
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: "Maintenance window not found" });
+    }
+
+    const updateData: any = { updatedAt: new Date(), updatedById: adminId };
+    
+    if (req.body.title !== undefined) updateData.title = req.body.title;
+    if (req.body.message !== undefined) updateData.message = req.body.message;
+    if (req.body.severity !== undefined) updateData.severity = req.body.severity;
+    if (req.body.startAt !== undefined) updateData.startAt = new Date(req.body.startAt);
+    if (req.body.endAt !== undefined) updateData.endAt = req.body.endAt ? new Date(req.body.endAt) : null;
+    if (req.body.durationMinutes !== undefined) updateData.durationMinutes = req.body.durationMinutes;
+    if (req.body.recurrence !== undefined) updateData.recurrence = req.body.recurrence;
+    if (req.body.weekday !== undefined) updateData.weekday = req.body.weekday;
+    if (req.body.dayOfMonth !== undefined) updateData.dayOfMonth = req.body.dayOfMonth;
+    if (req.body.forceLogout !== undefined) updateData.forceLogout = req.body.forceLogout;
+    if (req.body.showMaintenancePage !== undefined) updateData.showMaintenancePage = req.body.showMaintenancePage;
+    if (req.body.status !== undefined) updateData.status = req.body.status;
+
+    const [updated] = await db.update(maintenanceWindows)
+      .set(updateData)
+      .where(eq(maintenanceWindows.id, Number(id)))
+      .returning();
+
+    res.json(updated);
+  } catch (error) {
+    console.error("Update maintenance window error:", error);
+    res.status(500).json({ error: "Failed to update maintenance window" });
+  }
+});
+
+// DELETE /api/admin/maintenance/windows/:id - Delete maintenance window
+router.delete("/api/admin/maintenance/windows/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Check if window exists
+    const existing = await db.query.maintenanceWindows.findFirst({
+      where: eq(maintenanceWindows.id, Number(id))
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: "Maintenance window not found" });
+    }
+
+    // Delete associated broadcasts first
+    await db.delete(maintenanceBroadcasts).where(eq(maintenanceBroadcasts.windowId, Number(id)));
+
+    // Delete associated sessions
+    await db.delete(maintenanceSessions).where(eq(maintenanceSessions.windowId, Number(id)));
+
+    // Delete the window
+    await db.delete(maintenanceWindows).where(eq(maintenanceWindows.id, Number(id)));
+
+    res.json({ success: true, message: "Maintenance window deleted" });
+  } catch (error) {
+    console.error("Delete maintenance window error:", error);
+    res.status(500).json({ error: "Failed to delete maintenance window" });
+  }
+});
+
+// POST /api/admin/maintenance/windows/:id/activate - Activate maintenance mode
+router.post("/api/admin/maintenance/windows/:id/activate", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { id } = req.params;
+
+    const window = await db.query.maintenanceWindows.findFirst({
+      where: eq(maintenanceWindows.id, Number(id))
+    });
+
+    if (!window) {
+      return res.status(404).json({ error: "Maintenance window not found" });
+    }
+
+    // Deactivate any existing active sessions
+    await db.update(maintenanceSessions)
+      .set({ isActive: false, endedAt: new Date() })
+      .where(eq(maintenanceSessions.isActive, true));
+
+    // Create new active session
+    const endTime = window.endAt || new Date(Date.now() + window.durationMinutes * 60 * 1000);
+    
+    const [session] = await db.insert(maintenanceSessions).values({
+      windowId: Number(id),
+      isActive: true,
+      forceLogoutEnabled: window.forceLogout,
+      maintenancePageEnabled: window.showMaintenancePage,
+      endTime,
+      message: window.message,
+      activatedById: adminId
+    }).returning();
+
+    // Update window status to active
+    await db.update(maintenanceWindows)
+      .set({ status: 'active', updatedAt: new Date(), updatedById: adminId })
+      .where(eq(maintenanceWindows.id, Number(id)));
+
+    // Get user count for broadcast
+    const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(serverUsers);
+
+    // Create broadcast record
+    await db.insert(maintenanceBroadcasts).values({
+      windowId: Number(id),
+      broadcastType: 'scheduled',
+      title: window.title,
+      message: window.message,
+      severity: window.severity,
+      forceLogout: window.forceLogout,
+      targetUserCount: Number(count),
+      createdById: adminId
+    });
+
+    res.json({
+      success: true,
+      session,
+      message: "Maintenance mode activated"
+    });
+  } catch (error) {
+    console.error("Activate maintenance error:", error);
+    res.status(500).json({ error: "Failed to activate maintenance mode" });
+  }
+});
+
+// POST /api/admin/maintenance/windows/:id/deactivate - Deactivate maintenance mode
+router.post("/api/admin/maintenance/windows/:id/deactivate", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { id } = req.params;
+
+    // Deactivate sessions for this window
+    await db.update(maintenanceSessions)
+      .set({ isActive: false, endedAt: new Date() })
+      .where(and(
+        eq(maintenanceSessions.windowId, Number(id)),
+        eq(maintenanceSessions.isActive, true)
+      ));
+
+    // Update window status
+    await db.update(maintenanceWindows)
+      .set({ status: 'completed', updatedAt: new Date(), updatedById: adminId })
+      .where(eq(maintenanceWindows.id, Number(id)));
+
+    res.json({
+      success: true,
+      message: "Maintenance mode deactivated"
+    });
+  } catch (error) {
+    console.error("Deactivate maintenance error:", error);
+    res.status(500).json({ error: "Failed to deactivate maintenance mode" });
+  }
+});
+
+// POST /api/admin/maintenance/broadcast - Send ad-hoc broadcast
+router.post("/api/admin/maintenance/broadcast", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { title, message, severity = 'info', forceLogout = false, durationMinutes = 30 } = req.body;
+
+    if (!title || !message) {
+      return res.status(400).json({ error: "Title and message are required" });
+    }
+
+    // Get user count
+    const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(serverUsers);
+
+    // If forceLogout is requested, create an active session
+    if (forceLogout) {
+      // Deactivate any existing active sessions
+      await db.update(maintenanceSessions)
+        .set({ isActive: false, endedAt: new Date() })
+        .where(eq(maintenanceSessions.isActive, true));
+
+      // Create new session without a window
+      await db.insert(maintenanceSessions).values({
+        isActive: true,
+        forceLogoutEnabled: true,
+        maintenancePageEnabled: true,
+        endTime: new Date(Date.now() + durationMinutes * 60 * 1000),
+        message,
+        activatedById: adminId
+      });
+    }
+
+    // Create broadcast record
+    const [broadcast] = await db.insert(maintenanceBroadcasts).values({
+      broadcastType: 'adhoc',
+      title,
+      message,
+      severity,
+      forceLogout,
+      targetUserCount: Number(count),
+      createdById: adminId
+    }).returning();
+
+    res.json({
+      success: true,
+      broadcast,
+      targetUserCount: Number(count)
+    });
+  } catch (error) {
+    console.error("Send broadcast error:", error);
+    res.status(500).json({ error: "Failed to send broadcast" });
+  }
+});
+
+// GET /api/admin/maintenance/broadcasts - List all broadcasts
+router.get("/api/admin/maintenance/broadcasts", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { limit = 50, offset = 0 } = req.query;
+
+    const broadcasts = await db.select().from(maintenanceBroadcasts)
+      .orderBy(desc(maintenanceBroadcasts.sentAt))
+      .limit(Number(limit))
+      .offset(Number(offset));
+
+    const [{ count }] = await db.select({ count: sql<number>`count(*)` })
+      .from(maintenanceBroadcasts);
+
+    res.json({
+      broadcasts,
+      total: Number(count)
+    });
+  } catch (error) {
+    console.error("List broadcasts error:", error);
+    res.status(500).json({ error: "Failed to list broadcasts" });
+  }
+});
+
+// GET /api/admin/maintenance/sessions - Get active maintenance session (if any)
+router.get("/api/admin/maintenance/sessions", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const activeSession = await db.query.maintenanceSessions.findFirst({
+      where: eq(maintenanceSessions.isActive, true)
+    });
+
+    res.json({ activeSession });
+  } catch (error) {
+    console.error("Get active session error:", error);
+    res.status(500).json({ error: "Failed to get active session" });
+  }
+});
+
+// POST /api/admin/maintenance/deactivate-all - Deactivate all maintenance sessions
+router.post("/api/admin/maintenance/deactivate-all", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    await db.update(maintenanceSessions)
+      .set({ isActive: false, endedAt: new Date() })
+      .where(eq(maintenanceSessions.isActive, true));
+
+    // Update all active windows to completed
+    await db.update(maintenanceWindows)
+      .set({ status: 'completed', updatedAt: new Date() })
+      .where(eq(maintenanceWindows.status, 'active'));
+
+    res.json({ success: true, message: "All maintenance sessions deactivated" });
+  } catch (error) {
+    console.error("Deactivate all error:", error);
+    res.status(500).json({ error: "Failed to deactivate all sessions" });
+  }
+});
+
+// ============ PUBLIC MAINTENANCE STATUS API ============
+
+// GET /api/maintenance/status - Check current maintenance status (for clients)
+router.get("/api/maintenance/status", async (req: Request, res: Response) => {
+  try {
+    const activeSession = await db.query.maintenanceSessions.findFirst({
+      where: eq(maintenanceSessions.isActive, true)
+    });
+
+    if (!activeSession) {
+      return res.json({
+        isActive: false,
+        maintenance: null
+      });
+    }
+
+    // Calculate countdown
+    const now = new Date();
+    const endTime = activeSession.endTime ? new Date(activeSession.endTime) : null;
+    const countdownSeconds = endTime ? Math.max(0, Math.floor((endTime.getTime() - now.getTime()) / 1000)) : null;
+
+    res.json({
+      isActive: true,
+      maintenance: {
+        message: activeSession.message,
+        forceLogout: activeSession.forceLogoutEnabled,
+        showMaintenancePage: activeSession.maintenancePageEnabled,
+        endTime: activeSession.endTime,
+        countdownSeconds,
+        startedAt: activeSession.startedAt
+      }
+    });
+  } catch (error) {
+    console.error("Get maintenance status error:", error);
+    res.status(500).json({ error: "Failed to get maintenance status" });
+  }
+});
+
+// GET /api/maintenance/check-logout - Check if user should be logged out (for polling)
+router.get("/api/maintenance/check-logout", async (req: Request, res: Response) => {
+  try {
+    const activeSession = await db.query.maintenanceSessions.findFirst({
+      where: and(
+        eq(maintenanceSessions.isActive, true),
+        eq(maintenanceSessions.forceLogoutEnabled, true)
+      )
+    });
+
+    res.json({
+      shouldLogout: !!activeSession,
+      message: activeSession?.message || null
+    });
+  } catch (error) {
+    console.error("Check logout error:", error);
+    res.status(500).json({ error: "Failed to check logout status" });
   }
 });
 
