@@ -1653,8 +1653,9 @@ export type NotificationType = typeof notificationTypes[number];
 export const notifications = pgTable("notifications", {
   id: varchar("id", { length: 255 }).primaryKey(),
   userId: varchar("user_id", { length: 255 }).references(() => serverUsers.id).notNull(),
-  userMode: varchar("user_mode", { length: 10 }).notNull(), // HOME or STAFF
-  type: varchar("type", { length: 50 }).notNull(),
+  userMode: varchar("user_mode", { length: 10 }), // HOME or STAFF
+  category: varchar("category", { length: 50 }).notNull(), // collaboration, attendance, laundry, system
+  type: varchar("type", { length: 50 }),
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message"),
   // Related entity
@@ -1685,8 +1686,9 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 export const insertNotificationSchema = z.object({
   id: z.string().max(255),
   userId: z.string().max(255),
-  userMode: z.enum(userTypes),
-  type: z.enum(notificationTypes),
+  userMode: z.enum(userTypes).optional(),
+  category: z.string().max(50), // collaboration, attendance, laundry, system
+  type: z.enum(notificationTypes).optional(),
   title: z.string().max(255),
   message: z.string().optional(),
   entityType: z.string().max(50).optional(),

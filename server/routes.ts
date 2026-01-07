@@ -1114,6 +1114,7 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
         id: uuidv4(),
         userId,
         userMode: user.userType || 'HOME',
+        category: 'system',
         type: 'system',
         title: 'Phone Number Changed',
         message: `Your phone number has been changed from ${oldPhone} to ${normalizedNewPhone}`,
@@ -1135,6 +1136,7 @@ router.post("/api/user/phone/confirm", authenticateToken, async (req: Request, r
           id: uuidv4(),
           userId: otherUserId,
           userMode: 'HOME',
+          category: 'system',
           type: 'system',
           title: 'Contact Updated',
           message: `${user.displayName || 'A contact'} has updated their phone number`,
@@ -2299,13 +2301,21 @@ async function createNotification(
   message: string,
   entityType?: string,
   entityId?: string,
-  payload?: any
+  payload?: any,
+  category?: string
 ) {
   try {
+    // Derive category from type if not specified
+    const derivedCategory = category || 
+      (type.includes('connection') ? 'collaboration' :
+       type.includes('attendance') ? 'attendance' :
+       type.includes('laundry') ? 'laundry' : 'system');
+    
     await db.insert(notifications).values({
       id: uuidv4(),
       userId,
       userMode,
+      category: derivedCategory,
       type,
       title,
       message,
@@ -6992,6 +7002,7 @@ router.post("/api/connections/request", authenticateToken, async (req: Request, 
       id: notificationId,
       userId: targetUserId,
       userMode: targetUserMode,
+      category: 'collaboration',
       type: 'connection_request',
       title: 'New Connection Request',
       message: `${requesterName} wants to connect with you`,
