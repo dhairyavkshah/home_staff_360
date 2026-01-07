@@ -1963,6 +1963,52 @@ export type InsertBackupLog = z.infer<typeof insertBackupLogSchema>;
 export type BackupLog = typeof backupLogs.$inferSelect;
 
 // ============================================
+// System-Wide Backups (for Admin)
+// ============================================
+
+export const systemBackupStatuses = ['pending', 'completed', 'failed', 'deleted'] as const;
+export type SystemBackupStatus = typeof systemBackupStatuses[number];
+
+export const systemBackups = pgTable("system_backups", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  status: varchar("status", { length: 20 }).default('pending').notNull(),
+  schemaVersion: varchar("schema_version", { length: 50 }).notNull(),
+  checksum: text("checksum"),
+  backupData: jsonb("backup_data"),
+  tablesIncluded: text("tables_included").array(),
+  totalRecords: integer("total_records").default(0),
+  fileSizeBytes: integer("file_size_bytes"),
+  createdById: varchar("created_by_id", { length: 255 }).references(() => adminUsers.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  notes: text("notes"),
+});
+
+export const systemBackupsRelations = relations(systemBackups, ({ one }) => ({
+  createdBy: one(adminUsers, {
+    fields: [systemBackups.createdById],
+    references: [adminUsers.id],
+  }),
+}));
+
+export const insertSystemBackupSchema = z.object({
+  name: z.string().max(255),
+  description: z.string().optional(),
+  status: z.enum(systemBackupStatuses).optional(),
+  schemaVersion: z.string().max(50),
+  checksum: z.string().optional(),
+  backupData: z.any().optional(),
+  tablesIncluded: z.array(z.string()).optional(),
+  totalRecords: z.number().optional(),
+  fileSizeBytes: z.number().optional(),
+  createdById: z.string().max(255).optional(),
+  notes: z.string().optional(),
+});
+export type InsertSystemBackup = z.infer<typeof insertSystemBackupSchema>;
+export type SystemBackup = typeof systemBackups.$inferSelect;
+
+// ============================================
 // Maintenance Notification System
 // ============================================
 
