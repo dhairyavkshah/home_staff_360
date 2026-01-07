@@ -2191,6 +2191,8 @@ router.get("/api/notifications", authenticateToken, async (req: Request, res: Re
     const userId = (req as any).user?.userId;
     const { mode, unreadOnly } = req.query;
 
+    console.log("Notifications API called:", { userId, mode, unreadOnly });
+
     let conditions = [eq(notifications.userId, userId)];
     
     if (mode) {
@@ -2202,6 +2204,8 @@ router.get("/api/notifications", authenticateToken, async (req: Request, res: Re
       orderBy: desc(notifications.createdAt),
       limit: 50
     });
+
+    console.log(`Found ${userNotifications.length} notifications for user ${userId} with mode ${mode}`);
 
     // Count unread
     const unreadCount = userNotifications.filter(n => !n.isRead).length;
