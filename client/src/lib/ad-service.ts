@@ -87,9 +87,36 @@ class AdService {
     }
   }
 
+  async checkAdsEnabled(): Promise<boolean> {
+    try {
+      const response = await fetch("/api/ads/settings", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        return true;
+      }
+
+      const data = await response.json();
+      return data.adsEnabled ?? true;
+    } catch (error) {
+      console.error("Error checking ads settings:", error);
+      return true;
+    }
+  }
+
   async getNextAd(): Promise<Advertisement | null> {
     try {
-      const response = await fetch("/api/ads/next", {
+      const adsEnabled = await this.checkAdsEnabled();
+      if (!adsEnabled) {
+        return null;
+      }
+
+      const deviceId = this.getDeviceId();
+      const response = await fetch(`/api/ads/next?deviceId=${encodeURIComponent(deviceId)}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

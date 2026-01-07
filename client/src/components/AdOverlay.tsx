@@ -2,8 +2,19 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Advertisement } from "@shared/schema";
 import { adService } from "@/lib/ad-service";
+import { useI18n } from "@/lib/i18n/i18n-context";
 
 interface AdOverlayProps {
   ad: Advertisement;
@@ -13,10 +24,13 @@ interface AdOverlayProps {
 const SKIP_DELAY_SECONDS = 5;
 
 export function AdOverlay({ ad, onClose }: AdOverlayProps) {
+  const { t } = useI18n();
   const [countdown, setCountdown] = useState(SKIP_DELAY_SECONDS);
   const [canSkip, setCanSkip] = useState(false);
   const [watchedDuration, setWatchedDuration] = useState(0);
   const [hasClickedThrough, setHasClickedThrough] = useState(false);
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const startTimeRef = useRef<number>(Date.now());
   const hasRecordedImpressionRef = useRef(false);
@@ -43,6 +57,15 @@ export function AdOverlay({ ad, onClose }: AdOverlayProps) {
       clearInterval(countdownInterval);
       clearInterval(durationInterval);
     };
+  }, []);
+
+  const handleVideoMetadata = useCallback(() => {
+    const video = videoRef.current;
+    if (video) {
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+      setIsPortrait(videoHeight > videoWidth);
+    }
   }, []);
 
   const recordImpressionAndClose = useCallback(
@@ -76,16 +99,31 @@ export function AdOverlay({ ad, onClose }: AdOverlayProps) {
     }
   }, [canSkip, hasClickedThrough, recordImpressionAndClose]);
 
-  const handleLearnMore = useCallback(() => {
+  const handleLearnMoreClick = useCallback(() => {
+    if (ad.targetUrl) {
+      setShowConsentDialog(true);
+    }
+  }, [ad.targetUrl]);
+
+  const handleConsentConfirm = useCallback(() => {
     if (ad.targetUrl) {
       setHasClickedThrough(true);
+      setShowConsentDialog(false);
       window.open(ad.targetUrl, "_blank", "noopener,noreferrer");
     }
   }, [ad.targetUrl]);
 
+  const handleConsentCancel = useCallback(() => {
+    setShowConsentDialog(false);
+  }, []);
+
   const handleVideoEnded = useCallback(() => {
     recordImpressionAndClose(false, hasClickedThrough);
   }, [hasClickedThrough, recordImpressionAndClose]);
+
+  const videoContainerClasses = isPortrait
+    ? "w-full max-w-sm aspect-[9/16] rounded-lg overflow-hidden bg-black"
+    : "w-full max-w-2xl aspect-video rounded-lg overflow-hidden bg-black";
 
   return (
     <AnimatePresence>
@@ -125,7 +163,7 @@ export function AdOverlay({ ad, onClose }: AdOverlayProps) {
         </div>
 
         <div className="flex-1 flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl aspect-video rounded-lg overflow-hidden bg-black">
+          <div className={videoContainerClasses}>
             <video
               ref={videoRef}
               src={ad.videoUrl}
@@ -133,6 +171,7 @@ export function AdOverlay({ ad, onClose }: AdOverlayProps) {
               autoPlay
               playsInline
               muted={false}
+              onLoadedMetadata={handleVideoMetadata}
               onEnded={handleVideoEnded}
               data-testid="video-ad"
             />
@@ -165,7 +204,7 @@ export function AdOverlay({ ad, onClose }: AdOverlayProps) {
                 <Button
                   variant="default"
                   size="sm"
-                  onClick={handleLearnMore}
+                  onClick={handleLearnMoreClick}
                   className="shrink-0"
                   data-testid="button-learn-more"
                 >
@@ -190,6 +229,33 @@ export function AdOverlay({ ad, onClose }: AdOverlayProps) {
             </div>
           </div>
         </div>
+
+        <AlertDialog open={showConsentDialog} onOpenChange={setShowConsentDialog}>
+          <AlertDialogContent data-testid="dialog-leaving-app">
+            <AlertDialogHeader>
+              <AlertDialogTitle data-testid="text-leaving-app-title">
+                {t("leavingAppTitle")}
+              </AlertDialogTitle>
+              <AlertDialogDescription data-testid="text-leaving-app-description">
+                {t("leavingAppDescription", { advertiser: ad.advertiser || "this advertiser" })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={handleConsentCancel}
+                data-testid="button-cancel-leave"
+              >
+                {t("cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConsentConfirm}
+                data-testid="button-continue-leave"
+              >
+                {t("continueButton")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </motion.div>
     </AnimatePresence>
   );

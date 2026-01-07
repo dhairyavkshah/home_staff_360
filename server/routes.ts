@@ -24,6 +24,7 @@ import {
   businessShareMembers,
   advertisements,
   adImpressions,
+  adSettings,
   insertServerUserSchema,
   insertDeviceSchema,
   insertCollaborationLinkSchema,
@@ -35,6 +36,8 @@ import {
   insertNotificationSchema,
   insertAdvertisementSchema,
   insertAdImpressionSchema,
+  insertAdSettingsSchema,
+  adOrientations,
   approvalStatuses,
   userBackups,
   backupLogs,
@@ -4145,9 +4148,33 @@ router.post("/api/admin/seed-test-data", async (req: Request, res: Response) => 
 // Advertisement Endpoints
 // ============================================
 
+// GET /api/ads/settings - Get global ad settings (public)
+router.get("/api/ads/settings", async (req: Request, res: Response) => {
+  try {
+    const settings = await db.query.adSettings.findFirst();
+    
+    if (!settings) {
+      return res.json({ adsEnabled: true });
+    }
+    
+    res.json({ adsEnabled: settings.adsEnabled });
+  } catch (error) {
+    console.error("Get ad settings error:", error);
+    res.status(500).json({ error: "Failed to get ad settings" });
+  }
+});
+
 // GET /api/ads/next - Get next ad to display (weighted random selection)
 router.get("/api/ads/next", async (req: Request, res: Response) => {
   try {
+    const deviceId = req.query.deviceId as string | undefined;
+    
+    // Check global ads enabled setting
+    const settings = await db.query.adSettings.findFirst();
+    if (settings && !settings.adsEnabled) {
+      return res.status(404).json({ error: "Ads are disabled", adsDisabled: true });
+    }
+    
     const now = new Date();
     
     // Get all active ads within valid date range
@@ -4169,12 +4196,38 @@ router.get("/api/ads/next", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "No ads available" });
     }
 
+    // Filter out ads that have exceeded maxPlayCount for this device
+    let eligibleAds = activeAds;
+    if (deviceId) {
+      const adPlayCounts = await db.select({
+        adId: adImpressions.adId,
+        playCount: sql<number>`count(*)`
+      })
+      .from(adImpressions)
+      .where(eq(adImpressions.deviceId, deviceId))
+      .groupBy(adImpressions.adId);
+      
+      const playCountMap = new Map(adPlayCounts.map(pc => [pc.adId, Number(pc.playCount)]));
+      
+      eligibleAds = activeAds.filter(ad => {
+        if (ad.maxPlayCount === null || ad.maxPlayCount === undefined) {
+          return true; // Unlimited plays
+        }
+        const currentCount = playCountMap.get(ad.id) || 0;
+        return currentCount < ad.maxPlayCount;
+      });
+    }
+
+    if (eligibleAds.length === 0) {
+      return res.status(404).json({ error: "No ads available" });
+    }
+
     // Weighted random selection
-    const totalWeight = activeAds.reduce((sum, ad) => sum + (ad.weight || 1), 0);
+    const totalWeight = eligibleAds.reduce((sum, ad) => sum + (ad.weight || 1), 0);
     let random = Math.random() * totalWeight;
     
-    let selectedAd = activeAds[0];
-    for (const ad of activeAds) {
+    let selectedAd = eligibleAds[0];
+    for (const ad of eligibleAds) {
       random -= ad.weight || 1;
       if (random <= 0) {
         selectedAd = ad;
@@ -4188,7 +4241,8 @@ router.get("/api/ads/next", async (req: Request, res: Response) => {
       videoUrl: selectedAd.videoUrl,
       thumbnailUrl: selectedAd.thumbnailUrl,
       duration: selectedAd.duration,
-      targetUrl: selectedAd.targetUrl
+      targetUrl: selectedAd.targetUrl,
+      orientation: selectedAd.orientation
     });
   } catch (error) {
     console.error("Get next ad error:", error);
@@ -4359,6 +4413,61 @@ router.get("/api/admin/ads/analytics", authenticateAdmin, async (req: Request, r
   }
 });
 
+// GET /api/admin/ads/settings - Get ad settings (admin)
+router.get("/api/admin/ads/settings", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const settings = await db.query.adSettings.findFirst();
+    
+    if (!settings) {
+      return res.json({ adsEnabled: true, updatedAt: null, updatedBy: null });
+    }
+    
+    res.json(settings);
+  } catch (error) {
+    console.error("Get admin ad settings error:", error);
+    res.status(500).json({ error: "Failed to get ad settings" });
+  }
+});
+
+// PATCH /api/admin/ads/settings - Update ad settings (admin only)
+router.patch("/api/admin/ads/settings", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const validationResult = insertAdSettingsSchema.safeParse(req.body);
+    
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: "Invalid settings data",
+        details: validationResult.error.issues 
+      });
+    }
+    
+    const { adsEnabled } = validationResult.data;
+    
+    const existingSettings = await db.query.adSettings.findFirst();
+    
+    if (existingSettings) {
+      await db.update(adSettings)
+        .set({ 
+          adsEnabled,
+          updatedAt: new Date(),
+          updatedBy: adminId || null
+        })
+        .where(eq(adSettings.id, existingSettings.id));
+    } else {
+      await db.insert(adSettings).values({
+        adsEnabled,
+        updatedBy: adminId || null
+      });
+    }
+    
+    res.json({ success: true, adsEnabled });
+  } catch (error) {
+    console.error("Update ad settings error:", error);
+    res.status(500).json({ error: "Failed to update ad settings" });
+  }
+});
+
 // GET /api/admin/ads/:id - Get single ad details
 router.get("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: Response) => {
   try {
@@ -4406,7 +4515,9 @@ router.post("/api/admin/ads", authenticateAdmin, async (req: Request, res: Respo
       advertiser: data.advertiser || null,
       targetUrl: data.targetUrl || null,
       startDate: data.startDate || null,
-      endDate: data.endDate || null
+      endDate: data.endDate || null,
+      maxPlayCount: data.maxPlayCount ?? null,
+      orientation: data.orientation || "landscape"
     }).returning();
 
     res.status(201).json(newAd);
@@ -4442,6 +4553,8 @@ router.patch("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: 
     if (req.body.targetUrl !== undefined) updateData.targetUrl = req.body.targetUrl;
     if (req.body.startDate !== undefined) updateData.startDate = req.body.startDate ? new Date(req.body.startDate) : null;
     if (req.body.endDate !== undefined) updateData.endDate = req.body.endDate ? new Date(req.body.endDate) : null;
+    if (req.body.maxPlayCount !== undefined) updateData.maxPlayCount = req.body.maxPlayCount;
+    if (req.body.orientation !== undefined) updateData.orientation = req.body.orientation;
     updateData.updatedAt = new Date();
 
     const [updatedAd] = await db.update(advertisements)

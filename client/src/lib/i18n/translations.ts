@@ -978,6 +978,11 @@ const en = {
   serverDisconnected: "Disconnected from server",
   reconnecting: "Reconnecting...",
   dataWillSync: "Changes will sync when connected",
+  
+  // Ad Consent Dialog
+  leavingAppTitle: "Leaving App",
+  leavingAppDescription: "You are about to leave the app and visit {advertiser}. Your current screen will be preserved.",
+  continueButton: "Continue",
 };
 
 const hi: Partial<typeof en> = {
@@ -1929,6 +1934,10 @@ const hi: Partial<typeof en> = {
   searchClientHomes: "ग्राहक घरों में खोजें...",
   business: "व्यवसाय",
   selectBusiness: "व्यवसाय चुनें",
+  // Ad Consent Dialog
+  leavingAppTitle: "ऐप छोड़ना",
+  leavingAppDescription: "आप ऐप छोड़कर {advertiser} पर जाने वाले हैं। आपकी वर्तमान स्क्रीन संरक्षित रहेगी।",
+  continueButton: "जारी रखें",
 };
 
 const gu: Partial<typeof en> = {
@@ -2492,6 +2501,10 @@ const gu: Partial<typeof en> = {
   serverDisconnected: "સર્વરથી ડિસ્કનેક્ટ",
   reconnecting: "ફરી કનેક્ટ થઈ રહ્યું છે...",
   dataWillSync: "કનેક્ટ થયા પછી ફેરફારો સિંક થશે",
+  // Ad Consent Dialog
+  leavingAppTitle: "એપ છોડી રહ્યા છો",
+  leavingAppDescription: "તમે એપ છોડીને {advertiser} ની મુલાકાત લેવા જઈ રહ્યા છો. તમારી વર્તમાન સ્ક્રીન સાચવવામાં આવશે.",
+  continueButton: "ચાલુ રાખો",
 };
 
 const kn: Partial<typeof en> = {
@@ -3055,6 +3068,10 @@ const kn: Partial<typeof en> = {
   serverDisconnected: "ಸರ್ವರ್‌ನಿಂದ ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ",
   reconnecting: "ಮರುಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ...",
   dataWillSync: "ಸಂಪರ್ಕಗೊಂಡಾಗ ಬದಲಾವಣೆಗಳು ಸಿಂಕ್ ಆಗುತ್ತವೆ",
+  // Ad Consent Dialog
+  leavingAppTitle: "ಆಪ್ ಬಿಡುತ್ತಿದ್ದೀರಿ",
+  leavingAppDescription: "ನೀವು ಆಪ್ ಬಿಟ್ಟು {advertiser} ಗೆ ಭೇಟಿ ನೀಡಲಿದ್ದೀರಿ. ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಪರದೆ ಸಂರಕ್ಷಿಸಲಾಗುವುದು.",
+  continueButton: "ಮುಂದುವರಿಸಿ",
 };
 
 const ml: Partial<typeof en> = {
@@ -3618,6 +3635,10 @@ const ml: Partial<typeof en> = {
   serverDisconnected: "സെർവറിൽ നിന്ന് വിച്ഛേദിച്ചു",
   reconnecting: "വീണ്ടും കണക്റ്റ് ചെയ്യുന്നു...",
   dataWillSync: "കണക്റ്റ് ചെയ്യുമ്പോൾ മാറ്റങ്ങൾ സിങ്ക് ആകും",
+  // Ad Consent Dialog
+  leavingAppTitle: "ആപ്പ് വിടുന്നു",
+  leavingAppDescription: "നിങ്ങൾ ആപ്പ് വിട്ട് {advertiser} സന്ദർശിക്കാൻ പോകുന്നു. നിങ്ങളുടെ നിലവിലെ സ്ക്രീൻ സംരക്ഷിക്കപ്പെടും.",
+  continueButton: "തുടരുക",
 };
 
 // Complete Spanish translations
@@ -4402,6 +4423,10 @@ const es: Partial<typeof en> = {
   serverDisconnected: "Desconectado del servidor",
   reconnecting: "Reconectando...",
   dataWillSync: "Los cambios se sincronizarán al conectarse",
+  // Ad Consent Dialog
+  leavingAppTitle: "Saliendo de la aplicación",
+  leavingAppDescription: "Estás a punto de salir de la aplicación y visitar {advertiser}. Tu pantalla actual se conservará.",
+  continueButton: "Continuar",
 };
 const fr: Partial<typeof en> = {
   save: "Enregistrer", cancel: "Annuler", delete: "Supprimer", edit: "Modifier", view: "Voir", add: "Ajouter", back: "Retour", confirm: "Confirmer", loading: "Chargement...", error: "Erreur", success: "Succès", required: "Obligatoire", optional: "Optionnel", comingSoon: "Bientôt disponible",
@@ -4625,6 +4650,10 @@ const fr: Partial<typeof en> = {
   serverDisconnected: "Déconnecté du serveur",
   reconnecting: "Reconnexion...",
   dataWillSync: "Les modifications seront synchronisées une fois connecté",
+  // Ad Consent Dialog
+  leavingAppTitle: "Quitter l'application",
+  leavingAppDescription: "Vous êtes sur le point de quitter l'application et de visiter {advertiser}. Votre écran actuel sera préservé.",
+  continueButton: "Continuer",
 };
 const de: Partial<typeof en> = {
   save: "Speichern", cancel: "Abbrechen", delete: "Löschen", edit: "Bearbeiten", view: "Ansehen", add: "Hinzufügen", back: "Zurück", confirm: "Bestätigen", loading: "Wird geladen...", error: "Fehler", success: "Erfolg", required: "Erforderlich", optional: "Optional", comingSoon: "Demnächst verfügbar",
@@ -4848,6 +4877,10 @@ const de: Partial<typeof en> = {
   serverDisconnected: "Vom Server getrennt",
   reconnecting: "Verbindung wird wiederhergestellt...",
   dataWillSync: "Änderungen werden bei Verbindung synchronisiert",
+  // Ad Consent Dialog
+  leavingAppTitle: "App verlassen",
+  leavingAppDescription: "Sie sind dabei, die App zu verlassen und {advertiser} zu besuchen. Ihr aktueller Bildschirm wird beibehalten.",
+  continueButton: "Fortfahren",
 };
 const ar: Partial<typeof en> = {
   save: "حفظ", cancel: "إلغاء", delete: "حذف", edit: "تعديل", view: "عرض", add: "إضافة", back: "رجوع", confirm: "تأكيد", loading: "جاري التحميل...", error: "خطأ", success: "نجاح", required: "مطلوب", optional: "اختياري", comingSoon: "قريباً",
@@ -5071,6 +5104,10 @@ const ar: Partial<typeof en> = {
   serverDisconnected: "منفصل عن الخادم",
   reconnecting: "جاري إعادة الاتصال...",
   dataWillSync: "ستتم مزامنة التغييرات عند الاتصال",
+  // Ad Consent Dialog
+  leavingAppTitle: "مغادرة التطبيق",
+  leavingAppDescription: "أنت على وشك مغادرة التطبيق وزيارة {advertiser}. سيتم الحفاظ على شاشتك الحالية.",
+  continueButton: "متابعة",
 };
 const zh: Partial<typeof en> = {
   save: "保存", cancel: "取消", delete: "删除", edit: "编辑", view: "查看", add: "添加", back: "返回", confirm: "确认", loading: "加载中...", error: "错误", success: "成功", required: "必填", optional: "可选", comingSoon: "即将推出",
@@ -5293,6 +5330,10 @@ const zh: Partial<typeof en> = {
   serverDisconnected: "与服务器断开连接",
   reconnecting: "重新连接中...",
   dataWillSync: "连接后将同步更改",
+  // Ad Consent Dialog
+  leavingAppTitle: "离开应用",
+  leavingAppDescription: "您即将离开应用并访问 {advertiser}。您当前的屏幕将被保留。",
+  continueButton: "继续",
 };
 const ja: Partial<typeof en> = {
   save: "保存", cancel: "キャンセル", delete: "削除", edit: "編集", view: "表示", add: "追加", back: "戻る", confirm: "確認", loading: "読み込み中...", error: "エラー", success: "成功", required: "必須", optional: "任意", comingSoon: "近日公開",
@@ -5446,6 +5487,10 @@ const ja: Partial<typeof en> = {
   serverDisconnected: "サーバーから切断されています",
   reconnecting: "再接続中...",
   dataWillSync: "オンラインになるとデータが同期されます",
+  // Ad Consent Dialog
+  leavingAppTitle: "アプリを離れます",
+  leavingAppDescription: "アプリを離れて {advertiser} にアクセスしようとしています。現在の画面は保存されます。",
+  continueButton: "続ける",
 };
 const pt: Partial<typeof en> = {
   save: "Salvar", cancel: "Cancelar", delete: "Excluir", edit: "Editar", view: "Visualizar", add: "Adicionar", back: "Voltar", confirm: "Confirmar", loading: "Carregando...", error: "Erro", success: "Sucesso", required: "Obrigatório", optional: "Opcional", comingSoon: "Em breve",
@@ -5669,6 +5714,10 @@ const pt: Partial<typeof en> = {
   serverDisconnected: "Servidor Desconectado",
   reconnecting: "Reconectando...",
   dataWillSync: "Os dados serão sincronizados quando online",
+  // Ad Consent Dialog
+  leavingAppTitle: "Saindo do aplicativo",
+  leavingAppDescription: "Você está prestes a sair do aplicativo e visitar {advertiser}. Sua tela atual será preservada.",
+  continueButton: "Continuar",
 };
 
 // Marathi - Complete translations
@@ -5825,6 +5874,10 @@ const mr: Partial<typeof en> = {
   serverDisconnected: "सर्व्हर डिस्कनेक्ट झाला",
   reconnecting: "पुन्हा कनेक्ट होत आहे...",
   dataWillSync: "ऑनलाइन असताना डेटा सिंक होईल",
+  // Ad Consent Dialog
+  leavingAppTitle: "ॲप सोडत आहात",
+  leavingAppDescription: "तुम्ही ॲप सोडून {advertiser} ला भेट देणार आहात. तुमची सध्याची स्क्रीन जतन केली जाईल.",
+  continueButton: "पुढे चालू ठेवा",
 };
 // Punjabi - Complete translations
 const pa: Partial<typeof en> = {
@@ -5980,6 +6033,10 @@ const pa: Partial<typeof en> = {
   serverDisconnected: "ਸਰਵਰ ਡਿਸਕਨੈਕਟ ਹੋਇਆ",
   reconnecting: "ਦੁਬਾਰਾ ਕਨੈਕਟ ਹੋ ਰਿਹਾ ਹੈ...",
   dataWillSync: "ਆਨਲਾਈਨ ਹੋਣ 'ਤੇ ਡਾਟਾ ਸਿੰਕ ਹੋਵੇਗਾ",
+  // Ad Consent Dialog
+  leavingAppTitle: "ਐਪ ਛੱਡ ਰਹੇ ਹੋ",
+  leavingAppDescription: "ਤੁਸੀਂ ਐਪ ਛੱਡ ਕੇ {advertiser} 'ਤੇ ਜਾਣ ਵਾਲੇ ਹੋ। ਤੁਹਾਡੀ ਮੌਜੂਦਾ ਸਕ੍ਰੀਨ ਸੁਰੱਖਿਅਤ ਰਹੇਗੀ।",
+  continueButton: "ਜਾਰੀ ਰੱਖੋ",
 };
 const te: Partial<typeof en> = {
   save: "సేవ్ చేయండి", cancel: "రద్దు చేయండి", delete: "తొలగించు", edit: "సవరించు", view: "చూడండి", add: "జోడించు", back: "వెనుకకు", confirm: "నిర్ధారించు", loading: "లోడ్ అవుతోంది...", error: "లోపం", success: "విజయం", required: "అవసరం", optional: "ఐచ్ఛికం", comingSoon: "త్వరలో వస్తోంది",
@@ -6203,6 +6260,10 @@ const te: Partial<typeof en> = {
   serverDisconnected: "సర్వర్ డిస్‌కనెక్ట్ అయింది",
   reconnecting: "మళ్ళీ కనెక్ట్ అవుతోంది...",
   dataWillSync: "ఆన్‌లైన్‌లో ఉన్నప్పుడు డేటా సింక్ అవుతుంది",
+  // Ad Consent Dialog
+  leavingAppTitle: "యాప్ వదిలి వెళ్తున్నారు",
+  leavingAppDescription: "మీరు యాప్ వదిలి {advertiser}ని సందర్శించబోతున్నారు. మీ ప్రస్తుత స్క్రీన్ భద్రపరచబడుతుంది.",
+  continueButton: "కొనసాగించు",
 };
 const ta: Partial<typeof en> = {
   save: "சேமி", cancel: "ரத்து செய்", delete: "நீக்கு", edit: "திருத்து", view: "பார்", add: "சேர்", back: "பின்", confirm: "உறுதிப்படுத்து", loading: "ஏற்றுகிறது...", error: "பிழை", success: "வெற்றி", required: "தேவை", optional: "விருப்ப", comingSoon: "விரைவில் வரும்",
@@ -6426,6 +6487,10 @@ const ta: Partial<typeof en> = {
   serverDisconnected: "சர்வர் துண்டிக்கப்பட்டது",
   reconnecting: "மீண்டும் இணைக்கிறது...",
   dataWillSync: "ஆன்லைனில் இருக்கும்போது தரவு சின்க் ஆகும்",
+  // Ad Consent Dialog
+  leavingAppTitle: "செயலியை விட்டு வெளியேறுகிறீர்கள்",
+  leavingAppDescription: "நீங்கள் செயலியை விட்டு {advertiser} ஐ பார்வையிட உள்ளீர்கள். உங்கள் தற்போதைய திரை பாதுகாக்கப்படும்.",
+  continueButton: "தொடரவும்",
 };
 const ur: Partial<typeof en> = {
   // Common - عام
@@ -7381,6 +7446,10 @@ const ur: Partial<typeof en> = {
   serverDisconnected: "سرور سے منقطع",
   reconnecting: "دوبارہ جڑ رہا ہے...",
   dataWillSync: "آن لائن ہونے پر ڈیٹا سنک ہو جائے گا",
+  // Ad Consent Dialog
+  leavingAppTitle: "ایپ چھوڑ رہے ہیں",
+  leavingAppDescription: "آپ ایپ چھوڑ کر {advertiser} پر جانے والے ہیں۔ آپ کی موجودہ سکرین محفوظ رہے گی۔",
+  continueButton: "جاری رکھیں",
 };
 const bn: Partial<typeof en> = {
   save: "সংরক্ষণ করুন",
@@ -8240,6 +8309,10 @@ const bn: Partial<typeof en> = {
   serverDisconnected: "সার্ভার সংযোগ বিচ্ছিন্ন",
   reconnecting: "পুনরায় সংযোগ হচ্ছে...",
   dataWillSync: "অনলাইন হলে ডেটা সিঙ্ক হবে",
+  // Ad Consent Dialog
+  leavingAppTitle: "অ্যাপ ছেড়ে যাচ্ছেন",
+  leavingAppDescription: "আপনি অ্যাপ ছেড়ে {advertiser} পরিদর্শন করতে যাচ্ছেন। আপনার বর্তমান স্ক্রিন সংরক্ষিত থাকবে।",
+  continueButton: "চালিয়ে যান",
 };
 const or: Partial<typeof en> = {
   // Common
@@ -9195,6 +9268,10 @@ const or: Partial<typeof en> = {
   serverDisconnected: "ସର୍ଭର ସଂଯୋଗ ବିଚ୍ଛିନ୍ନ",
   reconnecting: "ପୁନଃ ସଂଯୋଗ ହେଉଛି...",
   dataWillSync: "ଅନଲାଇନ ହେଲେ ଡାଟା ସିଙ୍କ ହେବ",
+  // Ad Consent Dialog
+  leavingAppTitle: "ଆପ୍ ଛାଡୁଛନ୍ତି",
+  leavingAppDescription: "ଆପଣ ଆପ୍ ଛାଡି {advertiser} ଦେଖିବାକୁ ଯାଉଛନ୍ତି। ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ସ୍କ୍ରିନ୍ ସଂରକ୍ଷିତ ରହିବ।",
+  continueButton: "ଜାରି ରଖନ୍ତୁ",
 };
 const as: Partial<typeof en> = {
   // Common
@@ -10157,6 +10234,10 @@ const as: Partial<typeof en> = {
   searchClientHomes: "ক্লায়েণ্টৰ ঘৰ বিচাৰক...",
   business: "ব্যৱসায়",
   selectBusiness: "ব্যৱসায় বাছনি কৰক",
+  // Ad Consent Dialog
+  leavingAppTitle: "এপ এৰি যাব",
+  leavingAppDescription: "আপুনি এপ এৰি {advertiser} চাবলৈ যাব। আপোনাৰ বৰ্তমান স্ক্ৰীন সংৰক্ষিত হ'ব।",
+  continueButton: "অব্যাহত ৰাখক",
 };
 
 const ru: Partial<typeof en> = {
@@ -11120,6 +11201,10 @@ const ru: Partial<typeof en> = {
   searchClientHomes: "Поиск домов клиентов...",
   business: "Бизнес",
   selectBusiness: "Выберите бизнес",
+  // Ad Consent Dialog
+  leavingAppTitle: "Выход из приложения",
+  leavingAppDescription: "Вы собираетесь покинуть приложение и посетить {advertiser}. Ваш текущий экран будет сохранён.",
+  continueButton: "Продолжить",
 };
 
 export const translations: Record<Language, Partial<typeof en>> & { en: typeof en } = {

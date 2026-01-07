@@ -1695,6 +1695,9 @@ export type Notification = typeof notifications.$inferSelect;
 // Advertisement System
 // ============================================
 
+export const adOrientations = ['landscape', 'portrait', 'any'] as const;
+export type AdOrientation = typeof adOrientations[number];
+
 export const advertisements = pgTable("advertisements", {
   id: varchar("id", { length: 255 }).primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
@@ -1708,8 +1711,17 @@ export const advertisements = pgTable("advertisements", {
   targetUrl: text("target_url"), // URL to open when user taps the ad
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
+  maxPlayCount: integer("max_play_count"), // null = unlimited, number = max times to show per device
+  orientation: varchar("orientation", { length: 20 }).default("landscape").notNull(), // landscape, portrait, any
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const adSettings = pgTable("ad_settings", {
+  id: serial("id").primaryKey(),
+  adsEnabled: boolean("ads_enabled").notNull().default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by", { length: 255 }).references(() => adminUsers.id),
 });
 
 export const insertAdvertisementSchema = z.object({
@@ -1724,9 +1736,17 @@ export const insertAdvertisementSchema = z.object({
   targetUrl: z.string().url().optional(),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
+  maxPlayCount: z.number().int().positive().optional().nullable(),
+  orientation: z.enum(adOrientations).default("landscape"),
 });
 export type InsertAdvertisement = z.infer<typeof insertAdvertisementSchema>;
 export type Advertisement = typeof advertisements.$inferSelect;
+
+export const insertAdSettingsSchema = z.object({
+  adsEnabled: z.boolean().default(true),
+});
+export type InsertAdSettings = z.infer<typeof insertAdSettingsSchema>;
+export type AdSettings = typeof adSettings.$inferSelect;
 
 export const adImpressions = pgTable("ad_impressions", {
   id: varchar("id", { length: 255 }).primaryKey(),

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -56,6 +57,8 @@ interface Ad {
   isActive: boolean;
   startDate: string | null;
   endDate: string | null;
+  maxPlayCount: number | null;
+  orientation: "landscape" | "portrait" | "any";
   createdAt: string;
 }
 
@@ -71,6 +74,8 @@ interface AdFormData {
   isActive: boolean;
   startDate: Date | undefined;
   endDate: Date | undefined;
+  maxPlayCount: number | null;
+  orientation: "landscape" | "portrait" | "any";
 }
 
 interface AnalyticsOverview {
@@ -113,6 +118,8 @@ const defaultFormData: AdFormData = {
   isActive: true,
   startDate: undefined,
   endDate: undefined,
+  maxPlayCount: null,
+  orientation: "landscape",
 };
 
 export default function AdminAds() {
@@ -129,6 +136,8 @@ export default function AdminAds() {
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
   const [formData, setFormData] = useState<AdFormData>(defaultFormData);
   const [isSaving, setIsSaving] = useState(false);
+  const [adsEnabled, setAdsEnabled] = useState(true);
+  const [isTogglingAds, setIsTogglingAds] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
@@ -141,11 +150,14 @@ export default function AdminAds() {
 
   const fetchData = async (token: string) => {
     try {
-      const [adsRes, analyticsRes] = await Promise.all([
+      const [adsRes, analyticsRes, settingsRes] = await Promise.all([
         fetch("/api/admin/ads", {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch("/api/admin/ads/analytics", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/admin/ads/settings", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -166,10 +178,40 @@ export default function AdminAds() {
         const analyticsData = await analyticsRes.json();
         setAnalytics(analyticsData);
       }
+
+      if (settingsRes.ok) {
+        const settingsData = await settingsRes.json();
+        setAdsEnabled(settingsData.adsEnabled ?? true);
+      }
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleToggleAds = async (enabled: boolean) => {
+    const token = localStorage.getItem("adminToken");
+    if (!token) return;
+
+    setIsTogglingAds(true);
+    try {
+      const response = await fetch("/api/admin/ads/settings", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ adsEnabled: enabled }),
+      });
+
+      if (response.ok) {
+        setAdsEnabled(enabled);
+      }
+    } catch (error) {
+      console.error("Failed to toggle ads:", error);
+    } finally {
+      setIsTogglingAds(false);
     }
   };
 
@@ -193,6 +235,8 @@ export default function AdminAds() {
       isActive: ad.isActive,
       startDate: ad.startDate ? new Date(ad.startDate) : undefined,
       endDate: ad.endDate ? new Date(ad.endDate) : undefined,
+      maxPlayCount: ad.maxPlayCount,
+      orientation: ad.orientation || "landscape",
     });
     setIsDialogOpen(true);
   };
@@ -225,6 +269,8 @@ export default function AdminAds() {
         isActive: formData.isActive,
         startDate: formData.startDate ? formData.startDate.toISOString() : null,
         endDate: formData.endDate ? formData.endDate.toISOString() : null,
+        maxPlayCount: formData.maxPlayCount,
+        orientation: formData.orientation,
       };
 
       const url = selectedAd 
@@ -304,6 +350,29 @@ export default function AdminAds() {
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-4 pb-2">
+            <CardTitle>Global Ad Settings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="adsEnabled" className="text-base font-medium">Ads Enabled</Label>
+                <p className="text-sm text-muted-foreground">
+                  Toggle this off to disable all ads system-wide
+                </p>
+              </div>
+              <Switch
+                id="adsEnabled"
+                checked={adsEnabled}
+                disabled={isTogglingAds}
+                onCheckedChange={handleToggleAds}
+                data-testid="switch-global-ads-enabled"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4 pb-2">
             <CardTitle className="flex items-center gap-2">
@@ -591,6 +660,46 @@ export default function AdminAds() {
                   onChange={(e) => setFormData({ ...formData, weight: parseInt(e.target.value) || 1 })}
                   data-testid="input-ad-weight"
                 />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="maxPlayCount">Max Plays per Device</Label>
+                <Input
+                  id="maxPlayCount"
+                  type="number"
+                  min={1}
+                  value={formData.maxPlayCount ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFormData({ 
+                      ...formData, 
+                      maxPlayCount: val === "" ? null : parseInt(val) || null 
+                    });
+                  }}
+                  placeholder="Unlimited"
+                  data-testid="input-ad-max-plays"
+                />
+                <p className="text-xs text-muted-foreground">Leave empty for unlimited</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="orientation">Orientation</Label>
+                <Select
+                  value={formData.orientation}
+                  onValueChange={(value: "landscape" | "portrait" | "any") => 
+                    setFormData({ ...formData, orientation: value })
+                  }
+                >
+                  <SelectTrigger data-testid="select-ad-orientation">
+                    <SelectValue placeholder="Select orientation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="landscape">Landscape</SelectItem>
+                    <SelectItem value="portrait">Portrait</SelectItem>
+                    <SelectItem value="any">Any</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
