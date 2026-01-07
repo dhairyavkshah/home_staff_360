@@ -1388,7 +1388,17 @@ router.delete("/api/collaboration/links/:linkId", authenticateToken, async (req:
 
 router.post("/api/collaboration/messages", authenticateToken, async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user?.userId;
     const { linkId, messageType, payload, fromDeviceId } = req.body;
+
+    // SECURITY: Verify user is part of this collaboration link
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, linkId)
+    });
+
+    if (!link || (link.homeUserId !== userId && link.staffUserId !== userId)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
 
     const id = uuidv4();
     const [message] = await db.insert(collaborationMessages).values({
@@ -1410,8 +1420,18 @@ router.post("/api/collaboration/messages", authenticateToken, async (req: Reques
 
 router.get("/api/collaboration/:linkId/messages", authenticateToken, async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user?.userId;
     const { linkId } = req.params;
     const { since } = req.query;
+
+    // SECURITY: Verify user is part of this collaboration link
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, linkId)
+    });
+
+    if (!link || (link.homeUserId !== userId && link.staffUserId !== userId)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
 
     let query = db.select().from(collaborationMessages)
       .where(eq(collaborationMessages.linkId, linkId))
@@ -1610,6 +1630,7 @@ router.patch("/api/admin/users/:userId", authenticateAdmin, async (req: Request,
 // Create a binding between home person and staff client
 router.post("/api/bindings", authenticateToken, async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user?.userId;
     const { linkId, homePersonId, homePersonName, staffClientId, staffClientName } = req.body;
     
     if (!linkId || !homePersonId || !staffClientId) {
@@ -1623,6 +1644,11 @@ router.post("/api/bindings", authenticateToken, async (req: Request, res: Respon
 
     if (!link || link.status !== 'active') {
       return res.status(404).json({ error: "Active collaboration link not found" });
+    }
+
+    // SECURITY: Verify user is part of this collaboration link
+    if (link.homeUserId !== userId && link.staffUserId !== userId) {
+      return res.status(403).json({ error: "Access denied" });
     }
 
     const bindingId = uuidv4();
@@ -1717,6 +1743,11 @@ router.post("/api/shared-attendance", authenticateToken, async (req: Request, re
 
     if (!link) {
       return res.status(404).json({ error: "Collaboration link not found" });
+    }
+
+    // SECURITY: Verify user is part of this collaboration link
+    if (link.homeUserId !== userId && link.staffUserId !== userId) {
+      return res.status(403).json({ error: "Access denied" });
     }
 
     // Check for existing record on same date (only one allowed)
@@ -2087,6 +2118,11 @@ router.post("/api/shared-laundry", authenticateToken, async (req: Request, res: 
 
     if (!link) {
       return res.status(404).json({ error: "Collaboration link not found" });
+    }
+
+    // SECURITY: Verify user is part of this collaboration link
+    if (link.homeUserId !== userId && link.staffUserId !== userId) {
+      return res.status(403).json({ error: "Access denied" });
     }
 
     const isHomeUser = userId === link.homeUserId;
@@ -3471,6 +3507,19 @@ router.post("/api/chats/:chatId/read", authenticateToken, async (req: Request, r
     const { chatId } = req.params;
     const { lastMessageId } = req.body;
 
+    // SECURITY: Verify user is a participant
+    const participation = await db.query.chatParticipants.findFirst({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        eq(chatParticipants.userId, userId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+
+    if (!participation) {
+      return res.status(403).json({ error: "Not a participant of this chat" });
+    }
+
     const now = new Date();
 
     await db.update(chatParticipants)
@@ -3496,6 +3545,19 @@ router.patch("/api/chats/:chatId/mute", authenticateToken, async (req: Request, 
     const userId = (req as any).user?.userId;
     const { chatId } = req.params;
     const { muted } = req.body;
+
+    // SECURITY: Verify user is a participant
+    const participation = await db.query.chatParticipants.findFirst({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        eq(chatParticipants.userId, userId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+
+    if (!participation) {
+      return res.status(403).json({ error: "Not a participant of this chat" });
+    }
 
     await db.update(chatParticipants)
       .set({ isMuted: muted })
