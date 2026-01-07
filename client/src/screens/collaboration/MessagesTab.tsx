@@ -49,7 +49,12 @@ export function MessagesTab() {
     setIsLoading(true);
     try {
       const result = await collaborationService.fetchWithAuth("/chats");
-      setChats(result.chats || []);
+      // Transform API response to match client interface
+      const transformedChats = (result.chats || []).map((chat: any) => ({
+        ...chat,
+        otherParticipant: chat.participants?.[0] || null,
+      }));
+      setChats(transformedChats);
     } catch (error) {
       console.error("Failed to load chats:", error);
     } finally {
