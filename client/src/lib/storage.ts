@@ -707,6 +707,12 @@ export const storage = {
       transactions: this.getTransactions(),
       laundry: this.getLaundry(),
       expenses: this.getExpenses(),
+      clientHomes: this.getClientHomes(),
+      selfAttendance: this.getSelfAttendance(),
+      staffLaundryJobs: this.getStaffLaundryJobs(),
+      staffEarnings: this.getStaffEarnings(),
+      staffExpenses: this.getStaffExpenses(),
+      staffInvoices: this.getStaffInvoices(),
     };
   },
 
@@ -742,26 +748,87 @@ export const storage = {
       setItem(STORAGE_KEYS.TRANSACTIONS, validatedBackup.transactions);
       setItem(STORAGE_KEYS.LAUNDRY, validatedBackup.laundry);
       setItem(STORAGE_KEYS.EXPENSES, validatedBackup.expenses);
+      if (validatedBackup.clientHomes) setItem(STAFF_STORAGE_KEYS.CLIENT_HOMES, validatedBackup.clientHomes);
+      if (validatedBackup.selfAttendance) setItem(STAFF_STORAGE_KEYS.SELF_ATTENDANCE, validatedBackup.selfAttendance);
+      if (validatedBackup.staffLaundryJobs) setItem(STAFF_STORAGE_KEYS.LAUNDRY_JOBS, validatedBackup.staffLaundryJobs);
+      if (validatedBackup.staffEarnings) setItem(STAFF_STORAGE_KEYS.EARNINGS, validatedBackup.staffEarnings);
+      if (validatedBackup.staffExpenses) setItem(STAFF_STORAGE_KEYS.EXPENSES, validatedBackup.staffExpenses);
+      if (validatedBackup.staffInvoices) setItem(STAFF_STORAGE_KEYS.INVOICES, validatedBackup.staffInvoices);
     } else if (mode === "merge") {
-      const existingPeople = this.getPeople();
-      const mergedPeople = [...existingPeople];
-      for (const person of validatedBackup.people) {
-        const index = mergedPeople.findIndex((p) => p.id === person.id);
-        if (index === -1) {
-          mergedPeople.push(person);
-        } else {
-          mergedPeople[index] = person;
+      const mergeArrayById = <T extends { id: string }>(existing: T[], incoming: T[]): T[] => {
+        const merged = [...existing];
+        for (const item of incoming) {
+          const index = merged.findIndex((e) => e.id === item.id);
+          if (index === -1) {
+            merged.push(item);
+          } else {
+            merged[index] = item;
+          }
         }
+        return merged;
+      };
+
+      setItem(STORAGE_KEYS.PEOPLE, mergeArrayById(this.getPeople(), validatedBackup.people));
+      setItem(STORAGE_KEYS.ATTENDANCE, mergeArrayById(this.getAttendance(), validatedBackup.attendance));
+      setItem(STORAGE_KEYS.TRANSACTIONS, mergeArrayById(this.getTransactions(), validatedBackup.transactions));
+      setItem(STORAGE_KEYS.LAUNDRY, mergeArrayById(this.getLaundry(), validatedBackup.laundry));
+      setItem(STORAGE_KEYS.EXPENSES, mergeArrayById(this.getExpenses(), validatedBackup.expenses));
+      if (validatedBackup.accounts) {
+        setItem(STORAGE_KEYS.ACCOUNTS, mergeArrayById(this.getAccounts(), validatedBackup.accounts));
       }
-      setItem(STORAGE_KEYS.PEOPLE, mergedPeople);
-      
+      if (validatedBackup.clientHomes) {
+        setItem(STAFF_STORAGE_KEYS.CLIENT_HOMES, mergeArrayById(this.getClientHomes(), validatedBackup.clientHomes));
+      }
+      if (validatedBackup.selfAttendance) {
+        setItem(STAFF_STORAGE_KEYS.SELF_ATTENDANCE, mergeArrayById(this.getSelfAttendance(), validatedBackup.selfAttendance));
+      }
+      if (validatedBackup.staffLaundryJobs) {
+        setItem(STAFF_STORAGE_KEYS.LAUNDRY_JOBS, mergeArrayById(this.getStaffLaundryJobs(), validatedBackup.staffLaundryJobs));
+      }
+      if (validatedBackup.staffEarnings) {
+        setItem(STAFF_STORAGE_KEYS.EARNINGS, mergeArrayById(this.getStaffEarnings(), validatedBackup.staffEarnings));
+      }
+      if (validatedBackup.staffExpenses) {
+        setItem(STAFF_STORAGE_KEYS.EXPENSES, mergeArrayById(this.getStaffExpenses(), validatedBackup.staffExpenses));
+      }
+      if (validatedBackup.staffInvoices) {
+        setItem(STAFF_STORAGE_KEYS.INVOICES, mergeArrayById(this.getStaffInvoices(), validatedBackup.staffInvoices));
+      }
     } else if (mode === "keep") {
-      const existingPeople = this.getPeople();
-      const newPeople = validatedBackup.people.map((p) => ({
-        ...p,
-        id: generateId(),
-      }));
-      setItem(STORAGE_KEYS.PEOPLE, [...existingPeople, ...newPeople]);
+      const addWithNewIds = <T extends { id: string }>(existing: T[], incoming: T[]): T[] => {
+        const newItems = incoming.map((item) => ({
+          ...item,
+          id: generateId(),
+        }));
+        return [...existing, ...newItems];
+      };
+
+      setItem(STORAGE_KEYS.PEOPLE, addWithNewIds(this.getPeople(), validatedBackup.people));
+      setItem(STORAGE_KEYS.ATTENDANCE, addWithNewIds(this.getAttendance(), validatedBackup.attendance));
+      setItem(STORAGE_KEYS.TRANSACTIONS, addWithNewIds(this.getTransactions(), validatedBackup.transactions));
+      setItem(STORAGE_KEYS.LAUNDRY, addWithNewIds(this.getLaundry(), validatedBackup.laundry));
+      setItem(STORAGE_KEYS.EXPENSES, addWithNewIds(this.getExpenses(), validatedBackup.expenses));
+      if (validatedBackup.accounts) {
+        setItem(STORAGE_KEYS.ACCOUNTS, addWithNewIds(this.getAccounts(), validatedBackup.accounts));
+      }
+      if (validatedBackup.clientHomes) {
+        setItem(STAFF_STORAGE_KEYS.CLIENT_HOMES, addWithNewIds(this.getClientHomes(), validatedBackup.clientHomes));
+      }
+      if (validatedBackup.selfAttendance) {
+        setItem(STAFF_STORAGE_KEYS.SELF_ATTENDANCE, addWithNewIds(this.getSelfAttendance(), validatedBackup.selfAttendance));
+      }
+      if (validatedBackup.staffLaundryJobs) {
+        setItem(STAFF_STORAGE_KEYS.LAUNDRY_JOBS, addWithNewIds(this.getStaffLaundryJobs(), validatedBackup.staffLaundryJobs));
+      }
+      if (validatedBackup.staffEarnings) {
+        setItem(STAFF_STORAGE_KEYS.EARNINGS, addWithNewIds(this.getStaffEarnings(), validatedBackup.staffEarnings));
+      }
+      if (validatedBackup.staffExpenses) {
+        setItem(STAFF_STORAGE_KEYS.EXPENSES, addWithNewIds(this.getStaffExpenses(), validatedBackup.staffExpenses));
+      }
+      if (validatedBackup.staffInvoices) {
+        setItem(STAFF_STORAGE_KEYS.INVOICES, addWithNewIds(this.getStaffInvoices(), validatedBackup.staffInvoices));
+      }
     }
     
     return { success: true };

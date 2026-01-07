@@ -422,20 +422,8 @@ export type Expense = z.infer<typeof expenseSchema>;
 export const insertExpenseSchema = expenseSchema.omit({ id: true, createdAt: true });
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
 
-export const backupDataSchema = z.object({
-  version: z.string(),
-  exportDate: z.string(),
-  settings: appSettingsSchema,
-  profile: userProfileSchema.optional(),
-  accounts: z.array(accountSchema).optional(),
-  people: z.array(personSchema),
-  attendance: z.array(attendanceEntrySchema),
-  transactions: z.array(transactionSchema),
-  laundry: z.array(laundryBatchSchema),
-  expenses: z.array(expenseSchema),
-});
-
-export type BackupData = z.infer<typeof backupDataSchema>;
+export const backupFrequencies = ['off', 'daily', 'weekly', 'monthly'] as const;
+export type BackupFrequency = typeof backupFrequencies[number];
 
 export const currencySymbols: Record<Currency, string> = {
   INR: '₹',
@@ -615,6 +603,27 @@ export type StaffInvoice = z.infer<typeof staffInvoiceSchema>;
 
 export const insertStaffInvoiceSchema = staffInvoiceSchema.omit({ id: true, createdAt: true });
 export type InsertStaffInvoice = z.infer<typeof insertStaffInvoiceSchema>;
+
+export const backupDataSchema = z.object({
+  version: z.string(),
+  exportDate: z.string(),
+  settings: appSettingsSchema,
+  profile: userProfileSchema.optional(),
+  accounts: z.array(accountSchema).optional(),
+  people: z.array(personSchema),
+  attendance: z.array(attendanceEntrySchema),
+  transactions: z.array(transactionSchema),
+  laundry: z.array(laundryBatchSchema),
+  expenses: z.array(expenseSchema),
+  clientHomes: z.array(clientHomeSchema).optional(),
+  selfAttendance: z.array(selfAttendanceSchema).optional(),
+  staffLaundryJobs: z.array(staffLaundryJobSchema).optional(),
+  staffEarnings: z.array(staffEarningSchema).optional(),
+  staffExpenses: z.array(staffExpenseSchema).optional(),
+  staffInvoices: z.array(staffInvoiceSchema).optional(),
+});
+
+export type BackupData = z.infer<typeof backupDataSchema>;
 
 export const STAFF_STORAGE_KEYS = {
   CLIENT_HOMES: 'hm_staff_client_homes',

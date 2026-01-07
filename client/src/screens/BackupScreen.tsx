@@ -1,5 +1,5 @@
-import { useState, useRef, useMemo } from "react";
-import { Download, Upload, Share2 } from "lucide-react";
+import { useState, useRef, useMemo, useEffect } from "react";
+import { Download, Upload, Share2, Clock, Trash2, FolderOpen } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
@@ -7,16 +7,28 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { backupDataSchema, type BackupData } from "@shared/schema";
+import { useTranslation } from "@/lib/i18n/i18n-context";
+import { backupDataSchema, type BackupData, type BackupFrequency } from "@shared/schema";
+import {
+  getBackupFrequency,
+  setBackupFrequency,
+  formatLastBackupTime,
+  performAutoBackup,
+  listLocalBackups,
+  loadLocalBackup,
+  deleteLocalBackup,
+} from "@/lib/auto-backup";
 
 export function BackupScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const profile = useMemo(() => storage.getProfile(), []);
   const isNative = Capacitor.isNativePlatform();
@@ -24,6 +36,55 @@ export function BackupScreen() {
   const [importMode, setImportMode] = useState<"replace" | "merge" | "keep">("replace");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [backupFrequency, setBackupFrequencyState] = useState<BackupFrequency>(getBackupFrequency());
+  const [lastBackupTime, setLastBackupTime] = useState(formatLastBackupTime());
+  const [localBackups, setLocalBackups] = useState<Array<{ name: string; date: Date }>>([]);
+  const [showLocalBackups, setShowLocalBackups] = useState(false);
+  const [isLoadingBackups, setIsLoadingBackups] = useState(false);
+
+  useEffect(() => {
+    loadBackupsList();
+  }, []);
+
+  const loadBackupsList = async () => {
+    setIsLoadingBackups(true);
+    const backups = await listLocalBackups();
+    setLocalBackups(backups);
+    setIsLoadingBackups(false);
+  };
+
+  const handleFrequencyChange = (value: BackupFrequency) => {
+    setBackupFrequency(value);
+    setBackupFrequencyState(value);
+    toast({
+      title: t("success"),
+      description: value === "off" 
+        ? t("autoBackupDisabled") 
+        : t("autoBackupEnabled").replace("{frequency}", value),
+    });
+  };
+
+  const handleManualBackup = async () => {
+    setIsExporting(true);
+    try {
+      const result = await performAutoBackup();
+      if (result.success) {
+        setLastBackupTime(formatLastBackupTime());
+        await loadBackupsList();
+        toast({ title: t("success"), description: t("backupCreated") });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      toast({
+        title: t("error"),
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -51,15 +112,15 @@ export function BackupScreen() {
             files: [uriResult.uri],
             dialogTitle: "Save or Share Backup",
           });
-          toast({ title: "Backup saved successfully" });
+          toast({ title: t("backupSaved") });
         } catch (shareError) {
           if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
-            toast({ title: "Backup file ready", description: "Tap Share to save it" });
+            toast({ title: t("backupFileReady"), description: t("tapShareToSave") });
             return;
           }
           toast({
-            title: "Backup file created",
-            description: `Tap the Share button to save ${filename}`,
+            title: t("backupFileCreated"),
+            description: t("tapShareAgainToSave").replace("{filename}", filename),
           });
         }
       } else {
@@ -70,7 +131,7 @@ export function BackupScreen() {
         a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
-        toast({ title: "Backup downloaded successfully" });
+        toast({ title: t("backupDownloaded") });
       }
     } catch (error) {
       if ((error as Error).message?.includes("cancel") || (error as Error).message?.includes("Cancel")) {
@@ -79,8 +140,8 @@ export function BackupScreen() {
       }
       console.error("Export error:", error);
       toast({
-        title: "Export Failed",
-        description: error instanceof Error ? error.message : "Could not save backup file",
+        title: t("exportFailed"),
+        description: error instanceof Error ? error.message : t("couldNotSaveBackup"),
         variant: "destructive",
       });
     } finally {
@@ -114,15 +175,15 @@ export function BackupScreen() {
             files: [uriResult.uri],
             dialogTitle: "Share Backup File",
           });
-          toast({ title: "Backup shared successfully" });
+          toast({ title: t("backupShared") });
         } catch (shareError) {
           if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
-            toast({ title: "Backup file ready", description: "Tap Share to send it" });
+            toast({ title: t("backupFileReady"), description: t("tapShareToSend") });
             return;
           }
           toast({
-            title: "Backup file created",
-            description: `Tap Share again to send ${filename}`,
+            title: t("backupFileCreated"),
+            description: t("tapShareAgainToSend").replace("{filename}", filename),
           });
         }
       } else {
@@ -140,7 +201,7 @@ export function BackupScreen() {
           a.download = filename;
           a.click();
           URL.revokeObjectURL(url);
-          toast({ title: "Backup downloaded" });
+          toast({ title: t("backupDownloaded") });
         }
       }
     } catch (error) {
@@ -150,8 +211,8 @@ export function BackupScreen() {
       }
       console.error("Share error:", error);
       toast({
-        title: "Share Failed",
-        description: error instanceof Error ? error.message : "Could not share backup",
+        title: t("shareFailed"),
+        description: error instanceof Error ? error.message : t("couldNotShareBackup"),
         variant: "destructive",
       });
     } finally {
@@ -166,93 +227,143 @@ export function BackupScreen() {
     }
   };
 
+  const processBackupData = (text: string): BackupData => {
+    let data: unknown;
+    
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(t("invalidJsonFile"));
+    }
+
+    if (typeof data !== 'object' || data === null) {
+      throw new Error(t("invalidBackupStructure"));
+    }
+    
+    const rawData = data as Record<string, unknown>;
+    
+    if (!rawData.version || !rawData.exportDate) {
+      throw new Error(t("missingBackupMetadata"));
+    }
+    
+    if (!rawData.settings || typeof rawData.settings !== 'object') {
+      throw new Error(t("missingOrInvalidSettings"));
+    }
+    
+    const settingsData = rawData.settings as Record<string, unknown>;
+    
+    const validCurrencies = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'JPY', 'CNY', 'CAD', 'AUD', 'CHF', 'SGD', 'MXN', 'BRL', 'ZAR', 'OTHER'];
+    const currencyValue = typeof settingsData.currency === 'string' && validCurrencies.includes(settingsData.currency) 
+      ? settingsData.currency 
+      : 'USD';
+    
+    const normalizedSettings = {
+      currency: currencyValue,
+      customCurrencySymbol: settingsData.customCurrencySymbol,
+      language: settingsData.language || 'en',
+      salaryStartDay: typeof settingsData.salaryStartDay === 'number' ? settingsData.salaryStartDay : 1,
+      halfDayPercentage: typeof settingsData.halfDayPercentage === 'number' ? settingsData.halfDayPercentage : 50,
+      hasCompletedOnboarding: settingsData.hasCompletedOnboarding ?? false,
+      pinEnabled: settingsData.pinEnabled,
+      pinCode: settingsData.pinCode,
+      householdName: settingsData.householdName,
+      darkMode: settingsData.darkMode,
+      planType: settingsData.planType,
+      showAllContexts: settingsData.showAllContexts,
+      defaultAppMode: settingsData.defaultAppMode,
+      homeTourCompleted: settingsData.homeTourCompleted,
+      staffTourCompleted: settingsData.staffTourCompleted,
+      trialStartedAt: settingsData.trialStartedAt,
+      purchaseStatus: settingsData.purchaseStatus,
+      purchaseDate: settingsData.purchaseDate,
+      purchaseCountry: settingsData.purchaseCountry,
+      hapticFeedbackEnabled: settingsData.hapticFeedbackEnabled ?? true,
+      soundEffectsEnabled: settingsData.soundEffectsEnabled ?? true,
+      country: settingsData.country,
+      detectedCountry: settingsData.detectedCountry,
+    };
+    
+    const normalizedData = {
+      ...rawData,
+      settings: normalizedSettings,
+      people: Array.isArray(rawData.people) ? rawData.people : [],
+      attendance: Array.isArray(rawData.attendance) ? rawData.attendance : [],
+      transactions: Array.isArray(rawData.transactions) ? rawData.transactions : [],
+      laundry: Array.isArray(rawData.laundry) ? rawData.laundry : [],
+      expenses: Array.isArray(rawData.expenses) ? rawData.expenses : [],
+      clientHomes: Array.isArray(rawData.clientHomes) ? rawData.clientHomes : [],
+      selfAttendance: Array.isArray(rawData.selfAttendance) ? rawData.selfAttendance : [],
+      staffLaundryJobs: Array.isArray(rawData.staffLaundryJobs) ? rawData.staffLaundryJobs : [],
+      staffEarnings: Array.isArray(rawData.staffEarnings) ? rawData.staffEarnings : [],
+      staffExpenses: Array.isArray(rawData.staffExpenses) ? rawData.staffExpenses : [],
+      staffInvoices: Array.isArray(rawData.staffInvoices) ? rawData.staffInvoices : [],
+    };
+
+    const result = backupDataSchema.safeParse(normalizedData);
+    if (!result.success) {
+      const errorMessages = result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join('; ');
+      console.error("Backup validation errors:", result.error.errors);
+      throw new Error(`${t("backupValidationFailed")}: ${errorMessages}`);
+    }
+
+    return result.data;
+  };
+
   const handleImport = async () => {
     if (!selectedFile) return;
 
     try {
       const text = await selectedFile.text();
-      let data: unknown;
-      
-      try {
-        data = JSON.parse(text);
-      } catch {
-        throw new Error("File is not valid JSON. Please select a valid .hs360 backup file.");
-      }
+      const validatedData = processBackupData(text);
 
-      if (typeof data !== 'object' || data === null) {
-        throw new Error("Invalid backup file structure");
-      }
-      
-      const rawData = data as Record<string, unknown>;
-      
-      if (!rawData.version || !rawData.exportDate) {
-        throw new Error("Missing required backup metadata (version/exportDate)");
-      }
-      
-      if (!rawData.settings || typeof rawData.settings !== 'object') {
-        throw new Error("Missing or invalid settings in backup file");
-      }
-      
-      const settingsData = rawData.settings as Record<string, unknown>;
-      
-      const validCurrencies = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'JPY', 'CNY', 'CAD', 'AUD', 'CHF', 'SGD', 'MXN', 'BRL', 'ZAR', 'OTHER'];
-      const currencyValue = typeof settingsData.currency === 'string' && validCurrencies.includes(settingsData.currency) 
-        ? settingsData.currency 
-        : 'USD';
-      
-      const normalizedSettings = {
-        currency: currencyValue,
-        customCurrencySymbol: settingsData.customCurrencySymbol,
-        language: settingsData.language || 'en',
-        salaryStartDay: typeof settingsData.salaryStartDay === 'number' ? settingsData.salaryStartDay : 1,
-        halfDayPercentage: typeof settingsData.halfDayPercentage === 'number' ? settingsData.halfDayPercentage : 50,
-        hasCompletedOnboarding: settingsData.hasCompletedOnboarding ?? false,
-        pinEnabled: settingsData.pinEnabled,
-        pinCode: settingsData.pinCode,
-        householdName: settingsData.householdName,
-        darkMode: settingsData.darkMode,
-        planType: settingsData.planType,
-        showAllContexts: settingsData.showAllContexts,
-        defaultAppMode: settingsData.defaultAppMode,
-        homeTourCompleted: settingsData.homeTourCompleted,
-        staffTourCompleted: settingsData.staffTourCompleted,
-        trialStartedAt: settingsData.trialStartedAt,
-        purchaseStatus: settingsData.purchaseStatus,
-        purchaseDate: settingsData.purchaseDate,
-        purchaseCountry: settingsData.purchaseCountry,
-        hapticFeedbackEnabled: settingsData.hapticFeedbackEnabled ?? true,
-        soundEffectsEnabled: settingsData.soundEffectsEnabled ?? true,
-        country: settingsData.country,
-        detectedCountry: settingsData.detectedCountry,
-      };
-      
-      const normalizedData = {
-        ...rawData,
-        settings: normalizedSettings,
-        people: Array.isArray(rawData.people) ? rawData.people : [],
-        attendance: Array.isArray(rawData.attendance) ? rawData.attendance : [],
-        transactions: Array.isArray(rawData.transactions) ? rawData.transactions : [],
-        laundry: Array.isArray(rawData.laundry) ? rawData.laundry : [],
-        expenses: Array.isArray(rawData.expenses) ? rawData.expenses : [],
-      };
-
-      const result = backupDataSchema.safeParse(normalizedData);
-      if (!result.success) {
-        const errorMessages = result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join('; ');
-        console.error("Backup validation errors:", result.error.errors);
-        throw new Error(`Backup validation failed: ${errorMessages}`);
-      }
-
-      const importResult = storage.importBackup(result.data, importMode);
+      const importResult = storage.importBackup(validatedData, importMode);
       if (!importResult.success) {
-        throw new Error(importResult.error || "Import validation failed");
+        throw new Error(importResult.error || t("importValidationFailed"));
       }
-      toast({ title: "Backup imported successfully" });
+      toast({ title: t("backupImported") });
       navigate(profile?.type === "STAFF" ? "staff-home" : "home");
     } catch (error) {
       toast({
-        title: "Import Failed",
-        description: error instanceof Error ? error.message : "Unknown error",
+        title: t("importFailed"),
+        description: error instanceof Error ? error.message : t("unknownError"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRestoreLocalBackup = async (filename: string) => {
+    try {
+      const backupContent = await loadLocalBackup(filename);
+      if (!backupContent) {
+        throw new Error(t("backupFileNotFound"));
+      }
+
+      const validatedData = processBackupData(backupContent);
+
+      const importResult = storage.importBackup(validatedData, "replace");
+      if (!importResult.success) {
+        throw new Error(importResult.error || t("importValidationFailed"));
+      }
+      toast({ title: t("backupRestored") });
+      navigate(profile?.type === "STAFF" ? "staff-home" : "home");
+    } catch (error) {
+      toast({
+        title: t("restoreFailed"),
+        description: error instanceof Error ? error.message : t("unknownError"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteLocalBackup = async (filename: string) => {
+    const success = await deleteLocalBackup(filename);
+    if (success) {
+      toast({ title: t("backupDeleted") });
+      await loadBackupsList();
+    } else {
+      toast({
+        title: t("error"),
+        description: t("couldNotDeleteBackup"),
         variant: "destructive",
       });
     }
@@ -261,23 +372,114 @@ export function BackupScreen() {
   return (
     <AppLayout>
       <Header
-        title="Backup & Restore"
-        subtitle="Export or import your data"
+        title={t("backupAndRestore")}
+        subtitle={t("exportOrImportData")}
         onBack={() => navigate("settings")}
       />
 
       <ScrollContent>
         <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Export Data</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("autoBackup")}</h2>
+          <Card className="p-4 flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="icon-halo-primary w-9 h-9">
+                <Clock className="w-4.5 h-4.5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm">{t("backupFrequency")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("lastBackup")}: {lastBackupTime}
+                </p>
+              </div>
+            </div>
+            
+            <Select value={backupFrequency} onValueChange={handleFrequencyChange}>
+              <SelectTrigger data-testid="select-backup-frequency">
+                <SelectValue placeholder={t("selectFrequency")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="off" data-testid="option-off">{t("backupOff")}</SelectItem>
+                <SelectItem value="daily" data-testid="option-daily">{t("backupDaily")}</SelectItem>
+                <SelectItem value="weekly" data-testid="option-weekly">{t("backupWeekly")}</SelectItem>
+                <SelectItem value="monthly" data-testid="option-monthly">{t("backupMonthly")}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button 
+              variant="outline" 
+              onClick={handleManualBackup}
+              disabled={isExporting}
+              data-testid="button-backup-now"
+            >
+              {t("backupNow")}
+            </Button>
+          </Card>
+        </section>
+
+        {localBackups.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("localBackups")}</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowLocalBackups(!showLocalBackups)}
+                data-testid="button-toggle-local-backups"
+              >
+                <FolderOpen className="w-4 h-4 mr-1" />
+                {showLocalBackups ? t("hide") : t("show")} ({localBackups.length})
+              </Button>
+            </div>
+            
+            {showLocalBackups && (
+              <Card className="p-4 flex flex-col gap-2">
+                {localBackups.map((backup) => (
+                  <div 
+                    key={backup.name} 
+                    className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{backup.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {backup.date.toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRestoreLocalBackup(backup.name)}
+                        data-testid={`button-restore-${backup.name}`}
+                      >
+                        {t("restore")}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleDeleteLocalBackup(backup.name)}
+                        data-testid={`button-delete-${backup.name}`}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </Card>
+            )}
+          </section>
+        )}
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("exportData")}</h2>
           <Card className="p-4 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="icon-halo-primary w-9 h-9">
                 <Download className="w-4.5 h-4.5 text-primary" />
               </div>
               <div>
-                <p className="font-medium text-sm">Create backup file</p>
+                <p className="font-medium text-sm">{t("createBackupFile")}</p>
                 <p className="text-xs text-muted-foreground">
-                  Includes all staff, attendance, transactions, and settings
+                  {t("backupIncludesAllData")}
                 </p>
               </div>
             </div>
@@ -289,7 +491,7 @@ export function BackupScreen() {
                 data-testid="button-download-backup"
               >
                 <Download className="w-4 h-4 mr-2" />
-                {isNative ? "Save Backup" : "Download Backup"}
+                {isNative ? t("saveBackup") : t("downloadBackup")}
               </Button>
               <Button 
                 variant="outline" 
@@ -304,16 +506,16 @@ export function BackupScreen() {
         </section>
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Import Data</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("importData")}</h2>
           <Card className="p-4 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="icon-halo-muted w-9 h-9">
                 <Upload className="w-4.5 h-4.5 text-muted-foreground" />
               </div>
               <div>
-                <p className="font-medium text-sm">Restore from backup</p>
+                <p className="font-medium text-sm">{t("restoreFromBackup")}</p>
                 <p className="text-xs text-muted-foreground">
-                  Select a previously exported backup file
+                  {t("selectPreviouslyExportedBackup")}
                 </p>
               </div>
             </div>
@@ -332,13 +534,13 @@ export function BackupScreen() {
               onClick={() => fileInputRef.current?.click()}
               data-testid="button-choose-file"
             >
-              {selectedFile ? selectedFile.name : "Choose File"}
+              {selectedFile ? selectedFile.name : t("chooseFile")}
             </Button>
 
             {selectedFile && (
               <>
                 <div className="flex flex-col gap-3">
-                  <Label>Import Mode</Label>
+                  <Label>{t("importMode")}</Label>
                   <RadioGroup
                     value={importMode}
                     onValueChange={(v) => setImportMode(v as typeof importMode)}
@@ -347,10 +549,10 @@ export function BackupScreen() {
                       <RadioGroupItem value="replace" id="replace" data-testid="radio-replace" />
                       <div>
                         <Label htmlFor="replace" className="cursor-pointer font-medium">
-                          Replace All
+                          {t("replaceAll")}
                         </Label>
                         <p className="text-xs text-muted-foreground">
-                          Delete existing data, import new data
+                          {t("replaceAllDescription")}
                         </p>
                       </div>
                     </div>
@@ -358,10 +560,10 @@ export function BackupScreen() {
                       <RadioGroupItem value="merge" id="merge" data-testid="radio-merge" />
                       <div>
                         <Label htmlFor="merge" className="cursor-pointer font-medium">
-                          Merge
+                          {t("merge")}
                         </Label>
                         <p className="text-xs text-muted-foreground">
-                          Update existing records, add new ones
+                          {t("mergeDescription")}
                         </p>
                       </div>
                     </div>
@@ -369,10 +571,10 @@ export function BackupScreen() {
                       <RadioGroupItem value="keep" id="keep" data-testid="radio-keep" />
                       <div>
                         <Label htmlFor="keep" className="cursor-pointer font-medium">
-                          Keep Both
+                          {t("keepBoth")}
                         </Label>
                         <p className="text-xs text-muted-foreground">
-                          Keep existing data, import with new IDs
+                          {t("keepBothDescription")}
                         </p>
                       </div>
                     </div>
@@ -381,7 +583,7 @@ export function BackupScreen() {
 
                 <Button onClick={handleImport} data-testid="button-import">
                   <Upload className="w-4 h-4 mr-2" />
-                  Import Backup
+                  {t("importBackup")}
                 </Button>
               </>
             )}
