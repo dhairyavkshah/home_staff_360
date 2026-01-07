@@ -6,6 +6,7 @@ import {
   collaborationLinks, 
   collaborationMessages, 
   adminUsers,
+  adminRolesTable,
   collaborationBindings,
   sharedAttendance,
   attendanceRevisions,
@@ -4500,6 +4501,481 @@ router.delete("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res:
   }
 });
 
+// ============ ADMIN MANAGEMENT API ============
+
+// GET /api/admin/admins - List all admin users with their roles
+router.get("/api/admin/admins", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const admins = await db.query.adminUsers.findMany({
+      orderBy: desc(adminUsers.createdAt),
+      with: {
+        role: true,
+        invitedByAdmin: {
+          columns: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    // Get all roles for reference
+    const roles = await db.query.adminRolesTable.findMany({
+      orderBy: (adminRolesTable, { asc }) => [asc(adminRolesTable.precedence)]
+    });
+
+    res.json({
+      admins: admins.map(admin => ({
+        ...admin,
+        passwordHash: undefined
+      })),
+      roles
+    });
+  } catch (error) {
+    console.error("List admins error:", error);
+    res.status(500).json({ error: "Failed to list admins" });
+  }
+});
+
+// POST /api/admin/admins/invite - Invite a new admin
+router.post("/api/admin/admins/invite", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const inviterId = (req as any).adminId;
+    const { email, name, roleId, password } = req.body;
+
+    if (!email || !name || !roleId || !password) {
+      return res.status(400).json({ error: "Email, name, roleId, and password are required" });
+    }
+
+    // Get the inviter's role to check hierarchy
+    const inviter = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.id, inviterId),
+      with: { role: true }
+    });
+
+    if (!inviter || !inviter.role) {
+      return res.status(403).json({ error: "Cannot determine inviter role" });
+    }
+
+    // Get the target role
+    const targetRole = await db.query.adminRolesTable.findFirst({
+      where: eq(adminRolesTable.id, roleId)
+    });
+
+    if (!targetRole) {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    // Check hierarchy - can only invite roles with higher precedence (lower privilege)
+    if (targetRole.precedence <= inviter.role.precedence) {
+      return res.status(403).json({ 
+        error: "Cannot invite admin with equal or higher privileges than yourself" 
+      });
+    }
+
+    // Check if email already exists
+    const existing = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.email, email)
+    });
+
+    if (existing) {
+      return res.status(400).json({ error: "Admin with this email already exists" });
+    }
+
+    // Create the admin user directly
+    const adminId = uuidv4();
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const [newAdmin] = await db.insert(adminUsers).values({
+      id: adminId,
+      email,
+      name,
+      passwordHash,
+      roleId,
+      invitedBy: inviterId,
+      isActive: true
+    }).returning();
+
+    res.json({
+      success: true,
+      admin: {
+        ...newAdmin,
+        passwordHash: undefined
+      }
+    });
+  } catch (error) {
+    console.error("Invite admin error:", error);
+    res.status(500).json({ error: "Failed to invite admin" });
+  }
+});
+
+// PATCH /api/admin/admins/:id - Update an admin (role, status)
+router.patch("/api/admin/admins/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { id } = req.params;
+    const { roleId, isActive, name } = req.body;
+
+    // Get the acting admin's role
+    const actingAdmin = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.id, adminId),
+      with: { role: true }
+    });
+
+    if (!actingAdmin || !actingAdmin.role) {
+      return res.status(403).json({ error: "Cannot determine your role" });
+    }
+
+    // Get the target admin
+    const targetAdmin = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.id, id),
+      with: { role: true }
+    });
+
+    if (!targetAdmin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    // Check hierarchy - can only modify admins with higher precedence (lower privilege)
+    if (targetAdmin.role && targetAdmin.role.precedence <= actingAdmin.role.precedence) {
+      return res.status(403).json({ 
+        error: "Cannot modify admin with equal or higher privileges than yourself" 
+      });
+    }
+
+    // If changing role, validate the new role is also lower privilege
+    if (roleId !== undefined) {
+      const newRole = await db.query.adminRolesTable.findFirst({
+        where: eq(adminRolesTable.id, roleId)
+      });
+
+      if (!newRole) {
+        return res.status(400).json({ error: "Invalid role" });
+      }
+
+      if (newRole.precedence <= actingAdmin.role.precedence) {
+        return res.status(403).json({ 
+          error: "Cannot assign role with equal or higher privileges than yourself" 
+        });
+      }
+    }
+
+    const updateData: any = {};
+    if (roleId !== undefined) updateData.roleId = roleId;
+    if (isActive !== undefined) updateData.isActive = isActive;
+    if (name !== undefined) updateData.name = name;
+
+    const [updated] = await db.update(adminUsers)
+      .set(updateData)
+      .where(eq(adminUsers.id, id))
+      .returning();
+
+    res.json({
+      success: true,
+      admin: {
+        ...updated,
+        passwordHash: undefined
+      }
+    });
+  } catch (error) {
+    console.error("Update admin error:", error);
+    res.status(500).json({ error: "Failed to update admin" });
+  }
+});
+
+// GET /api/admin/admins/roles - Get available roles
+router.get("/api/admin/admins/roles", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const roles = await db.query.adminRolesTable.findMany({
+      orderBy: (adminRolesTable, { asc }) => [asc(adminRolesTable.precedence)]
+    });
+
+    res.json({ roles });
+  } catch (error) {
+    console.error("Get roles error:", error);
+    res.status(500).json({ error: "Failed to get roles" });
+  }
+});
+
+// GET /api/admin/roles - Alias for getting all roles (for AdminRolesPage)
+router.get("/api/admin/roles", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const roles = await db.query.adminRolesTable.findMany({
+      orderBy: (adminRolesTable, { asc }) => [asc(adminRolesTable.precedence)]
+    });
+
+    res.json({ roles });
+  } catch (error) {
+    console.error("Get roles error:", error);
+    res.status(500).json({ error: "Failed to get roles" });
+  }
+});
+
+// PATCH /api/admin/roles/:id - Update role permissions
+router.patch("/api/admin/roles/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { id } = req.params;
+    const { permissions } = req.body;
+
+    if (!permissions || !Array.isArray(permissions)) {
+      return res.status(400).json({ error: "Permissions array is required" });
+    }
+
+    // Get the acting admin's role
+    const actingAdmin = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.id, adminId),
+      with: { role: true }
+    });
+
+    if (!actingAdmin || !actingAdmin.role) {
+      return res.status(403).json({ error: "Cannot determine your role" });
+    }
+
+    // Get the target role
+    const targetRole = await db.query.adminRolesTable.findFirst({
+      where: eq(adminRolesTable.id, parseInt(id))
+    });
+
+    if (!targetRole) {
+      return res.status(404).json({ error: "Role not found" });
+    }
+
+    // Owner role cannot be modified
+    if (targetRole.name === 'owner') {
+      return res.status(403).json({ error: "Owner role cannot be modified" });
+    }
+
+    // Only owner can modify super_admin role
+    if (targetRole.name === 'super_admin' && actingAdmin.role.name !== 'owner') {
+      return res.status(403).json({ error: "Only owner can modify super_admin role" });
+    }
+
+    // Can only modify roles with higher precedence (lower privilege) than your own
+    if (targetRole.precedence <= actingAdmin.role.precedence) {
+      return res.status(403).json({ 
+        error: "Cannot modify role with equal or higher privileges than yourself" 
+      });
+    }
+
+    const [updated] = await db.update(adminRolesTable)
+      .set({ permissions })
+      .where(eq(adminRolesTable.id, parseInt(id)))
+      .returning();
+
+    res.json({
+      success: true,
+      role: updated
+    });
+  } catch (error) {
+    console.error("Update role error:", error);
+    res.status(500).json({ error: "Failed to update role" });
+  }
+});
+
+// GET /api/admin/team - Alias for getting admin team (for AdminTeamPage)
+router.get("/api/admin/team", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const admins = await db.query.adminUsers.findMany({
+      orderBy: desc(adminUsers.createdAt),
+      with: {
+        role: true,
+        invitedByAdmin: {
+          columns: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    const roles = await db.query.adminRolesTable.findMany({
+      orderBy: (adminRolesTable, { asc }) => [asc(adminRolesTable.precedence)]
+    });
+
+    res.json({
+      admins: admins.map(admin => ({
+        ...admin,
+        passwordHash: undefined
+      })),
+      roles
+    });
+  } catch (error) {
+    console.error("List team error:", error);
+    res.status(500).json({ error: "Failed to list team" });
+  }
+});
+
+// POST /api/admin/team/invite - Invite new team member
+router.post("/api/admin/team/invite", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const inviterId = (req as any).adminId;
+    const { email, name, roleId, password } = req.body;
+
+    if (!email || !name || !roleId || !password) {
+      return res.status(400).json({ error: "Email, name, roleId, and password are required" });
+    }
+
+    const inviter = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.id, inviterId),
+      with: { role: true }
+    });
+
+    if (!inviter || !inviter.role) {
+      return res.status(403).json({ error: "Cannot determine inviter role" });
+    }
+
+    const targetRole = await db.query.adminRolesTable.findFirst({
+      where: eq(adminRolesTable.id, roleId)
+    });
+
+    if (!targetRole) {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    if (targetRole.precedence <= inviter.role.precedence) {
+      return res.status(403).json({ 
+        error: "Cannot invite admin with equal or higher privileges than yourself" 
+      });
+    }
+
+    const existing = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.email, email)
+    });
+
+    if (existing) {
+      return res.status(400).json({ error: "Admin with this email already exists" });
+    }
+
+    const adminNewId = uuidv4();
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const [newAdmin] = await db.insert(adminUsers).values({
+      id: adminNewId,
+      email,
+      name,
+      passwordHash,
+      roleId,
+      invitedBy: inviterId,
+      isActive: true
+    }).returning();
+
+    res.json({
+      success: true,
+      admin: {
+        ...newAdmin,
+        passwordHash: undefined
+      }
+    });
+  } catch (error) {
+    console.error("Invite team member error:", error);
+    res.status(500).json({ error: "Failed to invite team member" });
+  }
+});
+
+// PATCH /api/admin/team/:id - Update team member
+router.patch("/api/admin/team/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { id } = req.params;
+    const { roleId, isActive, name } = req.body;
+
+    const actingAdmin = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.id, adminId),
+      with: { role: true }
+    });
+
+    if (!actingAdmin || !actingAdmin.role) {
+      return res.status(403).json({ error: "Cannot determine your role" });
+    }
+
+    const targetAdmin = await db.query.adminUsers.findFirst({
+      where: eq(adminUsers.id, id),
+      with: { role: true }
+    });
+
+    if (!targetAdmin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    if (targetAdmin.role && targetAdmin.role.precedence <= actingAdmin.role.precedence) {
+      return res.status(403).json({ 
+        error: "Cannot modify admin with equal or higher privileges than yourself" 
+      });
+    }
+
+    if (roleId !== undefined) {
+      const newRole = await db.query.adminRolesTable.findFirst({
+        where: eq(adminRolesTable.id, roleId)
+      });
+
+      if (!newRole) {
+        return res.status(400).json({ error: "Invalid role" });
+      }
+
+      if (newRole.precedence <= actingAdmin.role.precedence) {
+        return res.status(403).json({ 
+          error: "Cannot assign role with equal or higher privileges than yourself" 
+        });
+      }
+    }
+
+    const updateData: any = {};
+    if (roleId !== undefined) updateData.roleId = roleId;
+    if (isActive !== undefined) updateData.isActive = isActive;
+    if (name !== undefined) updateData.name = name;
+
+    const [updated] = await db.update(adminUsers)
+      .set(updateData)
+      .where(eq(adminUsers.id, id))
+      .returning();
+
+    res.json({
+      success: true,
+      admin: {
+        ...updated,
+        passwordHash: undefined
+      }
+    });
+  } catch (error) {
+    console.error("Update team member error:", error);
+    res.status(500).json({ error: "Failed to update team member" });
+  }
+});
+
+// GET /api/admin/users/search - Search users by phone number for backup
+router.get("/api/admin/users/search", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { phone } = req.query;
+
+    if (!phone || typeof phone !== 'string' || phone.length < 3) {
+      return res.status(400).json({ error: "Phone number search query required (min 3 chars)" });
+    }
+
+    const users = await db.query.serverUsers.findMany({
+      where: sql`${serverUsers.phone} LIKE ${'%' + phone + '%'}`,
+      limit: 20,
+      orderBy: desc(serverUsers.createdAt)
+    });
+
+    res.json({
+      users: users.map(u => ({
+        id: u.id,
+        phone: u.phone,
+        displayName: u.displayName,
+        userType: u.userType,
+        isVerified: u.isVerified,
+        isActive: u.isActive
+      }))
+    });
+  } catch (error) {
+    console.error("Search users error:", error);
+    res.status(500).json({ error: "Failed to search users" });
+  }
+});
+
 // ============ USER BACKUP MANAGEMENT API ============
 
 // Helper function to generate checksum for backup data
@@ -4519,10 +4995,57 @@ async function createBackupLog(backupId: number, action: string, adminId: string
   });
 }
 
+// GET /api/admin/backups/stats - Get backup statistics for dashboard
+router.get("/api/admin/backups/stats", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const [totalResult] = await db.select({ count: sql<number>`count(*)` }).from(userBackups);
+    const [pendingResult] = await db.select({ count: sql<number>`count(*)` })
+      .from(userBackups)
+      .where(eq(userBackups.status, 'pending'));
+    const [completedResult] = await db.select({ count: sql<number>`count(*)` })
+      .from(userBackups)
+      .where(eq(userBackups.status, 'completed'));
+    const [failedResult] = await db.select({ count: sql<number>`count(*)` })
+      .from(userBackups)
+      .where(eq(userBackups.status, 'failed'));
+    
+    const recentBackups = await db.query.userBackups.findMany({
+      orderBy: desc(userBackups.createdAt),
+      limit: 5,
+      with: {
+        user: {
+          columns: {
+            phone: true,
+            displayName: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      total: Number(totalResult.count),
+      pending: Number(pendingResult.count),
+      completed: Number(completedResult.count),
+      failed: Number(failedResult.count),
+      recent: recentBackups.map(b => ({
+        id: b.id,
+        phoneNumber: b.phoneNumber,
+        status: b.status,
+        backupType: b.backupType,
+        createdAt: b.createdAt,
+        userName: b.user?.displayName || null
+      }))
+    });
+  } catch (error) {
+    console.error("Backup stats error:", error);
+    res.status(500).json({ error: "Failed to get backup stats" });
+  }
+});
+
 // GET /api/admin/backups - List all backups with filtering
 router.get("/api/admin/backups", authenticateAdmin, async (req: Request, res: Response) => {
   try {
-    const { userId, status, type, limit = '50', offset = '0' } = req.query;
+    const { userId, status, type, phone, limit = '50', offset = '0' } = req.query;
 
     let conditions: any[] = [];
     
@@ -4534,6 +5057,9 @@ router.get("/api/admin/backups", authenticateAdmin, async (req: Request, res: Re
     }
     if (type && backupTypes.includes(type as any)) {
       conditions.push(eq(userBackups.backupType, type as string));
+    }
+    if (phone) {
+      conditions.push(sql`${userBackups.phoneNumber} ILIKE ${'%' + phone + '%'}`);
     }
 
     const backups = await db.query.userBackups.findMany({

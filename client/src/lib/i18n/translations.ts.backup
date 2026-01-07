@@ -1918,17 +1918,6 @@ const hi: Partial<typeof en> = {
   serverDisconnected: "सर्वर से डिस्कनेक्ट",
   reconnecting: "पुनः कनेक्ट हो रहा है...",
   dataWillSync: "कनेक्ट होने पर परिवर्तन सिंक होंगे",
-  expensesBills: "खर्च",
-  payables: "देय राशि",
-  staffVendorUserMode: "स्टाफ उपयोगकर्ता मोड",
-  cannotMarkFutureAttendance: "भविष्य की तारीखों के लिए उपस्थिति चिह्नित नहीं कर सकते",
-  editClient: "ग्राहक संपादित करें",
-  clientName: "ग्राहक का नाम",
-  enterClientName: "उदा., स्मिथ परिवार",
-  sameAsClientName: "ग्राहक के नाम जैसा ही",
-  searchClientHomes: "ग्राहक घरों में खोजें...",
-  business: "व्यवसाय",
-  selectBusiness: "व्यवसाय चुनें",
 };
 
 const gu: Partial<typeof en> = {
@@ -10150,13 +10139,6 @@ const as: Partial<typeof en> = {
   serverDisconnected: "চাৰ্ভাৰ সংযোগ বিচ্ছিন্ন",
   reconnecting: "পুনৰ সংযোগ হৈ আছে...",
   dataWillSync: "অনলাইন হ'লে ডাটা ছিংক হ'ব",
-  roleAutoSetForLaundry: "লণ্ড্ৰী সেৱা ব্যৱসায়ৰ বাবে ভূমিকা স্বয়ংক্ৰিয়ভাৱে ছেট কৰা হৈছে",
-  noLaundryBusinesses: "কোনো লণ্ড্ৰী সেৱা ব্যৱসায় নাই",
-  createLaundryBusinessFirst: "লণ্ড্ৰী কাম লগ কৰিবলৈ 'লণ্ড্ৰী সেৱা' পেচাৰ সৈতে এটা ব্যৱসায় সৃষ্টি কৰক",
-  manageAccounts: "ব্যৱসায় পৰিচালনা কৰক",
-  searchClientHomes: "ক্লায়েণ্টৰ ঘৰ বিচাৰক...",
-  business: "ব্যৱসায়",
-  selectBusiness: "ব্যৱসায় বাছনি কৰক",
 };
 
 const ru: Partial<typeof en> = {
@@ -11113,13 +11095,6 @@ const ru: Partial<typeof en> = {
   serverDisconnected: "Сервер отключён",
   reconnecting: "Переподключение...",
   dataWillSync: "Данные синхронизируются при подключении",
-  roleAutoSetForLaundry: "Роль автоматически устанавливается для прачечных предприятий",
-  noLaundryBusinesses: "Нет предприятий прачечной",
-  createLaundryBusinessFirst: "Создайте бизнес с профессией 'Прачечная' для регистрации работ по стирке",
-  manageAccounts: "Управление бизнесом",
-  searchClientHomes: "Поиск домов клиентов...",
-  business: "Бизнес",
-  selectBusiness: "Выберите бизнес",
 };
 
 export const translations: Record<Language, Partial<typeof en>> & { en: typeof en } = {

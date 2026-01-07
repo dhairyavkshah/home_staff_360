@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, Smartphone, Link2, Activity, LogOut, Film } from "lucide-react";
+import { Users, Smartphone, Link2, Activity, LogOut, Film, UserCog, Archive, Shield, UsersRound } from "lucide-react";
 
 interface Stats {
   totalUsers: number;
@@ -11,6 +11,21 @@ interface Stats {
   totalDevices: number;
   totalLinks: number;
   activeLinks: number;
+}
+
+interface BackupStats {
+  total: number;
+  pending: number;
+  completed: number;
+  failed: number;
+  recent: Array<{
+    id: number;
+    phoneNumber: string;
+    status: string;
+    backupType: string;
+    createdAt: string;
+    userName: string | null;
+  }>;
 }
 
 interface User {
@@ -28,6 +43,7 @@ interface User {
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [backupStats, setBackupStats] = useState<BackupStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [adminUser, setAdminUser] = useState<any>(null);
@@ -50,11 +66,14 @@ export default function AdminDashboard() {
 
   const fetchData = async (token: string) => {
     try {
-      const [statsRes, usersRes] = await Promise.all([
+      const [statsRes, usersRes, backupStatsRes] = await Promise.all([
         fetch("/api/admin/stats", {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch("/api/admin/users?limit=20", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/admin/backups/stats", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -68,9 +87,11 @@ export default function AdminDashboard() {
 
       const statsData = await statsRes.json();
       const usersData = await usersRes.json();
+      const backupStatsData = backupStatsRes.ok ? await backupStatsRes.json() : null;
 
       setStats(statsData);
       setUsers(usersData.users || []);
+      setBackupStats(backupStatsData);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -122,12 +143,30 @@ export default function AdminDashboard() {
             <h1 className="text-xl font-semibold">Home Staff 360</h1>
             <p className="text-sm text-muted-foreground">Super Admin Dashboard</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 flex-wrap">
             {adminUser && (
-              <span className="text-sm text-muted-foreground hidden sm:block">
+              <span className="text-sm text-muted-foreground hidden sm:block mr-2">
                 {adminUser.email}
               </span>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/admin/team")}
+              data-testid="button-admin-team"
+            >
+              <UsersRound className="w-4 h-4 mr-2" />
+              Team
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/admin/roles")}
+              data-testid="button-admin-roles"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Roles
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -136,6 +175,24 @@ export default function AdminDashboard() {
             >
               <Film className="w-4 h-4 mr-2" />
               Ads
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/admin/admins")}
+              data-testid="button-admin-admins"
+            >
+              <UserCog className="w-4 h-4 mr-2" />
+              Admins
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/admin/backups")}
+              data-testid="button-admin-backups"
+            >
+              <Archive className="w-4 h-4 mr-2" />
+              Backups
             </Button>
             <Button
               variant="outline"
@@ -206,6 +263,40 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {backupStats && (
+          <Card className="cursor-pointer hover-elevate" onClick={() => setLocation("/admin/backups")}>
+            <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Archive className="w-4 h-4" />
+                Backup Statistics
+              </CardTitle>
+              <Badge variant="secondary" data-testid="badge-backup-total">{backupStats.total} total</Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-green-600" data-testid="text-backup-completed">
+                    {backupStats.completed}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Completed</p>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-yellow-600" data-testid="text-backup-pending">
+                    {backupStats.pending}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Pending</p>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-600" data-testid="text-backup-failed">
+                    {backupStats.failed}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Failed</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
