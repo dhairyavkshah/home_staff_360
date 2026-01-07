@@ -305,12 +305,15 @@ export function NotificationCenterScreen() {
         ) : (
           <div className="divide-y">
             {notifications.map((notification) => (
-              <button
+              <div
                 key={notification.id}
-                className={`w-full px-4 py-3 text-left hover-elevate flex items-start gap-3 group ${
+                role="button"
+                tabIndex={0}
+                className={`w-full px-4 py-3 text-left hover-elevate flex items-start gap-3 group cursor-pointer ${
                   !notification.isRead ? "bg-primary/5" : ""
                 }`}
                 onClick={() => handleNotificationClick(notification)}
+                onKeyDown={(e) => e.key === 'Enter' && handleNotificationClick(notification)}
                 data-testid={`notification-${notification.id}`}
               >
                 <div className={`p-2 rounded-full flex-shrink-0 ${getNotificationColor(notification.type)}`}>
@@ -351,7 +354,7 @@ export function NotificationCenterScreen() {
                     <X className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}

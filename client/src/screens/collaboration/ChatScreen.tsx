@@ -62,6 +62,7 @@ export function ChatScreen() {
   useRealtimeChat(chatId || null);
 
   const handleNewMessage = useCallback((message: any) => {
+    console.log("[ChatScreen] Received chat:new-message:", message);
     const messageChatId = String(message.chatId);
     if (messageChatId !== chatId) return;
     
@@ -72,7 +73,22 @@ export function ChatScreen() {
     });
   }, [chatId]);
 
+  const handleMessageReceived = useCallback((data: any) => {
+    console.log("[ChatScreen] Received chat:message-received:", data);
+    const message = data.message;
+    if (!message) return;
+    const messageChatId = String(data.chatId || message.chatId);
+    if (messageChatId !== chatId) return;
+    
+    setMessages((prev) => {
+      const messageId = String(message.id);
+      if (prev.some((m) => m.id === messageId)) return prev;
+      return [...prev, { ...message, id: messageId, chatId: messageChatId, isOwn: false }];
+    });
+  }, [chatId]);
+
   useRealtime("chat:new-message", handleNewMessage);
+  useRealtime("chat:message-received", handleMessageReceived);
 
   useEffect(() => {
     if (chatId) {

@@ -127,9 +127,12 @@ class RealtimeService {
 
   joinChat(chatId: string) {
     this.currentChatId = chatId;
+    console.log("[Realtime] joinChat called for", chatId, "socket connected:", this.socket?.connected);
     if (this.socket?.connected) {
       this.socket.emit("chat:join", chatId);
-      console.log("[Realtime] Emitting chat:join for", chatId);
+      console.log("[Realtime] Emitted chat:join for", chatId);
+    } else {
+      console.log("[Realtime] Socket not connected, will join on reconnect");
     }
   }
 

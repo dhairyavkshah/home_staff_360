@@ -2,7 +2,7 @@ import { Server as SocketIOServer, Socket } from "socket.io";
 import { Server as HTTPServer } from "http";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "home-staff-360-jwt-secret-key-2024";
+const JWT_SECRET = process.env.JWT_SECRET || "homestaff360-secret-key";
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
