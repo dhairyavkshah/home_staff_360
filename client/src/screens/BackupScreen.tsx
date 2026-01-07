@@ -71,11 +71,55 @@ export function BackupScreen() {
       if (result.success) {
         setLastBackupTime(formatLastBackupTime());
         await loadBackupsList();
-        toast({ title: t("success"), description: t("backupCreated") });
+        
+        const backup = storage.exportBackup();
+        const json = JSON.stringify(backup, null, 2);
+        const filename = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
+
+        if (isNative) {
+          await Filesystem.writeFile({
+            path: filename,
+            data: json,
+            directory: Directory.Cache,
+            encoding: Encoding.UTF8,
+          });
+
+          const uriResult = await Filesystem.getUri({
+            directory: Directory.Cache,
+            path: filename,
+          });
+
+          try {
+            await Share.share({
+              title: "Save Backup",
+              files: [uriResult.uri],
+              dialogTitle: "Save or Share Backup",
+            });
+            toast({ title: t("success"), description: t("backupCreatedAndSaved") || t("backupSaved") });
+          } catch (shareError) {
+            toast({ 
+              title: t("success"), 
+              description: t("backupCreatedLocally") || t("backupCreated")
+            });
+          }
+        } else {
+          const blob = new Blob([json], { type: "application/octet-stream" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+          toast({ title: t("success"), description: t("backupCreatedAndDownloaded") || t("backupDownloaded") });
+        }
       } else {
         throw new Error(result.error);
       }
     } catch (error) {
+      if ((error as Error).message?.includes("cancel") || (error as Error).message?.includes("Cancel")) {
+        setIsExporting(false);
+        return;
+      }
       toast({
         title: t("error"),
         description: (error as Error).message,

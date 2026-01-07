@@ -1,9 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, Smartphone, Link2, Activity, LogOut, Film, UserCog, Archive, Shield, UsersRound, Wrench } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Users, Smartphone, Link2, Activity, LogOut, Film, UserCog, Archive, Shield, UsersRound, Wrench, Search, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import * as XLSX from "xlsx";
 
 interface Stats {
   totalUsers: number;
@@ -40,13 +49,50 @@ interface User {
   createdAt: string;
 }
 
+interface UsersResponse {
+  users: User[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [stats, setStats] = useState<Stats | null>(null);
   const [backupStats, setBackupStats] = useState<BackupStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [adminUser, setAdminUser] = useState<any>(null);
+
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [userTypeFilter, setUserTypeFilter] = useState<string>("all");
+  const [isVerifiedFilter, setIsVerifiedFilter] = useState<string>("all");
+  const [isActiveFilter, setIsActiveFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(100);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    debounceTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearch(searchText);
+      setPage(1);
+    }, 300);
+
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [searchText]);
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
@@ -61,16 +107,20 @@ export default function AdminDashboard() {
       setAdminUser(JSON.parse(user));
     }
 
-    fetchData(token);
+    fetchInitialData(token);
   }, []);
 
-  const fetchData = async (token: string) => {
+  useEffect(() => {
+    const token = localStorage.getItem("adminToken");
+    if (token) {
+      fetchUsers(token);
+    }
+  }, [debouncedSearch, userTypeFilter, isVerifiedFilter, isActiveFilter, page]);
+
+  const fetchInitialData = async (token: string) => {
     try {
-      const [statsRes, usersRes, backupStatsRes] = await Promise.all([
+      const [statsRes, backupStatsRes] = await Promise.all([
         fetch("/api/admin/stats", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("/api/admin/users?limit=20", {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch("/api/admin/backups/stats", {
@@ -78,26 +128,68 @@ export default function AdminDashboard() {
         }),
       ]);
 
-      if (!statsRes.ok || !usersRes.ok) {
-        if (statsRes.status === 403 || usersRes.status === 403) {
+      if (!statsRes.ok) {
+        if (statsRes.status === 403) {
           handleLogout();
           return;
         }
       }
 
       const statsData = await statsRes.json();
-      const usersData = await usersRes.json();
       const backupStatsData = backupStatsRes.ok ? await backupStatsRes.json() : null;
 
       setStats(statsData);
-      setUsers(usersData.users || []);
       setBackupStats(backupStatsData);
+      
+      await fetchUsers(token);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const fetchUsers = useCallback(async (token: string) => {
+    setIsUsersLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", limit.toString());
+      params.set("page", page.toString());
+      
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch);
+      }
+      if (userTypeFilter !== "all") {
+        params.set("userType", userTypeFilter);
+      }
+      if (isVerifiedFilter !== "all") {
+        params.set("isVerified", isVerifiedFilter === "verified" ? "true" : "false");
+      }
+      if (isActiveFilter !== "all") {
+        params.set("isActive", isActiveFilter === "active" ? "true" : "false");
+      }
+
+      const res = await fetch(`/api/admin/users?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        if (res.status === 403) {
+          handleLogout();
+          return;
+        }
+      }
+
+      const data: UsersResponse = await res.json();
+      setUsers(data.users || []);
+      setTotalPages(data.totalPages || 1);
+      setTotalCount(data.total || 0);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    } finally {
+      setIsUsersLoading(false);
+    }
+  }, [debouncedSearch, userTypeFilter, isVerifiedFilter, isActiveFilter, page, limit]);
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
@@ -125,6 +217,106 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Failed to update user:", error);
     }
+  };
+
+  const handleExportExcel = () => {
+    const exportData = users.map(user => ({
+      Phone: user.phone,
+      Name: user.displayName || "-",
+      Type: user.userType || "-",
+      Verified: user.isVerified ? "Yes" : "No",
+      Active: user.isActive ? "Yes" : "No",
+      Connections: user.connectCount,
+      "Last Login": user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : "-",
+      "Created At": new Date(user.createdAt).toLocaleString(),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+
+    const date = new Date().toISOString().split("T")[0];
+    XLSX.writeFile(workbook, `users-export-${date}.xlsx`);
+  };
+
+  const handleFilterChange = (setter: (value: string) => void) => (value: string) => {
+    setter(value);
+    setPage(1);
+  };
+
+  const renderPagination = () => {
+    const pageNumbers: number[] = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <p className="text-sm text-muted-foreground" data-testid="text-pagination-info">
+          Showing {users.length} of {totalCount} users (Page {page} of {totalPages})
+        </p>
+        <div className="flex items-center gap-1 flex-wrap">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage(1)}
+            disabled={page === 1}
+            data-testid="button-pagination-first"
+          >
+            <ChevronsLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            data-testid="button-pagination-prev"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          {pageNumbers.map(pageNum => (
+            <Button
+              key={pageNum}
+              variant={pageNum === page ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPage(pageNum)}
+              data-testid={`button-pagination-page-${pageNum}`}
+            >
+              {pageNum}
+            </Button>
+          ))}
+          
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            data-testid="button-pagination-next"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage(totalPages)}
+            disabled={page === totalPages}
+            data-testid="button-pagination-last"
+          >
+            <ChevronsRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -309,9 +501,65 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Users</CardTitle>
+            <CardTitle>Users</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by phone or name..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="pl-10"
+                data-testid="input-search-users"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <Select value={userTypeFilter} onValueChange={handleFilterChange(setUserTypeFilter)}>
+                <SelectTrigger className="w-[140px]" data-testid="select-user-type">
+                  <SelectValue placeholder="User Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="HOME">HOME</SelectItem>
+                  <SelectItem value="STAFF">STAFF</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={isVerifiedFilter} onValueChange={handleFilterChange(setIsVerifiedFilter)}>
+                <SelectTrigger className="w-[140px]" data-testid="select-is-verified">
+                  <SelectValue placeholder="Verified" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="verified">Verified</SelectItem>
+                  <SelectItem value="not-verified">Not Verified</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={isActiveFilter} onValueChange={handleFilterChange(setIsActiveFilter)}>
+                <SelectTrigger className="w-[140px]" data-testid="select-is-active">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="disabled">Disabled</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                onClick={handleExportExcel}
+                disabled={users.length === 0}
+                data-testid="button-export-excel"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Excel
+              </Button>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -324,50 +572,59 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
-                    <tr key={user.id} className="border-b" data-testid={`row-user-${user.id}`}>
-                      <td className="py-2 px-2">{user.phone}</td>
-                      <td className="py-2 px-2 hidden md:table-cell">
-                        {user.displayName || "-"}
-                      </td>
-                      <td className="py-2 px-2 hidden sm:table-cell">
-                        {user.userType || "-"}
-                      </td>
-                      <td className="py-2 px-2">
-                        <div className="flex gap-1 flex-wrap">
-                          {user.isVerified && (
-                            <Badge variant="secondary" className="text-xs">Verified</Badge>
-                          )}
-                          <Badge 
-                            variant={user.isActive ? "default" : "destructive"}
-                            className="text-xs"
-                          >
-                            {user.isActive ? "Active" : "Disabled"}
-                          </Badge>
-                        </div>
-                      </td>
-                      <td className="py-2 px-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleUserStatus(user.id, user.isActive)}
-                          data-testid={`button-toggle-user-${user.id}`}
-                        >
-                          {user.isActive ? "Disable" : "Enable"}
-                        </Button>
+                  {isUsersLoading ? (
+                    <tr>
+                      <td colSpan={5} className="py-4 text-center text-muted-foreground">
+                        Loading users...
                       </td>
                     </tr>
-                  ))}
-                  {users.length === 0 && (
+                  ) : users.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="py-4 text-center text-muted-foreground">
                         No users found
                       </td>
                     </tr>
+                  ) : (
+                    users.map((user) => (
+                      <tr key={user.id} className="border-b" data-testid={`row-user-${user.id}`}>
+                        <td className="py-2 px-2">{user.phone}</td>
+                        <td className="py-2 px-2 hidden md:table-cell">
+                          {user.displayName || "-"}
+                        </td>
+                        <td className="py-2 px-2 hidden sm:table-cell">
+                          {user.userType || "-"}
+                        </td>
+                        <td className="py-2 px-2">
+                          <div className="flex gap-1 flex-wrap">
+                            {user.isVerified && (
+                              <Badge variant="secondary" className="text-xs">Verified</Badge>
+                            )}
+                            <Badge 
+                              variant={user.isActive ? "default" : "destructive"}
+                              className="text-xs"
+                            >
+                              {user.isActive ? "Active" : "Disabled"}
+                            </Badge>
+                          </div>
+                        </td>
+                        <td className="py-2 px-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleUserStatus(user.id, user.isActive)}
+                            data-testid={`button-toggle-user-${user.id}`}
+                          >
+                            {user.isActive ? "Disable" : "Enable"}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>
             </div>
+
+            {totalPages > 1 && renderPagination()}
           </CardContent>
         </Card>
       </main>
