@@ -1,6 +1,15 @@
 import { Router, Request, Response } from "express";
 import crypto from "crypto";
 import { db } from "./db";
+import {
+  emitNewMessage,
+  emitNotification,
+  emitNotificationRead,
+  emitAllNotificationsRead,
+  emitConnectionInvite,
+  emitConnectionUpdated,
+  emitConnectionRemoved
+} from "./realtime";
 import { 
   serverUsers, 
   devices, 
@@ -2230,6 +2239,11 @@ router.patch("/api/notifications/:id/read", authenticateToken, async (req: Reque
       .set({ isRead: true, readAt: new Date() })
       .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
 
+    const numericUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+    if (!isNaN(numericUserId)) {
+      emitNotificationRead(numericUserId, typeof id === 'string' ? parseInt(id, 10) : id);
+    }
+
     res.json({ success: true });
   } catch (error) {
     console.error("Mark notification read error:", error);
@@ -2251,6 +2265,11 @@ router.post("/api/notifications/read-all", authenticateToken, async (req: Reques
     await db.update(notifications)
       .set({ isRead: true, readAt: new Date() })
       .where(and(...conditions));
+
+    const numericUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+    if (!isNaN(numericUserId)) {
+      emitAllNotificationsRead(numericUserId);
+    }
 
     res.json({ success: true });
   } catch (error) {
@@ -2309,14 +2328,16 @@ async function createNotification(
   category?: string
 ) {
   try {
-    // Derive category from type if not specified
     const derivedCategory = category || 
       (type.includes('connection') ? 'collaboration' :
        type.includes('attendance') ? 'attendance' :
        type.includes('laundry') ? 'laundry' : 'system');
     
+    const notificationId = uuidv4();
+    const createdAt = new Date();
+    
     await db.insert(notifications).values({
-      id: uuidv4(),
+      id: notificationId,
       userId,
       userMode,
       category: derivedCategory,
@@ -2330,8 +2351,27 @@ async function createNotification(
       actionType: ['attendance_submitted', 'laundry_submitted'].includes(type) ? 'approve' : 
                   type === 'connection_request' ? 'accept' : 'view',
       isRead: false,
-      createdAt: new Date()
+      createdAt
     });
+
+    // Emit real-time notification
+    const numericUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+    if (!isNaN(numericUserId)) {
+      emitNotification(numericUserId, {
+        id: notificationId,
+        userId,
+        userMode,
+        category: derivedCategory,
+        type,
+        title,
+        message,
+        entityType: entityType || null,
+        entityId: entityId || null,
+        payload: payload ? JSON.stringify(payload) : null,
+        isRead: false,
+        createdAt
+      });
+    }
   } catch (error) {
     console.error("Failed to create notification:", error);
   }
@@ -2572,6 +2612,17 @@ router.post("/api/connections/invites/:id/accept", authenticateToken, async (req
       connectionId
     );
 
+    // Emit real-time connection update event
+    const senderNumId = typeof invite.senderId === 'string' ? parseInt(invite.senderId, 10) : invite.senderId;
+    const acceptorNumId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+    if (!isNaN(senderNumId) && !isNaN(acceptorNumId)) {
+      emitConnectionUpdated(senderNumId, acceptorNumId, {
+        id: connectionId,
+        status: 'accepted',
+        chatId
+      });
+    }
+
     res.json({ success: true, connectionId, chatId });
   } catch (error) {
     console.error("Accept invite error:", error);
@@ -2704,8 +2755,18 @@ router.delete("/api/connections/:id", authenticateToken, async (req: Request, re
       await db.delete(collabChats).where(eq(collabChats.id, chat.id));
     }
 
+    // Get user IDs before deleting
+    const userAId = typeof connection.userAId === 'string' ? parseInt(connection.userAId, 10) : connection.userAId;
+    const userBId = typeof connection.userBId === 'string' ? parseInt(connection.userBId, 10) : connection.userBId;
+
     // Delete connection
     await db.delete(collabConnections).where(eq(collabConnections.id, id));
+
+    // Emit real-time connection removed event
+    if (!isNaN(userAId) && !isNaN(userBId)) {
+      const connectionNumId = typeof id === 'string' ? parseInt(id, 10) : id;
+      emitConnectionRemoved(userAId, userBId, connectionNumId);
+    }
 
     res.json({ success: true });
   } catch (error) {
@@ -3020,6 +3081,32 @@ router.post("/api/chats/:chatId/messages", authenticateToken, async (req: Reques
         );
       }
     }
+
+    // Emit real-time message event
+    const allParticipantIds = await db.query.chatParticipants.findMany({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+    const participantUserIds = allParticipantIds.map(p => {
+      const id = typeof p.userId === 'string' ? parseInt(p.userId, 10) : p.userId;
+      return isNaN(id) ? 0 : id;
+    }).filter(id => id > 0);
+
+    emitNewMessage(
+      parseInt(chatId, 10),
+      {
+        id: messageId,
+        chatId,
+        senderId: userId,
+        senderName: sender?.displayName,
+        content: content.trim(),
+        createdAt: now,
+        isOwn: false
+      },
+      participantUserIds
+    );
 
     res.json({ success: true, messageId });
   } catch (error) {
@@ -7068,6 +7155,7 @@ router.post("/api/connections/request", authenticateToken, async (req: Request, 
 
     const notificationId = uuidv4();
     const targetUserMode = targetUser.userType || 'HOME';
+    const createdAt = new Date();
     
     await db.insert(notifications).values({
       id: notificationId,
@@ -7081,8 +7169,37 @@ router.post("/api/connections/request", authenticateToken, async (req: Request, 
       entityId: connectionInviteId,
       payload: JSON.stringify({ senderId: userId, senderName: requesterName, message }),
       actionRequired: true,
-      actionType: 'approve'
+      actionType: 'approve',
+      createdAt
     });
+
+    // Emit real-time invite event
+    const targetNumId = typeof targetUserId === 'string' ? parseInt(targetUserId, 10) : targetUserId;
+    if (!isNaN(targetNumId)) {
+      emitConnectionInvite(targetNumId, {
+        id: connectionInviteId,
+        senderId: userId,
+        senderName: requesterName,
+        senderMode: currentUserMode,
+        message,
+        status: 'pending',
+        createdAt
+      });
+      
+      emitNotification(targetNumId, {
+        id: notificationId,
+        userId: targetUserId,
+        userMode: targetUserMode,
+        category: 'collaboration',
+        type: 'connection_request',
+        title: 'New Connection Request',
+        message: `${requesterName} wants to connect with you`,
+        entityType: 'connection_invite',
+        entityId: connectionInviteId,
+        isRead: false,
+        createdAt
+      });
+    }
 
     res.json({ 
       success: true, 

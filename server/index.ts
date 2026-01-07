@@ -5,6 +5,7 @@ import fs from "fs";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import routes from "./routes";
+import { initRealtime } from "./realtime";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -114,6 +115,8 @@ function serveStatic(app: express.Express) {
 
 (async () => {
   const server = createServer(app);
+  
+  initRealtime(server);
 
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     const status = err.status || err.statusCode || 500;
