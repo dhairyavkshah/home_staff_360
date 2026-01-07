@@ -51,17 +51,17 @@ export function initRealtime(server: HTTPServer): SocketIOServer {
     
     console.log(`[Realtime] User ${userId} connected (socket: ${socket.id})`);
 
-    socket.on("chat:join", (chatId: number) => {
+    socket.on("chat:join", (chatId: string | number) => {
       socket.join(`chat:${chatId}`);
       console.log(`[Realtime] User ${userId} joined chat:${chatId}`);
     });
 
-    socket.on("chat:leave", (chatId: number) => {
+    socket.on("chat:leave", (chatId: string | number) => {
       socket.leave(`chat:${chatId}`);
       console.log(`[Realtime] User ${userId} left chat:${chatId}`);
     });
 
-    socket.on("chat:typing", ({ chatId, isTyping }: { chatId: number; isTyping: boolean }) => {
+    socket.on("chat:typing", ({ chatId, isTyping }: { chatId: string | number; isTyping: boolean }) => {
       socket.to(`chat:${chatId}`).emit("chat:typing", {
         chatId,
         userId,
@@ -94,15 +94,16 @@ export function emitToUser(userId: string, event: string, data: any) {
   }
 }
 
-export function emitToChat(chatId: number, event: string, data: any) {
+export function emitToChat(chatId: string | number, event: string, data: any) {
   if (io) {
     io.to(`chat:${chatId}`).emit(event, data);
   }
 }
 
-export function emitNewMessage(chatId: number, message: any, participantIds: string[]) {
+export function emitNewMessage(chatId: string | number, message: any, participantIds: string[]) {
   if (io) {
     io.to(`chat:${chatId}`).emit("chat:new-message", message);
+    console.log(`[Realtime] Emitting chat:new-message to chat:${chatId}`, message.id);
     
     participantIds.forEach((userId) => {
       io!.to(`user:${userId}`).emit("chat:message-received", { chatId, message });
@@ -114,7 +115,7 @@ export function emitNotification(userId: string, notification: any) {
   emitToUser(userId, "notifications:created", notification);
 }
 
-export function emitNotificationRead(userId: string, notificationId: number) {
+export function emitNotificationRead(userId: string, notificationId: string) {
   emitToUser(userId, "notifications:read", { id: notificationId });
 }
 
@@ -131,7 +132,7 @@ export function emitConnectionUpdated(userId1: string, userId2: string, connecti
   emitToUser(userId2, "connections:status-changed", connection);
 }
 
-export function emitConnectionRemoved(userId1: string, userId2: string, connectionId: number) {
+export function emitConnectionRemoved(userId1: string, userId2: string, connectionId: string) {
   emitToUser(userId1, "connections:removed", { id: connectionId });
   emitToUser(userId2, "connections:removed", { id: connectionId });
 }

@@ -98,7 +98,10 @@ export function ChatScreen() {
         collaborationService.fetchWithAuth(`/chats/${chatId}`),
       ]);
       
-      setMessages((messagesRes.messages || []).reverse());
+      const sortedMessages = (messagesRes.messages || []).sort((a: Message, b: Message) => 
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      setMessages(sortedMessages);
       setChatInfo(chatRes.chat || null);
       
       await collaborationService.fetchWithAuth(`/chats/${chatId}/read`, {

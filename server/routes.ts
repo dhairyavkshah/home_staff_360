@@ -2280,9 +2280,8 @@ router.patch("/api/notifications/:id/read", authenticateToken, async (req: Reque
       .set({ isRead: true, readAt: new Date() })
       .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
 
-    const numericUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    if (!isNaN(numericUserId)) {
-      emitNotificationRead(numericUserId, typeof id === 'string' ? parseInt(id, 10) : id);
+    if (userId) {
+      emitNotificationRead(userId, id);
     }
 
     res.json({ success: true });
@@ -2307,9 +2306,8 @@ router.post("/api/notifications/read-all", authenticateToken, async (req: Reques
       .set({ isRead: true, readAt: new Date() })
       .where(and(...conditions));
 
-    const numericUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    if (!isNaN(numericUserId)) {
-      emitAllNotificationsRead(numericUserId);
+    if (userId) {
+      emitAllNotificationsRead(userId);
     }
 
     res.json({ success: true });
@@ -2396,9 +2394,9 @@ async function createNotification(
     });
 
     // Emit real-time notification
-    const numericUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    if (!isNaN(numericUserId)) {
-      emitNotification(numericUserId, {
+    if (userId) {
+      console.log(`[Realtime] Emitting notification to user ${userId}:`, title);
+      emitNotification(userId, {
         id: notificationId,
         userId,
         userMode,
@@ -2654,10 +2652,8 @@ router.post("/api/connections/invites/:id/accept", authenticateToken, async (req
     );
 
     // Emit real-time connection update event
-    const senderNumId = typeof invite.senderId === 'string' ? parseInt(invite.senderId, 10) : invite.senderId;
-    const acceptorNumId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
-    if (!isNaN(senderNumId) && !isNaN(acceptorNumId)) {
-      emitConnectionUpdated(senderNumId, acceptorNumId, {
+    if (invite.senderId && userId) {
+      emitConnectionUpdated(invite.senderId, userId, {
         id: connectionId,
         status: 'accepted',
         chatId
@@ -3130,26 +3126,32 @@ router.post("/api/chats/:chatId/messages", authenticateToken, async (req: Reques
         sql`${chatParticipants.leftAt} IS NULL`
       )
     });
-    const participantUserIds = allParticipantIds.map(p => {
-      const id = typeof p.userId === 'string' ? parseInt(p.userId, 10) : p.userId;
-      return isNaN(id) ? 0 : id;
-    }).filter(id => id > 0);
+    const participantUserIds = allParticipantIds.map(p => p.userId);
+
+    const messageData = {
+      id: messageId,
+      chatId,
+      senderId: userId,
+      senderName: sender?.displayName,
+      messageType: 'text',
+      content: content.trim(),
+      createdAt: now.toISOString(),
+      isOwn: false
+    };
 
     emitNewMessage(
-      parseInt(chatId, 10),
-      {
-        id: messageId,
-        chatId,
-        senderId: userId,
-        senderName: sender?.displayName,
-        content: content.trim(),
-        createdAt: now,
-        isOwn: false
-      },
+      chatId,
+      messageData,
       participantUserIds
     );
 
-    res.json({ success: true, messageId });
+    res.json({ 
+      success: true, 
+      message: {
+        ...messageData,
+        isOwn: true
+      }
+    });
   } catch (error) {
     console.error("Send message error:", error);
     res.status(500).json({ error: "Failed to send message" });
@@ -7317,9 +7319,8 @@ router.post("/api/connections/request", authenticateToken, async (req: Request, 
     });
 
     // Emit real-time invite event
-    const targetNumId = typeof targetUserId === 'string' ? parseInt(targetUserId, 10) : targetUserId;
-    if (!isNaN(targetNumId)) {
-      emitConnectionInvite(targetNumId, {
+    if (targetUserId) {
+      emitConnectionInvite(targetUserId, {
         id: connectionInviteId,
         senderId: userId,
         senderName: requesterName,
@@ -7329,7 +7330,7 @@ router.post("/api/connections/request", authenticateToken, async (req: Request, 
         createdAt
       });
       
-      emitNotification(targetNumId, {
+      emitNotification(targetUserId, {
         id: notificationId,
         userId: targetUserId,
         userMode: targetUserMode,

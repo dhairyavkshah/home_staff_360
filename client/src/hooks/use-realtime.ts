@@ -54,26 +54,21 @@ export function useRealtimeConnection() {
   return { isConnected, isConnecting };
 }
 
-export function useRealtimeChat(chatId: number | string | null) {
+export function useRealtimeChat(chatId: string | null) {
   useEffect(() => {
     if (!chatId) return;
 
-    const numericChatId = typeof chatId === "string" ? parseInt(chatId, 10) : chatId;
-    if (isNaN(numericChatId)) return;
-
-    realtimeService.joinChat(numericChatId);
+    realtimeService.joinChat(chatId);
 
     return () => {
-      realtimeService.leaveChat(numericChatId);
+      realtimeService.leaveChat(chatId);
     };
   }, [chatId]);
 
   const sendTyping = useCallback(
     (isTyping: boolean) => {
       if (!chatId) return;
-      const numericChatId = typeof chatId === "string" ? parseInt(chatId, 10) : chatId;
-      if (isNaN(numericChatId)) return;
-      realtimeService.sendTyping(numericChatId, isTyping);
+      realtimeService.sendTyping(chatId, isTyping);
     },
     [chatId]
   );

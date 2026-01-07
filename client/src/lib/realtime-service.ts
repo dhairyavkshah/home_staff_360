@@ -7,7 +7,7 @@ class RealtimeService {
   private eventHandlers: Map<string, Set<RealtimeEventHandler>> = new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private currentChatId: number | null = null;
+  private currentChatId: string | null = null;
   private isConnecting = false;
   private connectionPromise: Promise<void> | null = null;
   private connectionRefCount = 0;
@@ -125,14 +125,15 @@ class RealtimeService {
     this.disconnect();
   }
 
-  joinChat(chatId: number) {
+  joinChat(chatId: string) {
     this.currentChatId = chatId;
     if (this.socket?.connected) {
       this.socket.emit("chat:join", chatId);
+      console.log("[Realtime] Emitting chat:join for", chatId);
     }
   }
 
-  leaveChat(chatId: number) {
+  leaveChat(chatId: string) {
     if (this.socket?.connected) {
       this.socket.emit("chat:leave", chatId);
     }
@@ -141,10 +142,14 @@ class RealtimeService {
     }
   }
 
-  sendTyping(chatId: number, isTyping: boolean) {
+  sendTyping(chatId: string, isTyping: boolean) {
     if (this.socket?.connected) {
       this.socket.emit("chat:typing", { chatId, isTyping });
     }
+  }
+
+  getCurrentChatId(): string | null {
+    return this.currentChatId;
   }
 
   on(event: string, handler: RealtimeEventHandler): () => void {

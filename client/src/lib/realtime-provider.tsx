@@ -134,23 +134,25 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const onNotification = (data: NotificationPayload) => {
+      console.log("[RealtimeProvider] Received notification:", data);
       if (notificationHandlerRef.current) {
         notificationHandlerRef.current(data);
       }
     };
 
     const onMessage = (data: MessagePayload) => {
+      console.log("[RealtimeProvider] Received message:", data);
       if (messageHandlerRef.current) {
         messageHandlerRef.current(data);
       }
     };
 
-    realtimeService.on("notifications:created", onNotification);
-    realtimeService.on("chat:new-message", onMessage);
+    const unsubNotification = realtimeService.on("notifications:created", onNotification);
+    const unsubMessage = realtimeService.on("chat:new-message", onMessage);
 
     return () => {
-      realtimeService.off("notifications:created", onNotification);
-      realtimeService.off("chat:new-message", onMessage);
+      unsubNotification();
+      unsubMessage();
     };
   }, []);
 
