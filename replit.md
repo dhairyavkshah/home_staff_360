@@ -1,325 +1,59 @@
 # Home Staff 360 v2.0
 
 ## Overview
-Home Staff 360 is a **privacy-first, offline-capable mobile/web application** designed for managing household staff and service businesses. Version 2.0 adds **online-first collaboration** with phone+password authentication while maintaining local storage as the primary data source.
+Home Staff 360 is a live, real-time household staff management platform designed for managing household staff and service businesses. Version 2.0 features full online collaboration with phone+password authentication, real-time messaging, and live data synchronization across all connected users.
 
-### Core Modes
-- **Home User Mode**: For household managers to track domestic staff attendance, payments, expenses, and laundry batches.
+It operates in two core modes:
+- **Home User Mode**: For household managers to track domestic staff attendance, payments, expenses, and laundry batches with real-time collaboration.
 - **Staff User Mode**: For service professionals to manage client homes, log attendance, track earnings, handle expenses, and create invoices.
+
+The business vision is to provide a comprehensive, real-time solution for household and service staff management, enhancing efficiency and communication.
 
 ## User Preferences
 - Simple language and clear explanations
 - Iterative development with small, testable changes
 - Ask before major architectural decisions
-- Privacy and offline-first capabilities are priorities
-
----
+- Privacy and security remain priorities with live data
 
 ## System Architecture
 
-### Authentication Flow (v2.0)
-1. **Phone Check**: User enters phone number → server checks if account exists
-2. **Password Login/Setup**: 
-   - Existing users: Enter password to login
-   - New users: Set password during registration
-3. **OTP Verification**: Verify phone ownership via SMS code (Twilio)
-4. **Profile Setup**: Display name captured during onboarding, synced to server
+### Live Real-Time Architecture
+Home Staff 360 v2.0 is a fully live, cloud-connected application using a client-server architecture with real-time capabilities:
+- **Client**: React with TanStack for UI and Socket.IO Client for live updates.
+- **Server**: Express.js for REST APIs and Socket.IO Server for real-time events.
+- **Database**: PostgreSQL as the primary data store.
+- **Authentication**: JWT-based authentication with 30-day tokens.
 
-**Password Requirements**:
-- Minimum 6 characters
-- Required for all users (set during sign-up)
-- Current password required to change password or phone number
-- Forgot password: OTP-based password reset
-
-### Data Architecture
-```
-┌─────────────────────────────────────────────────────┐
-│                    CLIENT                           │
-│  ┌─────────────────┐  ┌─────────────────────────┐  │
-│  │  localStorage   │  │  collaboration-service  │  │
-│  │  (Primary Data) │  │  (Server Sync)          │  │
-│  └─────────────────┘  └─────────────────────────┘  │
-└─────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────┐
-│                    SERVER                           │
-│  ┌─────────────────┐  ┌─────────────────────────┐  │
-│  │  PostgreSQL     │  │  JWT Authentication     │  │
-│  │  (Collaboration)│  │  (30-day tokens)        │  │
-│  └─────────────────┘  └─────────────────────────┘  │
-└─────────────────────────────────────────────────────┘
-```
+### Authentication Flow
+The system uses a phone+password authentication flow with OTP verification for phone ownership. Users can register or log in with their phone number and password. OTP is used for verification and password resets. Passwords require a minimum of 6 characters and are mandatory for all users.
 
 ### UI/UX Design
-- Modern UI inspired by Samsung One UI and Material 3
-- "Squircle" corners (24px radius) for soft aesthetic
-- Light and Dark mode support
-- Primary color: Google Blue (#0B57D0)
-- Bottom navigation bar with 5 tabs
+The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "squircle" corners (24px radius) for a soft aesthetic. It supports both Light and Dark modes. The primary color is Google Blue (#0B57D0), and navigation is handled via a bottom navigation bar with 5 tabs.
 
----
+### Feature Specifications
+- **Multi-Language Support**: Supports 21 languages, including English, Hindi, Spanish, French, and more.
+- **Multi-Currency Support**: Supports 27 currencies, including INR, USD, EUR, GBP, AUD, and CAD.
+- **Real-Time Collaboration**: Includes a chat system with message edit/delete within a 5-minute window, real-time message delivery, and live events for attendance, laundry, and expense updates.
+- **Auto-Connection System**: Automatically creates connection invites based on phone numbers, resolving pending links upon user registration.
+- **Advertising System**: Displays full-screen video ads approximately every 5 minutes of app usage, with a skip option after 5 seconds and click-through functionality. Includes analytics for impressions, completion rates, and CTR, managed via an admin interface.
 
-## API Endpoints
+### Security Measures
+- **Authentication**: Passwords are hashed with bcrypt (10 rounds), JWT tokens are used (30-day user, 8-hour admin), and OTPs expire in 10 minutes with a max of 5 attempts.
+- **Rate Limiting**: Implemented for sensitive actions like phone change requests and OTP requests.
+- **Data Security**: All data is transmitted over HTTPS/TLS, server-side data is encrypted at rest, and the system is designed to be GDPR and DPDP Act compliant.
 
-### Authentication
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/check-phone` | POST | Check if phone number is registered |
-| `/api/auth/login` | POST | Login with phone + password |
-| `/api/auth/register` | POST | Register new user with phone + password |
-| `/api/auth/request-otp` | POST | Request OTP for phone verification |
-| `/api/auth/verify-otp` | POST | Verify OTP and complete auth |
-| `/api/auth/forgot-password` | POST | Request password reset OTP |
-| `/api/auth/reset-password` | POST | Reset password with OTP |
+## External Dependencies
 
-### User Profile
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/user/profile` | GET | Get user profile |
-| `/api/user/profile` | PATCH | Update display name, preferences |
-| `/api/user/password` | PUT | Change password (requires current password) |
-| `/api/user/phone/request-change` | POST | Request phone change (rate limited) |
-| `/api/user/phone/confirm` | POST | Confirm phone change with OTP |
-
-### Collaboration
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/connections` | GET/POST | Manage connections between users |
-| `/api/messages` | GET/POST | Direct messaging between connections |
-| `/api/notifications` | GET | Get user notifications |
-| `/api/shared-*` | Various | Shared data management (laundry, etc.) |
-
-### Admin (Protected)
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/admin/login` | POST | Admin login (email + password) |
-| `/api/admin/stats` | GET | Dashboard statistics |
-| `/api/admin/users` | GET | List/manage users |
-
-### Advertising System
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/ads/next` | GET | Get next ad to display (weighted random) |
-| `/api/ads/impression` | POST | Record ad impression with watch data |
-| `/api/admin/ads` | GET | List all ads (paginated) |
-| `/api/admin/ads` | POST | Create new advertisement |
-| `/api/admin/ads/:id` | GET | Get single ad details |
-| `/api/admin/ads/:id` | PATCH | Update advertisement |
-| `/api/admin/ads/:id` | DELETE | Delete/deactivate ad |
-| `/api/admin/ads/analytics` | GET | Get comprehensive ad analytics |
-
----
-
-## Database Schema (PostgreSQL)
-
-### Core Tables
-- `server_users`: User accounts (phone, displayName, passwordHash, userType)
-- `otp_codes`: OTP codes for verification (phone, code, expiresAt, verified)
-- `devices`: Registered devices for sync
-- `admin_users`: Admin dashboard users
-
-### Collaboration Tables
-- `collab_connections`: Bidirectional connections between users
-- `collab_chats`: Chat sessions between connected users
-- `chat_messages`: Messages with edit/delete support (5-minute window)
-- `chat_participants`: Chat membership and mute settings
-- `pending_phone_links`: Auto-connection invites for unregistered users
-- `notifications`: User notifications
-
-### Shared Data Tables
-- `shared_laundry`: Laundry batches shared for approval
-- `shared_laundry_revisions`: Revision history for shared laundry
-
-### Advertising Tables
-- `advertisements`: Ad content (title, videoUrl, duration, weight, isActive, advertiser, targetUrl)
-- `ad_impressions`: Ad view tracking (adId, userId, watchedDuration, completed, skipped, clickedThrough)
-
----
-
-## Advertising System
-
-### Overview
-- Ads display approximately every 5 minutes of app usage
-- Maximum ad duration: 30 seconds
-- Skip button appears after 5 seconds of watching
-- Equal weight distribution ensures fair rotation of all active ads
-
-### Features
-- **Video Ads**: Full-screen video overlay with Fluent 2 design
-- **Skip After 5s**: Users can skip ads after watching 5 seconds
-- **Click-through**: Optional "Learn More" button to visit advertiser
-- **Analytics**: Track impressions, completion rates, skip rates, CTR
-
-### Admin Management
-Access via `/admin/ads` after logging in as super admin:
-- Create, edit, delete advertisements
-- View detailed analytics per ad
-- User breakdown showing which users saw which ads
-- Schedule ads with start/end dates
-
----
-
-## Real-Time Features
-
-### Chat System
-- **Message Edit/Delete**: Users can edit or delete messages within 5 minutes of sending
-- **Real-time Delivery**: Messages, edits, and deletions broadcast instantly via Socket.IO
-- **Dual Delivery Pattern**: Events sent to both chat rooms and direct user channels for reliability
-- **Mobile-Friendly Actions**: Tap on messages to reveal edit/delete buttons (hover on desktop)
-
-### Live Collaboration Events
-| Event | Description |
-|-------|-------------|
-| `chat:new-message` | New message in a chat |
-| `chat:message-updated` | Message edited |
-| `chat:message-deleted` | Message deleted |
-| `collab:attendance-update` | Attendance record created/approved/rejected |
-| `collab:laundry-update` | Laundry batch created/approved/rejected |
-
-### Auto-Connection System
-- When adding staff/clients, system automatically creates connection invites
-- If user is not registered, creates a pending_phone_link
-- Pending links auto-resolve when user registers with that phone number
-
----
-
-## Security Measures
-
-### Authentication
-- Passwords hashed with bcrypt (10 rounds)
-- JWT tokens with 30-day expiry (users), 8-hour (admins)
-- OTP expiry: 10 minutes
-- OTP max attempts: 5 before requiring new code
-
-### Rate Limiting
-- Phone change requests: Max 3 per hour per user
-- OTP requests: Throttled via in-memory limiter
-- Generic error messages to prevent user enumeration
-
-### Local Security
-- PIN-based app lock (optional)
-- WebAuthn biometric authentication (optional)
-- Brute-force protection: 30-minute lockout after 5 failed attempts
-
----
-
-## Local Storage Keys
-
-```typescript
-const STORAGE_KEYS = {
-  SETTINGS: 'hm_settings',
-  HOME_SETTINGS: 'hm_home_settings', 
-  STAFF_SETTINGS: 'hm_staff_settings',
-  PROFILE: 'hm_profile',
-  ACCOUNTS: 'hm_accounts',
-  PEOPLE: 'hm_people',
-  ATTENDANCE: 'hm_attendance',
-  TRANSACTIONS: 'hm_transactions',
-  LAUNDRY: 'hm_laundry',
-  EXPENSES: 'hm_expenses',
-};
-```
-
----
-
-## Technical Stack
-
-### Frontend
-- React 18 with TypeScript
-- Vite (build tool)
-- Tailwind CSS + Shadcn/ui
-- Wouter (routing)
-- TanStack Query v5 (data fetching)
-- Framer Motion (animations)
-- Lucide React + React Icons
-
-### Backend
-- Express.js with TypeScript
-- Drizzle ORM + PostgreSQL
-- Twilio (SMS/OTP)
-- JWT (jsonwebtoken)
-- Bcrypt (password hashing)
-
-### Mobile
-- Capacitor (Android packaging)
-- GitHub Actions (CI/CD)
-
----
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `TWILIO_ACCOUNT_SID` | Twilio account SID |
-| `TWILIO_AUTH_TOKEN` | Twilio auth token |
-| `TWILIO_PHONE_NUMBER` | Twilio phone number for SMS |
-| `ADMIN_DEFAULT_EMAIL` | Default super admin email |
-| `ADMIN_DEFAULT_PASSWORD` | Default super admin password |
-| `JWT_SECRET` | JWT signing secret (has default) |
-
----
-
-## Feature Specifications
-
-### Limitations
-- Soft limit: 1000 total records with warnings
-- Document storage: 5MB per file (resized to max 1920x1920)
-
-### Multi-Language Support
-21 languages: English, Hindi, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Telugu, Tamil, Urdu, Bengali, Odia, Assamese, Spanish, French, German, Arabic, Chinese, Japanese, Portuguese, Russian
-
-### Multi-Currency Support
-27 currencies including INR, USD, EUR, GBP, AUD, CAD, and more.
-
-### Donation Feature
-Optional donations via UPI (India) or PayPal (International) with tiered amounts.
-
----
-
-## Key Screens
-
-### Authentication
-- `AuthScreen`: Unified login/register with phone, password, OTP
-- `ProfileSettingsScreen`: Edit name, change password, change phone
-
-### Home Mode
-- `HomeScreen`: Dashboard with staff overview
-- `PeopleScreen`: Staff management
-- `AttendanceScreen`: Attendance tracking
-- `ExpensesScreen`: Household expenses
-- `SettingsScreen`: App configuration
-
-### Staff Mode
-- `StaffHomeScreen`: Dashboard with earnings
-- `StaffClientHomesScreen`: Client management
-- `StaffAttendanceScreen`: Attendance logging
-- `StaffInvoicesScreen`: Invoice creation
-- `StaffExpensesScreen`: Business expenses
-
-### Collaboration (v2.0)
-- `CollaborationHubScreen`: Connections, messages, shared spaces
-- `NotificationCenterScreen`: All notifications
-- `MessagesTab`: Direct messaging
-
----
-
-## Development Notes
-
-### Running Locally
-```bash
-npm run dev  # Starts Express + Vite on port 5000
-```
-
-### Database Commands
-```bash
-npm run db:push  # Push schema changes
-npm run db:push --force  # Force push (use carefully)
-```
-
-### Code Conventions
-- Use `@/` imports for client components
-- Use `@shared/` imports for shared types
-- Follow existing Shadcn component patterns
-- Add `data-testid` attributes to interactive elements
+- **Database**: PostgreSQL
+- **SMS/OTP Service**: Twilio
+- **Frontend Framework**: React 18 with TypeScript
+- **Backend Framework**: Express.js with TypeScript
+- **ORM**: Drizzle ORM
+- **Real-time Communication**: Socket.IO (client and server)
+- **UI Components**: Tailwind CSS, Shadcn/ui
+- **Routing**: Wouter
+- **Data Fetching**: TanStack Query v5
+- **Animations**: Framer Motion
+- **Icons**: Lucide React, React Icons
+- **Mobile Packaging**: Capacitor (for Android)
+- **CI/CD**: GitHub Actions

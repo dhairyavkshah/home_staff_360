@@ -8,11 +8,57 @@
 
 **Release Date: January 2026**
 
-### Full Release Notes (Developer Log)
+### What's New in Version 2.0
+
+Home Staff 360 is now a **fully live, real-time platform** for household and staff management. This major update transforms the app from a local tool to a connected collaboration platform.
 
 ---
 
+### Highlights
+
+**Live Real-Time Collaboration**
+- Connect with household staff or clients in real-time
+- Instant messaging with message edit and delete (within 5 minutes)
+- Live updates for attendance, laundry, and expenses across all devices
+- Auto-connection system that creates links automatically when adding people
+
+**Enhanced Security**
+- Phone + password authentication with OTP verification
+- Bcrypt password hashing (10 rounds)
+- 30-day JWT tokens with secure session management
+- Optional biometric lock and PIN protection
+
+**Global Reach**
+- 21 languages supported
+- 27 currencies for international users
+- Works worldwide with SMS verification via Twilio
+
+---
+
+### Full Release Notes
+
 #### Major New Features
+
+**Real-Time Messaging System**
+- Direct messaging between connected users
+- Message history with timestamps
+- Edit or delete messages within 5 minutes of sending
+- Mobile-friendly tap-to-reveal actions
+- Desktop hover interactions
+- Push notification support
+
+**Live Collaboration Events**
+- Real-time attendance updates between employers and staff
+- Instant laundry batch approvals and rejections
+- Live expense sharing and approval workflows
+- Socket.IO-powered event broadcasting
+- Dual delivery pattern for reliability
+
+**Auto-Connection System**
+- Automatically creates connection invites when adding staff/clients
+- Pending phone links for users not yet registered
+- Auto-resolves connections when users sign up
+- Seamless onboarding for new connections
 
 **Multi-Tier Admin System**
 - Super Admin role with full system access
@@ -22,7 +68,7 @@
 - Admin dashboard with comprehensive analytics
 - User management interface with search and filtering
 
-**Enhanced Advertising System**
+**Advertising System**
 - Full-screen video ad overlay with Fluent 2 design
 - Skip button appears after 5 seconds of viewing
 - Maximum ad duration: 30 seconds
@@ -30,15 +76,6 @@
 - Click-through tracking for advertisers
 - Admin interface for ad campaign management
 - Comprehensive ad analytics dashboard
-- User-friendly ad experience with non-intrusive timing (~5 min intervals)
-
-**Donation Reminder System**
-- Gentle periodic reminders to support development
-- Multiple donation tiers: Small, Medium, Large, Custom
-- UPI support for Indian users
-- PayPal support for international users
-- Easy dismiss and "remind me later" options
-- Donation tracking and acknowledgment
 
 ---
 
@@ -73,74 +110,33 @@
 
 ---
 
-#### Collaboration Features
-
-**User Connections**
-- Search and connect with other users
-- Connection requests with accept/decline
-- View connection profiles
-- Disconnect option available
-
-**Direct Messaging**
-- Real-time messaging between connections
-- Message history preservation
-- Read receipts and timestamps
-- Push notification support (optional)
-
-**Shared Spaces**
-- Share laundry batches for approval
-- Collaborative editing with revisions
-- Approval workflow with status tracking
-- Sync activity log
-
-**Notifications**
-- Centralized notification center
-- Connection requests
-- Message alerts
-- Approval requests
-- Sync status updates
-
----
-
 #### Localization
 
 **21 Languages Supported**
 - English
-- Hindi (हिन्दी)
-- Gujarati (ગુજરાતી)
-- Kannada (ಕನ್ನಡ)
-- Malayalam (മലയാളം)
-- Marathi (मराठी)
-- Punjabi (ਪੰਜਾਬੀ)
-- Telugu (తెలుగు)
-- Tamil (தமிழ்)
-- Urdu (اردو)
-- Bengali (বাংলা)
-- Odia (ଓଡ଼ିଆ)
-- Assamese (অসমীয়া)
-- Spanish (Español)
-- French (Français)
-- German (Deutsch)
-- Arabic (العربية)
-- Chinese (中文)
-- Japanese (日本語)
-- Portuguese (Português)
-- Russian (Русский)
+- Hindi
+- Gujarati
+- Kannada
+- Malayalam
+- Marathi
+- Punjabi
+- Telugu
+- Tamil
+- Urdu
+- Bengali
+- Odia
+- Assamese
+- Spanish
+- French
+- German
+- Arabic
+- Chinese
+- Japanese
+- Portuguese
+- Russian
 
 **27 Currencies Supported**
 INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, KRW, BRL, MXN, ZAR, RUB, TRY, CHF, SEK, NOK, DKK, NZD
-
----
-
-#### Security Improvements
-
-- Enhanced rate limiting across all endpoints
-- Generic error messages to prevent user enumeration
-- Improved input validation and sanitization
-- Secure OTP handling with automatic expiry
-- Brute-force protection with 30-minute lockout after 5 failed attempts
-- WebAuthn biometric authentication support
-- PIN-based app lock with secure storage
 
 ---
 
@@ -152,6 +148,7 @@ INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, 
 - Better accessibility support
 - Responsive layout improvements
 - Enhanced form validation feedback
+- Mobile-friendly message actions (tap to reveal)
 
 ---
 
@@ -160,9 +157,10 @@ INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, 
 - Fixed attendance calendar sync issues
 - Resolved payment calculation edge cases
 - Fixed laundry batch duplicate prevention
-- Improved offline data persistence
+- Improved data persistence reliability
 - Fixed currency formatting inconsistencies
 - Resolved notification delivery delays
+- Fixed branding consistency (Home Staff 360)
 
 ---
 
@@ -170,6 +168,7 @@ INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, 
 
 - Upgraded to React 18
 - TanStack Query v5 for data fetching
+- Socket.IO for real-time communication
 - Improved TypeScript coverage
 - Better error handling and logging
 - Optimized database queries
@@ -180,36 +179,34 @@ INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, 
 ### Google Play Console Format (500 characters max)
 
 ```
-Version 2.0 - Major Update!
+Version 2.0 - Now Live & Real-Time!
 
-NEW FEATURES:
-- Phone + password authentication with OTP verification
-- Connect with other users & send messages
-- Share laundry batches for approval
-- Multi-tier admin system
+MAJOR UPDATE:
+- Live real-time collaboration with staff and clients
+- Instant messaging with edit/delete support
+- Auto-connect when adding new people
+- Phone + password secure authentication
 
-IMPROVEMENTS:
-- 21 languages now supported
-- Enhanced security with biometric lock
-- Better dark mode
-- Smoother performance
+FEATURES:
+- 21 languages supported
+- Enhanced biometric security
+- Beautiful Fluent 2 design
+- Smoother dark mode
 
-Plus: Optional donation reminders to support development
-
-Update now for the best experience!
+Connect and collaborate with your household team instantly!
 ```
 
-**Character Count: 456**
+**Character Count: 438**
 
 ---
 
 ### Short What's New (150 characters)
 
 ```
-v2.0: Phone auth, user connections, messaging, shared spaces, 21 languages, enhanced security, and more!
+v2.0: Live real-time collaboration! Instant messaging, auto-connections, 21 languages, enhanced security. Manage staff together!
 ```
 
-**Character Count: 105**
+**Character Count: 129**
 
 ---
 
@@ -217,10 +214,10 @@ v2.0: Phone auth, user connections, messaging, shared spaces, 21 languages, enha
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| 2.0.0 | Jan 2026 | Phone auth, collaboration, 21 languages |
+| 2.0.0 | Jan 2026 | Live real-time platform, collaboration, messaging |
 | 1.5.0 | - | Staff mode, invoices, multi-currency |
 | 1.0.0 | - | Initial release, basic features |
 
 ---
 
-*Home Staff 360 - Crafted with care by The Team 360*
+*Last Updated: January 7, 2026*
