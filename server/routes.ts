@@ -2815,6 +2815,71 @@ router.get("/api/chats", authenticateToken, async (req: Request, res: Response) 
   }
 });
 
+// Get single chat info
+router.get("/api/chats/:chatId", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { chatId } = req.params;
+
+    // Verify user is a participant
+    const participation = await db.query.chatParticipants.findFirst({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        eq(chatParticipants.userId, userId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+
+    if (!participation) {
+      return res.status(403).json({ error: "Not a participant of this chat" });
+    }
+
+    const chat = await db.query.collabChats.findFirst({
+      where: eq(collabChats.id, chatId)
+    });
+
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+
+    // Get other participants
+    const allParticipants = await db.query.chatParticipants.findMany({
+      where: eq(chatParticipants.chatId, chatId)
+    });
+
+    const otherParticipants = await Promise.all(
+      allParticipants
+        .filter(p => p.userId !== userId)
+        .map(async (p) => {
+          const user = await db.query.serverUsers.findFirst({
+            where: eq(serverUsers.id, p.userId)
+          });
+          return {
+            userId: p.userId,
+            displayName: user?.displayName,
+            mode: p.userMode
+          };
+        })
+    );
+
+    res.json({
+      chat: {
+        id: chat.id,
+        type: chat.type,
+        name: chat.name,
+        connectionId: chat.connectionId,
+        lastMessageAt: chat.lastMessageAt,
+        lastMessagePreview: chat.lastMessagePreview,
+        participants: otherParticipants,
+        isMuted: participation.isMuted || false
+      }
+    });
+  } catch (error) {
+    console.error("Get chat error:", error);
+    res.status(500).json({ error: "Failed to get chat" });
+  }
+});
+
 // Get messages for a chat
 router.get("/api/chats/:chatId/messages", authenticateToken, async (req: Request, res: Response) => {
   try {

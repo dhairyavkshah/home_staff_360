@@ -74,6 +74,7 @@ import { LinkAccountScreen } from "@/screens/collaboration/LinkAccountScreen";
 import { SyncActivityScreen } from "@/screens/collaboration/SyncActivityScreen";
 import { NotificationCenterScreen } from "@/screens/collaboration/NotificationCenterScreen";
 import { ApprovalDetailScreen } from "@/screens/collaboration/ApprovalDetailScreen";
+import { ChatScreen } from "@/screens/collaboration/ChatScreen";
 import { AuthScreen } from "@/screens/auth/AuthScreen";
 import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
 import { AdOverlay } from "@/components/AdOverlay";
@@ -204,6 +205,8 @@ function MobileAppRouter() {
       return <NotificationCenterScreen />;
     case "approval-detail":
       return <ApprovalDetailScreen />;
+    case "chat":
+      return <ChatScreen />;
     case "auth":
       return <AuthScreen />;
     case "profile-settings":
