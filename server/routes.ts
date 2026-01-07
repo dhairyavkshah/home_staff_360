@@ -91,15 +91,26 @@ const PhoneNumberFormat = libphonenumber.PhoneNumberFormat;
 
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || "homestaff360-secret-key";
+const JWT_SECRET: string = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("CRITICAL: JWT_SECRET environment variable is required for security. Please set it in your environment.");
+  }
+  return secret;
+})();
 const OTP_EXPIRY_MINUTES = 30;
 const MAX_OTP_ATTEMPTS_PER_HOUR = 5;
 const OTP_COOLDOWN_SECONDS = 60;
 
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+// Twilio client - gracefully handle missing credentials
+const TWILIO_ENABLED = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER);
+const twilioClient = TWILIO_ENABLED 
+  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+  : null;
+
+if (!TWILIO_ENABLED) {
+  console.warn("[WARNING] Twilio credentials not configured. SMS functionality disabled. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER in environment.");
+}
 
 const phoneUtil = PhoneNumberUtil.getInstance();
 
@@ -378,12 +389,12 @@ router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
       .where(eq(serverUsers.id, user.id));
 
     let smsSent = false;
-    if (process.env.TWILIO_PHONE_NUMBER && process.env.TWILIO_ACCOUNT_SID) {
+    if (TWILIO_ENABLED && twilioClient) {
       try {
         await twilioClient.messages.create({
           body: `Your OTP for phone number verification is: ${otp} (Note: Please keep it valid only for ${OTP_EXPIRY_MINUTES} minutes.)`,
           to: normalizedPhone,
-          from: process.env.TWILIO_PHONE_NUMBER
+          from: process.env.TWILIO_PHONE_NUMBER!
         });
         smsSent = true;
       } catch (smsError) {
@@ -704,12 +715,12 @@ router.post("/api/auth/forgot-password", async (req: Request, res: Response) => 
       })
       .where(eq(serverUsers.id, user.id));
 
-    if (process.env.TWILIO_PHONE_NUMBER && process.env.TWILIO_ACCOUNT_SID) {
+    if (TWILIO_ENABLED && twilioClient) {
       try {
         await twilioClient.messages.create({
           body: `Your password reset code is: ${otp} (Valid for ${PASSWORD_RESET_OTP_EXPIRY_MINUTES} minutes only)`,
           to: normalizedPhone,
-          from: process.env.TWILIO_PHONE_NUMBER
+          from: process.env.TWILIO_PHONE_NUMBER!
         });
       } catch (smsError) {
         console.error("SMS sending failed:", smsError);
@@ -1050,16 +1061,15 @@ router.post("/api/user/phone/request-change", authenticateToken, async (req: Req
     });
 
     // Send OTP via Twilio
-    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+    if (TWILIO_ENABLED && twilioClient) {
       try {
         await twilioClient.messages.create({
           body: `Your Home Staff 360 phone change verification code is: ${otp}. This code will expire in 10 minutes.`,
-          from: process.env.TWILIO_PHONE_NUMBER,
+          from: process.env.TWILIO_PHONE_NUMBER!,
           to: normalizedNewPhone
         });
       } catch (twilioError: any) {
         console.error("Twilio error:", twilioError);
-        // In dev mode, log OTP even if Twilio fails
         if (process.env.NODE_ENV === "development") {
           console.log(`[DEV] Phone change OTP for ${normalizedNewPhone}: ${otp}`);
         }
@@ -7463,8 +7473,8 @@ router.post("/api/invitations/send", authenticateToken, async (req: Request, res
       : `Hi! ${inviterName} has invited you to join Home Staff 360, a household management app. Download now: ${appLink}`;
 
     let smsSent = false;
-    if (process.env.TWILIO_PHONE_NUMBER && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-      const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+    if (TWILIO_ENABLED && twilioClient) {
+      const twilioPhone = process.env.TWILIO_PHONE_NUMBER!;
       const maskedTwilioPhone = twilioPhone.length > 8 
         ? `${twilioPhone.slice(0, 4)}****${twilioPhone.slice(-4)}`
         : '****';
@@ -7498,10 +7508,7 @@ router.post("/api/invitations/send", authenticateToken, async (req: Request, res
         }
       }
     } else {
-      console.log(`[SMS Invite] Twilio not configured - missing credentials`);
-      console.log(`  - TWILIO_PHONE_NUMBER: ${process.env.TWILIO_PHONE_NUMBER ? 'set' : 'missing'}`);
-      console.log(`  - TWILIO_ACCOUNT_SID: ${process.env.TWILIO_ACCOUNT_SID ? 'set' : 'missing'}`);
-      console.log(`  - TWILIO_AUTH_TOKEN: ${process.env.TWILIO_AUTH_TOKEN ? 'set' : 'missing'}`);
+      console.log(`[SMS Invite] Twilio not configured - SMS disabled`);
     }
 
     await db.insert(userInvitations).values({

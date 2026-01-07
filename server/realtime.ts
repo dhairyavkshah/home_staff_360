@@ -2,7 +2,13 @@ import { Server as SocketIOServer, Socket } from "socket.io";
 import { Server as HTTPServer } from "http";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "homestaff360-secret-key";
+const JWT_SECRET: string = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("CRITICAL: JWT_SECRET environment variable is required for security. Please set it in your environment.");
+  }
+  return secret;
+})();
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
