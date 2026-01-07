@@ -1446,11 +1446,16 @@ export type ChatParticipant = typeof chatParticipants.$inferSelect;
 export const messageStatuses = ['pending', 'sent', 'delivered', 'read', 'failed'] as const;
 export type MessageStatus = typeof messageStatuses[number];
 
+export const messageTypes = ['text', 'attachment', 'link', 'location', 'contact'] as const;
+export type MessageType = typeof messageTypes[number];
+
 export const chatMessages = pgTable("chat_messages", {
   id: varchar("id", { length: 255 }).primaryKey(),
   chatId: varchar("chat_id", { length: 255 }).references(() => collabChats.id).notNull(),
   senderId: varchar("sender_id", { length: 255 }).references(() => serverUsers.id).notNull(),
   senderMode: varchar("sender_mode", { length: 10 }).notNull(),
+  // Message type
+  messageType: varchar("message_type", { length: 20 }).default('text').notNull(),
   // Message content
   content: text("content").notNull(),
   // Status
@@ -1459,6 +1464,9 @@ export const chatMessages = pgTable("chat_messages", {
   clientMessageId: varchar("client_message_id", { length: 255 }),
   // Reply reference
   replyToId: varchar("reply_to_id", { length: 255 }),
+  // Edit/Delete window (5 minutes from creation)
+  editableUntil: timestamp("editable_until"),
+  isDeleted: boolean("is_deleted").default(false),
   // Timestamps
   createdAt: timestamp("created_at").defaultNow().notNull(),
   editedAt: timestamp("edited_at"),
@@ -1486,13 +1494,104 @@ export const insertChatMessageSchema = z.object({
   chatId: z.string().max(255),
   senderId: z.string().max(255),
   senderMode: z.enum(userTypes),
+  messageType: z.enum(messageTypes).optional(),
   content: z.string(),
   status: z.enum(messageStatuses).optional(),
   clientMessageId: z.string().max(255).optional(),
   replyToId: z.string().max(255).optional(),
+  editableUntil: z.date().optional(),
+  isDeleted: z.boolean().optional(),
 });
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+
+// Chat attachments - files/media attached to messages
+export const chatAttachments = pgTable("chat_attachments", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  messageId: varchar("message_id", { length: 255 }).references(() => chatMessages.id).notNull(),
+  // File information
+  fileName: varchar("file_name", { length: 255 }).notNull(),
+  fileType: varchar("file_type", { length: 50 }).notNull(), // jpg, pdf, png, etc.
+  mimeType: varchar("mime_type", { length: 100 }).notNull(),
+  fileSize: integer("file_size").notNull(), // in bytes
+  // Storage
+  storageKey: varchar("storage_key", { length: 500 }).notNull(), // path or URL
+  thumbnailKey: varchar("thumbnail_key", { length: 500 }), // for images
+  // For special types
+  locationData: jsonb("location_data"), // {lat, lng, name, address}
+  contactData: jsonb("contact_data"), // {name, phone, email}
+  linkData: jsonb("link_data"), // {url, title, description, image}
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const chatAttachmentsRelations = relations(chatAttachments, ({ one }) => ({
+  message: one(chatMessages, {
+    fields: [chatAttachments.messageId],
+    references: [chatMessages.id],
+  }),
+}));
+
+export const insertChatAttachmentSchema = z.object({
+  id: z.string().max(255),
+  messageId: z.string().max(255),
+  fileName: z.string().max(255),
+  fileType: z.string().max(50),
+  mimeType: z.string().max(100),
+  fileSize: z.number(),
+  storageKey: z.string().max(500),
+  thumbnailKey: z.string().max(500).optional(),
+  locationData: z.any().optional(),
+  contactData: z.any().optional(),
+  linkData: z.any().optional(),
+});
+export type InsertChatAttachment = z.infer<typeof insertChatAttachmentSchema>;
+export type ChatAttachment = typeof chatAttachments.$inferSelect;
+
+// Pending phone links - for auto-connections when user registers
+export const pendingPhoneLinks = pgTable("pending_phone_links", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  // Who created this link
+  creatorId: varchar("creator_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  creatorMode: varchar("creator_mode", { length: 10 }).notNull(),
+  // Target phone (normalized)
+  targetPhone: varchar("target_phone", { length: 20 }).notNull(),
+  // What type of entity they added (staff person or client home)
+  entityType: varchar("entity_type", { length: 20 }).notNull(), // 'staff' or 'client'
+  entityId: varchar("entity_id", { length: 255 }).notNull(), // local person ID or client home ID
+  entityName: varchar("entity_name", { length: 100 }),
+  // Status
+  isResolved: boolean("is_resolved").default(false),
+  resolvedUserId: varchar("resolved_user_id", { length: 255 }).references(() => serverUsers.id),
+  resolvedAt: timestamp("resolved_at"),
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const pendingPhoneLinksRelations = relations(pendingPhoneLinks, ({ one }) => ({
+  creator: one(serverUsers, {
+    fields: [pendingPhoneLinks.creatorId],
+    references: [serverUsers.id],
+    relationName: "pendingLinkCreator",
+  }),
+  resolvedUser: one(serverUsers, {
+    fields: [pendingPhoneLinks.resolvedUserId],
+    references: [serverUsers.id],
+    relationName: "pendingLinkResolved",
+  }),
+}));
+
+export const insertPendingPhoneLinkSchema = z.object({
+  id: z.string().max(255),
+  creatorId: z.string().max(255),
+  creatorMode: z.enum(userTypes),
+  targetPhone: z.string().max(20),
+  entityType: z.enum(['staff', 'client']),
+  entityId: z.string().max(255),
+  entityName: z.string().max(100).optional(),
+});
+export type InsertPendingPhoneLink = z.infer<typeof insertPendingPhoneLinkSchema>;
+export type PendingPhoneLink = typeof pendingPhoneLinks.$inferSelect;
 
 // ============================================
 // Shared Spaces (Household/Business Groups)
