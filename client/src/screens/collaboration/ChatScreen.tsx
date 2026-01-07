@@ -6,7 +6,12 @@ import {
   MoreVertical,
   Bell,
   BellOff,
+  Paperclip,
+  Edit2,
   Trash2,
+  X,
+  Check,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +26,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Message {
   id: string;
@@ -31,6 +44,10 @@ interface Message {
   content: string;
   isOwn: boolean;
   createdAt: string;
+  editableUntil?: string;
+  isEdited?: boolean;
+  isDeleted?: boolean;
+  editedAt?: string;
 }
 
 interface ChatInfo {
@@ -51,15 +68,30 @@ export function ChatScreen() {
   const { chatId } = useNavigationData<{ chatId?: string }>();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [chatInfo, setChatInfo] = useState<ChatInfo | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  
+  // Edit mode state
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  
+  // Timer for editable messages
+  const [, setTick] = useState(0);
 
   useRealtimeConnection();
   useRealtimeChat(chatId || null);
+
+  // Force re-render every 10 seconds to update edit timer
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleNewMessage = useCallback((message: any) => {
     console.log("[ChatScreen] Received chat:new-message:", message);
@@ -87,8 +119,30 @@ export function ChatScreen() {
     });
   }, [chatId]);
 
+  const handleMessageUpdated = useCallback((data: any) => {
+    console.log("[ChatScreen] Received chat:message-updated:", data);
+    const { messageId, content, editedAt } = data;
+    if (!messageId) return;
+    
+    setMessages((prev) => prev.map((m) => 
+      m.id === messageId ? { ...m, content, isEdited: true, editedAt } : m
+    ));
+  }, []);
+
+  const handleMessageDeleted = useCallback((data: any) => {
+    console.log("[ChatScreen] Received chat:message-deleted:", data);
+    const { messageId } = data;
+    if (!messageId) return;
+    
+    setMessages((prev) => prev.map((m) => 
+      m.id === messageId ? { ...m, isDeleted: true, content: "[This message was deleted]" } : m
+    ));
+  }, []);
+
   useRealtime("chat:new-message", handleNewMessage);
   useRealtime("chat:message-received", handleMessageReceived);
+  useRealtime("chat:message-updated", handleMessageUpdated);
+  useRealtime("chat:message-deleted", handleMessageDeleted);
 
   useEffect(() => {
     if (chatId) {
@@ -170,6 +224,139 @@ export function ChatScreen() {
     }
   };
 
+  const handleEditMessage = (message: Message) => {
+    setEditingMessageId(message.id);
+    setEditContent(message.content);
+    setIsEditDialogOpen(true);
+  };
+
+  const saveEdit = async () => {
+    if (!editingMessageId || !editContent.trim()) return;
+
+    try {
+      await collaborationService.fetchWithAuth(
+        `/chats/${chatId}/messages/${editingMessageId}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ content: editContent.trim() }),
+        }
+      );
+
+      setMessages((prev) => prev.map((m) => 
+        m.id === editingMessageId 
+          ? { ...m, content: editContent.trim(), isEdited: true, editedAt: new Date().toISOString() } 
+          : m
+      ));
+
+      toast({ title: "Message edited" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to edit message",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditDialogOpen(false);
+      setEditingMessageId(null);
+      setEditContent("");
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      await collaborationService.fetchWithAuth(
+        `/chats/${chatId}/messages/${messageId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      setMessages((prev) => prev.map((m) => 
+        m.id === messageId ? { ...m, isDeleted: true, content: "[This message was deleted]" } : m
+      ));
+
+      toast({ title: "Message deleted" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete message",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !chatId) return;
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Maximum file size is 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'image/jpeg', 'image/png', 'image/jpg', 'image/heif', 'image/heic',
+      'application/pdf',
+      'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Unsupported file type",
+        description: "Allowed types: JPG, PNG, PDF, DOC, DOCX, PPT, PPTX, HEIF",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const token = localStorage.getItem('collab_token');
+      const response = await fetch(`/api/chats/${chatId}/attachments`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      if (result.message) {
+        setMessages((prev) => [...prev, { ...result.message, isOwn: true }]);
+      }
+
+      toast({ title: "File sent" });
+    } catch (error) {
+      console.error("Failed to upload file:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send file",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const toggleMute = async () => {
     if (!chatId || !chatInfo) return;
 
@@ -192,6 +379,20 @@ export function ChatScreen() {
         variant: "destructive",
       });
     }
+  };
+
+  const isEditable = (message: Message): boolean => {
+    if (!message.isOwn || message.isDeleted) return false;
+    if (!message.editableUntil) return false;
+    return new Date(message.editableUntil) > new Date();
+  };
+
+  const getRemainingEditTime = (message: Message): string | null => {
+    if (!message.editableUntil) return null;
+    const remaining = new Date(message.editableUntil).getTime() - Date.now();
+    if (remaining <= 0) return null;
+    const minutes = Math.ceil(remaining / 60000);
+    return `${minutes}m left to edit`;
   };
 
   const formatTime = (dateStr: string) => {
@@ -289,29 +490,64 @@ export function ChatScreen() {
               key={message.id}
               className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}
             >
-              <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                  message.isOwn
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}
-                data-testid={`message-${message.id}`}
-              >
-                {!message.isOwn && message.senderName && (
-                  <p className="text-xs font-medium mb-1 opacity-70">
-                    {message.senderName}
-                  </p>
-                )}
-                <p className="text-sm whitespace-pre-wrap break-words">
-                  {message.content}
-                </p>
-                <p
-                  className={`text-xs mt-1 ${
-                    message.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+              <div className="relative group max-w-[80%]">
+                <div
+                  className={`rounded-2xl px-4 py-2 ${
+                    message.isDeleted
+                      ? "bg-muted/50 italic"
+                      : message.isOwn
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
                   }`}
+                  data-testid={`message-${message.id}`}
                 >
-                  {formatTime(message.createdAt)}
-                </p>
+                  {!message.isOwn && message.senderName && !message.isDeleted && (
+                    <p className="text-xs font-medium mb-1 opacity-70">
+                      {message.senderName}
+                    </p>
+                  )}
+                  <p className="text-sm whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
+                  <div className={`flex items-center gap-2 mt-1 ${
+                    message.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+                  }`}>
+                    <span className="text-xs">{formatTime(message.createdAt)}</span>
+                    {message.isEdited && !message.isDeleted && (
+                      <span className="text-xs italic">edited</span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Edit/Delete buttons for own editable messages */}
+                {isEditable(message) && (
+                  <div className="absolute -top-8 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-background border rounded-md shadow-sm p-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => handleEditMessage(message)}
+                      data-testid={`button-edit-${message.id}`}
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6 text-destructive"
+                      onClick={() => handleDeleteMessage(message.id)}
+                      data-testid={`button-delete-${message.id}`}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                    {getRemainingEditTime(message) && (
+                      <span className="text-xs text-muted-foreground px-1 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {getRemainingEditTime(message)}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))
@@ -327,6 +563,23 @@ export function ChatScreen() {
           }}
           className="flex gap-2"
         >
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            className="hidden"
+            accept=".jpg,.jpeg,.png,.heif,.heic,.pdf,.doc,.docx,.ppt,.pptx"
+          />
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={handleAttachmentClick}
+            disabled={isSending}
+            data-testid="button-attach"
+          >
+            <Paperclip className="w-4 h-4" />
+          </Button>
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -349,6 +602,40 @@ export function ChatScreen() {
           </Button>
         </form>
       </div>
+
+      {/* Edit Message Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Message</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            placeholder="Edit your message..."
+            className="min-h-[100px]"
+            data-testid="input-edit-message"
+          />
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+              data-testid="button-cancel-edit"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Cancel
+            </Button>
+            <Button
+              onClick={saveEdit}
+              disabled={!editContent.trim()}
+              data-testid="button-save-edit"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

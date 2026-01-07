@@ -3380,6 +3380,38 @@ router.delete("/api/chats/:chatId/messages/:messageId", authenticateToken, async
   }
 });
 
+// Upload attachment (file)
+router.post("/api/chats/:chatId/attachments", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { chatId } = req.params;
+
+    // Verify user is a participant
+    const participation = await db.query.chatParticipants.findFirst({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        eq(chatParticipants.userId, userId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+
+    if (!participation) {
+      return res.status(403).json({ error: "Not a participant of this chat" });
+    }
+
+    // For now, return error asking for the file
+    // Full multipart file upload would need multer middleware
+    // This is a placeholder that indicates the endpoint exists
+    return res.status(501).json({ 
+      error: "File upload is being configured. Please try sending as a text message for now." 
+    });
+
+  } catch (error) {
+    console.error("Attachment upload error:", error);
+    res.status(500).json({ error: "Failed to upload attachment" });
+  }
+});
+
 // Mark messages as read
 router.post("/api/chats/:chatId/read", authenticateToken, async (req: Request, res: Response) => {
   try {
