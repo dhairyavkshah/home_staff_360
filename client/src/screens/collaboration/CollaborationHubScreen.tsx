@@ -33,19 +33,24 @@ import { ConnectionsTab } from "./ConnectionsTab";
 import { MessagesTab } from "./MessagesTab";
 import { SharedSpacesTab } from "./SharedSpacesTab";
 import { useAutoSync } from "@/hooks/useAutoSync";
+import { useRealtimeContext } from "@/lib/realtime-provider";
+import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
 
 export function CollaborationHubScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
   const { t } = useTranslation();
   const autoSync = useAutoSync();
+  const { isConnected, unreadNotificationCount, unreadMessageCount } = useRealtimeContext();
+
+  useRealtimeConnection();
 
   const [activeTab, setActiveTab] = useState("connections");
   const [links, setLinks] = useState<CollaborationLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<
     "connected" | "disconnected" | "connecting"
-  >("disconnected");
+  >(isConnected ? "connected" : "disconnected");
 
   const profile = useMemo(() => storage.getProfile(), []);
   const isHome = profile?.type === "HOME";
@@ -65,6 +70,17 @@ export function CollaborationHubScreen() {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+
+  useEffect(() => {
+    setConnectionStatus(isConnected ? "connected" : "disconnected");
+  }, [isConnected]);
+
+  const handleNewInvite = () => {
+    loadLinks();
+  };
+
+  useRealtime("connections:invite-received", handleNewInvite);
+  useRealtime("connections:status-changed", handleNewInvite);
 
   const updateConnectionStatus = () => {
     setConnectionStatus(collaborationService.getConnectionStatus());

@@ -81,8 +81,8 @@ import { AdOverlay } from "@/components/AdOverlay";
 import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { useAds } from "@/hooks/useAds";
 import { useDonationReminder } from "@/hooks/useDonationReminder";
-import { useNotificationAlerts } from "@/hooks/use-notification-alerts";
 import { useTranslation } from "@/lib/i18n/i18n-context";
+import { RealtimeProvider } from "@/lib/realtime-provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -225,11 +225,6 @@ function AdManager() {
   return <AdOverlay ad={currentAd} onClose={dismissAd} />;
 }
 
-function NotificationAlertsManager() {
-  useNotificationAlerts();
-  return null;
-}
-
 function DonationReminderDialog() {
   const { shouldShowReminder, dismissReminder } = useDonationReminder();
   const { t } = useTranslation();
@@ -279,16 +274,17 @@ function MobileAppWithSplash() {
 
   return (
     <NavigationProvider>
-      <DirtyTrackingProvider>
-        <GuidedTourProvider>
-          <MaintenanceBanner />
-          <MobileAppRouter />
-          <AdManager />
-          <NotificationAlertsManager />
-          <DonationReminderDialog />
-          <Toaster />
-        </GuidedTourProvider>
-      </DirtyTrackingProvider>
+      <RealtimeProvider>
+        <DirtyTrackingProvider>
+          <GuidedTourProvider>
+            <MaintenanceBanner />
+            <MobileAppRouter />
+            <AdManager />
+            <DonationReminderDialog />
+            <Toaster />
+          </GuidedTourProvider>
+        </DirtyTrackingProvider>
+      </RealtimeProvider>
     </NavigationProvider>
   );
 }

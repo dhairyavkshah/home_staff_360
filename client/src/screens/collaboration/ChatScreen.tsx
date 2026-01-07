@@ -62,11 +62,13 @@ export function ChatScreen() {
   useRealtimeChat(chatId || null);
 
   const handleNewMessage = useCallback((message: any) => {
-    if (message.chatId !== chatId) return;
+    const messageChatId = String(message.chatId);
+    if (messageChatId !== chatId) return;
     
     setMessages((prev) => {
-      if (prev.some((m) => m.id === message.id)) return prev;
-      return [...prev, { ...message, isOwn: false }];
+      const messageId = String(message.id);
+      if (prev.some((m) => m.id === messageId)) return prev;
+      return [...prev, { ...message, id: messageId, chatId: messageChatId, isOwn: false }];
     });
   }, [chatId]);
 

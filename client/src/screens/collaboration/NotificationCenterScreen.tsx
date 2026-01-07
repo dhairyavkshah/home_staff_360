@@ -10,11 +10,13 @@ import { storage } from "@/lib/storage";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
+import { useRealtimeContext } from "@/lib/realtime-provider";
 
 export function NotificationCenterScreen() {
   const { navigate, goBack } = useNavigation();
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { setNotificationCount, decrementNotificationCount } = useRealtimeContext();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +60,7 @@ export function NotificationCenterScreen() {
       const result = await collaborationService.getNotifications(currentMode as "HOME" | "STAFF");
       setNotifications(result.notifications);
       setUnreadCount(result.unreadCount);
+      setNotificationCount(result.unreadCount);
     } catch (err) {
       console.error("Failed to load notifications:", err);
       setError("Failed to load notifications");
@@ -71,6 +74,7 @@ export function NotificationCenterScreen() {
       await collaborationService.markAllNotificationsRead(currentMode as "HOME" | "STAFF");
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
+      setNotificationCount(0);
       toast({
         title: "All notifications marked as read",
       });
@@ -91,6 +95,7 @@ export function NotificationCenterScreen() {
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
       if (deletedNotification && !deletedNotification.isRead) {
         setUnreadCount(prev => Math.max(0, prev - 1));
+        decrementNotificationCount();
       }
       toast({
         title: "Notification dismissed",
@@ -134,24 +139,34 @@ export function NotificationCenterScreen() {
           prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
         );
         setUnreadCount(prev => Math.max(0, prev - 1));
+        decrementNotificationCount();
       } catch (err) {
         console.error("Failed to mark notification as read:", err);
       }
     }
 
-    // Navigate to approval detail for attendance/laundry notifications
-    if (notification.entityType === "attendance" && notification.entityId) {
+    const type = notification.type;
+    const entityType = notification.entityType;
+    const entityId = notification.entityId;
+
+    if (entityType === "attendance" && entityId) {
       navigate("approval-detail", { 
         entityType: "attendance", 
-        entityId: notification.entityId,
-        notificationType: notification.type
+        entityId: entityId,
+        notificationType: type
       });
-    } else if (notification.entityType === "laundry" && notification.entityId) {
+    } else if (entityType === "laundry" && entityId) {
       navigate("approval-detail", {
         entityType: "laundry",
-        entityId: notification.entityId,
-        notificationType: notification.type
+        entityId: entityId,
+        notificationType: type
       });
+    } else if (type === "connection_request" || type === "connection_accepted" || type === "connection_rejected") {
+      navigate("collaboration-hub");
+    } else if (type === "chat_message" && entityId) {
+      navigate("chat", { chatId: entityId });
+    } else if (type === "binding_created") {
+      navigate("collaboration-hub");
     }
   }
 

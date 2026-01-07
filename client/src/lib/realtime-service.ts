@@ -15,12 +15,13 @@ class RealtimeService {
   private listenersSetup = false;
 
   connect(token: string): Promise<void> {
-    this.connectionRefCount++;
     this.currentToken = token;
     
     if (this.socket?.connected) {
       return Promise.resolve();
     }
+
+    this.connectionRefCount++;
 
     if (this.isConnecting && this.connectionPromise) {
       return this.connectionPromise;
@@ -64,10 +65,8 @@ class RealtimeService {
         console.log("[Realtime] Disconnected:", reason);
       });
 
-      if (!this.listenersSetup) {
-        this.setupEventListeners();
-        this.listenersSetup = true;
-      }
+      this.setupEventListeners();
+      this.listenersSetup = true;
     });
 
     return this.connectionPromise;
