@@ -74,7 +74,8 @@ import {
   systemBackups,
   insertSystemBackupSchema,
   systemBackupStatuses,
-  userInvitations
+  userInvitations,
+  pendingPhoneLinks
 } from "@shared/schema";
 import { eq, and, or, desc, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -458,6 +459,12 @@ router.post("/api/auth/verify-otp", async (req: Request, res: Response) => {
         lastActiveAt: new Date()
       })
       .where(eq(serverUsers.id, user.id));
+
+    // Resolve any pending phone links for this user (auto-connections)
+    const resolvedLinks = await resolvePendingPhoneLinks(user.id, user.phone);
+    if (resolvedLinks > 0) {
+      console.log(`[Auth] Resolved ${resolvedLinks} pending connection(s) for user ${user.id}`);
+    }
 
     const token = jwt.sign(
       { userId: user.id, phone: user.phone },
@@ -7502,6 +7509,286 @@ router.post("/api/connections/request", authenticateToken, async (req: Request, 
     res.status(500).json({ error: "Failed to send connection request" });
   }
 });
+
+// POST /api/connections/auto-connect - Auto-connect by phone number (creates pending link if user doesn't exist)
+router.post("/api/connections/auto-connect", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { phone, personName, role, message } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ error: "Phone number is required" });
+    }
+
+    // Normalize phone number
+    const phoneUtil = PhoneNumberUtil.getInstance();
+    let normalizedPhone: string;
+    try {
+      const parsed = phoneUtil.parseAndKeepRawInput(phone, "IN");
+      normalizedPhone = phoneUtil.format(parsed, PhoneNumberFormat.E164);
+    } catch {
+      normalizedPhone = phone.replace(/[^\d+]/g, '');
+      if (!normalizedPhone.startsWith('+')) {
+        normalizedPhone = '+91' + normalizedPhone;
+      }
+    }
+
+    const currentUser = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ error: "Current user not found" });
+    }
+
+    // Check if target user exists
+    const targetUser = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.phone, normalizedPhone)
+    });
+
+    if (targetUser) {
+      // Check if connection already exists
+      const existingConnection = await db.query.collabConnections.findFirst({
+        where: or(
+          and(
+            eq(collabConnections.userAId, userId),
+            eq(collabConnections.userBId, targetUser.id)
+          ),
+          and(
+            eq(collabConnections.userAId, targetUser.id),
+            eq(collabConnections.userBId, userId)
+          )
+        )
+      });
+
+      if (existingConnection) {
+        return res.json({ 
+          success: true, 
+          status: 'already_connected',
+          connectionId: existingConnection.id
+        });
+      }
+
+      // Check for pending invite
+      const pendingInvite = await db.query.collabConnectionInvites.findFirst({
+        where: and(
+          eq(collabConnectionInvites.senderId, userId),
+          eq(collabConnectionInvites.targetUserId, targetUser.id),
+          eq(collabConnectionInvites.status, 'pending')
+        )
+      });
+
+      if (pendingInvite) {
+        return res.json({ 
+          success: true, 
+          status: 'invite_pending',
+          inviteId: pendingInvite.id
+        });
+      }
+
+      // Create connection invite
+      const connectionInviteId = uuidv4();
+      const currentUserMode = currentUser.userType || 'HOME';
+
+      await db.insert(collabConnectionInvites).values({
+        id: connectionInviteId,
+        senderId: userId,
+        senderMode: currentUserMode,
+        targetPhone: normalizedPhone,
+        targetPhoneNormalized: normalizedPhone,
+        targetUserId: targetUser.id,
+        status: 'pending',
+        message: message || `Hi! I've added you as ${personName || 'a contact'} (${role || 'connection'}) in my app.`
+      });
+
+      // Create notification for target user
+      const notificationId = uuidv4();
+      const targetUserMode = targetUser.userType || 'HOME';
+      const createdAt = new Date();
+      
+      await db.insert(notifications).values({
+        id: notificationId,
+        userId: targetUser.id,
+        userMode: targetUserMode,
+        category: 'collaboration',
+        type: 'connection_request',
+        title: 'New Connection Request',
+        message: `${currentUser.displayName || 'Someone'} wants to connect with you`,
+        entityType: 'connection_invite',
+        entityId: connectionInviteId,
+        payload: JSON.stringify({ senderId: userId, senderName: currentUser.displayName, role, personName }),
+        actionRequired: true,
+        actionType: 'approve',
+        createdAt
+      });
+
+      emitConnectionInvite(targetUser.id, {
+        id: connectionInviteId,
+        senderId: userId,
+        senderName: currentUser.displayName,
+        senderMode: currentUserMode,
+        message,
+        status: 'pending',
+        createdAt
+      });
+
+      emitNotification(targetUser.id, {
+        id: notificationId,
+        userId: targetUser.id,
+        userMode: targetUserMode,
+        category: 'collaboration',
+        type: 'connection_request',
+        title: 'New Connection Request',
+        message: `${currentUser.displayName || 'Someone'} wants to connect with you`,
+        entityType: 'connection_invite',
+        entityId: connectionInviteId,
+        isRead: false,
+        createdAt
+      });
+
+      return res.json({ 
+        success: true, 
+        status: 'invite_sent',
+        inviteId: connectionInviteId
+      });
+    }
+
+    // User doesn't exist - check for existing pending link
+    const existingPendingLink = await db.query.pendingPhoneLinks.findFirst({
+      where: and(
+        eq(pendingPhoneLinks.creatorId, userId),
+        eq(pendingPhoneLinks.phone, normalizedPhone),
+        eq(pendingPhoneLinks.status, 'pending')
+      )
+    });
+
+    if (existingPendingLink) {
+      return res.json({ 
+        success: true, 
+        status: 'pending_link_exists',
+        pendingLinkId: existingPendingLink.id
+      });
+    }
+
+    // Create pending phone link
+    const pendingLinkId = uuidv4();
+    await db.insert(pendingPhoneLinks).values({
+      id: pendingLinkId,
+      creatorId: userId,
+      phone: normalizedPhone,
+      personName: personName || null,
+      role: role || 'connection',
+      message: message || null,
+      status: 'pending'
+    });
+
+    res.json({ 
+      success: true, 
+      status: 'pending_link_created',
+      pendingLinkId,
+      message: 'Connection will be created when the user registers'
+    });
+  } catch (error) {
+    console.error("Auto-connect error:", error);
+    res.status(500).json({ error: "Failed to auto-connect" });
+  }
+});
+
+// Helper function to resolve pending phone links after user registration
+async function resolvePendingPhoneLinks(newUserId: string, phone: string) {
+  try {
+    // Find all pending links for this phone number
+    const pendingLinks = await db.query.pendingPhoneLinks.findMany({
+      where: and(
+        eq(pendingPhoneLinks.phone, phone),
+        eq(pendingPhoneLinks.status, 'pending')
+      )
+    });
+
+    for (const link of pendingLinks) {
+      const creatorUser = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.id, link.creatorId)
+      });
+
+      if (!creatorUser) continue;
+
+      // Create connection invite
+      const connectionInviteId = uuidv4();
+      const creatorMode = creatorUser.userType || 'HOME';
+
+      await db.insert(collabConnectionInvites).values({
+        id: connectionInviteId,
+        senderId: link.creatorId,
+        senderMode: creatorMode,
+        targetPhone: phone,
+        targetPhoneNormalized: phone,
+        targetUserId: newUserId,
+        status: 'pending',
+        message: link.message || `Hi! I've added you as ${link.personName || 'a contact'} (${link.role || 'connection'}) in my app.`
+      });
+
+      // Mark pending link as resolved
+      await db.update(pendingPhoneLinks)
+        .set({
+          status: 'resolved',
+          resolvedUserId: newUserId,
+          resolvedAt: new Date()
+        })
+        .where(eq(pendingPhoneLinks.id, link.id));
+
+      // Create notification for new user
+      const notificationId = uuidv4();
+      const createdAt = new Date();
+
+      await db.insert(notifications).values({
+        id: notificationId,
+        userId: newUserId,
+        userMode: 'HOME',
+        category: 'collaboration',
+        type: 'connection_request',
+        title: 'New Connection Request',
+        message: `${creatorUser.displayName || 'Someone'} wants to connect with you`,
+        entityType: 'connection_invite',
+        entityId: connectionInviteId,
+        payload: JSON.stringify({ senderId: link.creatorId, senderName: creatorUser.displayName, role: link.role, personName: link.personName }),
+        actionRequired: true,
+        actionType: 'approve',
+        createdAt
+      });
+
+      emitConnectionInvite(newUserId, {
+        id: connectionInviteId,
+        senderId: link.creatorId,
+        senderName: creatorUser.displayName,
+        senderMode: creatorMode,
+        message: link.message,
+        status: 'pending',
+        createdAt
+      });
+
+      emitNotification(newUserId, {
+        id: notificationId,
+        userId: newUserId,
+        userMode: 'HOME',
+        category: 'collaboration',
+        type: 'connection_request',
+        title: 'New Connection Request',
+        message: `${creatorUser.displayName || 'Someone'} wants to connect with you`,
+        entityType: 'connection_invite',
+        entityId: connectionInviteId,
+        isRead: false,
+        createdAt
+      });
+
+      console.log(`[Auto-Connect] Resolved pending link ${link.id} for new user ${newUserId}`);
+    }
+
+    return pendingLinks.length;
+  } catch (error) {
+    console.error("Error resolving pending phone links:", error);
+    return 0;
+  }
+}
 
 async function initializeDefaultAdmin() {
   const defaultEmail = process.env.ADMIN_DEFAULT_EMAIL;
