@@ -575,6 +575,19 @@ router.post("/api/auth/check-phone", async (req: Request, res: Response) => {
   }
 });
 
+// Logout endpoint - invalidates session on server side
+router.post("/api/auth/logout", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    // Clear any server-side session data if needed
+    // For JWT-based auth, the client simply needs to discard the token
+    // This endpoint exists for any future server-side session invalidation
+    res.json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ success: false, error: "Failed to logout" });
+  }
+});
+
 const PASSWORD_RESET_OTP_EXPIRY_MINUTES = 10;
 
 router.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
@@ -858,6 +871,40 @@ router.put("/api/user/password", authenticateToken, async (req: Request, res: Re
   } catch (error) {
     console.error("Change password error:", error);
     res.status(500).json({ error: "Failed to change password" });
+  }
+});
+
+// Verify password (for confirming dangerous actions like clearing data)
+router.post("/api/user/verify-password", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ error: "Password is required" });
+    }
+
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!user.passwordHash) {
+      return res.status(400).json({ error: "No password set for this account" });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: "Incorrect password", success: false });
+    }
+
+    res.json({ success: true, message: "Password verified" });
+  } catch (error) {
+    console.error("Verify password error:", error);
+    res.status(500).json({ error: "Failed to verify password" });
   }
 });
 

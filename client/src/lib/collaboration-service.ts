@@ -531,8 +531,20 @@ class CollaborationService {
     });
   }
 
-  logout() {
+  async logout(): Promise<{ success: boolean }> {
+    try {
+      if (this.token) {
+        await this.apiRequest("/auth/logout", {
+          method: "POST",
+        }).catch(() => {});
+      }
+    } catch {
+    }
+    
     this.clearToken();
+    this.clearSavedCredentials();
+    
+    return { success: true };
   }
 
   async deleteAccount(password: string): Promise<{ 
@@ -599,6 +611,17 @@ class CollaborationService {
     return this.apiRequest("/user/password", {
       method: "PUT",
       body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  }
+
+  async verifyPassword(password: string): Promise<{ 
+    success: boolean; 
+    message?: string;
+    error?: string;
+  }> {
+    return this.apiRequest("/user/verify-password", {
+      method: "POST",
+      body: JSON.stringify({ password }),
     });
   }
 

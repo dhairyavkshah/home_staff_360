@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Database, Trash2, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle, Volume2, Vibrate, MapPin, Link2 } from "lucide-react";
+import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle, Volume2, Vibrate, MapPin, Link2 } from "lucide-react";
 import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
-import { PinConfirmModal } from "@/components/ui/pin-confirm-modal";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
@@ -27,6 +26,7 @@ import { CountrySelector } from "@/components/ui/country-selector";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { CurrencySelector } from "@/components/ui/currency-selector";
 import { notifyCurrencyChange } from "@/hooks/useCurrency";
+import { collaborationService } from "@/lib/collaboration-service";
 
 export function SettingsScreen() {
   const { navigate, goBack } = useNavigation();
@@ -55,11 +55,10 @@ export function SettingsScreen() {
   const [halfDayPercentage, setHalfDayPercentage] = useState(isHome ? homeSettings.halfDayPercentage : 50);
   const [pendingLanguage, setPendingLanguage] = useState<Language>(language);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showClearDataModal, setShowClearDataModal] = useState(false);
-  const [showPinConfirmModal, setShowPinConfirmModal] = useState(false);
   const [showDisablePinModal, setShowDisablePinModal] = useState(false);
   const [showExitCover, setShowExitCover] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const [appMode, setAppMode] = useState<UserType>(profile?.type || "HOME");
   
@@ -193,24 +192,6 @@ export function SettingsScreen() {
     toast({ title: t("settingsSaved") });
   };
 
-  const handleClearData = () => {
-    if (isPinEnabled) {
-      setShowPinConfirmModal(true);
-    } else {
-      setShowClearDataModal(true);
-    }
-  };
-
-  const confirmClearData = () => {
-    storage.clearAllData();
-    toast({ title: "All data cleared" });
-    navigate("role-selection");
-  };
-
-  const handlePinConfirmed = () => {
-    setShowClearDataModal(true);
-  };
-
   const handleTogglePin = () => {
     if (isPinEnabled) {
       setShowDisablePinModal(true);
@@ -227,6 +208,12 @@ export function SettingsScreen() {
 
   const toggleDarkMode = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleLogout = async () => {
+    await collaborationService.logout();
+    toast({ title: t("loggedOut") });
+    navigate("auth");
   };
 
   const handleAppModeSwitch = (mode: UserType) => {
@@ -349,12 +336,12 @@ export function SettingsScreen() {
 
         <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("account")}</h2>
-          <button
-            className="w-full text-left hover-elevate"
-            onClick={() => navigate("profile-settings")}
-            data-testid="button-profile-settings"
-          >
-            <Card className="p-4">
+          <Card className="divide-y">
+            <button
+              className="w-full p-4 text-left hover-elevate"
+              onClick={() => navigate("profile-settings")}
+              data-testid="button-profile-settings"
+            >
               <div className="flex items-center gap-3">
                 <div className="icon-halo-primary w-9 h-9">
                   <User className="w-4.5 h-4.5 text-primary" />
@@ -379,8 +366,25 @@ export function SettingsScreen() {
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>
-            </Card>
-          </button>
+            </button>
+            {collaborationService.isAuthenticated() && (
+              <button
+                className="w-full p-4 text-left hover-elevate"
+                onClick={() => setShowLogoutModal(true)}
+                data-testid="button-logout"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="icon-halo-destructive w-9 h-9">
+                    <LogOut className="w-4.5 h-4.5 text-destructive" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm text-destructive">{t("logout")}</p>
+                    <p className="text-xs text-muted-foreground">{t("logoutDescription")}</p>
+                  </div>
+                </div>
+              </button>
+            )}
+          </Card>
         </section>
 
         <section className="flex flex-col gap-4">
@@ -576,9 +580,9 @@ export function SettingsScreen() {
 
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("dataManagement")}</h2>
-          <Card className="divide-y">
+          <Card className="p-3">
             <button
-              className="w-full p-3 flex items-center gap-3 hover-elevate text-left"
+              className="w-full flex items-center gap-3 hover-elevate text-left"
               onClick={() => navigate("backup")}
               data-testid="button-backup"
             >
@@ -588,19 +592,6 @@ export function SettingsScreen() {
               <div>
                 <p className="font-medium text-sm">{t("backupAndRestore")}</p>
                 <p className="text-xs text-muted-foreground">{t("exportImportData")}</p>
-              </div>
-            </button>
-            <button
-              className="w-full p-3 flex items-center gap-3 hover-elevate text-left"
-              onClick={handleClearData}
-              data-testid="button-clear-data"
-            >
-              <div className="icon-halo-destructive w-9 h-9">
-                <Trash2 className="w-4.5 h-4.5 text-destructive" />
-              </div>
-              <div>
-                <p className="font-medium text-sm text-destructive">{t("clearAllData")}</p>
-                <p className="text-xs text-muted-foreground">{t("deleteEverythingStartFresh")}</p>
               </div>
             </button>
           </Card>
@@ -652,22 +643,6 @@ export function SettingsScreen() {
       </ScrollContent>
 
       <ConfirmModal
-        open={showClearDataModal}
-        onOpenChange={setShowClearDataModal}
-        onConfirm={confirmClearData}
-        title={t("clearAllData")}
-        description="This will permanently delete all your data. This action cannot be undone."
-        confirmText="Clear Everything"
-        variant="destructive"
-      />
-
-      <PinConfirmModal
-        isOpen={showPinConfirmModal}
-        onClose={() => setShowPinConfirmModal(false)}
-        onConfirm={handlePinConfirmed}
-      />
-
-      <ConfirmModal
         open={showDisablePinModal}
         onOpenChange={setShowDisablePinModal}
         onConfirm={handleDisablePin}
@@ -690,6 +665,16 @@ export function SettingsScreen() {
         confirmText="Save"
         cancelText="Discard"
         onCancel={handleDiscardChanges}
+      />
+
+      <ConfirmModal
+        open={showLogoutModal}
+        onOpenChange={setShowLogoutModal}
+        onConfirm={handleLogout}
+        title={t("logoutConfirmTitle")}
+        description={t("logoutConfirmDescription")}
+        confirmText={t("logout")}
+        variant="destructive"
       />
 
       <ExitCoverScreen 

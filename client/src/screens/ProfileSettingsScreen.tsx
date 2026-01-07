@@ -23,8 +23,9 @@ import { useNavigation } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
 import { useTranslation } from "@/lib/i18n/i18n-context";
+import { storage } from "@/lib/storage";
 
-type ProfileStep = "view" | "edit-name" | "change-password" | "change-phone" | "verify-phone" | "delete-account";
+type ProfileStep = "view" | "edit-name" | "change-password" | "change-phone" | "verify-phone" | "clear-all-data" | "delete-account";
 
 export function ProfileSettingsScreen() {
   const { navigate, goBack } = useNavigation();
@@ -60,6 +61,9 @@ export function ProfileSettingsScreen() {
 
   // Delete account form
   const [deletePassword, setDeletePassword] = useState("");
+
+  // Clear all data form
+  const [clearDataPassword, setClearDataPassword] = useState("");
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -107,6 +111,7 @@ export function ProfileSettingsScreen() {
       setPhonePassword("");
       setOtp("");
       setDeletePassword("");
+      setClearDataPassword("");
     } else {
       navigate("settings");
     }
@@ -293,12 +298,51 @@ export function ProfileSettingsScreen() {
     }
   };
 
+  const handleClearAllData = async () => {
+    if (!clearDataPassword) {
+      toast({
+        title: t("error"),
+        description: t("clearAllDataPasswordRequired"),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await collaborationService.verifyPassword(clearDataPassword);
+      if (result.success) {
+        storage.clearAllData();
+        toast({
+          title: t("clearAllDataSuccess"),
+          description: t("clearAllDataSuccessDescription"),
+        });
+        navigate("role-selection");
+      } else {
+        toast({
+          title: t("error"),
+          description: t("incorrectPassword"),
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: t("error"),
+        description: error.message || t("clearAllDataFailed"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getTitle = () => {
     switch (step) {
       case "edit-name": return "Edit Name";
       case "change-password": return "Change Password";
       case "change-phone": return "Change Phone Number";
       case "verify-phone": return "Verify New Phone";
+      case "clear-all-data": return t("clearAllData");
       case "delete-account": return "Delete Account";
       default: return "Profile";
     }
@@ -380,10 +424,29 @@ export function ProfileSettingsScreen() {
             </Card>
 
             <h2 className="text-sm font-medium text-destructive uppercase tracking-wide mt-6">
-              Danger Zone
+              {t("dangerZone")}
             </h2>
 
-            <Card className="p-4 border-destructive/30">
+            <Card className="p-4 border-destructive/30 flex flex-col gap-2">
+              <button
+                className="flex items-center justify-between py-2 hover-elevate rounded-md px-2 -mx-2 w-full"
+                onClick={() => setStep("clear-all-data")}
+                data-testid="button-clear-all-data"
+              >
+                <div className="flex items-center gap-3">
+                  <Trash2 className="w-5 h-5 text-destructive" />
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-destructive">{t("clearAllData")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("clearAllDataDescription")}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-destructive" />
+              </button>
+
+              <div className="border-t border-destructive/20 -mx-4 my-1" />
+
               <button
                 className="flex items-center justify-between py-2 hover-elevate rounded-md px-2 -mx-2 w-full"
                 onClick={() => setStep("delete-account")}
@@ -664,6 +727,87 @@ export function ProfileSettingsScreen() {
                     <>
                       <RefreshCw className="w-3 h-3 mr-1" />
                       Resend Code
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Card>
+          </section>
+        )}
+
+        {step === "clear-all-data" && (
+          <section className="flex flex-col gap-6">
+            <Card className="p-4 flex flex-col gap-4 border-destructive/30">
+              <div className="flex flex-col items-center text-center mb-2">
+                <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-3">
+                  <Trash2 className="w-6 h-6 text-destructive" />
+                </div>
+                <h3 className="font-semibold text-destructive">{t("clearAllData")}</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {t("clearAllDataWarning")}
+                </p>
+              </div>
+
+              <div className="bg-destructive/5 rounded-md p-3 text-sm space-y-2">
+                <p className="font-medium text-destructive">{t("clearAllDataWhatDeleted")}</p>
+                <ul className="text-muted-foreground space-y-1 ml-4 list-disc">
+                  <li>{t("clearAllDataItem1")}</li>
+                  <li>{t("clearAllDataItem2")}</li>
+                  <li>{t("clearAllDataItem3")}</li>
+                </ul>
+                <p className="font-medium text-muted-foreground mt-3">
+                  {t("clearAllDataServerNote")}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 mt-2">
+                <Label htmlFor="clearDataPassword">{t("enterPasswordToConfirm")}</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="clearDataPassword"
+                    type={showPassword ? "text" : "password"}
+                    value={clearDataPassword}
+                    onChange={(e) => setClearDataPassword(e.target.value)}
+                    placeholder={t("enterYourPassword")}
+                    className="pl-10 pr-10"
+                    data-testid="input-clear-data-password"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setStep("view")}
+                  disabled={isLoading}
+                  data-testid="button-cancel-clear"
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={handleClearAllData}
+                  disabled={isLoading || !clearDataPassword}
+                  data-testid="button-confirm-clear"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {t("clearAllDataConfirm")}
                     </>
                   )}
                 </Button>
