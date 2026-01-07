@@ -600,6 +600,12 @@ router.post("/api/auth/check-phone", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Phone number is required" });
     }
 
+    // Validate phone number format using libphonenumber (supports all international formats)
+    const phoneValidation = validateAndFormatPhone(phone);
+    if (!phoneValidation.isValid) {
+      return res.status(400).json({ error: phoneValidation.error || "Invalid phone number format" });
+    }
+
     const user = await findUserByPhone(phone);
 
     if (!user) {
