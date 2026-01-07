@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from "react";
-import { Info, Camera, User, ImageIcon } from "lucide-react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { Info, Camera, User, ImageIcon, UserCheck, UserPlus, Send, Loader2, CheckCircle } from "lucide-react";
+import { collaborationService } from "@/lib/collaboration-service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,6 +60,21 @@ export function AddPersonScreen() {
   const [currency, setCurrency] = useState<Currency>(defaultCurrency);
   const [customCurrencySymbol, setCustomCurrencySymbol] = useState("");
 
+  // Phone verification state
+  interface PhoneCheckResult {
+    exists: boolean;
+    isConnected?: boolean;
+    displayName?: string;
+    userId?: string;
+  }
+  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
+  const [phoneCheckResult, setPhoneCheckResult] = useState<PhoneCheckResult | null>(null);
+  const [isSendingAction, setIsSendingAction] = useState(false);
+  const phoneCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Get user profile for display name
+  const profile = storage.getHomeSettings();
+
   useEffect(() => {
     if (editMode && data.personId) {
       const person = storage.getPerson(data.personId);
@@ -78,6 +94,138 @@ export function AddPersonScreen() {
       }
     }
   }, [editMode, data.personId]);
+
+  // Phone check with debounce
+  const checkPhoneNumber = useCallback(async (phoneNumber: string) => {
+    const digitsOnly = phoneNumber.replace(/\D/g, "");
+    if (digitsOnly.length < 10) {
+      setPhoneCheckResult(null);
+      return;
+    }
+
+    setIsCheckingPhone(true);
+    try {
+      const token = collaborationService.getToken();
+      const response = await fetch(`/api/phone/check?phone=${encodeURIComponent(phoneNumber)}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setPhoneCheckResult(result);
+      } else {
+        setPhoneCheckResult(null);
+      }
+    } catch (error) {
+      console.error("Phone check failed:", error);
+      setPhoneCheckResult(null);
+    } finally {
+      setIsCheckingPhone(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (phoneCheckTimeoutRef.current) {
+      clearTimeout(phoneCheckTimeoutRef.current);
+    }
+
+    const digitsOnly = phone.replace(/\D/g, "");
+    if (digitsOnly.length >= 10) {
+      phoneCheckTimeoutRef.current = setTimeout(() => {
+        checkPhoneNumber(phone);
+      }, 1000);
+    } else {
+      setPhoneCheckResult(null);
+    }
+
+    return () => {
+      if (phoneCheckTimeoutRef.current) {
+        clearTimeout(phoneCheckTimeoutRef.current);
+      }
+    };
+  }, [phone, checkPhoneNumber]);
+
+  // Handle send connect request
+  const handleSendConnectRequest = async () => {
+    if (!phoneCheckResult?.userId) return;
+
+    setIsSendingAction(true);
+    try {
+      const token = collaborationService.getToken();
+      const response = await fetch("/api/connections/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          targetUserId: phoneCheckResult.userId,
+          requesterName: profile?.displayName || name || "User",
+        }),
+      });
+
+      if (response.ok) {
+        toast({ title: "Connect request sent successfully" });
+        setPhoneCheckResult(prev => prev ? { ...prev, isConnected: true } : null);
+      } else {
+        const error = await response.json().catch(() => ({}));
+        toast({ 
+          title: "Failed to send connect request", 
+          description: error.message || "Please try again",
+          variant: "destructive" 
+        });
+      }
+    } catch (error) {
+      toast({ 
+        title: "Failed to send connect request", 
+        description: "Please check your connection and try again",
+        variant: "destructive" 
+      });
+    } finally {
+      setIsSendingAction(false);
+    }
+  };
+
+  // Handle send SMS invite
+  const handleSendSmsInvite = async () => {
+    setIsSendingAction(true);
+    try {
+      const token = collaborationService.getToken();
+      const response = await fetch("/api/invitations/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          phone: phone.trim(),
+          inviterName: profile?.displayName || name || "User",
+        }),
+      });
+
+      if (response.ok) {
+        toast({ title: "SMS invite sent successfully" });
+      } else {
+        const error = await response.json().catch(() => ({}));
+        toast({ 
+          title: "Failed to send SMS invite", 
+          description: error.message || "Please try again",
+          variant: "destructive" 
+        });
+      }
+    } catch (error) {
+      toast({ 
+        title: "Failed to send SMS invite", 
+        description: "Please check your connection and try again",
+        variant: "destructive" 
+      });
+    } finally {
+      setIsSendingAction(false);
+    }
+  };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -298,6 +446,107 @@ export function AddPersonScreen() {
               data-testid="input-phone"
             />
             {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+            
+            {/* Phone verification status */}
+            {isCheckingPhone && (
+              <div 
+                className="flex items-center gap-2 p-3 mt-2 rounded-lg bg-muted/50"
+                data-testid="status-phone-checking"
+              >
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Checking phone number...</span>
+              </div>
+            )}
+            
+            {!isCheckingPhone && phoneCheckResult && (
+              <>
+                {/* User exists and already connected */}
+                {phoneCheckResult.exists && phoneCheckResult.isConnected && (
+                  <div 
+                    className="flex items-center gap-3 p-3 mt-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900"
+                    data-testid="status-already-connected"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50">
+                      <CheckCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Already Connected</p>
+                      {phoneCheckResult.displayName && (
+                        <p className="text-xs text-blue-700 dark:text-blue-300 truncate">{phoneCheckResult.displayName}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* User exists but not connected */}
+                {phoneCheckResult.exists && !phoneCheckResult.isConnected && (
+                  <div 
+                    className="flex items-center gap-3 p-3 mt-2 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900"
+                    data-testid="status-user-found"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50">
+                      <UserCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-green-900 dark:text-green-100">
+                        {phoneCheckResult.displayName || "User found"}
+                      </p>
+                      <p className="text-xs text-green-700 dark:text-green-300">Registered on HomeStaff360</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-green-300 dark:border-green-700 text-green-700 dark:text-green-300"
+                      onClick={handleSendConnectRequest}
+                      disabled={isSendingAction}
+                      data-testid="button-send-connect-request"
+                    >
+                      {isSendingAction ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <UserPlus className="w-4 h-4 mr-1" />
+                          Connect
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                {/* User doesn't exist */}
+                {!phoneCheckResult.exists && (
+                  <div 
+                    className="flex items-center gap-3 p-3 mt-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900"
+                    data-testid="status-user-not-found"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50">
+                      <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-blue-900 dark:text-blue-100">User not registered</p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">Invite them to HomeStaff360</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
+                      onClick={handleSendSmsInvite}
+                      disabled={isSendingAction}
+                      data-testid="button-send-sms-invite"
+                    >
+                      {isSendingAction ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-1" />
+                          Invite
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </section>
 
