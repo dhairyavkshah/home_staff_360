@@ -19,10 +19,11 @@
 |--------|-------|
 | **API Tests (curl-based)** | 21 |
 | **E2E Scenario Tests (TypeScript)** | 43 |
-| **Total Automated Tests** | 64 |
-| **Total Tests Passed** | 64 |
+| **Module E2E Tests (TypeScript)** | 60 |
+| **Total Automated Tests** | 124 |
+| **Total Tests Passed** | 124 |
 | **Overall Pass Rate** | 100% |
-| **Defects Found & Fixed** | 2 |
+| **Defects Found & Fixed** | 4 |
 
 ---
 
@@ -114,6 +115,48 @@ The following sections document the complete 1,500 test case specifications. The
    - Resolution: Modified OTP response to always include devOtp in development
 3. **Chat Response Format** - Test code was reading wrong response path
    - Resolution: Updated test to properly extract chat.id from response
+
+### Security Vulnerabilities Fixed During Module Testing
+4. **SEC-001** (Severity: Critical) - GET /api/shared-attendance missing authorization
+   - Issue: Users could query attendance records for bindings they don't have access to
+   - Resolution: Added user ownership verification before returning records
+5. **SEC-002** (Severity: Critical) - GET /api/shared-laundry missing authorization
+   - Issue: Users could query laundry records for bindings they don't have access to
+   - Resolution: Added user ownership verification before returning records
+
+---
+
+## Module E2E Test Results (60 tests - 100% Pass)
+
+### Test Script
+- **Location**: `tests/e2e/module-tests.ts`
+- **Type**: TypeScript with fetch API
+- **Run Command**: `npx tsx tests/e2e/module-tests.ts`
+
+### Test Categories
+| Phase | Tests | Status | Description |
+|-------|-------|--------|-------------|
+| User Creation | 10 | Pass | 5 Home + 5 Staff users with OTP flow |
+| Connection Setup | 15 | Pass | Collaboration links and bindings between pairs |
+| Attendance (Home-initiated) | 6 | Pass | Home creates → Staff sees → Staff approves → Both verify |
+| Laundry (Home-initiated) | 6 | Pass | Home creates → Staff sees → Staff approves → Both verify |
+| Attendance (Staff-initiated) | 6 | Pass | Staff creates → Home sees → Home approves → Both verify |
+| Laundry (Staff-initiated) | 6 | Pass | Staff creates → Home sees → Home approves → Both verify |
+| Data Isolation | 11 | Pass | Cross-pair and unconnected user access denial |
+
+### Cross-User Sync Verification
+These tests verify that data created by one user in a connection is visible to the other:
+- Home creates attendance/laundry → Staff can read and approve
+- Staff creates attendance/laundry → Home can read and approve
+- Status changes (pending → approved) visible to both parties
+
+### Data Isolation Verification
+These tests verify security boundaries:
+- Home1 cannot see Pair2 bindings
+- Staff1 cannot see Pair2 bindings
+- Home1 cannot query Pair2 attendance/laundry lists
+- Staff1 cannot query Pair2 attendance/laundry lists
+- Unconnected users cannot access connected pair data
 
 ---
 
