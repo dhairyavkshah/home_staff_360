@@ -1701,6 +1701,37 @@ export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
 
 // ============================================
+// User Invitations (SMS invites to non-registered users)
+// ============================================
+
+export const userInvitationStatuses = ['pending', 'accepted', 'expired'] as const;
+export type UserInvitationStatus = typeof userInvitationStatuses[number];
+
+export const userInvitations = pgTable("user_invitations", {
+  id: serial("id").primaryKey(),
+  inviterUserId: varchar("inviter_user_id", { length: 255 }).notNull().references(() => serverUsers.id),
+  invitedPhone: varchar("invited_phone", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+  acceptedAt: timestamp("accepted_at"),
+});
+
+export const userInvitationsRelations = relations(userInvitations, ({ one }) => ({
+  inviter: one(serverUsers, {
+    fields: [userInvitations.inviterUserId],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertUserInvitationSchema = z.object({
+  inviterUserId: z.string().max(255),
+  invitedPhone: z.string().max(20),
+  status: z.enum(userInvitationStatuses).optional(),
+});
+export type InsertUserInvitation = z.infer<typeof insertUserInvitationSchema>;
+export type UserInvitation = typeof userInvitations.$inferSelect;
+
+// ============================================
 // Advertisement System
 // ============================================
 

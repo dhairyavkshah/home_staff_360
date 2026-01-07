@@ -58,7 +58,8 @@ import {
   maintenanceStatuses,
   systemBackups,
   insertSystemBackupSchema,
-  systemBackupStatuses
+  systemBackupStatuses,
+  userInvitations
 } from "@shared/schema";
 import { eq, and, or, desc, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -6846,6 +6847,237 @@ router.get("/api/maintenance/check-logout", async (req: Request, res: Response) 
   } catch (error) {
     console.error("Check logout error:", error);
     res.status(500).json({ error: "Failed to check logout status" });
+  }
+});
+
+// ============ PHONE CHECK & INVITE/CONNECT API ============
+
+// GET /api/phone/check - Check if a phone number exists in the system
+router.get("/api/phone/check", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { phone } = req.query;
+
+    if (!phone || typeof phone !== 'string') {
+      return res.status(400).json({ error: "Phone number is required" });
+    }
+
+    const normalizedPhone = normalizePhoneWithCountryCode(phone);
+    
+    const targetUser = await findUserByPhone(phone);
+
+    if (!targetUser) {
+      return res.json({ exists: false });
+    }
+
+    let isConnected = false;
+    
+    const existingConnection = await db.query.collabConnections.findFirst({
+      where: or(
+        and(
+          eq(collabConnections.userAId, userId),
+          eq(collabConnections.userBId, targetUser.id)
+        ),
+        and(
+          eq(collabConnections.userAId, targetUser.id),
+          eq(collabConnections.userBId, userId)
+        )
+      )
+    });
+
+    if (existingConnection && existingConnection.status === 'accepted') {
+      isConnected = true;
+    }
+
+    res.json({
+      exists: true,
+      userId: targetUser.id,
+      displayName: targetUser.displayName,
+      userType: targetUser.userType,
+      isConnected
+    });
+  } catch (error) {
+    console.error("Phone check error:", error);
+    res.status(500).json({ error: "Failed to check phone number" });
+  }
+});
+
+// POST /api/invitations/send - Send an SMS invitation to a non-registered user
+router.post("/api/invitations/send", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { phone, inviterName, message } = req.body;
+
+    if (!phone || !inviterName) {
+      return res.status(400).json({ error: "Phone and inviterName are required" });
+    }
+
+    const phoneValidation = validateAndFormatPhone(phone);
+    if (!phoneValidation.isValid || !phoneValidation.e164) {
+      return res.status(400).json({ 
+        error: phoneValidation.error || "Invalid phone number format"
+      });
+    }
+
+    const normalizedPhone = phoneValidation.e164;
+
+    const existingUser = await findUserByPhone(phone);
+    if (existingUser) {
+      return res.status(400).json({ 
+        error: "This phone number is already registered. Use connection request instead." 
+      });
+    }
+
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentInvites = await db.query.userInvitations.findMany({
+      where: and(
+        eq(userInvitations.invitedPhone, normalizedPhone),
+        sql`${userInvitations.sentAt} > ${oneDayAgo}`
+      )
+    });
+
+    if (recentInvites.length >= 3) {
+      return res.status(429).json({ 
+        error: "Maximum invites reached for this phone number today. Please try again tomorrow." 
+      });
+    }
+
+    const appLink = "https://homestaff360.app/download";
+    const smsMessage = message 
+      ? `Hi! ${inviterName} has invited you to join Home Staff 360: "${message}". Download now: ${appLink}`
+      : `Hi! ${inviterName} has invited you to join Home Staff 360, a household management app. Download now: ${appLink}`;
+
+    let smsSent = false;
+    if (process.env.TWILIO_PHONE_NUMBER && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      try {
+        await twilioClient.messages.create({
+          body: smsMessage,
+          to: normalizedPhone,
+          from: process.env.TWILIO_PHONE_NUMBER
+        });
+        smsSent = true;
+      } catch (smsError) {
+        console.error("SMS invitation sending failed:", smsError);
+        if (process.env.NODE_ENV !== "development") {
+          return res.status(500).json({ error: "Failed to send SMS invitation" });
+        }
+      }
+    }
+
+    await db.insert(userInvitations).values({
+      inviterUserId: userId,
+      invitedPhone: normalizedPhone,
+      status: "pending"
+    });
+
+    res.json({ 
+      success: true, 
+      message: smsSent ? "Invitation sent successfully" : "Invitation recorded (SMS not configured)"
+    });
+  } catch (error) {
+    console.error("Send invitation error:", error);
+    res.status(500).json({ error: "Failed to send invitation" });
+  }
+});
+
+// POST /api/connections/request - Send a connection request to an existing user
+router.post("/api/connections/request", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { targetUserId, requesterName, message } = req.body;
+
+    if (!targetUserId || !requesterName) {
+      return res.status(400).json({ error: "targetUserId and requesterName are required" });
+    }
+
+    if (targetUserId === userId) {
+      return res.status(400).json({ error: "Cannot send connection request to yourself" });
+    }
+
+    const targetUser = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, targetUserId)
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ error: "Target user not found" });
+    }
+
+    const currentUser = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ error: "Current user not found" });
+    }
+
+    const existingConnection = await db.query.collabConnections.findFirst({
+      where: or(
+        and(
+          eq(collabConnections.userAId, userId),
+          eq(collabConnections.userBId, targetUserId)
+        ),
+        and(
+          eq(collabConnections.userAId, targetUserId),
+          eq(collabConnections.userBId, userId)
+        )
+      )
+    });
+
+    if (existingConnection) {
+      return res.status(400).json({ error: "Connection already exists" });
+    }
+
+    const pendingInvite = await db.query.collabConnectionInvites.findFirst({
+      where: and(
+        eq(collabConnectionInvites.senderId, userId),
+        eq(collabConnectionInvites.targetUserId, targetUserId),
+        eq(collabConnectionInvites.status, 'pending')
+      )
+    });
+
+    if (pendingInvite) {
+      return res.status(400).json({ error: "Connection request already pending" });
+    }
+
+    const connectionInviteId = uuidv4();
+    const normalizedPhone = targetUser.phone;
+    const currentUserMode = currentUser.userType || 'HOME';
+
+    await db.insert(collabConnectionInvites).values({
+      id: connectionInviteId,
+      senderId: userId,
+      senderMode: currentUserMode,
+      targetPhone: normalizedPhone,
+      targetPhoneNormalized: normalizedPhone,
+      targetUserId: targetUserId,
+      status: 'pending',
+      message: message || null
+    });
+
+    const notificationId = uuidv4();
+    const targetUserMode = targetUser.userType || 'HOME';
+    
+    await db.insert(notifications).values({
+      id: notificationId,
+      userId: targetUserId,
+      userMode: targetUserMode,
+      type: 'connection_request',
+      title: 'New Connection Request',
+      message: `${requesterName} wants to connect with you`,
+      entityType: 'connection_invite',
+      entityId: connectionInviteId,
+      payload: JSON.stringify({ senderId: userId, senderName: requesterName, message }),
+      actionRequired: true,
+      actionType: 'approve'
+    });
+
+    res.json({ 
+      success: true, 
+      connectionId: connectionInviteId 
+    });
+  } catch (error) {
+    console.error("Connection request error:", error);
+    res.status(500).json({ error: "Failed to send connection request" });
   }
 });
 
