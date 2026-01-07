@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import crypto from "crypto";
 import { db } from "./db";
 import { 
   serverUsers, 
@@ -5107,9 +5108,31 @@ router.get("/api/admin/users/search", authenticateAdmin, async (req: Request, re
 
 // Helper function to generate checksum for backup data
 function generateChecksum(data: any): string {
-  const crypto = require('crypto');
   const jsonString = JSON.stringify(data);
   return crypto.createHash('sha256').update(jsonString).digest('hex');
+}
+
+// Helper function to convert ISO date strings back to Date objects for restore
+function parseDateStrings(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'string') {
+    // Check if it's an ISO date string
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(obj)) {
+      return new Date(obj);
+    }
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(parseDateStrings);
+  }
+  if (typeof obj === 'object') {
+    const result: any = {};
+    for (const key of Object.keys(obj)) {
+      result[key] = parseDateStrings(obj[key]);
+    }
+    return result;
+  }
+  return obj;
 }
 
 // Helper function to create backup log entry
@@ -5685,16 +5708,19 @@ router.post("/api/admin/system-restore", authenticateAdmin, async (req: Request,
       return res.status(403).json({ error: "Only super administrators can restore system backups" });
     }
 
-    const backupData = req.body;
+    const rawBackupData = req.body;
 
     // Validate backup structure
-    if (!backupData || !backupData.version || !backupData.tables) {
+    if (!rawBackupData || !rawBackupData.version || !rawBackupData.tables) {
       return res.status(400).json({ error: "Invalid backup format" });
     }
 
-    if (backupData.version !== "1.0") {
-      return res.status(400).json({ error: `Unsupported backup version: ${backupData.version}` });
+    if (rawBackupData.version !== "1.0" && rawBackupData.version !== "2.0") {
+      return res.status(400).json({ error: `Unsupported backup version: ${rawBackupData.version}` });
     }
+
+    // Convert date strings back to Date objects
+    const backupData = parseDateStrings(rawBackupData);
 
     // Perform restoration in a transaction
     await db.transaction(async (tx) => {
@@ -5769,31 +5795,22 @@ router.post("/api/admin/system-restore", authenticateAdmin, async (req: Request,
       if (backupData.tables.devices) {
         await tx.delete(devices);
       }
-      if (backupData.tables.admin_invitations) {
-        await tx.delete(adminInvitations);
-      }
-      if (backupData.tables.admin_users) {
-        await tx.delete(adminUsers);
-      }
-      if (backupData.tables.admin_roles) {
-        await tx.delete(adminRolesTable);
+      // Skip admin tables (admin_invitations, admin_users, admin_roles) to preserve admin access
+      // Delete user_invitations before server_users (FK constraint)
+      if (backupData.tables.user_invitations) {
+        await tx.delete(userInvitations);
       }
       if (backupData.tables.server_users) {
         await tx.delete(serverUsers);
       }
 
       // Re-insert data in dependency order (parent tables first)
-      if (backupData.tables.admin_roles && backupData.tables.admin_roles.length > 0) {
-        await tx.insert(adminRolesTable).values(backupData.tables.admin_roles);
-      }
+      // Skip admin_roles, admin_users, admin_invitations to preserve current admin access
       if (backupData.tables.server_users && backupData.tables.server_users.length > 0) {
         await tx.insert(serverUsers).values(backupData.tables.server_users);
       }
-      if (backupData.tables.admin_users && backupData.tables.admin_users.length > 0) {
-        await tx.insert(adminUsers).values(backupData.tables.admin_users);
-      }
-      if (backupData.tables.admin_invitations && backupData.tables.admin_invitations.length > 0) {
-        await tx.insert(adminInvitations).values(backupData.tables.admin_invitations);
+      if (backupData.tables.user_invitations && backupData.tables.user_invitations.length > 0) {
+        await tx.insert(userInvitations).values(backupData.tables.user_invitations);
       }
       if (backupData.tables.devices && backupData.tables.devices.length > 0) {
         await tx.insert(devices).values(backupData.tables.devices);
@@ -5901,7 +5918,8 @@ router.post("/api/admin/system-backups", authenticateAdmin, async (req: Request,
       chatParticipantsData, chatMessagesData, householdSharesData, householdShareMembersData,
       businessSharesData, businessShareMembersData, notificationsData,
       advertisementsData, adSettingsData, adImpressionsData, userBackupsData, backupLogsData,
-      maintenanceWindowsData, maintenanceBroadcastsData, maintenanceSessionsData
+      maintenanceWindowsData, maintenanceBroadcastsData, maintenanceSessionsData,
+      userInvitationsData
     ] = await Promise.all([
       db.select().from(serverUsers),
       db.select().from(devices),
@@ -5932,7 +5950,8 @@ router.post("/api/admin/system-backups", authenticateAdmin, async (req: Request,
       db.select().from(backupLogs),
       db.select().from(maintenanceWindows),
       db.select().from(maintenanceBroadcasts),
-      db.select().from(maintenanceSessions)
+      db.select().from(maintenanceSessions),
+      db.select().from(userInvitations)
     ]);
 
     const tablesIncluded = [
@@ -5943,7 +5962,7 @@ router.post("/api/admin/system-backups", authenticateAdmin, async (req: Request,
       'chat_participants', 'chat_messages', 'household_shares', 'household_share_members',
       'business_shares', 'business_share_members', 'notifications',
       'advertisements', 'ad_settings', 'ad_impressions', 'user_backups', 'backup_logs',
-      'maintenance_windows', 'maintenance_broadcasts', 'maintenance_sessions'
+      'maintenance_windows', 'maintenance_broadcasts', 'maintenance_sessions', 'user_invitations'
     ];
 
     const backupData = {
@@ -5980,7 +5999,8 @@ router.post("/api/admin/system-backups", authenticateAdmin, async (req: Request,
         backup_logs: backupLogsData,
         maintenance_windows: maintenanceWindowsData,
         maintenance_broadcasts: maintenanceBroadcastsData,
-        maintenance_sessions: maintenanceSessionsData
+        maintenance_sessions: maintenanceSessionsData,
+        user_invitations: userInvitationsData
       }
     };
 
@@ -5993,7 +6013,8 @@ router.post("/api/admin/system-backups", authenticateAdmin, async (req: Request,
       householdShareMembersData.length + businessSharesData.length + businessShareMembersData.length +
       notificationsData.length + advertisementsData.length + adSettingsData.length +
       adImpressionsData.length + userBackupsData.length + backupLogsData.length +
-      maintenanceWindowsData.length + maintenanceBroadcastsData.length + maintenanceSessionsData.length;
+      maintenanceWindowsData.length + maintenanceBroadcastsData.length + maintenanceSessionsData.length +
+      userInvitationsData.length;
 
     const jsonString = JSON.stringify(backupData);
     const fileSizeBytes = Buffer.byteLength(jsonString, 'utf8');
@@ -6153,14 +6174,19 @@ router.post("/api/admin/system-backups/:id/restore", authenticateAdmin, async (r
       return res.status(400).json({ error: "Cannot restore from incomplete backup" });
     }
 
-    const backupData = backup.backupData as any;
-    if (!backupData || !backupData.version || !backupData.tables) {
+    const rawBackupData = backup.backupData as any;
+    if (!rawBackupData || !rawBackupData.version || !rawBackupData.tables) {
       return res.status(400).json({ error: "Invalid backup data" });
     }
 
-    // Perform restoration in a transaction (using same logic as system-restore)
+    // Convert date strings back to Date objects
+    const backupData = parseDateStrings(rawBackupData);
+
+    // Perform restoration in a transaction
+    // NOTE: We skip restoring admin_users, admin_roles, and admin_invitations to avoid
+    // locking out the current admin and breaking FK constraints with system_backups
     await db.transaction(async (tx) => {
-      // Delete existing data in reverse dependency order
+      // Delete existing data in reverse dependency order (skip admin tables)
       if (backupData.tables.maintenance_sessions) {
         await tx.delete(maintenanceSessions);
       }
@@ -6239,31 +6265,22 @@ router.post("/api/admin/system-backups/:id/restore", authenticateAdmin, async (r
       if (backupData.tables.devices) {
         await tx.delete(devices);
       }
-      if (backupData.tables.admin_invitations) {
-        await tx.delete(adminInvitations);
-      }
-      if (backupData.tables.admin_users) {
-        await tx.delete(adminUsers);
-      }
-      if (backupData.tables.admin_roles) {
-        await tx.delete(adminRolesTable);
+      // Skip admin_invitations, admin_users, admin_roles to preserve admin access
+      // Delete user_invitations before server_users (FK constraint)
+      if (backupData.tables.user_invitations) {
+        await tx.delete(userInvitations);
       }
       if (backupData.tables.server_users) {
         await tx.delete(serverUsers);
       }
 
       // Insert data in dependency order
+      // Skip admin_roles, admin_users, admin_invitations to preserve current admin access
       if (backupData.tables.server_users && backupData.tables.server_users.length > 0) {
         await tx.insert(serverUsers).values(backupData.tables.server_users);
       }
-      if (backupData.tables.admin_roles && backupData.tables.admin_roles.length > 0) {
-        await tx.insert(adminRolesTable).values(backupData.tables.admin_roles);
-      }
-      if (backupData.tables.admin_users && backupData.tables.admin_users.length > 0) {
-        await tx.insert(adminUsers).values(backupData.tables.admin_users);
-      }
-      if (backupData.tables.admin_invitations && backupData.tables.admin_invitations.length > 0) {
-        await tx.insert(adminInvitations).values(backupData.tables.admin_invitations);
+      if (backupData.tables.user_invitations && backupData.tables.user_invitations.length > 0) {
+        await tx.insert(userInvitations).values(backupData.tables.user_invitations);
       }
       if (backupData.tables.devices && backupData.tables.devices.length > 0) {
         await tx.insert(devices).values(backupData.tables.devices);
