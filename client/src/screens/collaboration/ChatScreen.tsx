@@ -81,6 +81,9 @@ export function ChatScreen() {
   const [editContent, setEditContent] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
+  // Mobile action state - selected message shows actions
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+  
   // Timer for editable messages
   const [, setTick] = useState(0);
 
@@ -122,22 +125,28 @@ export function ChatScreen() {
   const handleMessageUpdated = useCallback((data: any) => {
     console.log("[ChatScreen] Received chat:message-updated:", data);
     const { messageId, content, editedAt } = data;
+    const messageChatId = String(data.chatId);
     if (!messageId) return;
+    // Only update if this is the current chat
+    if (messageChatId !== chatId) return;
     
     setMessages((prev) => prev.map((m) => 
       m.id === messageId ? { ...m, content, isEdited: true, editedAt } : m
     ));
-  }, []);
+  }, [chatId]);
 
   const handleMessageDeleted = useCallback((data: any) => {
     console.log("[ChatScreen] Received chat:message-deleted:", data);
     const { messageId } = data;
+    const messageChatId = String(data.chatId);
     if (!messageId) return;
+    // Only update if this is the current chat
+    if (messageChatId !== chatId) return;
     
     setMessages((prev) => prev.map((m) => 
       m.id === messageId ? { ...m, isDeleted: true, content: "[This message was deleted]" } : m
     ));
-  }, []);
+  }, [chatId]);
 
   useRealtime("chat:new-message", handleNewMessage);
   useRealtime("chat:message-received", handleMessageReceived);
@@ -485,72 +494,93 @@ export function ChatScreen() {
             </p>
           </div>
         ) : (
-          messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}
-            >
-              <div className="relative group max-w-[80%]">
-                <div
-                  className={`rounded-2xl px-4 py-2 ${
-                    message.isDeleted
-                      ? "bg-muted/50 italic"
-                      : message.isOwn
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  }`}
-                  data-testid={`message-${message.id}`}
-                >
-                  {!message.isOwn && message.senderName && !message.isDeleted && (
-                    <p className="text-xs font-medium mb-1 opacity-70">
-                      {message.senderName}
+          messages.map((message) => {
+            const showActions = isEditable(message) && (selectedMessageId === message.id);
+            return (
+              <div
+                key={message.id}
+                className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}
+              >
+                <div className="relative group max-w-[80%]">
+                  <div
+                    className={`rounded-2xl px-4 py-2 cursor-pointer ${
+                      message.isDeleted
+                        ? "bg-muted/50 italic"
+                        : message.isOwn
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    }`}
+                    data-testid={`message-${message.id}`}
+                    onClick={() => {
+                      if (isEditable(message)) {
+                        setSelectedMessageId(selectedMessageId === message.id ? null : message.id);
+                      }
+                    }}
+                  >
+                    {!message.isOwn && message.senderName && !message.isDeleted && (
+                      <p className="text-xs font-medium mb-1 opacity-70">
+                        {message.senderName}
+                      </p>
+                    )}
+                    <p className="text-sm whitespace-pre-wrap break-words">
+                      {message.content}
                     </p>
+                    <div className={`flex items-center gap-2 mt-1 ${
+                      message.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+                    }`}>
+                      <span className="text-xs">{formatTime(message.createdAt)}</span>
+                      {message.isEdited && !message.isDeleted && (
+                        <span className="text-xs italic">edited</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Edit/Delete buttons - visible on hover (desktop) or tap (mobile) */}
+                  {isEditable(message) && (
+                    <div 
+                      className={`absolute -top-8 right-0 flex items-center gap-1 bg-background border rounded-md shadow-sm p-1 transition-opacity ${
+                        showActions ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                      }`}
+                      style={{ visibility: showActions ? 'visible' : undefined }}
+                    >
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditMessage(message);
+                          setSelectedMessageId(null);
+                        }}
+                        data-testid={`button-edit-${message.id}`}
+                      >
+                        <Edit2 className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteMessage(message.id);
+                          setSelectedMessageId(null);
+                        }}
+                        data-testid={`button-delete-${message.id}`}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                      {getRemainingEditTime(message) && (
+                        <span className="text-xs text-muted-foreground px-1 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {getRemainingEditTime(message)}
+                        </span>
+                      )}
+                    </div>
                   )}
-                  <p className="text-sm whitespace-pre-wrap break-words">
-                    {message.content}
-                  </p>
-                  <div className={`flex items-center gap-2 mt-1 ${
-                    message.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
-                  }`}>
-                    <span className="text-xs">{formatTime(message.createdAt)}</span>
-                    {message.isEdited && !message.isDeleted && (
-                      <span className="text-xs italic">edited</span>
-                    )}
-                  </div>
                 </div>
-                
-                {/* Edit/Delete buttons for own editable messages */}
-                {isEditable(message) && (
-                  <div className="absolute -top-8 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-background border rounded-md shadow-sm p-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6"
-                      onClick={() => handleEditMessage(message)}
-                      data-testid={`button-edit-${message.id}`}
-                    >
-                      <Edit2 className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6 text-destructive"
-                      onClick={() => handleDeleteMessage(message.id)}
-                      data-testid={`button-delete-${message.id}`}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                    {getRemainingEditTime(message) && (
-                      <span className="text-xs text-muted-foreground px-1 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {getRemainingEditTime(message)}
-                      </span>
-                    )}
-                  </div>
-                )}
               </div>
-            </div>
-          ))
+            );
+          })
         )}
         <div ref={messagesEndRef} />
       </div>
