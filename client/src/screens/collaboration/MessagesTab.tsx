@@ -64,8 +64,8 @@ export function MessagesTab() {
   const toggleMute = async (chatId: string, currentlyMuted: boolean) => {
     try {
       await collaborationService.fetchWithAuth(
-        `/chats/${chatId}/${currentlyMuted ? "unmute" : "mute"}`,
-        { method: "POST" }
+        `/chats/${chatId}/mute`,
+        { method: "PATCH", body: JSON.stringify({ muted: !currentlyMuted }) }
       );
       setChats((prev) =>
         prev.map((c) =>

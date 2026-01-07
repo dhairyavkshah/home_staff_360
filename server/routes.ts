@@ -2720,6 +2720,7 @@ router.delete("/api/connections/:id", authenticateToken, async (req: Request, re
 router.get("/api/chats", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.userId;
+    console.log("Chats API called for user:", userId);
 
     // Get all chats where user is a participant
     const participations = await db.query.chatParticipants.findMany({
@@ -2728,6 +2729,7 @@ router.get("/api/chats", authenticateToken, async (req: Request, res: Response) 
         sql`${chatParticipants.leftAt} IS NULL`
       )
     });
+    console.log("Found participations:", participations.length);
 
     const chatIds = participations.map(p => p.chatId);
     
