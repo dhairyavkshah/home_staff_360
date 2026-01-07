@@ -17,6 +17,7 @@ import {
   getDonorStatus,
   isIndianUser
 } from "@/lib/payment-handler";
+import { markDonationComplete } from "@/lib/donation-reminder";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Drawer,
@@ -478,6 +479,7 @@ export function SupportDeveloperScreen() {
   const handleConfirmDonation = () => {
     setShowConfirmation(false);
     markAsDonor();
+    markDonationComplete();
     setShowThankYou(true);
     setTimeout(() => setShowThankYou(false), 5000);
   };
@@ -587,6 +589,12 @@ export function SupportDeveloperScreen() {
             </Badge>
           )}
         </section>
+
+        <Card className="p-4 bg-primary/5 border-primary/20">
+          <p className="text-sm text-muted-foreground leading-relaxed text-center" data-testid="text-developer-appeal">
+            {t("supportDeveloperAppeal")}
+          </p>
+        </Card>
 
         <Card className="p-4 flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -857,7 +865,7 @@ export function SupportDeveloperScreen() {
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
                 <li>{t("helpsMaintainApp")}</li>
                 <li>{t("supportsDevelopment")}</li>
-                <li>{t("keepsAppAdFree")}</li>
+                <li>{t("helpsCoversServerCosts")}</li>
                 <li>{t("enablesFasterBugFixes")}</li>
               </ul>
             </div>

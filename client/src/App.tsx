@@ -76,6 +76,19 @@ import { AuthScreen } from "@/screens/auth/AuthScreen";
 import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
 import { AdOverlay } from "@/components/AdOverlay";
 import { useAds } from "@/hooks/useAds";
+import { useDonationReminder } from "@/hooks/useDonationReminder";
+import { useTranslation } from "@/lib/i18n/i18n-context";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Heart } from "lucide-react";
 
 function MobileAppRouter() {
   const { currentScreen } = useNavigation();
@@ -205,6 +218,41 @@ function AdManager() {
   return <AdOverlay ad={currentAd} onClose={dismissAd} />;
 }
 
+function DonationReminderDialog() {
+  const { shouldShowReminder, dismissReminder } = useDonationReminder();
+  const { t } = useTranslation();
+  const { navigate } = useNavigation();
+
+  const handleSupport = () => {
+    dismissReminder();
+    navigate("support-developer");
+  };
+
+  return (
+    <AlertDialog open={shouldShowReminder} onOpenChange={(open) => !open && dismissReminder()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Heart className="w-5 h-5 text-primary" />
+            </div>
+            <AlertDialogTitle>{t("donationReminderTitle")}</AlertDialogTitle>
+          </div>
+          <AlertDialogDescription>
+            {t("donationReminderMessage")}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel data-testid="button-dismiss-reminder">{t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction onClick={handleSupport} data-testid="button-support-now">
+            {t("supportTheDeveloper")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 function MobileAppWithSplash() {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -222,6 +270,7 @@ function MobileAppWithSplash() {
         <GuidedTourProvider>
           <MobileAppRouter />
           <AdManager />
+          <DonationReminderDialog />
           <Toaster />
         </GuidedTourProvider>
       </DirtyTrackingProvider>
