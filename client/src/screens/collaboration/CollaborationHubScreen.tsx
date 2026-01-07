@@ -38,7 +38,6 @@ export function CollaborationHubScreen() {
   const [activeTab, setActiveTab] = useState("connections");
   const [links, setLinks] = useState<CollaborationLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<
     "connected" | "disconnected" | "connecting"
   >("disconnected");
@@ -80,26 +79,6 @@ export function CollaborationHubScreen() {
       console.error("Failed to load links:", error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleSync = async () => {
-    if (isSyncing) return;
-    setIsSyncing(true);
-    try {
-      await loadLinks();
-      toast({
-        title: t("success"),
-        description: t("synced"),
-      });
-    } catch {
-      toast({
-        title: t("error"),
-        description: t("syncFailed"),
-        variant: "destructive",
-      });
-    } finally {
-      setIsSyncing(false);
     }
   };
 
@@ -199,28 +178,14 @@ export function CollaborationHubScreen() {
   const renderLinksTab = () => (
     <div className="flex flex-col gap-6">
       <Card className="p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Link2 className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="font-medium">{t("syncStatus")}</p>
-              <ConnectionIndicator />
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Link2 className="w-5 h-5 text-primary" />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSync}
-            disabled={isSyncing}
-            data-testid="button-sync"
-          >
-            <RefreshCw
-              className={`w-4 h-4 mr-2 ${isSyncing ? "animate-spin" : ""}`}
-            />
-            {isSyncing ? t("syncing") : t("syncNow")}
-          </Button>
+          <div className="flex-1">
+            <p className="font-medium">{t("syncStatus")}</p>
+            <ConnectionIndicator />
+          </div>
         </div>
       </Card>
 
