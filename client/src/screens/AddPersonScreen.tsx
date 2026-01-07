@@ -73,7 +73,7 @@ export function AddPersonScreen() {
   const phoneCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Get user profile for display name
-  const profile = storage.getHomeSettings();
+  const profile = storage.getProfile();
 
   useEffect(() => {
     if (editMode && data.personId) {
