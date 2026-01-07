@@ -12,6 +12,9 @@ import {
   emitConnectionUpdated,
   emitConnectionRemoved,
   emitSyncData,
+  emitAttendanceUpdate,
+  emitLaundryUpdate,
+  emitHouseholdUpdate,
   isUserOnline,
   getOnlineUserIds
 } from "./realtime";
@@ -1759,6 +1762,17 @@ router.post("/api/shared-attendance", authenticateToken, async (req: Request, re
         'Attendance Revised', `Attendance for ${date} has been revised. Please review.`,
         'attendance', existingRecord.id, { status, date });
 
+      // Emit real-time update to both parties
+      emitAttendanceUpdate([userId, counterpartyId], 'updated', {
+        id: existingRecord.id,
+        bindingId,
+        date,
+        status,
+        hoursWorked,
+        approvalStatus: 'pending',
+        isRevision: true
+      });
+
       return res.json({ 
         success: true, 
         attendanceId: existingRecord.id,
@@ -1802,6 +1816,16 @@ router.post("/api/shared-attendance", authenticateToken, async (req: Request, re
     await createNotification(counterpartyId, counterpartyMode, 'attendance_submitted',
       'Attendance Approval Needed', `Attendance for ${date} needs your approval.`,
       'attendance', attendanceId, { status, date });
+
+    // Emit real-time update to both parties
+    emitAttendanceUpdate([userId, counterpartyId], 'created', {
+      id: attendanceId,
+      bindingId,
+      date,
+      status,
+      hoursWorked,
+      approvalStatus: 'pending'
+    });
 
     res.json({ success: true, attendanceId });
   } catch (error) {
@@ -1952,6 +1976,14 @@ router.patch("/api/shared-attendance/:id/action", authenticateToken, async (req:
         `Your attendance submission for ${record.date} has been approved.`,
         'attendance', id);
 
+      // Emit real-time update
+      emitAttendanceUpdate([userId, record.submittedBy], 'updated', {
+        id,
+        bindingId: record.bindingId,
+        date: record.date,
+        approvalStatus: 'approved'
+      });
+
     } else {
       await db.update(sharedAttendance)
         .set({
@@ -1977,6 +2009,15 @@ router.patch("/api/shared-attendance/:id/action", authenticateToken, async (req:
         'attendance_rejected', 'Attendance Rejected',
         `Your attendance for ${record.date} was rejected: ${remarks}`,
         'attendance', id, { remarks });
+
+      // Emit real-time update
+      emitAttendanceUpdate([userId, record.submittedBy], 'updated', {
+        id,
+        bindingId: record.bindingId,
+        date: record.date,
+        approvalStatus: 'rejected',
+        remarks
+      });
     }
 
     res.json({ success: true, action });
@@ -2057,6 +2098,15 @@ router.post("/api/shared-laundry", authenticateToken, async (req: Request, res: 
     await createNotification(counterpartyId, counterpartyMode, 'laundry_submitted',
       'Laundry Approval Needed', `Laundry batch for ${date} needs your approval.`,
       'laundry', laundryId, { total, date });
+
+    // Emit real-time update to both parties
+    emitLaundryUpdate([userId, counterpartyId], 'created', {
+      id: laundryId,
+      bindingId,
+      date,
+      total,
+      approvalStatus: 'pending'
+    });
 
     res.json({ success: true, laundryId });
   } catch (error) {
@@ -2209,6 +2259,14 @@ router.patch("/api/shared-laundry/:id/action", authenticateToken, async (req: Re
         `Your laundry submission for ${record.date} has been approved.`,
         'laundry', id);
 
+      // Emit real-time update
+      emitLaundryUpdate([userId, record.submittedBy], 'updated', {
+        id,
+        bindingId: record.bindingId,
+        date: record.date,
+        approvalStatus: 'approved'
+      });
+
     } else {
       await db.update(sharedLaundry)
         .set({
@@ -2233,6 +2291,15 @@ router.patch("/api/shared-laundry/:id/action", authenticateToken, async (req: Re
         'laundry_rejected', 'Laundry Rejected',
         `Your laundry for ${record.date} was rejected: ${remarks}`,
         'laundry', id, { remarks });
+
+      // Emit real-time update
+      emitLaundryUpdate([userId, record.submittedBy], 'updated', {
+        id,
+        bindingId: record.bindingId,
+        date: record.date,
+        approvalStatus: 'rejected',
+        remarks
+      });
     }
 
     res.json({ success: true, action });

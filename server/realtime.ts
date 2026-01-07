@@ -166,6 +166,31 @@ export function emitSyncData(toUserIds: string[], payload: any) {
   });
 }
 
+// Live collaboration events for shared data
+export function emitAttendanceUpdate(toUserIds: string[], action: 'created' | 'updated' | 'deleted', data: any) {
+  toUserIds.forEach((userId) => {
+    emitToUser(userId, "collab:attendance-update", { action, data });
+  });
+}
+
+export function emitLaundryUpdate(toUserIds: string[], action: 'created' | 'updated' | 'deleted', data: any) {
+  toUserIds.forEach((userId) => {
+    emitToUser(userId, "collab:laundry-update", { action, data });
+  });
+}
+
+export function emitExpenseUpdate(toUserIds: string[], action: 'created' | 'updated' | 'deleted', data: any) {
+  toUserIds.forEach((userId) => {
+    emitToUser(userId, "collab:expense-update", { action, data });
+  });
+}
+
+export function emitHouseholdUpdate(toUserIds: string[], action: 'member-added' | 'member-removed' | 'updated', data: any) {
+  toUserIds.forEach((userId) => {
+    emitToUser(userId, "collab:household-update", { action, data });
+  });
+}
+
 export function emitUserOnline(toUserIds: string[], userId: string) {
   toUserIds.forEach((targetId) => {
     emitToUser(targetId, "sync:user-online", { userId });
