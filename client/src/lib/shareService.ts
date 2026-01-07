@@ -3,115 +3,174 @@ import { Share } from "@capacitor/share";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Capacitor } from "@capacitor/core";
 
-async function writeAndShareFile(content: string, filename: string, title: string): Promise<boolean> {
+/**
+ * Downloads content as a file
+ * - On web: Creates a blob and triggers browser download
+ * - On native: Saves to Documents directory, then opens share sheet so user can save/send
+ */
+export async function downloadAsFile(content: string, filename: string): Promise<boolean> {
   const BOM = '\uFEFF';
   const fileContent = BOM + content;
 
-  try {
-    const writeResult = await Filesystem.writeFile({
-      path: filename,
-      data: fileContent,
-      directory: Directory.Cache,
-      encoding: Encoding.UTF8,
-    });
-
-    console.log('File written successfully:', writeResult.uri);
-
-    const uriResult = await Filesystem.getUri({
-      directory: Directory.Cache,
-      path: filename,
-    });
-
-    console.log('File URI obtained:', uriResult.uri);
-
-    const canShare = await Share.canShare();
-    if (!canShare.value) {
-      console.error('Share is not available on this device');
-      return false;
-    }
-
-    await Share.share({
-      title: title,
-      files: [uriResult.uri],
-      dialogTitle: title,
-    });
-    return true;
-  } catch (error) {
-    const errorMessage = (error as Error).message || String(error);
-    
-    if (errorMessage.includes('cancel') || 
-        errorMessage.includes('Cancel') ||
-        errorMessage.includes('dismissed') ||
-        errorMessage.includes('aborted')) {
-      console.log('Share was cancelled by user');
-      return false;
-    }
-    
-    console.error('Failed to save/share file:', error);
-    console.error('Error details:', JSON.stringify(error, null, 2));
-    throw error;
-  }
-}
-
-export async function downloadAsFile(content: string, filename: string): Promise<boolean> {
   if (Capacitor.isNativePlatform()) {
     try {
-      return await writeAndShareFile(content, filename, 'Save File');
+      // On native, write to Documents directory (user-accessible)
+      const writeResult = await Filesystem.writeFile({
+        path: filename,
+        data: fileContent,
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      });
+
+      console.log('File saved to Documents:', writeResult.uri);
+
+      // Get the URI for sharing
+      const uriResult = await Filesystem.getUri({
+        directory: Directory.Documents,
+        path: filename,
+      });
+
+      // Open share sheet so user can choose where to save/send
+      const canShare = await Share.canShare();
+      if (canShare.value) {
+        await Share.share({
+          title: 'Save Report',
+          files: [uriResult.uri],
+          dialogTitle: 'Save or Share Report',
+        });
+      }
+      
+      return true;
     } catch (error) {
-      console.error('Native file sharing failed:', error);
+      const errorMessage = (error as Error).message || String(error);
+      
+      // User cancelled - still a success since file was saved
+      if (errorMessage.includes('cancel') || 
+          errorMessage.includes('Cancel') ||
+          errorMessage.includes('dismissed') ||
+          errorMessage.includes('aborted')) {
+        console.log('Share was cancelled by user (file is still saved)');
+        return true;
+      }
+      
+      console.error('Failed to save file on native:', error);
       return false;
     }
   } else {
-    const BOM = '\uFEFF';
-    const fileContent = BOM + content;
+    // Web: Create blob and trigger download
     try {
       const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
+      link.style.display = 'none';
       document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      
+      // Use setTimeout to ensure the link is in the DOM
+      await new Promise<void>((resolve) => {
+        setTimeout(() => {
+          link.click();
+          resolve();
+        }, 100);
+      });
+      
+      // Cleanup after a delay
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 1000);
+      
       return true;
     } catch (error) {
-      console.error('Failed to download file:', error);
+      console.error('Failed to download file on web:', error);
       return false;
     }
   }
 }
 
+/**
+ * Opens native sharing menu to share a report
+ * - On web: Uses Web Share API if available, falls back to download
+ * - On native: Writes file to cache and opens share sheet
+ */
 export async function shareReport(options: {
   title: string;
   text: string;
   filename: string;
 }): Promise<boolean> {
+  const BOM = '\uFEFF';
+  const fileContent = BOM + options.text;
+
   if (Capacitor.isNativePlatform()) {
     try {
-      return await writeAndShareFile(options.text, options.filename, options.title);
+      // Write to cache directory for sharing
+      await Filesystem.writeFile({
+        path: options.filename,
+        data: fileContent,
+        directory: Directory.Cache,
+        encoding: Encoding.UTF8,
+      });
+
+      const uriResult = await Filesystem.getUri({
+        directory: Directory.Cache,
+        path: options.filename,
+      });
+
+      console.log('File ready for sharing:', uriResult.uri);
+
+      const canShare = await Share.canShare();
+      if (!canShare.value) {
+        console.error('Share is not available on this device');
+        return false;
+      }
+
+      await Share.share({
+        title: options.title,
+        files: [uriResult.uri],
+        dialogTitle: options.title,
+      });
+      
+      return true;
     } catch (error) {
-      console.error('Native report sharing failed:', error);
+      const errorMessage = (error as Error).message || String(error);
+      
+      if (errorMessage.includes('cancel') || 
+          errorMessage.includes('Cancel') ||
+          errorMessage.includes('dismissed') ||
+          errorMessage.includes('aborted')) {
+        console.log('Share was cancelled by user');
+        return false;
+      }
+      
+      console.error('Native share failed:', error);
       return false;
     }
   } else {
-    const BOM = '\uFEFF';
-    const fileContent = BOM + options.text;
-    if (navigator.share) {
+    // Web: Try Web Share API first
+    if (navigator.share && navigator.canShare) {
       try {
-        const file = new File([fileContent], options.filename, { type: 'text/csv' });
-        await navigator.share({
-          title: options.title,
-          files: [file],
-        });
-        return true;
+        const file = new File([fileContent], options.filename, { type: 'text/csv;charset=utf-8' });
+        
+        // Check if we can share files
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: options.title,
+            files: [file],
+          });
+          return true;
+        }
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
+          console.log('Web share was cancelled by user');
           return false;
         }
-        console.error('Web share failed:', error);
+        console.error('Web Share API failed:', error);
       }
     }
+    
+    // Fallback: download the file
+    console.log('Web Share API not available, falling back to download');
     return await downloadAsFile(options.text, options.filename);
   }
 }
