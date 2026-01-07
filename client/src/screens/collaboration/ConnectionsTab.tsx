@@ -18,6 +18,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
 import { storage } from "@/lib/storage";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Connection {
   id: string;
@@ -71,6 +81,7 @@ export function ConnectionsTab() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [connectionToRemove, setConnectionToRemove] = useState<Connection | null>(null);
 
   const profile = storage.getProfile();
   const currentMode = profile?.type || "HOME";
@@ -225,10 +236,12 @@ export function ConnectionsTab() {
     }
   };
 
-  const handleRemoveConnection = async (connectionId: string) => {
+  const confirmRemoveConnection = async () => {
+    if (!connectionToRemove) return;
+    
     try {
       await collaborationService.fetchWithAuth(
-        `/api/connections/${connectionId}`,
+        `/connections/${connectionToRemove.id}`,
         { method: "DELETE" }
       );
       toast({
@@ -242,6 +255,8 @@ export function ConnectionsTab() {
         description: "Failed to remove connection",
         variant: "destructive",
       });
+    } finally {
+      setConnectionToRemove(null);
     }
   };
 
@@ -457,7 +472,7 @@ export function ConnectionsTab() {
                       variant="ghost"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleRemoveConnection(conn.id);
+                        setConnectionToRemove(conn);
                       }}
                       data-testid={`button-remove-${conn.id}`}
                     >
@@ -470,6 +485,29 @@ export function ConnectionsTab() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!connectionToRemove} onOpenChange={() => setConnectionToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Connection</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove your connection with{" "}
+              <strong>{connectionToRemove?.otherUser.displayName || "this user"}</strong>?
+              This will also delete your chat history with them.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-remove">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemoveConnection}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-remove"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
