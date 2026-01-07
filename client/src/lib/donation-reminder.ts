@@ -1,5 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
+import { storage } from "@/lib/storage";
 
 const STORAGE_KEYS = {
   LAST_DONATION_AT: "hm_last_donation_at",
@@ -30,8 +31,27 @@ export function getDaysSinceLastDonation(): number {
   return Math.floor(diffMs / (24 * 60 * 60 * 1000));
 }
 
+function getUserRegistrationTimestamp(): number | null {
+  const profile = storage.getProfile();
+  if (!profile?.createdAt) {
+    return null;
+  }
+  return new Date(profile.createdAt).getTime();
+}
+
 export function checkShouldShowReminder(): boolean {
   const now = Date.now();
+  
+  const registrationTime = getUserRegistrationTimestamp();
+  if (!registrationTime) {
+    return false;
+  }
+  
+  const userAgeMs = now - registrationTime;
+  if (userAgeMs < ONE_MONTH_MS) {
+    return false;
+  }
+  
   const lastDonation = getLastDonationTimestamp();
   const lastReminder = getLastReminderTimestamp();
 
