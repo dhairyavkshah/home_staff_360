@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1767746193732,
+      "tag": "0000_add_backup_tables",
+      "breakpoints": true
+    }
+  ]
+}

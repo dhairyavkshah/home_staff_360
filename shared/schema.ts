@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, varchar, text, boolean, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, varchar, text, boolean, timestamp, integer, serial, jsonb } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const STORAGE_KEYS = {
@@ -871,30 +871,142 @@ export const insertCollaborationMessageSchema = z.object({
 export type InsertCollaborationMessage = z.infer<typeof insertCollaborationMessageSchema>;
 export type CollaborationMessage = typeof collaborationMessages.$inferSelect;
 
-export const adminRoles = ['super_admin', 'admin', 'support'] as const;
-export type AdminRole = typeof adminRoles[number];
+// ============ MULTI-TIER ADMIN HIERARCHY ============
 
+// Admin role types for type safety
+export const adminRoleNames = ['owner', 'super_admin', 'admin'] as const;
+export type AdminRoleName = typeof adminRoleNames[number];
+
+// Invitation statuses
+export const adminInvitationStatuses = ['pending', 'accepted', 'expired'] as const;
+export type AdminInvitationStatus = typeof adminInvitationStatuses[number];
+
+// Admin roles table - defines the hierarchy with precedence
+// Precedence: 1 = highest (owner), 2 = super_admin, 3 = admin
+export const adminRolesTable = pgTable("admin_roles", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  precedence: integer("precedence").notNull(),
+  permissions: jsonb("permissions").$type<string[]>().default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const adminRolesTableRelations = relations(adminRolesTable, ({ many }) => ({
+  users: many(adminUsers),
+  invitations: many(adminInvitations),
+}));
+
+export const insertAdminRoleSchema = z.object({
+  name: z.string().min(1),
+  precedence: z.number().int().min(1),
+  permissions: z.array(z.string()).optional(),
+});
+export type InsertAdminRole = z.infer<typeof insertAdminRoleSchema>;
+export type AdminRole = typeof adminRolesTable.$inferSelect;
+
+// Admin users table - with role hierarchy support
 export const adminUsers = pgTable("admin_users", {
   id: varchar("id", { length: 255 }).primaryKey(),
   email: varchar("email", { length: 255 }).unique().notNull(),
   passwordHash: text("password_hash").notNull(),
   name: varchar("name", { length: 100 }).notNull(),
-  role: varchar("role", { length: 30 }).default('admin'),
-  isActive: boolean("is_active").default(true),
+  roleId: integer("role_id").references(() => adminRolesTable.id),
+  isActive: boolean("is_active").default(true).notNull(),
+  invitedBy: varchar("invited_by", { length: 255 }),
   lastLoginAt: timestamp("last_login_at"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const adminUsersRelations = relations(adminUsers, ({ one, many }) => ({
+  role: one(adminRolesTable, {
+    fields: [adminUsers.roleId],
+    references: [adminRolesTable.id],
+  }),
+  invitedByAdmin: one(adminUsers, {
+    fields: [adminUsers.invitedBy],
+    references: [adminUsers.id],
+    relationName: "invitedAdmins",
+  }),
+  invitedAdmins: many(adminUsers, { relationName: "invitedAdmins" }),
+  sentInvitations: many(adminInvitations),
+}));
 
 export const insertAdminUserSchema = z.object({
   id: z.string().max(255),
   email: z.string().email().max(255),
   passwordHash: z.string(),
   name: z.string().max(100),
-  role: z.enum(adminRoles).optional(),
+  roleId: z.number().int().optional(),
   isActive: z.boolean().optional(),
+  invitedBy: z.string().max(255).optional(),
 });
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
 export type AdminUser = typeof adminUsers.$inferSelect;
+
+// Admin invitations table - for inviting new admins
+export const adminInvitations = pgTable("admin_invitations", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  roleId: integer("role_id").references(() => adminRolesTable.id).notNull(),
+  token: text("token").unique().notNull(),
+  status: text("status").default('pending').notNull(),
+  invitedById: varchar("invited_by_id", { length: 255 }).references(() => adminUsers.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const adminInvitationsRelations = relations(adminInvitations, ({ one }) => ({
+  role: one(adminRolesTable, {
+    fields: [adminInvitations.roleId],
+    references: [adminRolesTable.id],
+  }),
+  invitedBy: one(adminUsers, {
+    fields: [adminInvitations.invitedById],
+    references: [adminUsers.id],
+  }),
+}));
+
+export const insertAdminInvitationSchema = z.object({
+  email: z.string().email(),
+  roleId: z.number().int(),
+  token: z.string().min(1),
+  status: z.enum(adminInvitationStatuses).optional(),
+  invitedById: z.string().max(255).optional(),
+  expiresAt: z.date(),
+});
+export type InsertAdminInvitation = z.infer<typeof insertAdminInvitationSchema>;
+export type AdminInvitation = typeof adminInvitations.$inferSelect;
+
+// Default admin permissions by role
+export const DEFAULT_ADMIN_PERMISSIONS = {
+  owner: [
+    'manage_super_admins',
+    'manage_admins',
+    'manage_users',
+    'manage_ads',
+    'view_analytics',
+    'manage_settings',
+    'manage_subscriptions',
+    'full_access',
+  ],
+  super_admin: [
+    'manage_admins',
+    'manage_users',
+    'manage_ads',
+    'view_analytics',
+    'manage_settings',
+  ],
+  admin: [
+    'manage_users',
+    'view_analytics',
+  ],
+} as const;
+
+// Seed data for default admin roles (use in migration or seed script):
+// INSERT INTO admin_roles (name, precedence, permissions) VALUES
+//   ('owner', 1, '["manage_super_admins","manage_admins","manage_users","manage_ads","view_analytics","manage_settings","manage_subscriptions","full_access"]'),
+//   ('super_admin', 2, '["manage_admins","manage_users","manage_ads","view_analytics","manage_settings"]'),
+//   ('admin', 3, '["manage_users","view_analytics"]');
 
 // ============ REAL-TIME COLLABORATION SYSTEM ============
 
@@ -1726,3 +1838,97 @@ export const revisionEntrySchema = z.object({
   createdAt: z.string(),
 });
 export type RevisionEntry = z.infer<typeof revisionEntrySchema>;
+
+// ============================================
+// User Backup Management System
+// ============================================
+
+export const backupTypes = ['manual', 'automatic', 'pre_delete'] as const;
+export type BackupType = typeof backupTypes[number];
+
+export const backupStatuses = ['pending', 'completed', 'failed', 'restored', 'deleted'] as const;
+export type BackupStatus = typeof backupStatuses[number];
+
+export const backupLogActions = ['created', 'restored', 'deleted', 'failed'] as const;
+export type BackupLogAction = typeof backupLogActions[number];
+
+// User backups table - stores user data snapshots
+export const userBackups = pgTable("user_backups", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).references(() => serverUsers.id),
+  phoneNumber: text("phone_number").notNull(),
+  backupType: varchar("backup_type", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).default('pending').notNull(),
+  backupData: jsonb("backup_data"),
+  checksum: text("checksum"),
+  createdById: varchar("created_by_id", { length: 255 }).references(() => adminUsers.id),
+  restoredById: varchar("restored_by_id", { length: 255 }).references(() => adminUsers.id),
+  restoredAt: timestamp("restored_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  notes: text("notes"),
+});
+
+export const userBackupsRelations = relations(userBackups, ({ one, many }) => ({
+  user: one(serverUsers, {
+    fields: [userBackups.userId],
+    references: [serverUsers.id],
+  }),
+  createdBy: one(adminUsers, {
+    fields: [userBackups.createdById],
+    references: [adminUsers.id],
+    relationName: "backupsCreated",
+  }),
+  restoredBy: one(adminUsers, {
+    fields: [userBackups.restoredById],
+    references: [adminUsers.id],
+    relationName: "backupsRestored",
+  }),
+  logs: many(backupLogs),
+}));
+
+export const insertUserBackupSchema = z.object({
+  userId: z.string().max(255).nullable().optional(),
+  phoneNumber: z.string(),
+  backupType: z.enum(backupTypes),
+  status: z.enum(backupStatuses).optional(),
+  backupData: z.any().optional(),
+  checksum: z.string().optional(),
+  createdById: z.string().max(255).optional(),
+  restoredById: z.string().max(255).optional(),
+  restoredAt: z.date().optional(),
+  expiresAt: z.date().optional(),
+  notes: z.string().optional(),
+});
+export type InsertUserBackup = z.infer<typeof insertUserBackupSchema>;
+export type UserBackup = typeof userBackups.$inferSelect;
+
+// Backup logs table - audit trail for backup operations
+export const backupLogs = pgTable("backup_logs", {
+  id: serial("id").primaryKey(),
+  backupId: integer("backup_id").references(() => userBackups.id).notNull(),
+  action: varchar("action", { length: 20 }).notNull(),
+  adminId: varchar("admin_id", { length: 255 }).references(() => adminUsers.id),
+  details: jsonb("details"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const backupLogsRelations = relations(backupLogs, ({ one }) => ({
+  backup: one(userBackups, {
+    fields: [backupLogs.backupId],
+    references: [userBackups.id],
+  }),
+  admin: one(adminUsers, {
+    fields: [backupLogs.adminId],
+    references: [adminUsers.id],
+  }),
+}));
+
+export const insertBackupLogSchema = z.object({
+  backupId: z.number(),
+  action: z.enum(backupLogActions),
+  adminId: z.string().max(255).optional(),
+  details: z.any().optional(),
+});
+export type InsertBackupLog = z.infer<typeof insertBackupLogSchema>;
+export type BackupLog = typeof backupLogs.$inferSelect;

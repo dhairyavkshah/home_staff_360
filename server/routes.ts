@@ -34,7 +34,14 @@ import {
   insertNotificationSchema,
   insertAdvertisementSchema,
   insertAdImpressionSchema,
-  approvalStatuses
+  approvalStatuses,
+  userBackups,
+  backupLogs,
+  insertUserBackupSchema,
+  insertBackupLogSchema,
+  backupTypes,
+  backupStatuses,
+  backupLogActions
 } from "@shared/schema";
 import { eq, and, or, desc, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -1406,7 +1413,7 @@ router.post("/api/admin/login", async (req: Request, res: Response) => {
       .where(eq(adminUsers.id, admin.id));
 
     const token = jwt.sign(
-      { adminId: admin.id, email: admin.email, role: admin.role, isAdmin: true },
+      { adminId: admin.id, email: admin.email, roleId: admin.roleId, isAdmin: true },
       JWT_SECRET,
       { expiresIn: "8h" }
     );
@@ -1418,7 +1425,7 @@ router.post("/api/admin/login", async (req: Request, res: Response) => {
         id: admin.id,
         email: admin.email,
         name: admin.name,
-        role: admin.role
+        roleId: admin.roleId
       }
     });
   } catch (error) {
@@ -4493,6 +4500,400 @@ router.delete("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res:
   }
 });
 
+// ============ USER BACKUP MANAGEMENT API ============
+
+// Helper function to generate checksum for backup data
+function generateChecksum(data: any): string {
+  const crypto = require('crypto');
+  const jsonString = JSON.stringify(data);
+  return crypto.createHash('sha256').update(jsonString).digest('hex');
+}
+
+// Helper function to create backup log entry
+async function createBackupLog(backupId: number, action: string, adminId: string | null, details?: any) {
+  await db.insert(backupLogs).values({
+    backupId,
+    action,
+    adminId,
+    details: details || null
+  });
+}
+
+// GET /api/admin/backups - List all backups with filtering
+router.get("/api/admin/backups", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { userId, status, type, limit = '50', offset = '0' } = req.query;
+
+    let conditions: any[] = [];
+    
+    if (userId) {
+      conditions.push(eq(userBackups.userId, userId as string));
+    }
+    if (status && backupStatuses.includes(status as any)) {
+      conditions.push(eq(userBackups.status, status as string));
+    }
+    if (type && backupTypes.includes(type as any)) {
+      conditions.push(eq(userBackups.backupType, type as string));
+    }
+
+    const backups = await db.query.userBackups.findMany({
+      where: conditions.length > 0 ? and(...conditions) : undefined,
+      orderBy: desc(userBackups.createdAt),
+      limit: Math.min(parseInt(limit as string) || 50, 100),
+      offset: parseInt(offset as string) || 0,
+      with: {
+        user: true,
+        createdBy: {
+          columns: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        restoredBy: {
+          columns: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    // Get total count for pagination
+    const [totalResult] = await db.select({ count: sql<number>`count(*)` })
+      .from(userBackups)
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+    res.json({
+      backups,
+      total: Number(totalResult.count),
+      limit: parseInt(limit as string) || 50,
+      offset: parseInt(offset as string) || 0
+    });
+  } catch (error) {
+    console.error("List backups error:", error);
+    res.status(500).json({ error: "Failed to list backups" });
+  }
+});
+
+// POST /api/admin/backups - Create manual backup for a user
+router.post("/api/admin/backups", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { userId, notes, expiresAt } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+
+    // Get user data
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Collect related user data for comprehensive backup
+    const userDevices = await db.query.devices.findMany({
+      where: eq(devices.userId, userId)
+    });
+
+    const userLinks = await db.query.collaborationLinks.findMany({
+      where: or(
+        eq(collaborationLinks.homeUserId, userId),
+        eq(collaborationLinks.staffUserId, userId)
+      )
+    });
+
+    const userNotifications = await db.query.notifications.findMany({
+      where: eq(notifications.userId, userId)
+    });
+
+    const backupData = {
+      user: {
+        ...user,
+        passwordHash: '[REDACTED]',
+        otpHash: '[REDACTED]'
+      },
+      devices: userDevices,
+      collaborationLinks: userLinks,
+      notifications: userNotifications.slice(0, 100), // Limit to last 100 notifications
+      backupVersion: '1.0',
+      backupTimestamp: new Date().toISOString()
+    };
+
+    const checksum = generateChecksum(backupData);
+
+    const [newBackup] = await db.insert(userBackups).values({
+      userId,
+      phoneNumber: user.phone,
+      backupType: 'manual',
+      status: 'completed',
+      backupData,
+      checksum,
+      createdById: adminId,
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
+      notes: notes || null
+    }).returning();
+
+    // Create audit log
+    await createBackupLog(newBackup.id, 'created', adminId, {
+      backupType: 'manual',
+      userPhone: user.phone,
+      dataSize: JSON.stringify(backupData).length
+    });
+
+    res.status(201).json({
+      success: true,
+      backup: {
+        ...newBackup,
+        backupData: undefined // Don't return backup data in response
+      }
+    });
+  } catch (error) {
+    console.error("Create backup error:", error);
+    res.status(500).json({ error: "Failed to create backup" });
+  }
+});
+
+// GET /api/admin/backups/:id - Get backup details
+router.get("/api/admin/backups/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { includeData } = req.query;
+
+    const backup = await db.query.userBackups.findFirst({
+      where: eq(userBackups.id, parseInt(id)),
+      with: {
+        user: true,
+        createdBy: {
+          columns: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        restoredBy: {
+          columns: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        logs: {
+          orderBy: desc(backupLogs.createdAt),
+          with: {
+            admin: {
+              columns: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!backup) {
+      return res.status(404).json({ error: "Backup not found" });
+    }
+
+    // Verify checksum integrity
+    let checksumValid = false;
+    if (backup.backupData && backup.checksum) {
+      const computedChecksum = generateChecksum(backup.backupData);
+      checksumValid = computedChecksum === backup.checksum;
+    }
+
+    const response: any = {
+      ...backup,
+      checksumValid
+    };
+
+    // Only include backup data if explicitly requested (for restore preview)
+    if (includeData !== 'true') {
+      response.backupData = undefined;
+    }
+
+    res.json(response);
+  } catch (error) {
+    console.error("Get backup error:", error);
+    res.status(500).json({ error: "Failed to get backup" });
+  }
+});
+
+// POST /api/admin/backups/:id/restore - Restore a user from backup
+router.post("/api/admin/backups/:id/restore", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    const backup = await db.query.userBackups.findFirst({
+      where: eq(userBackups.id, parseInt(id))
+    });
+
+    if (!backup) {
+      return res.status(404).json({ error: "Backup not found" });
+    }
+
+    if (backup.status === 'deleted') {
+      return res.status(400).json({ error: "Cannot restore from a deleted backup" });
+    }
+
+    if (backup.status === 'restored') {
+      return res.status(400).json({ error: "Backup has already been restored" });
+    }
+
+    const backupData = backup.backupData as any;
+    if (!backupData || !backupData.user) {
+      return res.status(400).json({ error: "Invalid backup data" });
+    }
+
+    // Verify checksum
+    if (backup.checksum) {
+      const computedChecksum = generateChecksum(backup.backupData);
+      if (computedChecksum !== backup.checksum) {
+        await createBackupLog(backup.id, 'failed', adminId, {
+          reason: 'Checksum verification failed',
+          notes
+        });
+        return res.status(400).json({ error: "Backup data integrity check failed" });
+      }
+    }
+
+    const now = new Date();
+    let userId = backup.userId;
+
+    // Check if user still exists
+    if (userId) {
+      const existingUser = await db.query.serverUsers.findFirst({
+        where: eq(serverUsers.id, userId)
+      });
+
+      if (existingUser) {
+        // Update existing user with backup data (excluding sensitive fields)
+        const userData = backupData.user;
+        await db.update(serverUsers)
+          .set({
+            displayName: userData.displayName,
+            userType: userData.userType,
+            avatarData: userData.avatarData,
+            preferredLanguage: userData.preferredLanguage,
+            isActive: true,
+            lastActiveAt: now
+          })
+          .where(eq(serverUsers.id, userId));
+      } else {
+        // User was deleted, recreate with new ID
+        const userData = backupData.user;
+        userId = uuidv4();
+        
+        await db.insert(serverUsers).values({
+          id: userId,
+          phone: backup.phoneNumber,
+          displayName: userData.displayName,
+          userType: userData.userType,
+          avatarData: userData.avatarData,
+          preferredLanguage: userData.preferredLanguage,
+          isActive: true,
+          isVerified: true,
+          createdAt: now
+        });
+      }
+    } else {
+      // No userId in backup (user was deleted before backup), create new user
+      const userData = backupData.user;
+      userId = uuidv4();
+      
+      await db.insert(serverUsers).values({
+        id: userId,
+        phone: backup.phoneNumber,
+        displayName: userData.displayName || 'Restored User',
+        userType: userData.userType,
+        avatarData: userData.avatarData,
+        preferredLanguage: userData.preferredLanguage,
+        isActive: true,
+        isVerified: true,
+        createdAt: now
+      });
+    }
+
+    // Update backup status
+    await db.update(userBackups)
+      .set({
+        status: 'restored',
+        restoredById: adminId,
+        restoredAt: now,
+        userId: userId, // Update to new userId if recreated
+        notes: notes ? `${backup.notes || ''}\n[Restore Note]: ${notes}`.trim() : backup.notes
+      })
+      .where(eq(userBackups.id, backup.id));
+
+    // Create audit log
+    await createBackupLog(backup.id, 'restored', adminId, {
+      restoredUserId: userId,
+      notes
+    });
+
+    res.json({
+      success: true,
+      message: "User restored successfully",
+      restoredUserId: userId
+    });
+  } catch (error) {
+    console.error("Restore backup error:", error);
+    res.status(500).json({ error: "Failed to restore backup" });
+  }
+});
+
+// DELETE /api/admin/backups/:id - Delete a backup (soft delete by changing status)
+router.delete("/api/admin/backups/:id", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    const backup = await db.query.userBackups.findFirst({
+      where: eq(userBackups.id, parseInt(id))
+    });
+
+    if (!backup) {
+      return res.status(404).json({ error: "Backup not found" });
+    }
+
+    if (backup.status === 'deleted') {
+      return res.status(400).json({ error: "Backup is already deleted" });
+    }
+
+    // Soft delete by changing status
+    await db.update(userBackups)
+      .set({
+        status: 'deleted',
+        notes: notes ? `${backup.notes || ''}\n[Delete Note]: ${notes}`.trim() : backup.notes
+      })
+      .where(eq(userBackups.id, backup.id));
+
+    // Create audit log
+    await createBackupLog(backup.id, 'deleted', adminId, {
+      previousStatus: backup.status,
+      notes
+    });
+
+    res.json({
+      success: true,
+      message: "Backup deleted successfully"
+    });
+  } catch (error) {
+    console.error("Delete backup error:", error);
+    res.status(500).json({ error: "Failed to delete backup" });
+  }
+});
+
 async function initializeDefaultAdmin() {
   const defaultEmail = process.env.ADMIN_DEFAULT_EMAIL;
   const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD;
@@ -4512,8 +4913,7 @@ async function initializeDefaultAdmin() {
       id: uuidv4(),
       email: defaultEmail,
       passwordHash,
-      name: "Super Admin",
-      role: "super_admin",
+      name: "Owner Admin",
       isActive: true
     });
     console.log("Default admin user created");
