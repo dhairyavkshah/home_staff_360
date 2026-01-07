@@ -2409,117 +2409,6 @@ router.get("/api/connections/search", authenticateToken, async (req: Request, re
   }
 });
 
-// Send connection request
-router.post("/api/connections/request", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.userId;
-    const { targetUserId, senderMode, message } = req.body;
-
-    if (!targetUserId || !senderMode) {
-      return res.status(400).json({ error: "Target user ID and sender mode are required" });
-    }
-
-    if (targetUserId === userId) {
-      return res.status(400).json({ error: "Cannot send connection request to yourself" });
-    }
-
-    // Check if target user exists
-    const targetUser = await db.query.serverUsers.findFirst({
-      where: eq(serverUsers.id, targetUserId)
-    });
-
-    if (!targetUser) {
-      return res.status(404).json({ error: "Target user not found" });
-    }
-
-    // Check existing connection
-    const existingConnection = await db.query.collabConnections.findFirst({
-      where: or(
-        and(eq(collabConnections.userAId, userId), eq(collabConnections.userBId, targetUserId)),
-        and(eq(collabConnections.userAId, targetUserId), eq(collabConnections.userBId, userId))
-      )
-    });
-
-    if (existingConnection) {
-      return res.status(400).json({ error: "Already connected with this user" });
-    }
-
-    // Check pending invite
-    const pendingInvite = await db.query.collabConnectionInvites.findFirst({
-      where: and(
-        or(
-          and(eq(collabConnectionInvites.senderId, userId), eq(collabConnectionInvites.targetUserId, targetUserId)),
-          and(eq(collabConnectionInvites.senderId, targetUserId), eq(collabConnectionInvites.targetUserId, userId))
-        ),
-        eq(collabConnectionInvites.status, 'pending')
-      )
-    });
-
-    if (pendingInvite) {
-      // If they sent us an invite, auto-accept
-      if (pendingInvite.senderId === targetUserId) {
-        return res.json({ 
-          success: true, 
-          message: "You have a pending invite from this user. Accepting it now.",
-          inviteId: pendingInvite.id,
-          autoAccept: true
-        });
-      }
-      return res.status(400).json({ error: "Connection request already pending" });
-    }
-
-    // Get sender info
-    const sender = await db.query.serverUsers.findFirst({
-      where: eq(serverUsers.id, userId)
-    });
-
-    // Create invite
-    const inviteId = uuidv4();
-    const normalizedPhone = targetUser.phone ? normalizePhoneWithCountryCode(targetUser.phone) : '';
-
-    await db.insert(collabConnectionInvites).values({
-      id: inviteId,
-      senderId: userId,
-      senderMode,
-      targetPhone: targetUser.phone || '',
-      targetPhoneNormalized: normalizedPhone,
-      targetUserId,
-      status: 'pending',
-      message: message || null,
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-    });
-
-    // Create notification for target user (send to both modes)
-    await createNotification(
-      targetUserId, 
-      'HOME',
-      'connection_request',
-      'New Connection Request',
-      `${sender?.displayName || 'Someone'} wants to connect with you.`,
-      'connection',
-      inviteId,
-      { senderId: userId, senderName: sender?.displayName }
-    );
-
-    await createNotification(
-      targetUserId, 
-      'STAFF',
-      'connection_request',
-      'New Connection Request',
-      `${sender?.displayName || 'Someone'} wants to connect with you.`,
-      'connection',
-      inviteId,
-      { senderId: userId, senderName: sender?.displayName }
-    );
-
-    res.json({ success: true, inviteId });
-  } catch (error) {
-    console.error("Connection request error:", error);
-    res.status(500).json({ error: "Failed to send connection request" });
-  }
-});
-
 // Get pending connection invites (received)
 router.get("/api/connections/invites/received", authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -6966,19 +6855,44 @@ router.post("/api/invitations/send", authenticateToken, async (req: Request, res
 
     let smsSent = false;
     if (process.env.TWILIO_PHONE_NUMBER && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+      const maskedTwilioPhone = twilioPhone.length > 8 
+        ? `${twilioPhone.slice(0, 4)}****${twilioPhone.slice(-4)}`
+        : '****';
+      
+      console.log(`[SMS Invite] Attempting to send SMS invitation:`);
+      console.log(`  - To: ${normalizedPhone}`);
+      console.log(`  - From: ${maskedTwilioPhone}`);
+      console.log(`  - Message length: ${smsMessage.length} chars`);
+      
       try {
-        await twilioClient.messages.create({
+        const messageResult = await twilioClient.messages.create({
           body: smsMessage,
           to: normalizedPhone,
-          from: process.env.TWILIO_PHONE_NUMBER
+          from: twilioPhone
         });
         smsSent = true;
-      } catch (smsError) {
-        console.error("SMS invitation sending failed:", smsError);
+        console.log(`[SMS Invite] SUCCESS - Message SID: ${messageResult.sid}, Status: ${messageResult.status}`);
+      } catch (smsError: any) {
+        console.error(`[SMS Invite] FAILED - Error sending SMS to ${normalizedPhone}:`);
+        console.error(`  - Error Code: ${smsError.code || 'N/A'}`);
+        console.error(`  - Error Message: ${smsError.message || 'Unknown error'}`);
+        console.error(`  - More Info: ${smsError.moreInfo || 'N/A'}`);
+        console.error(`  - Status: ${smsError.status || 'N/A'}`);
+        console.error(`  - Full Error:`, JSON.stringify(smsError, null, 2));
+        
         if (process.env.NODE_ENV !== "development") {
-          return res.status(500).json({ error: "Failed to send SMS invitation" });
+          return res.status(500).json({ 
+            error: "Failed to send SMS invitation",
+            details: smsError.message || "Twilio error occurred"
+          });
         }
       }
+    } else {
+      console.log(`[SMS Invite] Twilio not configured - missing credentials`);
+      console.log(`  - TWILIO_PHONE_NUMBER: ${process.env.TWILIO_PHONE_NUMBER ? 'set' : 'missing'}`);
+      console.log(`  - TWILIO_ACCOUNT_SID: ${process.env.TWILIO_ACCOUNT_SID ? 'set' : 'missing'}`);
+      console.log(`  - TWILIO_AUTH_TOKEN: ${process.env.TWILIO_AUTH_TOKEN ? 'set' : 'missing'}`);
     }
 
     await db.insert(userInvitations).values({

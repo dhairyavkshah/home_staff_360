@@ -48,7 +48,7 @@ export function MessagesTab() {
   const loadChats = async () => {
     setIsLoading(true);
     try {
-      const result = await collaborationService.fetchWithAuth("/api/chats");
+      const result = await collaborationService.fetchWithAuth("/chats");
       setChats(result.chats || []);
     } catch (error) {
       console.error("Failed to load chats:", error);
@@ -64,7 +64,7 @@ export function MessagesTab() {
   const toggleMute = async (chatId: string, currentlyMuted: boolean) => {
     try {
       await collaborationService.fetchWithAuth(
-        `/api/chats/${chatId}/${currentlyMuted ? "unmute" : "mute"}`,
+        `/chats/${chatId}/${currentlyMuted ? "unmute" : "mute"}`,
         { method: "POST" }
       );
       setChats((prev) =>

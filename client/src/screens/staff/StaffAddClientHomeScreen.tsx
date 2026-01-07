@@ -391,9 +391,15 @@ export function StaffAddClientHomeScreen() {
             value={contactPhone}
             onChange={(e) => handlePhoneChange(e.target.value)}
             onBlur={handlePhoneBlur}
-            placeholder={t("enterContactPhone")}
+            placeholder="+91 98765 43210"
             data-testid="input-contact-phone"
           />
+          <p className="text-xs text-muted-foreground">
+            Include country code (e.g., +91 for India, +1 for USA)
+          </p>
+          {contactPhone && !contactPhone.trim().startsWith('+') && (
+            <p className="text-xs text-destructive">Phone number must start with + and country code</p>
+          )}
           
           {isCheckingPhone && (
             <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg" data-testid="status-phone-checking">

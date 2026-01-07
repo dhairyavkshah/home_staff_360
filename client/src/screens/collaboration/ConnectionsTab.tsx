@@ -83,9 +83,9 @@ export function ConnectionsTab() {
     setIsLoading(true);
     try {
       const [connectionsRes, receivedRes, sentRes] = await Promise.all([
-        collaborationService.fetchWithAuth("/api/connections"),
-        collaborationService.fetchWithAuth("/api/connections/invites/received"),
-        collaborationService.fetchWithAuth("/api/connections/invites/sent"),
+        collaborationService.fetchWithAuth("/connections"),
+        collaborationService.fetchWithAuth("/connections/invites/received"),
+        collaborationService.fetchWithAuth("/connections/invites/sent"),
       ]);
 
       setConnections(connectionsRes.connections || []);
@@ -112,7 +112,7 @@ export function ConnectionsTab() {
     setSearchResult(null);
     try {
       const result = await collaborationService.fetchWithAuth(
-        `/api/connections/search?phone=${encodeURIComponent(searchPhone)}&mode=${currentMode}`
+        `/connections/search?phone=${encodeURIComponent(searchPhone)}&mode=${currentMode}`
       );
       setSearchResult(result);
       if (!result.user) {
@@ -146,12 +146,12 @@ export function ConnectionsTab() {
     setIsSending(true);
     try {
       const result = await collaborationService.fetchWithAuth(
-        "/api/connections/request",
+        "/connections/request",
         {
           method: "POST",
           body: JSON.stringify({
             targetUserId: searchResult.user.id,
-            senderMode: currentMode,
+            requesterName: profile?.displayName || "User",
           }),
         }
       );
@@ -185,7 +185,7 @@ export function ConnectionsTab() {
   const handleAcceptInvite = async (inviteId: string) => {
     try {
       await collaborationService.fetchWithAuth(
-        `/api/connections/invites/${inviteId}/accept`,
+        `/connections/invites/${inviteId}/accept`,
         {
           method: "POST",
           body: JSON.stringify({ receiverMode: currentMode }),
@@ -208,7 +208,7 @@ export function ConnectionsTab() {
   const handleRejectInvite = async (inviteId: string) => {
     try {
       await collaborationService.fetchWithAuth(
-        `/api/connections/invites/${inviteId}/reject`,
+        `/connections/invites/${inviteId}/reject`,
         { method: "POST" }
       );
       toast({
@@ -264,14 +264,15 @@ export function ConnectionsTab() {
           <Search className="w-4 h-4" />
           Find People
         </h4>
-        <div className="flex gap-4">
-          <Input
-            placeholder="+1234567890"
-            value={searchPhone}
-            onChange={(e) => setSearchPhone(e.target.value)}
-            className="flex-1"
-            data-testid="input-search-phone"
-          />
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-4">
+            <Input
+              placeholder="+91 98765 43210"
+              value={searchPhone}
+              onChange={(e) => setSearchPhone(e.target.value)}
+              className="flex-1"
+              data-testid="input-search-phone"
+            />
           <Button
             onClick={handleSearch}
             disabled={isSearching}
@@ -283,6 +284,13 @@ export function ConnectionsTab() {
               <Search className="w-4 h-4" />
             )}
           </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Include country code (e.g., +91 for India, +1 for USA)
+          </p>
+          {searchPhone && !searchPhone.trim().startsWith('+') && (
+            <p className="text-xs text-destructive">Phone number must start with + and country code</p>
+          )}
         </div>
 
         {searchResult?.user && (

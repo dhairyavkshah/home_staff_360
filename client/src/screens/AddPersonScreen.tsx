@@ -442,9 +442,15 @@ export function AddPersonScreen() {
               type="tel"
               value={phone}
               onChange={(e) => { setPhone(e.target.value); markDirty(); }}
-              placeholder="+1234567890"
+              placeholder="+91 98765 43210"
               data-testid="input-phone"
             />
+            <p className="text-xs text-muted-foreground">
+              Include country code (e.g., +91 for India, +1 for USA)
+            </p>
+            {phone && !phone.trim().startsWith('+') && (
+              <p className="text-xs text-destructive">Phone number must start with + and country code</p>
+            )}
             {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
             
             {/* Phone verification status */}

@@ -387,7 +387,7 @@ export function AuthScreen() {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="+1234567890"
+                    placeholder="+91 98765 43210"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="pl-10 h-8"
@@ -395,8 +395,11 @@ export function AuthScreen() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Include country code (e.g., +1 for USA, +91 for India)
+                  Include country code (e.g., +91 for India, +1 for USA)
                 </p>
+                {phone && !phone.trim().startsWith('+') && (
+                  <p className="text-xs text-destructive">Phone number must start with + and country code</p>
+                )}
               </div>
 
               <Button

@@ -107,9 +107,9 @@ export function SharedSpacesTab() {
     setIsLoading(true);
     try {
       const [spacesRes, invitesRes, connsRes] = await Promise.all([
-        collaborationService.fetchWithAuth("/api/shared-spaces"),
-        collaborationService.fetchWithAuth("/api/shared-spaces/invitations"),
-        collaborationService.fetchWithAuth("/api/connections"),
+        collaborationService.fetchWithAuth("/shared-spaces"),
+        collaborationService.fetchWithAuth("/shared-spaces/invitations"),
+        collaborationService.fetchWithAuth("/connections"),
       ]);
       setSpaces(spacesRes.spaces || []);
       setInvitations(invitesRes.invitations || []);
@@ -145,7 +145,7 @@ export function SharedSpacesTab() {
 
     setIsSubmitting(true);
     try {
-      await collaborationService.fetchWithAuth("/api/shared-spaces", {
+      await collaborationService.fetchWithAuth("/shared-spaces", {
         method: "POST",
         body: JSON.stringify({
           type: createType,
