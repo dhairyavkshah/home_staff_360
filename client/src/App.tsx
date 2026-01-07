@@ -19,6 +19,7 @@ import AdminManagement from "@/pages/admin/AdminManagement";
 import AdminBackups from "@/pages/admin/AdminBackups";
 import AdminRolesPage from "@/pages/admin/AdminRolesPage";
 import AdminTeamPage from "@/pages/admin/AdminTeamPage";
+import AdminMaintenance from "@/pages/admin/AdminMaintenance";
 
 import { SplashScreen } from "@/screens/SplashScreen";
 import { LauncherScreen } from "@/screens/LauncherScreen";
@@ -289,6 +290,7 @@ function AdminApp() {
           <Route path="/admin/ads" component={AdminAds} />
           <Route path="/admin/admins" component={AdminManagement} />
           <Route path="/admin/backups" component={AdminBackups} />
+          <Route path="/admin/maintenance" component={AdminMaintenance} />
           <Route path="/admin/roles" component={AdminRolesPage} />
           <Route path="/admin/team" component={AdminTeamPage} />
           <Route path="/admin" component={AdminLogin} />
