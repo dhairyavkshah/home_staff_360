@@ -13,11 +13,60 @@ const JWT_SECRET: string = (() => {
 interface AuthenticatedSocket extends Socket {
   userId?: string;
   userPhone?: string;
+  tokenExp?: number;
 }
 
 let io: SocketIOServer | null = null;
 
 const userSockets = new Map<string, Set<string>>();
+
+// ============================================
+// Socket Connection Rate Limiting (per IP)
+// ============================================
+interface SocketRateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
+const socketRateLimitStore = new Map<string, SocketRateLimitEntry>();
+const SOCKET_RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const SOCKET_RATE_LIMIT_MAX_CONNECTIONS = 30; // max 30 connection attempts per minute per IP
+
+function getSocketClientIP(socket: Socket): string {
+  const forwarded = socket.handshake.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return socket.handshake.address || 'unknown';
+}
+
+function checkSocketRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = socketRateLimitStore.get(ip);
+  
+  if (!entry || now > entry.resetAt) {
+    socketRateLimitStore.set(ip, { count: 1, resetAt: now + SOCKET_RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  
+  if (entry.count >= SOCKET_RATE_LIMIT_MAX_CONNECTIONS) {
+    return false;
+  }
+  
+  entry.count++;
+  return true;
+}
+
+// Cleanup socket rate limit entries every minute
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of socketRateLimitStore.entries()) {
+    if (now > entry.resetAt) {
+      socketRateLimitStore.delete(key);
+    }
+  }
+}, 60 * 1000);
+// ============================================
 
 export function initRealtime(server: HTTPServer): SocketIOServer {
   io = new SocketIOServer(server, {
@@ -26,8 +75,21 @@ export function initRealtime(server: HTTPServer): SocketIOServer {
       methods: ["GET", "POST"],
     },
     transports: ["websocket", "polling"],
+    pingTimeout: 30000,
+    pingInterval: 25000,
   });
 
+  // Rate limiting middleware
+  io.use((socket: AuthenticatedSocket, next) => {
+    const ip = getSocketClientIP(socket);
+    if (!checkSocketRateLimit(ip)) {
+      console.warn(`[Realtime] Rate limit exceeded for IP: ${ip}`);
+      return next(new Error("Too many connection attempts. Please wait."));
+    }
+    next();
+  });
+
+  // Authentication middleware
   io.use((socket: AuthenticatedSocket, next) => {
     const token = socket.handshake.auth.token || socket.handshake.query.token;
     
@@ -36,11 +98,15 @@ export function initRealtime(server: HTTPServer): SocketIOServer {
     }
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; phone: string };
+      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; phone: string; exp?: number };
       socket.userId = decoded.userId;
       socket.userPhone = decoded.phone;
+      socket.tokenExp = decoded.exp;
       next();
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'TokenExpiredError') {
+        return next(new Error("Token expired"));
+      }
       return next(new Error("Invalid token"));
     }
   });
