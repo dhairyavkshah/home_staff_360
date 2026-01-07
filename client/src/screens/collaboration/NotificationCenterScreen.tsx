@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Bell, CheckCheck, Clock, ChevronRight, Calendar, Shirt, Link2, AlertCircle, CheckCircle, XCircle, ArrowLeft, Trash2, X } from "lucide-react";
+import { Bell, CheckCheck, ChevronRight, Calendar, Shirt, Link2, AlertCircle, ArrowLeft, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,7 @@ import { useNavigation } from "@/lib/navigation";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { collaborationService, AppNotification } from "@/lib/collaboration-service";
 import { storage } from "@/lib/storage";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
 
@@ -227,41 +227,40 @@ export function NotificationCenterScreen() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background overflow-hidden">
       <div className="safe-area-top" />
-      <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background border-b">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={goBack} data-testid="button-back">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-semibold">Notifications</h1>
+      <header className="sticky top-0 z-50 flex items-center gap-2 px-4 py-3 bg-background border-b min-w-0">
+        <Button variant="ghost" size="icon" onClick={goBack} className="flex-shrink-0" data-testid="button-back">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <h1 className="text-lg font-semibold truncate">Notifications</h1>
           {unreadCount > 0 && (
-            <Badge variant="destructive" className="text-xs">{unreadCount}</Badge>
+            <Badge variant="destructive" className="text-xs flex-shrink-0">{unreadCount}</Badge>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-shrink-0">
           {notifications.length > 0 && unreadCount > 0 && (
             <Button 
               variant="ghost" 
-              size="sm"
+              size="icon"
               onClick={handleMarkAllRead}
+              title="Mark all as read"
               data-testid="button-mark-all-read"
             >
-              <CheckCheck className="w-4 h-4 mr-1" />
-              Mark all read
+              <CheckCheck className="w-4 h-4" />
             </Button>
           )}
           {notifications.length > 0 && (
             <Button 
               variant="ghost" 
-              size="sm"
+              size="icon"
               onClick={handleClearAll}
               disabled={isClearing}
-              className="text-destructive"
+              title="Clear all"
               data-testid="button-clear-all"
             >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Clear all
+              <Trash2 className="w-4 h-4" />
             </Button>
           )}
         </div>
@@ -291,42 +290,38 @@ export function NotificationCenterScreen() {
         ) : (
           <div className="divide-y">
             {notifications.map((notification) => (
-              <div
+              <button
                 key={notification.id}
-                className={`w-full px-4 py-4 text-left hover-elevate flex items-start gap-4 group ${
+                className={`w-full px-4 py-3 text-left hover-elevate flex items-start gap-3 group ${
                   !notification.isRead ? "bg-primary/5" : ""
                 }`}
+                onClick={() => handleNotificationClick(notification)}
                 data-testid={`notification-${notification.id}`}
               >
-                <button
-                  className="flex items-start gap-4 flex-1 min-w-0"
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <div className={`p-2 rounded-full ${getNotificationColor(notification.type)}`}>
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className={`font-medium text-sm ${!notification.isRead ? "text-foreground" : "text-muted-foreground"}`}>
-                        {notification.title}
-                      </p>
-                      {!notification.isRead && (
-                        <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
-                      )}
-                    </div>
-                    {notification.message && (
-                      <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
-                        {notification.message}
-                      </p>
+                <div className={`p-2 rounded-full flex-shrink-0 ${getNotificationColor(notification.type)}`}>
+                  {getNotificationIcon(notification.type)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start gap-2">
+                    <p className={`font-medium text-sm flex-1 min-w-0 ${!notification.isRead ? "text-foreground" : "text-muted-foreground"}`}>
+                      {notification.title}
+                    </p>
+                    {!notification.isRead && (
+                      <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1" />
                     )}
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(notification.createdAt, { addSuffix: true })}
-                      </span>
-                      {getStatusBadge(notification.type)}
-                    </div>
                   </div>
-                </button>
+                  {notification.message && (
+                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2 break-words">
+                      {notification.message}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(notification.createdAt, { addSuffix: true })}
+                    </span>
+                    {getStatusBadge(notification.type)}
+                  </div>
+                </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {notification.actionRequired && (
                     <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -341,7 +336,7 @@ export function NotificationCenterScreen() {
                     <X className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}
