@@ -39,8 +39,16 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 
 ### Security Measures
 - **Authentication**: Passwords are hashed with bcrypt (10 rounds), JWT tokens are used (30-day user, 8-hour admin), and OTPs expire in 10 minutes with a max of 5 attempts.
-- **Rate Limiting**: Implemented for sensitive actions like phone change requests and OTP requests.
+- **Rate Limiting**: IP-based rate limiting implemented for sensitive actions like OTP requests, authentication, and password resets. Socket.IO connections also have per-IP rate limiting (30 connections/minute).
 - **Data Security**: All data is transmitted over HTTPS/TLS, server-side data is encrypted at rest, and the system is designed to be GDPR and DPDP Act compliant.
+- **Transaction Safety**: 7 critical multi-table operations wrapped in database transactions for data integrity.
+- **Standardized Error Handling**: Consistent API error responses with error codes (see ERROR_CODES in server/routes.ts).
+- **Frontend Error Boundaries**: Global error boundary catches rendering errors with user-friendly recovery options.
+
+### Testing (Development Only)
+- **Test Bypass Header**: In non-production environments, the header `x-test-bypass: rate-limit-skip` can be used to bypass rate limiting for automated testing.
+- **Total Automated Tests**: 151 tests across 3 test suites (module-tests.ts, e2e-scenario-tests.ts, extended-module-tests.ts).
+- **Run Tests**: `npx tsx tests/e2e/module-tests.ts && npx tsx tests/e2e/e2e-scenario-tests.ts && npx tsx tests/e2e/extended-module-tests.ts`
 
 ## External Dependencies
 

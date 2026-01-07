@@ -228,6 +228,11 @@ setInterval(() => {
 // Rate limiting middleware factory
 function rateLimitMiddleware(action: string) {
   return (req: Request, res: Response, next: Function) => {
+    // Allow test bypass in development mode only
+    if (process.env.NODE_ENV !== 'production' && req.headers['x-test-bypass'] === 'rate-limit-skip') {
+      return next();
+    }
+    
     const ip = getClientIP(req);
     const result = checkRateLimit(ip, action);
     

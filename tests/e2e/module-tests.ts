@@ -48,6 +48,7 @@ async function apiRequest(
 ): Promise<{ status: number; data: any }> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    'x-test-bypass': 'rate-limit-skip',
   };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
