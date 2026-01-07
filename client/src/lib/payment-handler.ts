@@ -18,7 +18,7 @@ const DEFAULT_CONFIG: PaymentConfig = {
   upiId: "dhairyavkshah@icici",
   payeeName: "Dhairya Shah",
   paypalUsername: "dhairyavkshah",
-  transactionNote: "Support HomeStaff360",
+  transactionNote: "Support Home Staff 360",
 };
 
 const DONOR_STORAGE_KEY = "hs360_donor_status";

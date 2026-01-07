@@ -497,7 +497,7 @@ export function AddPersonScreen() {
                       <p className="text-sm font-medium text-green-900 dark:text-green-100">
                         {phoneCheckResult.displayName || "User found"}
                       </p>
-                      <p className="text-xs text-green-700 dark:text-green-300">Registered on HomeStaff360</p>
+                      <p className="text-xs text-green-700 dark:text-green-300">Registered on Home Staff 360</p>
                     </div>
                     <Button
                       size="sm"
@@ -530,7 +530,7 @@ export function AddPersonScreen() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-blue-900 dark:text-blue-100">User not registered</p>
-                      <p className="text-xs text-blue-700 dark:text-blue-300">Invite them to HomeStaff360</p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">Invite them to Home Staff 360</p>
                     </div>
                     <Button
                       size="sm"
