@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import crypto from "crypto";
-import { db } from "./db";
+import { db, withTransaction } from "./db";
 import {
   emitNewMessage,
   emitMessageUpdated,
@@ -1852,31 +1852,34 @@ router.post("/api/shared-attendance", authenticateToken, async (req: Request, re
 
     // If there's a pending/rejected record, update it as revised
     if (existingRecord && (existingRecord.approvalStatus === 'pending' || existingRecord.approvalStatus === 'rejected')) {
-      await db.update(sharedAttendance)
-        .set({
-          status,
-          hoursWorked: hoursWorked || null,
-          note: note || null,
-          approvalStatus: 'pending',
-          submittedBy: userId,
-          submittedByRole: submitterRole,
-          actionRequiredBy: counterpartyId,
-          revisionCount: (existingRecord.revisionCount || 0) + 1,
-          updatedAt: now,
-          rejectedAt: null
-        })
-        .where(eq(sharedAttendance.id, existingRecord.id));
+      // Use transaction for atomic update of attendance and revision
+      await withTransaction(async (tx) => {
+        await tx.update(sharedAttendance)
+          .set({
+            status,
+            hoursWorked: hoursWorked || null,
+            note: note || null,
+            approvalStatus: 'pending',
+            submittedBy: userId,
+            submittedByRole: submitterRole,
+            actionRequiredBy: counterpartyId,
+            revisionCount: (existingRecord.revisionCount || 0) + 1,
+            updatedAt: now,
+            rejectedAt: null
+          })
+          .where(eq(sharedAttendance.id, existingRecord.id));
 
-      // Create revision record
-      await db.insert(attendanceRevisions).values({
-        id: revisionId,
-        attendanceId: existingRecord.id,
-        revisionNumber: (existingRecord.revisionCount || 0) + 1,
-        previousStatus: existingRecord.status,
-        newStatus: status,
-        action: 'revised',
-        actionBy: userId,
-        createdAt: now
+        // Create revision record
+        await tx.insert(attendanceRevisions).values({
+          id: revisionId,
+          attendanceId: existingRecord.id,
+          revisionNumber: (existingRecord.revisionCount || 0) + 1,
+          previousStatus: existingRecord.status,
+          newStatus: status,
+          action: 'revised',
+          actionBy: userId,
+          createdAt: now
+        });
       });
 
       // Notify counterparty
@@ -1902,36 +1905,38 @@ router.post("/api/shared-attendance", authenticateToken, async (req: Request, re
       });
     }
 
-    // Create new attendance record
-    await db.insert(sharedAttendance).values({
-      id: attendanceId,
-      bindingId,
-      date,
-      status,
-      hoursWorked: hoursWorked || null,
-      note: note || null,
-      approvalStatus: 'pending',
-      submittedBy: userId,
-      submittedByRole: submitterRole,
-      actionRequiredBy: counterpartyId,
-      currentRevisionId: revisionId,
-      revisionCount: 0,
-      recordSalaryType: recordSalaryType || null,
-      recordRate: recordRate || null,
-      recordCurrency: recordCurrency || null,
-      createdAt: now,
-      updatedAt: now
-    });
+    // Create new attendance record with initial revision (atomic transaction)
+    await withTransaction(async (tx) => {
+      await tx.insert(sharedAttendance).values({
+        id: attendanceId,
+        bindingId,
+        date,
+        status,
+        hoursWorked: hoursWorked || null,
+        note: note || null,
+        approvalStatus: 'pending',
+        submittedBy: userId,
+        submittedByRole: submitterRole,
+        actionRequiredBy: counterpartyId,
+        currentRevisionId: revisionId,
+        revisionCount: 0,
+        recordSalaryType: recordSalaryType || null,
+        recordRate: recordRate || null,
+        recordCurrency: recordCurrency || null,
+        createdAt: now,
+        updatedAt: now
+      });
 
-    // Create initial revision record
-    await db.insert(attendanceRevisions).values({
-      id: revisionId,
-      attendanceId,
-      revisionNumber: 0,
-      newStatus: status,
-      action: 'submitted',
-      actionBy: userId,
-      createdAt: now
+      // Create initial revision record
+      await tx.insert(attendanceRevisions).values({
+        id: revisionId,
+        attendanceId,
+        revisionNumber: 0,
+        newStatus: status,
+        action: 'submitted',
+        actionBy: userId,
+        createdAt: now
+      });
     });
 
     // Notify counterparty for approval
@@ -2209,35 +2214,38 @@ router.post("/api/shared-laundry", authenticateToken, async (req: Request, res: 
     const revisionId = uuidv4();
     const now = new Date();
 
-    await db.insert(sharedLaundry).values({
-      id: laundryId,
-      bindingId,
-      date,
-      items: typeof items === 'string' ? items : JSON.stringify(items),
-      itemsTotal: itemsTotal || null,
-      pickupDelivery: pickupDelivery || false,
-      pickupDeliveryCharge: pickupDeliveryCharge || null,
-      total,
-      serviceType: serviceType || null,
-      approvalStatus: 'pending',
-      submittedBy: userId,
-      submittedByRole: submitterRole,
-      actionRequiredBy: counterpartyId,
-      currentRevisionId: revisionId,
-      revisionCount: 0,
-      recordCurrency: recordCurrency || null,
-      createdAt: now,
-      updatedAt: now
-    });
+    // Use transaction for atomic creation of laundry record and revision
+    await withTransaction(async (tx) => {
+      await tx.insert(sharedLaundry).values({
+        id: laundryId,
+        bindingId,
+        date,
+        items: typeof items === 'string' ? items : JSON.stringify(items),
+        itemsTotal: itemsTotal || null,
+        pickupDelivery: pickupDelivery || false,
+        pickupDeliveryCharge: pickupDeliveryCharge || null,
+        total,
+        serviceType: serviceType || null,
+        approvalStatus: 'pending',
+        submittedBy: userId,
+        submittedByRole: submitterRole,
+        actionRequiredBy: counterpartyId,
+        currentRevisionId: revisionId,
+        revisionCount: 0,
+        recordCurrency: recordCurrency || null,
+        createdAt: now,
+        updatedAt: now
+      });
 
-    await db.insert(laundryRevisions).values({
-      id: revisionId,
-      laundryId,
-      revisionNumber: 0,
-      newData: typeof items === 'string' ? items : JSON.stringify(items),
-      action: 'submitted',
-      actionBy: userId,
-      createdAt: now
+      await tx.insert(laundryRevisions).values({
+        id: revisionId,
+        laundryId,
+        revisionNumber: 0,
+        newData: typeof items === 'string' ? items : JSON.stringify(items),
+        action: 'submitted',
+        actionBy: userId,
+        createdAt: now
+      });
     });
 
     await createNotification(counterpartyId, counterpartyMode, 'laundry_submitted',
@@ -2805,7 +2813,7 @@ router.get("/api/connections/invites/sent", authenticateToken, async (req: Reque
   }
 });
 
-// Accept connection invite
+// Accept connection invite (uses transaction for data consistency)
 router.post("/api/connections/invites/:id/accept", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.userId;
@@ -2825,61 +2833,65 @@ router.post("/api/connections/invites/:id/accept", authenticateToken, async (req
     }
 
     const now = new Date();
-
-    // Update invite status
-    await db.update(collabConnectionInvites)
-      .set({ status: 'accepted', respondedAt: now })
-      .where(eq(collabConnectionInvites.id, id));
-
-    // Create connection
     const connectionId = uuidv4();
-    await db.insert(collabConnections).values({
-      id: connectionId,
-      userAId: invite.senderId,
-      userAMode: invite.senderMode,
-      userBId: userId,
-      userBMode: receiverMode || 'HOME',
-      status: 'accepted',
-      initiatedBy: invite.senderId,
-      createdAt: now,
-      updatedAt: now
-    });
-
-    // Create direct chat for the connection
     const chatId = uuidv4();
-    await db.insert(collabChats).values({
-      id: chatId,
-      type: 'direct',
-      connectionId,
-      createdAt: now,
-      updatedAt: now
+
+    // Use transaction to ensure all related records are created atomically
+    await withTransaction(async (tx) => {
+      // Update invite status
+      await tx.update(collabConnectionInvites)
+        .set({ status: 'accepted', respondedAt: now })
+        .where(eq(collabConnectionInvites.id, id));
+
+      // Create connection
+      await tx.insert(collabConnections).values({
+        id: connectionId,
+        userAId: invite.senderId,
+        userAMode: invite.senderMode,
+        userBId: userId,
+        userBMode: receiverMode || 'HOME',
+        status: 'accepted',
+        initiatedBy: invite.senderId,
+        createdAt: now,
+        updatedAt: now
+      });
+
+      // Create direct chat for the connection
+      await tx.insert(collabChats).values({
+        id: chatId,
+        type: 'direct',
+        connectionId,
+        createdAt: now,
+        updatedAt: now
+      });
+
+      // Add both users as chat participants
+      await tx.insert(chatParticipants).values([
+        {
+          id: uuidv4(),
+          chatId,
+          userId: invite.senderId,
+          userMode: invite.senderMode,
+          role: 'member',
+          joinedAt: now
+        },
+        {
+          id: uuidv4(),
+          chatId,
+          userId,
+          userMode: receiverMode || 'HOME',
+          role: 'member',
+          joinedAt: now
+        }
+      ]);
     });
 
-    // Add both users as chat participants
+    // Fetch user info for notification (outside transaction, non-critical)
     const currentUser = await db.query.serverUsers.findFirst({
       where: eq(serverUsers.id, userId)
     });
 
-    await db.insert(chatParticipants).values([
-      {
-        id: uuidv4(),
-        chatId,
-        userId: invite.senderId,
-        userMode: invite.senderMode,
-        role: 'member',
-        joinedAt: now
-      },
-      {
-        id: uuidv4(),
-        chatId,
-        userId,
-        userMode: receiverMode || 'HOME',
-        role: 'member',
-        joinedAt: now
-      }
-    ]);
-
-    // Notify sender
+    // Notify sender (outside transaction, non-critical)
     await createNotification(
       invite.senderId,
       invite.senderMode as 'HOME' | 'STAFF',
@@ -2997,7 +3009,7 @@ router.get("/api/connections", authenticateToken, async (req: Request, res: Resp
   }
 });
 
-// Remove connection
+// Remove connection (uses transaction for data consistency)
 router.delete("/api/connections/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.userId;
@@ -3022,23 +3034,25 @@ router.delete("/api/connections/:id", authenticateToken, async (req: Request, re
       where: eq(collabChats.connectionId, id)
     });
 
-    if (chat) {
-      // Delete chat participants
-      await db.delete(chatParticipants).where(eq(chatParticipants.chatId, chat.id));
-      // Delete messages
-      await db.delete(chatMessages).where(eq(chatMessages.chatId, chat.id));
-      // Delete chat
-      await db.delete(collabChats).where(eq(collabChats.id, chat.id));
-    }
-
-    // Get user IDs before deleting
+    // Get user IDs before deleting (for real-time event)
     const userAId = typeof connection.userAId === 'string' ? parseInt(connection.userAId, 10) : connection.userAId;
     const userBId = typeof connection.userBId === 'string' ? parseInt(connection.userBId, 10) : connection.userBId;
 
-    // Delete connection
-    await db.delete(collabConnections).where(eq(collabConnections.id, id));
+    // Use transaction to ensure all deletions are atomic
+    await withTransaction(async (tx) => {
+      if (chat) {
+        // Delete chat participants
+        await tx.delete(chatParticipants).where(eq(chatParticipants.chatId, chat.id));
+        // Delete messages
+        await tx.delete(chatMessages).where(eq(chatMessages.chatId, chat.id));
+        // Delete chat
+        await tx.delete(collabChats).where(eq(collabChats.id, chat.id));
+      }
+      // Delete connection
+      await tx.delete(collabConnections).where(eq(collabConnections.id, id));
+    });
 
-    // Emit real-time connection removed event
+    // Emit real-time connection removed event (outside transaction, non-critical)
     if (!isNaN(userAId) && !isNaN(userBId)) {
       const connectionNumId = typeof id === 'string' ? parseInt(id, 10) : id;
       emitConnectionRemoved(userAId, userBId, connectionNumId);
@@ -4289,7 +4303,7 @@ router.delete("/api/shared-spaces/:shareId/member/:memberId", authenticateToken,
   }
 });
 
-// Delete shared space (owner only)
+// Delete shared space (owner only, uses transaction for data consistency)
 router.delete("/api/shared-spaces/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.userId;
@@ -4305,9 +4319,11 @@ router.delete("/api/shared-spaces/:id", authenticateToken, async (req: Request, 
         return res.status(403).json({ error: "Not authorized to delete this space" });
       }
 
-      // Delete all members first
-      await db.delete(householdShareMembers).where(eq(householdShareMembers.shareId, id));
-      await db.delete(householdShares).where(eq(householdShares.id, id));
+      // Use transaction to ensure atomic deletion
+      await withTransaction(async (tx) => {
+        await tx.delete(householdShareMembers).where(eq(householdShareMembers.shareId, id));
+        await tx.delete(householdShares).where(eq(householdShares.id, id));
+      });
       
       res.json({ success: true });
     } else if (type === 'business') {
@@ -4319,8 +4335,11 @@ router.delete("/api/shared-spaces/:id", authenticateToken, async (req: Request, 
         return res.status(403).json({ error: "Not authorized to delete this space" });
       }
 
-      await db.delete(businessShareMembers).where(eq(businessShareMembers.shareId, id));
-      await db.delete(businessShares).where(eq(businessShares.id, id));
+      // Use transaction to ensure atomic deletion
+      await withTransaction(async (tx) => {
+        await tx.delete(businessShareMembers).where(eq(businessShareMembers.shareId, id));
+        await tx.delete(businessShares).where(eq(businessShares.id, id));
+      });
       
       res.json({ success: true });
     } else {

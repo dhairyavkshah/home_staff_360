@@ -1,4 +1,4 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "@shared/schema";
 
@@ -12,3 +12,12 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle(pool, { schema });
+
+// Transaction helper for multi-table operations
+export type TransactionDB = NodePgDatabase<typeof schema>;
+
+export async function withTransaction<T>(
+  fn: (tx: TransactionDB) => Promise<T>
+): Promise<T> {
+  return await db.transaction(fn);
+}
