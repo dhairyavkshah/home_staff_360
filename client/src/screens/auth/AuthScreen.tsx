@@ -427,8 +427,8 @@ export function AuthScreen() {
 
               <div className="flex flex-col gap-1">
                 <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -438,11 +438,9 @@ export function AuthScreen() {
                     className="pl-10 pr-10 h-8"
                     data-testid="input-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -450,7 +448,7 @@ export function AuthScreen() {
                     ) : (
                       <Eye className="w-4 h-4" />
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
@@ -639,8 +637,8 @@ export function AuthScreen() {
 
               <div className="flex flex-col gap-1">
                 <Label htmlFor="new-reset-password">New Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="new-reset-password"
                     type={showPassword ? "text" : "password"}
@@ -650,11 +648,9 @@ export function AuthScreen() {
                     className="pl-10 pr-10 h-8"
                     data-testid="input-new-reset-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -662,14 +658,14 @@ export function AuthScreen() {
                     ) : (
                       <Eye className="w-4 h-4" />
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
               <div className="flex flex-col gap-1">
                 <Label htmlFor="confirm-reset-password">Confirm Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="confirm-reset-password"
                     type={showPassword ? "text" : "password"}
@@ -679,11 +675,9 @@ export function AuthScreen() {
                     className="pl-10 pr-10 h-8"
                     data-testid="input-confirm-reset-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -691,7 +685,7 @@ export function AuthScreen() {
                     ) : (
                       <Eye className="w-4 h-4" />
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
@@ -735,8 +729,8 @@ export function AuthScreen() {
 
               <div className="flex flex-col gap-1">
                 <Label htmlFor="new-password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="new-password"
                     type={showPassword ? "text" : "password"}
@@ -746,11 +740,9 @@ export function AuthScreen() {
                     className="pl-10 pr-10 h-8"
                     data-testid="input-new-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -758,14 +750,14 @@ export function AuthScreen() {
                     ) : (
                       <Eye className="w-4 h-4" />
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
               <div className="flex flex-col gap-1">
                 <Label htmlFor="confirm-password">Confirm Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="confirm-password"
                     type={showPassword ? "text" : "password"}
@@ -775,11 +767,9 @@ export function AuthScreen() {
                     className="pl-10 pr-10 h-8"
                     data-testid="input-confirm-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -787,7 +777,7 @@ export function AuthScreen() {
                     ) : (
                       <Eye className="w-4 h-4" />
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
 

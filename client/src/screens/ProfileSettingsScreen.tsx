@@ -508,7 +508,7 @@ export function ProfileSettingsScreen() {
             <Card className="p-4 flex flex-col gap-4">
               <div className="flex flex-col gap-4">
                 <Label htmlFor="currentPassword">Current Password</Label>
-                <div className="relative">
+                <div className="relative flex items-center">
                   <Input
                     id="currentPassword"
                     type={showPassword ? "text" : "password"}
@@ -518,21 +518,19 @@ export function ProfileSettingsScreen() {
                     className="pr-10"
                     data-testid="input-current-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
               <div className="flex flex-col gap-4">
                 <Label htmlFor="newPassword">New Password</Label>
-                <div className="relative">
+                <div className="relative flex items-center">
                   <Input
                     id="newPassword"
                     type={showPassword ? "text" : "password"}
@@ -542,21 +540,19 @@ export function ProfileSettingsScreen() {
                     className="pr-10"
                     data-testid="input-new-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
               <div className="flex flex-col gap-4">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <div className="relative">
+                <div className="relative flex items-center">
                   <Input
                     id="confirmPassword"
                     type={showPassword ? "text" : "password"}
@@ -566,15 +562,13 @@ export function ProfileSettingsScreen() {
                     className="pr-10"
                     data-testid="input-confirm-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
@@ -762,8 +756,8 @@ export function ProfileSettingsScreen() {
 
               <div className="flex flex-col gap-2 mt-2">
                 <Label htmlFor="clearDataPassword">{t("enterPasswordToConfirm")}</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="clearDataPassword"
                     type={showPassword ? "text" : "password"}
@@ -773,15 +767,13 @@ export function ProfileSettingsScreen() {
                     className="pl-10 pr-10"
                     data-testid="input-clear-data-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
@@ -844,8 +836,8 @@ export function ProfileSettingsScreen() {
 
               <div className="flex flex-col gap-2 mt-2">
                 <Label htmlFor="deletePassword">Enter your password to confirm</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="deletePassword"
                     type={showPassword ? "text" : "password"}
@@ -855,15 +847,13 @@ export function ProfileSettingsScreen() {
                     className="pl-10 pr-10"
                     data-testid="input-delete-password"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
