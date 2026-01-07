@@ -102,6 +102,81 @@ const OTP_EXPIRY_MINUTES = 30;
 const MAX_OTP_ATTEMPTS_PER_HOUR = 5;
 const OTP_COOLDOWN_SECONDS = 60;
 
+// ============================================
+// IP-Based Rate Limiting (In-Memory)
+// ============================================
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
+const rateLimitStore = new Map<string, RateLimitEntry>();
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_MAX_REQUESTS: Record<string, number> = {
+  'otp': 10,           // 10 OTP requests per 15 min per IP
+  'auth': 20,          // 20 auth attempts per 15 min per IP
+  'forgot-password': 5, // 5 password reset requests per 15 min per IP
+  'check-phone': 30,   // 30 phone checks per 15 min per IP
+};
+
+function getClientIP(req: Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.ip || req.socket.remoteAddress || 'unknown';
+}
+
+function checkRateLimit(ip: string, action: string): { allowed: boolean; retryAfter?: number } {
+  const key = `${ip}:${action}`;
+  const now = Date.now();
+  const maxRequests = RATE_LIMIT_MAX_REQUESTS[action] || 20;
+  
+  const entry = rateLimitStore.get(key);
+  
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true };
+  }
+  
+  if (entry.count >= maxRequests) {
+    const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+  
+  entry.count++;
+  return { allowed: true };
+}
+
+// Cleanup old entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitStore.entries()) {
+    if (now > entry.resetAt) {
+      rateLimitStore.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
+
+// Rate limiting middleware factory
+function rateLimitMiddleware(action: string) {
+  return (req: Request, res: Response, next: Function) => {
+    const ip = getClientIP(req);
+    const result = checkRateLimit(ip, action);
+    
+    if (!result.allowed) {
+      res.setHeader('Retry-After', result.retryAfter || 60);
+      return res.status(429).json({ 
+        error: "Too many requests. Please try again later.",
+        retryAfter: result.retryAfter
+      });
+    }
+    next();
+  };
+}
+
+// ============================================
+
 // Twilio client - gracefully handle missing credentials
 const TWILIO_ENABLED = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER);
 const twilioClient = TWILIO_ENABLED 
@@ -325,7 +400,7 @@ function canRequestOtp(user: { otpAttemptCount: number | null; otpAttemptResetAt
   return { allowed: true };
 }
 
-router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
+router.post("/api/auth/request-otp", rateLimitMiddleware('otp'), async (req: Request, res: Response) => {
   try {
     const { phone } = req.body;
     
@@ -431,7 +506,7 @@ router.post("/api/auth/request-otp", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/api/auth/verify-otp", async (req: Request, res: Response) => {
+router.post("/api/auth/verify-otp", rateLimitMiddleware('auth'), async (req: Request, res: Response) => {
   try {
     const { phone, otp } = req.body;
 
@@ -544,7 +619,7 @@ router.post("/api/auth/set-password", authenticateToken, async (req: Request, re
 });
 
 // Sign in with phone + password (for returning users)
-router.post("/api/auth/login", async (req: Request, res: Response) => {
+router.post("/api/auth/login", rateLimitMiddleware('auth'), async (req: Request, res: Response) => {
   try {
     const { phone, password } = req.body;
 
@@ -603,7 +678,7 @@ router.post("/api/auth/login", async (req: Request, res: Response) => {
 });
 
 // Check if phone exists and has password
-router.post("/api/auth/check-phone", async (req: Request, res: Response) => {
+router.post("/api/auth/check-phone", rateLimitMiddleware('check-phone'), async (req: Request, res: Response) => {
   try {
     const { phone } = req.body;
 
@@ -657,7 +732,7 @@ router.post("/api/auth/logout", authenticateToken, async (req: Request, res: Res
 
 const PASSWORD_RESET_OTP_EXPIRY_MINUTES = 10;
 
-router.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+router.post("/api/auth/forgot-password", rateLimitMiddleware('forgot-password'), async (req: Request, res: Response) => {
   try {
     const { phone } = req.body;
     
