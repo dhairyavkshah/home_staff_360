@@ -77,6 +77,7 @@ import { ApprovalDetailScreen } from "@/screens/collaboration/ApprovalDetailScre
 import { AuthScreen } from "@/screens/auth/AuthScreen";
 import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
 import { AdOverlay } from "@/components/AdOverlay";
+import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { useAds } from "@/hooks/useAds";
 import { useDonationReminder } from "@/hooks/useDonationReminder";
 import { useTranslation } from "@/lib/i18n/i18n-context";
@@ -271,6 +272,7 @@ function MobileAppWithSplash() {
     <NavigationProvider>
       <DirtyTrackingProvider>
         <GuidedTourProvider>
+          <MaintenanceBanner />
           <MobileAppRouter />
           <AdManager />
           <DonationReminderDialog />
