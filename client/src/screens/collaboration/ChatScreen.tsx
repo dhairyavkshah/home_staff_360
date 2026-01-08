@@ -164,10 +164,24 @@ export function ChatScreen() {
     ));
   }, [chatId]);
 
+  const handleChatCleared = useCallback((data: any) => {
+    console.log("[ChatScreen] Received chat:cleared:", data);
+    const clearedChatId = String(data.chatId);
+    if (clearedChatId !== chatId) return;
+    
+    // Clear all messages when chat is cleared
+    setMessages([]);
+    toast({
+      title: "Chat cleared",
+      description: "The chat history has been cleared",
+    });
+  }, [chatId, toast]);
+
   useRealtime("chat:new-message", handleNewMessage);
   useRealtime("chat:message-received", handleMessageReceived);
   useRealtime("chat:message-updated", handleMessageUpdated);
   useRealtime("chat:message-deleted", handleMessageDeleted);
+  useRealtime("chat:cleared", handleChatCleared);
 
   useEffect(() => {
     if (chatId) {
