@@ -21,8 +21,7 @@ import { pinService } from "@/lib/pin-service";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useTour } from "@/lib/guided-tour";
 import { setHapticEnabled, setSoundEnabled, isHapticEnabled, isSoundEnabled } from "@/lib/sound-service";
-import { getCurrencyForCountry } from "@/lib/geolocation-service";
-import { CountrySelector } from "@/components/ui/country-selector";
+import { getCurrencyForCountry, getCountryByCode } from "@/lib/geolocation-service";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { CurrencySelector } from "@/components/ui/currency-selector";
 import { notifyCurrencyChange } from "@/hooks/useCurrency";
@@ -50,7 +49,7 @@ export function SettingsScreen() {
   
   const appSettings = useMemo(() => storage.getSettings(), []);
   const [selectedAccountId, setSelectedAccountId] = useState(activeAccount?.id || "");
-  const [country, setCountry] = useState(appSettings.country || "");
+  const country = appSettings.detectedCountry || appSettings.country || "";
   const [currency, setCurrency] = useState<Currency>(modeSettings.currency);
   const [customSymbol, setCustomSymbol] = useState(modeSettings.customCurrencySymbol || "");
   const [salaryStartDay, setSalaryStartDay] = useState(isHome ? homeSettings.salaryStartDay : 1);
@@ -64,7 +63,6 @@ export function SettingsScreen() {
 
   const [appMode, setAppMode] = useState<UserType>(profile?.type || "HOME");
   
-  const initialCountry = useMemo(() => appSettings.country || "", []);
   const initialCurrency = useMemo(() => modeSettings.currency, []);
   const initialCustomSymbol = useMemo(() => modeSettings.customCurrencySymbol || "", []);
   const initialSalaryStartDay = useMemo(() => isHome ? homeSettings.salaryStartDay : 1, []);
@@ -73,14 +71,13 @@ export function SettingsScreen() {
 
   const isDirty = useMemo(() => {
     return (
-      country !== initialCountry ||
       currency !== initialCurrency ||
       customSymbol !== initialCustomSymbol ||
       salaryStartDay !== initialSalaryStartDay ||
       halfDayPercentage !== initialHalfDayPercentage ||
       pendingLanguage !== initialLanguage
     );
-  }, [country, currency, customSymbol, salaryStartDay, halfDayPercentage, pendingLanguage, initialCountry, initialCurrency, initialCustomSymbol, initialSalaryStartDay, initialHalfDayPercentage, initialLanguage]);
+  }, [currency, customSymbol, salaryStartDay, halfDayPercentage, pendingLanguage, initialCurrency, initialCustomSymbol, initialSalaryStartDay, initialHalfDayPercentage, initialLanguage]);
 
   const handleBack = useCallback(() => {
     if (isDirty) {
@@ -91,7 +88,6 @@ export function SettingsScreen() {
   }, [isDirty, navigate, appMode]);
 
   const handleDiscardChanges = () => {
-    setCountry(initialCountry);
     setCurrency(initialCurrency);
     setCustomSymbol(initialCustomSymbol);
     setSalaryStartDay(initialSalaryStartDay);
@@ -250,15 +246,14 @@ export function SettingsScreen() {
                 <MapPin className="w-4 h-4" />
                 {t("country")}
               </Label>
-              <CountrySelector
-                value={country}
-                onValueChange={(v) => {
-                  setCountry(v);
-                  const newCurrency = getCurrencyForCountry(v);
-                  setCurrency(newCurrency);
-                }}
-                data-testid="select-country"
-              />
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-sm" data-testid="badge-country">
+                  {getCountryByCode(country)?.name || country || "Not detected"}
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  Auto-detected from Google Play
+                </span>
+              </div>
             </div>
 
             <div className="flex flex-col gap-2">
