@@ -180,7 +180,7 @@ export function SharedSpacesTab() {
     setIsSubmitting(true);
     try {
       await collaborationService.fetchWithAuth(
-        `/api/shared-spaces/${selectedSpace.id}/invite`,
+        `/shared-spaces/${selectedSpace.id}/invite`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -211,7 +211,7 @@ export function SharedSpacesTab() {
   const handleAcceptInvite = async (invite: ShareInvitation) => {
     try {
       await collaborationService.fetchWithAuth(
-        `/api/shared-spaces/invitations/${invite.id}/accept`,
+        `/shared-spaces/invitations/${invite.id}/accept`,
         {
           method: "POST",
           body: JSON.stringify({ type: invite.type }),
@@ -234,7 +234,7 @@ export function SharedSpacesTab() {
   const handleDeclineInvite = async (invite: ShareInvitation) => {
     try {
       await collaborationService.fetchWithAuth(
-        `/api/shared-spaces/${invite.shareId}/member/${invite.id}?type=${invite.type}`,
+        `/shared-spaces/${invite.shareId}/member/${invite.id}?type=${invite.type}`,
         { method: "DELETE" }
       );
       toast({
