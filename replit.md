@@ -39,7 +39,7 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 ### Subscription Model
 - **Annual Subscription**: Users must subscribe to access the app
 - **Google Play Billing**: All subscriptions managed through Google Play services
-- **Pricing**: India: 300 INR/year, US: $30/year, other countries based on equivalent USD pricing
+- **Pricing**: India: 300 INR/year, US: $10/year, other countries based on equivalent USD pricing
 - **International Pricing**: Defined for 27 currencies in SUBSCRIPTION_PRICES constant
 - **Subscription Endpoints**: /api/subscriptions/validate, /api/subscriptions/status, /api/subscriptions/check, /api/subscriptions/prices
 - **Ad System**: Disabled (code preserved for future use via AD_FEATURE_ENABLED flag)
