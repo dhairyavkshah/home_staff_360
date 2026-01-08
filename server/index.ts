@@ -14,7 +14,7 @@ const getFilename = () => {
       return fileURLToPath(import.meta.url);
     }
   } catch {}
-  return process.cwd() + '/server/index.ts';
+  return path.join(process.cwd(), 'server', 'index.ts');
 };
 
 const getDirname = () => {
@@ -23,7 +23,8 @@ const getDirname = () => {
       return dirname(fileURLToPath(import.meta.url));
     }
   } catch {}
-  return process.cwd();
+  // Return server directory so path.resolve(__dirname, "..", "dist") works correctly
+  return path.join(process.cwd(), 'server');
 };
 
 const __filename = getFilename();
