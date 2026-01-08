@@ -38,16 +38,17 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 
 ### Subscription Model
 - **Two Plan Options**: Monthly and Annual subscriptions available
-- **Google Play Billing**: All subscriptions managed through Google Play services - prices are fetched dynamically from Play Store at runtime
-- **5-Tier Pricing System** (143 countries covered):
-  - **Tier 1** ($1/mo, $11/yr): Bangladesh, Benin, Bolivia, Burkina Faso, Cambodia, Guinea-Bissau, Haiti, India, Kenya, Laos, Mali, Mozambique, Myanmar, Nepal, Nicaragua, Niger, Nigeria, Pakistan, Paraguay, Rwanda, Senegal, Sri Lanka, Tanzania, Togo, Uganda, Venezuela, Vietnam, Zambia, Zimbabwe
-  - **Tier 2** ($1.8/mo, $20/yr): Algeria, Angola, Armenia, Cameroon, Cape Verde, Colombia, Côte d'Ivoire, Ecuador, Egypt, El Salvador, Fiji, Georgia, Ghana, Guatemala, Honduras, Indonesia, Iraq, Kyrgyzstan, Lebanon, Moldova, Morocco, Papua New Guinea, Peru, Philippines, Tajikistan, Thailand, Tunisia, Turkmenistan, Ukraine, Uzbekistan
-  - **Tier 3** ($2.5/mo, $27/yr): Albania, Argentina, Azerbaijan, Belarus, Belize, Bosnia & Herzegovina, Botswana, Brazil, Bulgaria, Chile, Costa Rica, Dominican Republic, Gabon, Jamaica, Jordan, Kazakhstan, Macau, Macedonia, Malaysia, Mauritius, Mexico, Namibia, Panama, Romania, Russia, Serbia, South Africa, Taiwan, Trinidad & Tobago, Turkey, Uruguay
-  - **Tier 4** ($3/mo, $33/yr): Antigua and Barbuda, Aruba, Australia, Bahamas, Canada, Croatia, Cyprus, Czechia, Estonia, Greece, Hungary, Israel, Italy, Japan, Latvia, Lithuania, Malta, New Zealand, Poland, Portugal, Slovakia, Slovenia, South Korea, Spain, United Kingdom, United States
-  - **Tier 5** ($4/mo, $44/yr): Austria, Bahrain, Belgium, Denmark, Finland, France, Germany, Gibraltar, Hong Kong, Iceland, Ireland, Kuwait, Liechtenstein, Luxembourg, Monaco, Netherlands, Norway, Oman, Qatar, San Marino, Saudi Arabia, Singapore, Sweden, Switzerland, United Arab Emirates
-- **Pricing Configuration**: TIER_PRICING and COUNTRY_PRICING in shared/schema.ts - USD fallback for web/testing, actual prices from Google Play at runtime
-- **Subscription Endpoints**: /api/subscriptions/validate, /api/subscriptions/status, /api/subscriptions/check, /api/subscriptions/prices
-- **Country Auto-Detection**: Country is auto-detected from Google Play Store and is read-only in settings
+- **Google Play Billing**: All subscriptions managed through Google Play services - prices are fetched dynamically from Play Store at runtime via queryProductDetailsAsync()
+- **5-Tier Pricing System** (132 countries with local currency prices):
+  - **Tier 1** (~$1/mo, ~$11/yr - 27 countries): India (90 INR), Bangladesh (120 BDT), Pakistan (300 PKR), Nepal, Sri Lanka, Vietnam, Nigeria, Kenya, Tanzania, Uganda, Rwanda, Senegal, Cambodia, Laos, Myanmar, Haiti, Nicaragua, Bolivia, Paraguay, Mozambique, Zambia, Zimbabwe, and West African CFA countries
+  - **Tier 2** (~$1.8/mo, ~$20/yr - 26 countries): Indonesia (28,000 IDR), Philippines (100 PHP), Thailand (70 THB), Egypt, Morocco, Tunisia, Algeria, Armenia, Georgia, Ukraine, Moldova, Ghana, Cameroon, Angola, Honduras, Guatemala, El Salvador, Ecuador, Peru, Colombia, Uzbekistan, Kyrgyzstan, Tajikistan, Turkmenistan, Papua New Guinea, Cape Verde
+  - **Tier 3** (~$2.5/mo, ~$27/yr - 27 countries): Brazil (13 BRL), Mexico (45 MXN), Argentina, Chile, Costa Rica, Panama, Dominican Republic, Turkey, Kazakhstan, Azerbaijan, Malaysia, South Africa, Romania, Bulgaria, Serbia, Bosnia & Herzegovina, North Macedonia, Albania, Namibia, Mauritius, Jamaica, Uruguay, Trinidad & Tobago, Gabon, Botswana, Belize, Macau
+  - **Tier 4** (~$3/mo, ~$33/yr - 27 countries): US (3 USD), UK (2.50 GBP), Canada (4 CAD), Australia (4.50 AUD), New Zealand, Japan (450 JPY), South Korea (4,000 KRW), Israel, Taiwan, Spain, Italy, Portugal, Greece, Poland, Czechia, Slovakia, Slovenia, Croatia, Estonia, Latvia, Lithuania, Cyprus, Malta, Hungary, Aruba, Bahamas, Antigua & Barbuda
+  - **Tier 5** (~$4/mo, ~$44/yr - 25 countries): Switzerland (4 CHF), Norway (45 NOK), Denmark (30 DKK), Sweden (45 SEK), Finland, Iceland, Luxembourg, Netherlands, Belgium, Germany, France, Austria, Ireland, Monaco, Liechtenstein, San Marino, Singapore (5.50 SGD), Hong Kong (32 HKD), UAE (15 AED), Qatar, Kuwait, Bahrain, Saudi Arabia, Oman, Gibraltar
+- **Local Currency Pricing**: Each country has specific local currency prices stored in COUNTRY_PRICING (shared/schema.ts) with currency, monthly, and annual amounts
+- **Hybrid Pricing Model**: Google Play is source of truth for mobile (localized prices via Billing Library), app stores local currency fallback values for web/testing
+- **Subscription Endpoints**: /api/subscriptions/validate, /api/subscriptions/status, /api/subscriptions/check, /api/subscriptions/prices (returns tier, currency, fallback amounts)
+- **Country Auto-Detection**: Country is auto-detected from Google Play Store and displayed as read-only Badge in settings (not editable by users)
 - **Ad System**: Disabled (code preserved for future use via AD_FEATURE_ENABLED flag)
 
 ### Security Measures
