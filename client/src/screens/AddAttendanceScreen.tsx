@@ -4,6 +4,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
@@ -37,6 +47,13 @@ export function AddAttendanceScreen() {
   const [note, setNote] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [showEditConfirmDialog, setShowEditConfirmDialog] = useState(false);
+
+  const existingRecord = useMemo(() => {
+    return storage.getAttendance().find(
+      (a) => a.personId === personId && a.date === date
+    );
+  }, [personId, date]);
 
   const handleBack = () => navigate("person-detail", { personId, source });
 
@@ -62,13 +79,6 @@ export function AddAttendanceScreen() {
       newErrors.date = t("cannotMarkFutureAttendance");
     }
 
-    const existing = storage.getAttendance().find(
-      (a) => a.personId === personId && a.date === date
-    );
-    if (existing) {
-      newErrors.date = t("existingRecord");
-    }
-
     if (showHours && status !== "ABSENT") {
       if (!hours || parseFloat(hours) <= 0) {
         newErrors.hours = t("hoursRequired");
@@ -82,17 +92,42 @@ export function AddAttendanceScreen() {
   const handleSubmit = () => {
     if (!validate()) return;
 
-    storage.addAttendance({
-      personId,
-      date,
-      status,
-      hours: showHours && status !== "ABSENT" ? parseFloat(hours) : undefined,
-      note: note.trim() || undefined,
-    });
+    // Check for existing record and ask for confirmation
+    if (existingRecord) {
+      setShowEditConfirmDialog(true);
+      return;
+    }
 
-    markClean();
-    toast({ title: t("attendanceMarked") });
+    saveAttendance();
+  };
+
+  const saveAttendance = () => {
+    // Update existing record if present
+    if (existingRecord) {
+      storage.updateAttendance(existingRecord.id, {
+        status,
+        hours: showHours && status !== "ABSENT" ? parseFloat(hours) : undefined,
+        note: note.trim() || undefined,
+      });
+      markClean();
+      toast({ title: t("updateAttendance") || "Attendance updated" });
+    } else {
+      storage.addAttendance({
+        personId,
+        date,
+        status,
+        hours: showHours && status !== "ABSENT" ? parseFloat(hours) : undefined,
+        note: note.trim() || undefined,
+      });
+      markClean();
+      toast({ title: t("attendanceMarked") });
+    }
     navigate("person-detail", { personId, source });
+  };
+
+  const handleConfirmEdit = () => {
+    setShowEditConfirmDialog(false);
+    saveAttendance();
   };
 
   const handleHomePress = () => {
@@ -196,6 +231,23 @@ export function AddAttendanceScreen() {
         onDiscard={handleDiscardAndGoHome}
         onCancel={() => setShowUnsavedDialog(false)}
       />
+
+      <AlertDialog open={showEditConfirmDialog} onOpenChange={setShowEditConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("editAttendance") || "Edit Attendance"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("editAttendanceConfirm") || "An attendance record already exists for this date. Do you want to update it with the new values?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmEdit} data-testid="button-confirm-edit">
+              {t("update") || "Update"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }

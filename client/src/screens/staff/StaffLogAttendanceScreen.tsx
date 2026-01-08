@@ -60,6 +60,7 @@ export function StaffLogAttendanceScreen() {
   const [note, setNote] = useState("");
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditConfirmDialog, setShowEditConfirmDialog] = useState(false);
 
   useEffect(() => {
     if (existingRecord) {
@@ -105,18 +106,45 @@ export function StaffLogAttendanceScreen() {
       return;
     }
 
-    storage.addSelfAttendance({
-      staffUserId: profile.id,
-      clientHomeId: selectedHome,
-      date,
-      status,
-      hoursWorked: hours ? parseFloat(hours) : undefined,
-      note: note.trim() || undefined,
-    });
-    toast({ title: t("attendanceLogged") });
+    // Check for existing attendance record and ask for confirmation
+    if (existingAttendance) {
+      setShowEditConfirmDialog(true);
+      return;
+    }
+
+    saveAttendance();
+  };
+
+  const saveAttendance = () => {
+    if (!profile) return;
+
+    // Update existing record if present
+    if (existingAttendance) {
+      storage.updateSelfAttendance(existingAttendance.id, {
+        status,
+        hoursWorked: hours ? parseFloat(hours) : undefined,
+        note: note.trim() || undefined,
+      });
+      toast({ title: t("updateAttendance") || "Attendance updated" });
+    } else {
+      storage.addSelfAttendance({
+        staffUserId: profile.id,
+        clientHomeId: selectedHome,
+        date,
+        status,
+        hoursWorked: hours ? parseFloat(hours) : undefined,
+        note: note.trim() || undefined,
+      });
+      toast({ title: t("attendanceLogged") });
+    }
 
     markClean();
     navigate("staff-home");
+  };
+
+  const handleConfirmEdit = () => {
+    setShowEditConfirmDialog(false);
+    saveAttendance();
   };
 
   const handleDelete = () => {
@@ -379,6 +407,23 @@ export function StaffLogAttendanceScreen() {
         onDiscard={handleDiscardAndGoHome}
         onCancel={() => setShowUnsavedDialog(false)}
       />
+
+      <AlertDialog open={showEditConfirmDialog} onOpenChange={setShowEditConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("editAttendance") || "Edit Attendance"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("editAttendanceConfirm") || "An attendance record already exists for this date. Do you want to update it with the new values?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmEdit} data-testid="button-confirm-edit">
+              {t("update") || "Update"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
