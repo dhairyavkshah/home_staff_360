@@ -87,7 +87,7 @@ import {
   COUNTRY_PRICING,
   getCountryPricing
 } from "@shared/schema";
-import { eq, and, or, desc, sql } from "drizzle-orm";
+import { eq, and, or, desc, sql, SQL } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import twilio from "twilio";

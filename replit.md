@@ -57,7 +57,7 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 - **Hybrid Pricing Model**: Google Play is source of truth for mobile (localized prices via Billing Library), app stores local currency fallback values for web/testing
 - **Subscription Endpoints**: /api/subscriptions/validate, /api/subscriptions/status, /api/subscriptions/check, /api/subscriptions/prices (returns tier, currency, fallback amounts)
 - **Country Auto-Detection**: Country is auto-detected from Google Play Store and displayed as read-only Badge in settings (not editable by users)
-- **Ad System**: Disabled (code preserved for future use via AD_FEATURE_ENABLED flag)
+- **Ad System**: Enabled for free tier users; premium subscribers see no ads. Uses AdMob for native apps and custom web ads. Ads display at 5-minute intervals for free users. Admin dashboard shows free vs paid user metrics via `/api/admin/subscription-stats`.
 
 ### Security Measures
 - **Authentication**: Passwords are hashed with bcrypt (10 rounds), JWT tokens are used (30-day user, 8-hour admin), and OTPs expire in 10 minutes with a max of 5 attempts.
