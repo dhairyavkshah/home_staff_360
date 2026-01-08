@@ -101,7 +101,7 @@ const router = Router();
 // ============================================
 // Ad Feature Flag
 // ============================================
-const AD_FEATURE_ENABLED = false; // Set to true to re-enable ads
+const AD_FEATURE_ENABLED = true; // Ads enabled for free tier users
 
 // ============================================
 // Standardized API Error Response System
