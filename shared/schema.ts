@@ -2281,3 +2281,80 @@ export const insertMaintenanceSessionSchema = z.object({
 });
 export type InsertMaintenanceSession = z.infer<typeof insertMaintenanceSessionSchema>;
 export type MaintenanceSession = typeof maintenanceSessions.$inferSelect;
+
+// ============================================
+// Google Play Subscription Management
+// ============================================
+
+export const subscriptionStates = ['purchased', 'canceled', 'pending'] as const;
+export type SubscriptionState = typeof subscriptionStates[number];
+
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: varchar("user_id", { length: 255 }).references(() => serverUsers.id).notNull(),
+  productId: varchar("product_id", { length: 255 }).notNull(),
+  purchaseToken: text("purchase_token").notNull(),
+  purchaseState: varchar("purchase_state", { length: 50 }).notNull(),
+  expiryTime: timestamp("expiry_time"),
+  priceMicros: integer("price_micros"),
+  currency: varchar("currency", { length: 10 }),
+  country: varchar("country", { length: 10 }),
+  autoRenewing: boolean("auto_renewing").default(false),
+  linkedAt: timestamp("linked_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(serverUsers, {
+    fields: [subscriptions.userId],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertSubscriptionSchema = z.object({
+  id: z.string().max(255),
+  userId: z.string().max(255),
+  productId: z.string().max(255),
+  purchaseToken: z.string(),
+  purchaseState: z.enum(subscriptionStates),
+  expiryTime: z.date().or(z.string()).optional().nullable(),
+  priceMicros: z.number().optional().nullable(),
+  currency: z.string().max(10).optional().nullable(),
+  country: z.string().max(10).optional().nullable(),
+  autoRenewing: z.boolean().optional(),
+  linkedAt: z.date().or(z.string()).optional(),
+});
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+
+// Subscription pricing for different regions (~$30 USD equivalent)
+export const SUBSCRIPTION_PRICES = {
+  INR: { amount: 300, currency: 'INR', country: 'IN' },
+  USD: { amount: 30, currency: 'USD', country: 'US' },
+  EUR: { amount: 28, currency: 'EUR', country: 'EU' },
+  GBP: { amount: 24, currency: 'GBP', country: 'GB' },
+  AUD: { amount: 45, currency: 'AUD', country: 'AU' },
+  CAD: { amount: 40, currency: 'CAD', country: 'CA' },
+  CHF: { amount: 27, currency: 'CHF', country: 'CH' },
+  CZK: { amount: 700, currency: 'CZK', country: 'CZ' },
+  DKK: { amount: 210, currency: 'DKK', country: 'DK' },
+  HKD: { amount: 235, currency: 'HKD', country: 'HK' },
+  HUF: { amount: 11000, currency: 'HUF', country: 'HU' },
+  ILS: { amount: 110, currency: 'ILS', country: 'IL' },
+  JPY: { amount: 4500, currency: 'JPY', country: 'JP' },
+  MXN: { amount: 520, currency: 'MXN', country: 'MX' },
+  NOK: { amount: 330, currency: 'NOK', country: 'NO' },
+  NZD: { amount: 50, currency: 'NZD', country: 'NZ' },
+  PHP: { amount: 1700, currency: 'PHP', country: 'PH' },
+  PLN: { amount: 120, currency: 'PLN', country: 'PL' },
+  RUB: { amount: 2800, currency: 'RUB', country: 'RU' },
+  SEK: { amount: 320, currency: 'SEK', country: 'SE' },
+  SGD: { amount: 40, currency: 'SGD', country: 'SG' },
+  THB: { amount: 1050, currency: 'THB', country: 'TH' },
+  TWD: { amount: 950, currency: 'TWD', country: 'TW' },
+  AED: { amount: 110, currency: 'AED', country: 'AE' },
+  CNY: { amount: 215, currency: 'CNY', country: 'CN' },
+  BRL: { amount: 150, currency: 'BRL', country: 'BR' },
+  ZAR: { amount: 560, currency: 'ZAR', country: 'ZA' },
+} as const;

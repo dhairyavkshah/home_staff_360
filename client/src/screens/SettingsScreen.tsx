@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, Crown, HelpCircle, Volume2, Vibrate, MapPin, Link2 } from "lucide-react";
+import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, HelpCircle, Volume2, Vibrate, MapPin, Link2 } from "lucide-react";
 import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
 import { Button } from "@/components/ui/button";
@@ -385,30 +385,6 @@ export function SettingsScreen() {
               </button>
             )}
           </Card>
-        </section>
-
-        <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("support")}</h2>
-          <button
-            className="w-full text-left hover-elevate"
-            onClick={() => navigate("support-developer")}
-            data-testid="button-support"
-          >
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="icon-halo-warning w-10 h-10">
-                  <Crown className="w-5 h-5 text-pink-500 dark:text-pink-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-sm">{t("supportTheDeveloper")}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("helpKeepAppFree")}
-                  </p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </div>
-            </Card>
-          </button>
         </section>
 
         <section className="flex flex-col gap-4">

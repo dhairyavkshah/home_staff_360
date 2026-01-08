@@ -79,7 +79,11 @@ import {
   insertSystemBackupSchema,
   systemBackupStatuses,
   userInvitations,
-  pendingPhoneLinks
+  pendingPhoneLinks,
+  subscriptions,
+  insertSubscriptionSchema,
+  subscriptionStates,
+  SUBSCRIPTION_PRICES
 } from "@shared/schema";
 import { eq, and, or, desc, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -1001,6 +1005,47 @@ function authenticateToken(req: Request, res: Response, next: Function) {
     }
     (req as any).user = decoded;
     next();
+  });
+}
+
+// Subscription middleware - checks if user has an active subscription
+// This middleware can be used to gate premium routes (not applied yet - just defined)
+function requireActiveSubscription(req: Request, res: Response, next: Function) {
+  const userId = (req as any).user?.userId;
+  
+  if (!userId) {
+    return apiError(res, 401, ERROR_CODES.AUTHENTICATION_REQUIRED, "Authentication required");
+  }
+
+  db.query.serverUsers.findFirst({
+    where: eq(serverUsers.id, userId)
+  }).then(user => {
+    if (!user) {
+      return apiError(res, 404, ERROR_CODES.RESOURCE_NOT_FOUND, "User not found");
+    }
+
+    const now = new Date();
+    const expiryDate = user.subscriptionExpiryDate;
+    const isActive = user.subscriptionStatus === 'active' && 
+                     expiryDate && 
+                     new Date(expiryDate) > now;
+
+    if (!isActive) {
+      return apiError(res, 403, ERROR_CODES.AUTHORIZATION_DENIED, 
+        "Active subscription required to access this feature", 
+        { subscriptionRequired: true }
+      );
+    }
+
+    (req as any).subscription = {
+      status: user.subscriptionStatus,
+      expiryDate: user.subscriptionExpiryDate,
+      isActive: true
+    };
+    next();
+  }).catch(error => {
+    console.error("Subscription check error:", error);
+    return apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to verify subscription");
   });
 }
 
@@ -8197,6 +8242,170 @@ async function resolvePendingPhoneLinks(newUserId: string, phone: string) {
     return 0;
   }
 }
+
+// ============================================
+// Subscription Management Endpoints
+// ============================================
+
+// POST /api/subscriptions/validate - Validate and store subscription
+router.post("/api/subscriptions/validate", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { purchaseToken, productId, priceMicros, currency, country, expiryTime, autoRenewing } = req.body;
+
+    if (!purchaseToken || !productId) {
+      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, "purchaseToken and productId are required");
+    }
+
+    // Check if subscription already exists for this purchase token
+    const existingSubscription = await db.query.subscriptions.findFirst({
+      where: eq(subscriptions.purchaseToken, purchaseToken)
+    });
+
+    const subscriptionId = existingSubscription?.id || uuidv4();
+    const now = new Date();
+    const expiryDate = expiryTime ? new Date(expiryTime) : null;
+
+    if (existingSubscription) {
+      // Update existing subscription
+      await db.update(subscriptions)
+        .set({
+          purchaseState: 'purchased',
+          expiryTime: expiryDate,
+          priceMicros: priceMicros || null,
+          currency: currency || null,
+          country: country || null,
+          autoRenewing: autoRenewing || false,
+          updatedAt: now
+        })
+        .where(eq(subscriptions.id, existingSubscription.id));
+    } else {
+      // Create new subscription
+      await db.insert(subscriptions).values({
+        id: subscriptionId,
+        userId,
+        productId,
+        purchaseToken,
+        purchaseState: 'purchased',
+        expiryTime: expiryDate,
+        priceMicros: priceMicros || null,
+        currency: currency || null,
+        country: country || null,
+        autoRenewing: autoRenewing || false,
+        linkedAt: now,
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+
+    // Update user's subscription status
+    await db.update(serverUsers)
+      .set({
+        subscriptionStatus: 'active',
+        subscriptionExpiryDate: expiryDate
+      })
+      .where(eq(serverUsers.id, userId));
+
+    return apiSuccess(res, {
+      subscriptionId,
+      status: 'active',
+      expiryDate,
+      productId,
+      autoRenewing: autoRenewing || false
+    });
+  } catch (error) {
+    console.error("Subscription validation error:", error);
+    return apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to validate subscription");
+  }
+});
+
+// GET /api/subscriptions/status - Get current user's subscription status
+router.get("/api/subscriptions/status", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId)
+    });
+
+    if (!user) {
+      return apiError(res, 404, ERROR_CODES.RESOURCE_NOT_FOUND, "User not found");
+    }
+
+    // Get the latest subscription record
+    const latestSubscription = await db.query.subscriptions.findFirst({
+      where: eq(subscriptions.userId, userId),
+      orderBy: [desc(subscriptions.createdAt)]
+    });
+
+    const now = new Date();
+    const expiryDate = user.subscriptionExpiryDate;
+    const isActive = user.subscriptionStatus === 'active' && 
+                     expiryDate && 
+                     new Date(expiryDate) > now;
+
+    return apiSuccess(res, {
+      status: user.subscriptionStatus || 'none',
+      expiryDate: user.subscriptionExpiryDate,
+      isActive,
+      subscription: latestSubscription ? {
+        id: latestSubscription.id,
+        productId: latestSubscription.productId,
+        purchaseState: latestSubscription.purchaseState,
+        expiryTime: latestSubscription.expiryTime,
+        autoRenewing: latestSubscription.autoRenewing,
+        currency: latestSubscription.currency,
+        country: latestSubscription.country
+      } : null
+    });
+  } catch (error) {
+    console.error("Get subscription status error:", error);
+    return apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to get subscription status");
+  }
+});
+
+// POST /api/subscriptions/check - Lightweight check if user has active subscription
+router.post("/api/subscriptions/check", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId),
+      columns: {
+        subscriptionStatus: true,
+        subscriptionExpiryDate: true
+      }
+    });
+
+    if (!user) {
+      return apiError(res, 404, ERROR_CODES.RESOURCE_NOT_FOUND, "User not found");
+    }
+
+    const now = new Date();
+    const expiryDate = user.subscriptionExpiryDate;
+    const isActive = user.subscriptionStatus === 'active' && 
+                     expiryDate && 
+                     new Date(expiryDate) > now;
+
+    return apiSuccess(res, {
+      isActive,
+      expiryDate: user.subscriptionExpiryDate
+    });
+  } catch (error) {
+    console.error("Subscription check error:", error);
+    return apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to check subscription");
+  }
+});
+
+// GET /api/subscriptions/prices - Get subscription prices for all regions
+router.get("/api/subscriptions/prices", async (req: Request, res: Response) => {
+  try {
+    return apiSuccess(res, SUBSCRIPTION_PRICES);
+  } catch (error) {
+    console.error("Get subscription prices error:", error);
+    return apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to get subscription prices");
+  }
+});
 
 async function initializeDefaultAdmin() {
   const defaultEmail = process.env.ADMIN_DEFAULT_EMAIL;

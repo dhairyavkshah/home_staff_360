@@ -44,7 +44,6 @@ import { ExpenseCalendarScreen } from "@/screens/ExpenseCalendarScreen";
 import { ReportsScreen } from "@/screens/ReportsScreen";
 import { ReportPreviewScreen } from "@/screens/ReportPreviewScreen";
 import { SettingsScreen } from "@/screens/SettingsScreen";
-import { SupportDeveloperScreen } from "@/screens/SupportDeveloperScreen";
 import { BackupScreen } from "@/screens/BackupScreen";
 import { PayablesScreen } from "@/screens/PayablesScreen";
 import { DocumentsScreen } from "@/screens/DocumentsScreen";
@@ -80,20 +79,8 @@ import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
 import { AdOverlay } from "@/components/AdOverlay";
 import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { useAds } from "@/hooks/useAds";
-import { useDonationReminder } from "@/hooks/useDonationReminder";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { RealtimeProvider } from "@/lib/realtime-provider";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Heart } from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function MobileAppRouter() {
@@ -153,8 +140,6 @@ function MobileAppRouter() {
       return <ReportPreviewScreen />;
     case "settings":
       return <SettingsScreen />;
-    case "support-developer":
-      return <SupportDeveloperScreen />;
     case "backup":
       return <BackupScreen />;
     case "staff-home":
@@ -226,41 +211,6 @@ function AdManager() {
   return <AdOverlay ad={currentAd} onClose={dismissAd} />;
 }
 
-function DonationReminderDialog() {
-  const { shouldShowReminder, dismissReminder } = useDonationReminder();
-  const { t } = useTranslation();
-  const { navigate } = useNavigation();
-
-  const handleSupport = () => {
-    dismissReminder();
-    navigate("support-developer");
-  };
-
-  return (
-    <AlertDialog open={shouldShowReminder} onOpenChange={(open) => !open && dismissReminder()}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Heart className="w-5 h-5 text-primary" />
-            </div>
-            <AlertDialogTitle>{t("donationReminderTitle")}</AlertDialogTitle>
-          </div>
-          <AlertDialogDescription>
-            {t("donationReminderMessage")}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel data-testid="button-dismiss-reminder">{t("cancel")}</AlertDialogCancel>
-          <AlertDialogAction onClick={handleSupport} data-testid="button-support-now">
-            {t("supportTheDeveloper")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
-
 function MobileAppWithSplash() {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -281,7 +231,6 @@ function MobileAppWithSplash() {
             <MaintenanceBanner />
             <MobileAppRouter />
             <AdManager />
-            <DonationReminderDialog />
             <Toaster />
           </GuidedTourProvider>
         </DirtyTrackingProvider>
