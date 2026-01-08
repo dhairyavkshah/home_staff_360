@@ -5,7 +5,6 @@ const config: CapacitorConfig = {
   appName: 'Home Staff 360',
   webDir: 'dist/public',
   server: {
-    // Production URL - no dev banner
     url: 'https://homestaff360shahdhairyavk.replit.app',
     androidScheme: 'https'
   },

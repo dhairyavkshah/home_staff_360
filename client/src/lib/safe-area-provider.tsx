@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { Capacitor } from "@capacitor/core";
 import { SafeArea, SystemBarsStyle } from "@capacitor-community/safe-area";
-import { StatusBar, Style } from "@capacitor/status-bar";
 
 interface SafeAreaContextValue {
   insets: { top: number; right: number; bottom: number; left: number };
@@ -31,82 +30,50 @@ export function SafeAreaProvider({ children }: SafeAreaProviderProps) {
     async function initializeSafeArea() {
       if (Capacitor.isNativePlatform()) {
         try {
-          // Disable WebView overlay mode - let Android handle system bar spacing
-          // This makes the WebView resize below the status/navigation bars
-          await StatusBar.setOverlaysWebView({ overlay: false });
-          
-          // Set status bar style based on theme
           const isDarkMode = document.documentElement.classList.contains('dark');
-          await StatusBar.setStyle({ 
-            style: isDarkMode ? Style.Dark : Style.Light 
-          });
-          await StatusBar.setBackgroundColor({ color: isDarkMode ? '#000000' : '#ffffff' });
-          
-          // Also set system bars style via SafeArea plugin for consistency
           await SafeArea.setSystemBarsStyle({
             style: isDarkMode ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
           });
 
-          // Since overlay is disabled, Android handles the spacing
-          // We set zero insets because the WebView is already below the status bar
-          const finalInsets = { top: 0, right: 0, bottom: 0, left: 0 };
-          setInsets(finalInsets);
+          // Wait a bit for CSS env variables to be set by the plugin, then read them
+          setTimeout(() => {
+            const computedStyle = getComputedStyle(document.documentElement);
+            const top = parseInt(computedStyle.getPropertyValue('--safe-area-inset-top') || '0', 10) || 0;
+            const right = parseInt(computedStyle.getPropertyValue('--safe-area-inset-right') || '0', 10) || 0;
+            const bottom = parseInt(computedStyle.getPropertyValue('--safe-area-inset-bottom') || '0', 10) || 0;
+            const left = parseInt(computedStyle.getPropertyValue('--safe-area-inset-left') || '0', 10) || 0;
 
-          // Set CSS custom properties to zero since overlay is disabled
-          document.documentElement.style.setProperty('--safe-area-inset-top', '0px');
-          document.documentElement.style.setProperty('--safe-area-inset-bottom', '0px');
-          document.documentElement.style.setProperty('--safe-area-inset-left', '0px');
-          document.documentElement.style.setProperty('--safe-area-inset-right', '0px');
-          document.documentElement.style.setProperty('--app-safe-area-top', '0px');
-          document.documentElement.style.setProperty('--app-safe-area-bottom', '0px');
-          document.documentElement.style.setProperty('--app-safe-area-left', '0px');
-          document.documentElement.style.setProperty('--app-safe-area-right', '0px');
+            // Ensure minimum values for Android status bar (typically 24-48dp depending on device)
+            // Samsung S21FE has a taller status bar area, so use 48px minimum
+            const finalTop = Math.max(top, 48);
+            const finalBottom = Math.max(bottom, 0);
+            
+            setInsets({ top: finalTop, right, bottom: finalBottom, left });
 
-          console.log('Safe area initialized: overlay disabled, Android handles system bar spacing');
-          setIsReady(true);
+            document.documentElement.style.setProperty('--app-safe-area-top', `${finalTop}px`);
+            document.documentElement.style.setProperty('--app-safe-area-bottom', `${finalBottom}px`);
+            document.documentElement.style.setProperty('--app-safe-area-left', `${left}px`);
+            document.documentElement.style.setProperty('--app-safe-area-right', `${right}px`);
+
+            console.log('Safe area insets detected:', { top: finalTop, right, bottom: finalBottom, left });
+            setIsReady(true);
+          }, 200);
         } catch (error) {
           console.error('Failed to initialize safe area:', error);
-          // Fallback - mark as ready with zero insets
-          setInsets(defaultInsets);
-          document.documentElement.style.setProperty('--safe-area-inset-top', '0px');
-          document.documentElement.style.setProperty('--safe-area-inset-bottom', '0px');
-          document.documentElement.style.setProperty('--safe-area-inset-left', '0px');
-          document.documentElement.style.setProperty('--safe-area-inset-right', '0px');
-          document.documentElement.style.setProperty('--app-safe-area-top', '0px');
-          document.documentElement.style.setProperty('--app-safe-area-bottom', '0px');
-          document.documentElement.style.setProperty('--app-safe-area-left', '0px');
-          document.documentElement.style.setProperty('--app-safe-area-right', '0px');
+          // Set sensible defaults for Android
+          const defaultTop = 32;
+          const defaultBottom = 0;
+          setInsets({ top: defaultTop, right: 0, bottom: defaultBottom, left: 0 });
+          document.documentElement.style.setProperty('--app-safe-area-top', `${defaultTop}px`);
+          document.documentElement.style.setProperty('--app-safe-area-bottom', `${defaultBottom}px`);
           setIsReady(true);
         }
       } else {
-        // Web browser - no safe area needed
         setIsReady(true);
       }
     }
 
     initializeSafeArea();
-  }, []);
-
-  // Listen for theme changes to update status bar
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          const isDarkMode = document.documentElement.classList.contains('dark');
-          StatusBar.setStyle({ 
-            style: isDarkMode ? Style.Dark : Style.Light 
-          }).catch(console.error);
-          StatusBar.setBackgroundColor({ 
-            color: isDarkMode ? '#000000' : '#ffffff' 
-          }).catch(console.error);
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, { attributes: true });
-    return () => observer.disconnect();
   }, []);
 
   return (
