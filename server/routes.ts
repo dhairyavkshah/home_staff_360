@@ -7916,7 +7916,7 @@ router.post("/api/connections/request", authenticateToken, async (req: Request, 
 router.post("/api/connections/auto-connect", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.userId;
-    const { phone, personName, role, message } = req.body;
+    const { phone, personName, personId, role, message } = req.body;
 
     if (!phone) {
       return res.status(400).json({ error: "Phone number is required" });
@@ -8059,8 +8059,8 @@ router.post("/api/connections/auto-connect", authenticateToken, async (req: Requ
     const existingPendingLink = await db.query.pendingPhoneLinks.findFirst({
       where: and(
         eq(pendingPhoneLinks.creatorId, userId),
-        eq(pendingPhoneLinks.phone, normalizedPhone),
-        eq(pendingPhoneLinks.status, 'pending')
+        eq(pendingPhoneLinks.targetPhone, normalizedPhone),
+        eq(pendingPhoneLinks.isResolved, false)
       )
     });
 
@@ -8169,7 +8169,7 @@ async function resolvePendingPhoneLinks(newUserId: string, phone: string) {
         senderId: link.creatorId,
         senderName: creatorUser.displayName,
         senderMode: creatorMode,
-        message: link.message,
+        message: `${creatorUser.displayName || 'Someone'} wants to connect with you`,
         status: 'pending',
         createdAt
       });
