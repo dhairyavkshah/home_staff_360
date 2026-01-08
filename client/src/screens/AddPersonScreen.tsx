@@ -25,6 +25,7 @@ import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
+import { useDirtyForm } from "@/lib/dirty-tracking";
 import { 
   salaryTypes, 
   type SalaryType, 
@@ -40,6 +41,7 @@ export function AddPersonScreen() {
   const { navigate, goBack, data } = useNavigation();
   const { toast } = useToast();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  useDirtyForm(isDirty);
   const editMode = data.editMode && data.personId;
   
   const [name, setName] = useState("");

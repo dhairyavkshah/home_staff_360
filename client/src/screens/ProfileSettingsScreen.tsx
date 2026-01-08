@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   User,
   Phone,
@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { storage } from "@/lib/storage";
+import { useDirtyForm } from "@/lib/dirty-tracking";
 
 type ProfileStep = "view" | "edit-name" | "change-password" | "change-phone" | "verify-phone" | "clear-all-data" | "delete-account";
 
@@ -64,6 +65,27 @@ export function ProfileSettingsScreen() {
 
   // Clear all data form
   const [clearDataPassword, setClearDataPassword] = useState("");
+
+  const isFormDirty = useMemo(() => {
+    switch (step) {
+      case "edit-name":
+        return displayName !== (profile?.displayName || "");
+      case "change-password":
+        return currentPassword.length > 0 || newPassword.length > 0 || confirmPassword.length > 0;
+      case "change-phone":
+        return newPhone.length > 0 || phonePassword.length > 0;
+      case "verify-phone":
+        return otp.length > 0;
+      case "delete-account":
+        return deletePassword.length > 0;
+      case "clear-all-data":
+        return clearDataPassword.length > 0;
+      default:
+        return false;
+    }
+  }, [step, displayName, profile?.displayName, currentPassword, newPassword, confirmPassword, newPhone, phonePassword, otp, deletePassword, clearDataPassword]);
+
+  useDirtyForm(isFormDirty);
 
   const fetchProfile = useCallback(async () => {
     try {

@@ -29,6 +29,7 @@ import { useNavigation, useNavigationData } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
+import { useDirtyForm } from "@/lib/dirty-tracking";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import type { AttendanceStatus } from "@shared/schema";
 
@@ -37,6 +38,7 @@ export function StaffLogAttendanceScreen() {
   const { toast } = useToast();
   const { t } = useTranslation();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  useDirtyForm(isDirty);
   const data = useNavigationData<{ attendanceId?: string }>();
 
   const profile = useMemo(() => storage.getProfile(), []);

@@ -12,6 +12,7 @@ import { useNavigation, useNavigationData } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
+import { useDirtyForm } from "@/lib/dirty-tracking";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { collaborationService } from "@/lib/collaboration-service";
 import { UserCheck, UserPlus, Send, Loader2, CheckCircle } from "lucide-react";
@@ -38,6 +39,7 @@ export function StaffAddClientHomeScreen() {
   const { toast } = useToast();
   const { t, tLabel } = useTranslation();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  useDirtyForm(isDirty);
   const data = useNavigationData<{ clientHomeId?: string }>();
   
   const profile = useMemo(() => storage.getProfile(), []);

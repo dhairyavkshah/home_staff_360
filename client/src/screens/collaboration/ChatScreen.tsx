@@ -418,6 +418,7 @@ export function ChatScreen() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full bg-background">
+        <div className="safe-area-top" />
         <header className="sticky top-0 z-50 flex items-center gap-3 px-4 py-3 border-b bg-background">
           <Button
             size="icon"
@@ -434,12 +435,14 @@ export function ChatScreen() {
         <div className="flex-1 flex items-center justify-center">
           <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
+        <div className="safe-area-bottom" />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full bg-background">
+      <div className="safe-area-top" />
       <header className="sticky top-0 z-50 flex items-center gap-3 px-4 py-3 border-b bg-background">
         <Button
           size="icon"
@@ -666,6 +669,7 @@ export function ChatScreen() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <div className="safe-area-bottom" />
     </div>
   );
 }

@@ -35,6 +35,7 @@ import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
+import { useDirtyForm } from "@/lib/dirty-tracking";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
 import { getTodayString } from "@/lib/calculations";
@@ -65,6 +66,7 @@ export function AddExpenseScreen() {
   const { navigate, goBack, data } = useNavigation();
   const { toast } = useToast();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  useDirtyForm(isDirty);
   const { tLabel } = useTranslation();
   const { contextLabel, contextMode } = useActiveContext();
   const { getCurrencySymbol } = useCurrency();

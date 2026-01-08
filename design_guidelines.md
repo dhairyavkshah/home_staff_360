@@ -329,4 +329,3 @@ Action buttons: mt-6, flex gap-3
 ---
 
 *Design System v5.0 - Microsoft Fluent 2*
-*Crafted by The Team 360*

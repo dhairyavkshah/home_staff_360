@@ -340,6 +340,7 @@ export function StaffDocumentsScreen() {
         variant="destructive"
         onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
       />
+      <div className="safe-area-bottom" />
     </div>
   );
 }

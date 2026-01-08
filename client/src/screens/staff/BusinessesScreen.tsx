@@ -283,6 +283,7 @@ export function BusinessesScreen() {
         variant="destructive"
         onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
       />
+      <div className="safe-area-bottom" />
     </div>
   );
 }

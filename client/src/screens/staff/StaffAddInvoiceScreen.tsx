@@ -29,6 +29,7 @@ import { useNavigation, useNavigationData } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
+import { useDirtyForm } from "@/lib/dirty-tracking";
 import { useCurrency } from "@/hooks/useCurrency";
 import { formatCurrency, getTodayString } from "@/lib/calculations";
 import { currencySymbols, type InvoiceItem, type InvoiceStatus } from "@shared/schema";
@@ -49,6 +50,7 @@ export function StaffAddInvoiceScreen() {
   const { goBack, navigate } = useNavigation();
   const { toast } = useToast();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  useDirtyForm(isDirty);
   const data = useNavigationData<{ invoiceId?: string; editMode?: boolean }>();
   const { getCurrencySymbol } = useCurrency();
   

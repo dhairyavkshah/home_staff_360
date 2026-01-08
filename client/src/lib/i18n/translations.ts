@@ -7,6 +7,8 @@ const en = {
   save: "Save",
   cancel: "Cancel",
   delete: "Delete",
+  restore: "Restore",
+  merge: "Merge",
   edit: "Edit",
   view: "View",
   add: "Add",
@@ -641,7 +643,7 @@ const en = {
   donationsVoluntary: "All donations are voluntary. The app is free to use forever, regardless of donations. Thank you for your support!",
   country: "Country",
   version: "Version",
-  craftedBy: "Crafted by Dhairya Shah (The Team 360)",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "Thank you for using our app",
   seeYouSoon: "See you soon!",
   appTagline: "Built for homes and the people who run them.",
@@ -1058,6 +1060,8 @@ const hi: Partial<typeof en> = {
   save: "सहेजें",
   cancel: "रद्द करें",
   delete: "हटाएं",
+  restore: "पुनर्स्थापित करें",
+  merge: "मर्ज करें",
   edit: "संपादित करें",
   view: "देखें",
   add: "जोड़ें",
@@ -1663,7 +1667,7 @@ const hi: Partial<typeof en> = {
   donationsVoluntary: "सभी दान स्वैच्छिक हैं। ऐप हमेशा के लिए मुफ्त है, दान की परवाह किए बिना। आपके समर्थन के लिए धन्यवाद!",
   country: "देश",
   version: "संस्करण",
-  craftedBy: "Dhairya Shah (The Team 360) द्वारा निर्मित",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "हमारे ऐप का उपयोग करने के लिए धन्यवाद",
   seeYouSoon: "जल्द मिलेंगे!",
   appTagline: "Built for homes and the people who run them.",
@@ -2014,6 +2018,8 @@ const gu: Partial<typeof en> = {
   save: "સાચવો",
   cancel: "રદ કરો",
   delete: "કાઢી નાખો",
+  restore: "પુનઃસ્થાપિત કરો",
+  merge: "મર્જ કરો",
   edit: "સંપાદિત કરો",
   view: "જુઓ",
   add: "ઉમેરો",
@@ -2416,7 +2422,7 @@ const gu: Partial<typeof en> = {
   donationsVoluntary: "બધા દાન સ્વૈચ્છિક છે. એપ હંમેશા માટે મફત છે, દાનને ધ્યાનમાં લીધા વિના. તમારા સપોર્ટ માટે આભાર!",
   country: "દેશ",
   version: "વર્ઝન",
-  craftedBy: "Dhairya Shah (The Team 360) દ્વારા બનાવેલ",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "અમારી એપનો ઉપયોગ કરવા બદલ આભાર",
   seeYouSoon: "જલ્દી મળીશું!",
   appTagline: "Built for homes and the people who run them.",
@@ -2583,6 +2589,8 @@ const kn: Partial<typeof en> = {
   save: "ಉಳಿಸು",
   cancel: "ರದ್ದುಮಾಡು",
   delete: "ಅಳಿಸು",
+  restore: "ಮರುಸ್ಥಾಪಿಸು",
+  merge: "ವಿಲೀನಗೊಳಿಸು",
   edit: "ಸಂಪಾದಿಸು",
   view: "ನೋಡಿ",
   add: "ಸೇರಿಸು",
@@ -2985,7 +2993,7 @@ const kn: Partial<typeof en> = {
   donationsVoluntary: "ಎಲ್ಲಾ ದಾನಗಳು ಸ್ವಯಂಪ್ರೇರಿತ. ಆ್ಯಪ್ ಶಾಶ್ವತವಾಗಿ ಉಚಿತ, ದಾನಗಳನ್ನು ಲೆಕ್ಕಿಸದೆ. ನಿಮ್ಮ ಬೆಂಬಲಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು!",
   country: "ದೇಶ",
   version: "ಆವೃತ್ತಿ",
-  craftedBy: "Dhairya Shah (The Team 360) ರಿಂದ ರಚಿಸಲಾಗಿದೆ",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "ನಮ್ಮ ಆ್ಯಪ್ ಬಳಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು",
   seeYouSoon: "ಶೀಘ್ರದಲ್ಲೇ ಭೇಟಿಯಾಗೋಣ!",
   appTagline: "Built for homes and the people who run them.",
@@ -3152,6 +3160,8 @@ const ml: Partial<typeof en> = {
   save: "സേവ് ചെയ്യുക",
   cancel: "റദ്ദാക്കുക",
   delete: "ഇല്ലാതാക്കുക",
+  restore: "പുനഃസ്ഥാപിക്കുക",
+  merge: "ലയിപ്പിക്കുക",
   edit: "എഡിറ്റ് ചെയ്യുക",
   view: "കാണുക",
   add: "ചേർക്കുക",
@@ -3554,7 +3564,7 @@ const ml: Partial<typeof en> = {
   donationsVoluntary: "എല്ലാ സംഭാവനകളും സ്വമേധയാ ഉള്ളതാണ്. ആപ്പ് എന്നെന്നേക്കും സൗജന്യമാണ്, സംഭാവനകൾ പരിഗണിക്കാതെ. നിങ്ങളുടെ പിന്തുണയ്ക്ക് നന്ദി!",
   country: "രാജ്യം",
   version: "പതിപ്പ്",
-  craftedBy: "Dhairya Shah (The Team 360) നിർമ്മിച്ചത്",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "ഞങ്ങളുടെ ആപ്പ് ഉപയോഗിച്ചതിന് നന്ദി",
   seeYouSoon: "ഉടൻ കാണാം!",
   appTagline: "Built for homes and the people who run them.",
@@ -3723,6 +3733,8 @@ const es: Partial<typeof en> = {
   save: "Guardar",
   cancel: "Cancelar",
   delete: "Eliminar",
+  restore: "Restaurar",
+  merge: "Combinar",
   edit: "Editar",
   view: "Ver",
   add: "Agregar",
@@ -4344,7 +4356,7 @@ const es: Partial<typeof en> = {
   donationsVoluntary: "Todas las donaciones son voluntarias. La aplicación es gratuita para siempre, independientemente de las donaciones. ¡Gracias por tu apoyo!",
   country: "País",
   version: "Versión",
-  craftedBy: "Creado por Dhairya Shah (The Team 360)",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "Gracias por usar nuestra aplicación",
   seeYouSoon: "¡Hasta pronto!",
   appTagline: "Built for homes and the people who run them.",
@@ -4507,7 +4519,7 @@ const es: Partial<typeof en> = {
   donationReminderMessage: "Si has encontrado esta aplicación útil, considera apoyar su desarrollo.",
 };
 const fr: Partial<typeof en> = {
-  save: "Enregistrer", cancel: "Annuler", delete: "Supprimer", edit: "Modifier", view: "Voir", add: "Ajouter", back: "Retour", confirm: "Confirmer", loading: "Chargement...", error: "Erreur", success: "Succès", required: "Obligatoire", optional: "Optionnel", comingSoon: "Bientôt disponible",
+  save: "Enregistrer", cancel: "Annuler", delete: "Supprimer", restore: "Restaurer", merge: "Fusionner", edit: "Modifier", view: "Voir", add: "Ajouter", back: "Retour", confirm: "Confirmer", loading: "Chargement...", error: "Erreur", success: "Succès", required: "Obligatoire", optional: "Optionnel", comingSoon: "Bientôt disponible",
   home: "Accueil", staff: "Personnel", expenses: "Dépenses", expensesBills: "Dépenses", payables: "À payer", reports: "Rapports", settings: "Paramètres",
   welcome: "Bienvenue", quickActions: "Actions rapides", markAttendance: "Marquer la présence", recordPayment: "Enregistrer un paiement", addExpense: "Ajouter une dépense", viewReports: "Voir les rapports", activeStaff: "Personnel actif", todayAttendance: "Présence aujourd'hui", monthPayments: "Paiements ce mois", monthExpenses: "Dépenses ce mois",
   staffMembers: "Personnel", addStaffMember: "Ajouter du personnel", editStaffMember: "Modifier le personnel", noStaffMembers: "Aucun personnel ajouté", addYourFirstStaff: "Ajoutez votre premier membre du personnel pour commencer", staffManagement: "Gestion du personnel", manageYourTeam: "Gérer votre équipe", searchByNameOrRole: "Rechercher par nom ou rôle...", noStaffAddedYet: "Aucun personnel ajouté", startByAddingFirstStaff: "Commencez par ajouter votre premier membre du personnel", addStaffVendor: "Ajouter du personnel", noResultsFound: "Aucun résultat trouvé", owed: "Dû", settled: "Réglé", searchByTitleOrVendor: "Rechercher par titre ou fournisseur...",
@@ -4647,7 +4659,7 @@ const fr: Partial<typeof en> = {
   inrIndianRupee: "INR - Roupie indienne", usdUsDollar: "USD - Dollar américain", eurEuro: "EUR - Euro", gbpBritishPound: "GBP - Livre sterling", aedUaeDirham: "AED - Dirham des EAU", jpyJapaneseYen: "JPY - Yen japonais", cnyChinseYuan: "CNY - Yuan chinois", cadCanadianDollar: "CAD - Dollar canadien", audAustralianDollar: "AUD - Dollar australien", chfSwissFranc: "CHF - Franc suisse", sgdSingaporeDollar: "SGD - Dollar de Singapour", mxnMexicanPeso: "MXN - Peso mexicain", brlBrazilianReal: "BRL - Réal brésilien", zarSouthAfricanRand: "ZAR - Rand sud-africain", otherCustom: "Autre (personnalisé)",
   reportTemplate: "Modèle de rapport", salaryReport: "Rapport de salaire", salaryReportDesc: "Résumé des salaires du personnel et historique des paiements", expenseReport: "Rapport de dépenses", expenseReportDesc: "Résumé des dépenses du foyer", laundryReport: "Rapport de blanchisserie", laundryReportDesc: "Enregistrements et coûts des services de blanchisserie", summary: "Résumé", detailed: "Détaillé", byCategory: "Par catégorie", byStaff: "Par personnel", byClient: "Par client", generatePdf: "Générer PDF", downloadCsv: "Télécharger CSV", shareReport: "Partager le rapport",
   tour: "Visite guidée", startTour: "Commencer la visite", skipTour: "Passer la visite", nextStep: "Suivant", previousStep: "Précédent", finishTour: "Terminer", tourCompleted: "Visite terminée", replayTour: "Rejouer la visite",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "Recommandé", googlePay: "Google Pay", payDirectlyWithGooglePay: "Payer directement avec Google Pay", paypal: "PayPal", paySecurelyWithPayPal: "Payer en toute sécurité avec PayPal", donate: "Faire un don", selectAnAmount: "Sélectionner un montant", whatYourSupportDoes: "Ce que fait votre soutien", helpsMaintainApp: "Aide à maintenir et améliorer l'application", supportsDevelopment: "Soutient le développement de nouvelles fonctionnalités", helpsCoversServerCosts: "Aide à couvrir les coûts du serveur et de maintenance", enablesFasterBugFixes: "Permet des corrections de bugs et mises à jour plus rapides", donationsVoluntary: "Tous les dons sont volontaires. L'application est gratuite pour toujours, indépendamment des dons. Merci pour votre soutien !", country: "Pays", version: "Version", craftedBy: "Créé par Dhairya Shah (The Team 360)", thankYouForUsing: "Merci d'utiliser notre application", seeYouSoon: "À bientôt !", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "Recommandé", googlePay: "Google Pay", payDirectlyWithGooglePay: "Payer directement avec Google Pay", paypal: "PayPal", paySecurelyWithPayPal: "Payer en toute sécurité avec PayPal", donate: "Faire un don", selectAnAmount: "Sélectionner un montant", whatYourSupportDoes: "Ce que fait votre soutien", helpsMaintainApp: "Aide à maintenir et améliorer l'application", supportsDevelopment: "Soutient le développement de nouvelles fonctionnalités", helpsCoversServerCosts: "Aide à couvrir les coûts du serveur et de maintenance", enablesFasterBugFixes: "Permet des corrections de bugs et mises à jour plus rapides", donationsVoluntary: "Tous les dons sont volontaires. L'application est gratuite pour toujours, indépendamment des dons. Merci pour votre soutien !", country: "Pays", version: "Version", craftedBy: "Home Staff 360", thankYouForUsing: "Merci d'utiliser notre application", seeYouSoon: "À bientôt !", appTagline: "Built for homes and the people who run them.",
   searchClientHomes: "Rechercher des foyers clients...", business: "Entreprise", selectBusiness: "Sélectionner une entreprise",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "Modifications non enregistrées",
@@ -4736,7 +4748,7 @@ const fr: Partial<typeof en> = {
   donationReminderMessage: "Si vous avez trouvé cette application utile, envisagez de soutenir son développement.",
 };
 const de: Partial<typeof en> = {
-  save: "Speichern", cancel: "Abbrechen", delete: "Löschen", edit: "Bearbeiten", view: "Ansehen", add: "Hinzufügen", back: "Zurück", confirm: "Bestätigen", loading: "Wird geladen...", error: "Fehler", success: "Erfolg", required: "Erforderlich", optional: "Optional", comingSoon: "Demnächst verfügbar",
+  save: "Speichern", cancel: "Abbrechen", delete: "Löschen", restore: "Wiederherstellen", merge: "Zusammenführen", edit: "Bearbeiten", view: "Ansehen", add: "Hinzufügen", back: "Zurück", confirm: "Bestätigen", loading: "Wird geladen...", error: "Fehler", success: "Erfolg", required: "Erforderlich", optional: "Optional", comingSoon: "Demnächst verfügbar",
   home: "Startseite", staff: "Personal", expenses: "Ausgaben", expensesBills: "Ausgaben", payables: "Verbindlichkeiten", reports: "Berichte", settings: "Einstellungen",
   welcome: "Willkommen", quickActions: "Schnellaktionen", markAttendance: "Anwesenheit markieren", recordPayment: "Zahlung erfassen", addExpense: "Ausgabe hinzufügen", viewReports: "Berichte anzeigen", activeStaff: "Aktives Personal", todayAttendance: "Heutige Anwesenheit", monthPayments: "Zahlungen diesen Monat", monthExpenses: "Ausgaben diesen Monat",
   staffMembers: "Personal", addStaffMember: "Personal hinzufügen", editStaffMember: "Personal bearbeiten", noStaffMembers: "Noch kein Personal hinzugefügt", addYourFirstStaff: "Fügen Sie Ihr erstes Personalmitglied hinzu, um zu beginnen", staffManagement: "Personalverwaltung", manageYourTeam: "Ihr Team verwalten", searchByNameOrRole: "Nach Name oder Rolle suchen...", noStaffAddedYet: "Noch kein Personal hinzugefügt", startByAddingFirstStaff: "Beginnen Sie mit dem Hinzufügen Ihres ersten Personalmitglieds", addStaffVendor: "Personal hinzufügen", noResultsFound: "Keine Ergebnisse gefunden", owed: "Geschuldet", settled: "Beglichen", searchByTitleOrVendor: "Nach Titel oder Lieferant suchen...",
@@ -4876,7 +4888,7 @@ const de: Partial<typeof en> = {
   inrIndianRupee: "INR - Indische Rupie", usdUsDollar: "USD - US-Dollar", eurEuro: "EUR - Euro", gbpBritishPound: "GBP - Britisches Pfund", aedUaeDirham: "AED - VAE-Dirham", jpyJapaneseYen: "JPY - Japanischer Yen", cnyChinseYuan: "CNY - Chinesischer Yuan", cadCanadianDollar: "CAD - Kanadischer Dollar", audAustralianDollar: "AUD - Australischer Dollar", chfSwissFranc: "CHF - Schweizer Franken", sgdSingaporeDollar: "SGD - Singapur-Dollar", mxnMexicanPeso: "MXN - Mexikanischer Peso", brlBrazilianReal: "BRL - Brasilianischer Real", zarSouthAfricanRand: "ZAR - Südafrikanischer Rand", otherCustom: "Andere (benutzerdefiniert)",
   reportTemplate: "Berichtsvorlage", salaryReport: "Gehaltsbericht", salaryReportDesc: "Gehaltsübersicht des Personals und Zahlungsverlauf", expenseReport: "Ausgabenbericht", expenseReportDesc: "Haushaltsausgabenübersicht", laundryReport: "Wäschebericht", laundryReportDesc: "Wäscheservice-Aufzeichnungen und Kosten", summary: "Zusammenfassung", detailed: "Detailliert", byCategory: "Nach Kategorie", byStaff: "Nach Personal", byClient: "Nach Kunde", generatePdf: "PDF erstellen", downloadCsv: "CSV herunterladen", shareReport: "Bericht teilen",
   tour: "Tour", startTour: "Tour starten", skipTour: "Tour überspringen", nextStep: "Weiter", previousStep: "Zurück", finishTour: "Fertig", tourCompleted: "Tour abgeschlossen", replayTour: "Tour wiederholen",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "Empfohlen", googlePay: "Google Pay", payDirectlyWithGooglePay: "Direkt mit Google Pay bezahlen", paypal: "PayPal", paySecurelyWithPayPal: "Sicher mit PayPal bezahlen", donate: "Spenden", selectAnAmount: "Betrag auswählen", whatYourSupportDoes: "Was Ihre Unterstützung bewirkt", helpsMaintainApp: "Hilft bei der Wartung und Verbesserung der App", supportsDevelopment: "Unterstützt die Entwicklung neuer Funktionen", helpsCoversServerCosts: "Hilft bei der Deckung von Server- und Wartungskosten", enablesFasterBugFixes: "Ermöglicht schnellere Fehlerbehebungen und Updates", donationsVoluntary: "Alle Spenden sind freiwillig. Die App ist für immer kostenlos, unabhängig von Spenden. Danke für Ihre Unterstützung!", country: "Land", version: "Version", craftedBy: "Erstellt von Dhairya Shah (The Team 360)", thankYouForUsing: "Danke, dass Sie unsere App nutzen", seeYouSoon: "Bis bald!", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "Empfohlen", googlePay: "Google Pay", payDirectlyWithGooglePay: "Direkt mit Google Pay bezahlen", paypal: "PayPal", paySecurelyWithPayPal: "Sicher mit PayPal bezahlen", donate: "Spenden", selectAnAmount: "Betrag auswählen", whatYourSupportDoes: "Was Ihre Unterstützung bewirkt", helpsMaintainApp: "Hilft bei der Wartung und Verbesserung der App", supportsDevelopment: "Unterstützt die Entwicklung neuer Funktionen", helpsCoversServerCosts: "Hilft bei der Deckung von Server- und Wartungskosten", enablesFasterBugFixes: "Ermöglicht schnellere Fehlerbehebungen und Updates", donationsVoluntary: "Alle Spenden sind freiwillig. Die App ist für immer kostenlos, unabhängig von Spenden. Danke für Ihre Unterstützung!", country: "Land", version: "Version", craftedBy: "Home Staff 360", thankYouForUsing: "Danke, dass Sie unsere App nutzen", seeYouSoon: "Bis bald!", appTagline: "Built for homes and the people who run them.",
   searchClientHomes: "Kundenhaushalte suchen...", business: "Unternehmen", selectBusiness: "Unternehmen auswählen",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "Nicht gespeicherte Änderungen",
@@ -4965,7 +4977,7 @@ const de: Partial<typeof en> = {
   donationReminderMessage: "Wenn Sie diese App hilfreich fanden, erwägen Sie, ihre Entwicklung zu unterstützen.",
 };
 const ar: Partial<typeof en> = {
-  save: "حفظ", cancel: "إلغاء", delete: "حذف", edit: "تعديل", view: "عرض", add: "إضافة", back: "رجوع", confirm: "تأكيد", loading: "جاري التحميل...", error: "خطأ", success: "نجاح", required: "مطلوب", optional: "اختياري", comingSoon: "قريباً",
+  save: "حفظ", cancel: "إلغاء", delete: "حذف", restore: "استعادة", merge: "دمج", edit: "تعديل", view: "عرض", add: "إضافة", back: "رجوع", confirm: "تأكيد", loading: "جاري التحميل...", error: "خطأ", success: "نجاح", required: "مطلوب", optional: "اختياري", comingSoon: "قريباً",
   home: "الرئيسية", staff: "الموظفون", expenses: "المصروفات", expensesBills: "المصروفات", payables: "المستحقات", reports: "التقارير", settings: "الإعدادات",
   welcome: "مرحباً", quickActions: "إجراءات سريعة", markAttendance: "تسجيل الحضور", recordPayment: "تسجيل دفعة", addExpense: "إضافة مصروف", viewReports: "عرض التقارير", activeStaff: "الموظفون النشطون", todayAttendance: "حضور اليوم", monthPayments: "مدفوعات هذا الشهر", monthExpenses: "مصروفات هذا الشهر",
   staffMembers: "الموظفون", addStaffMember: "إضافة موظف", editStaffMember: "تعديل الموظف", noStaffMembers: "لا يوجد موظفون حتى الآن", addYourFirstStaff: "أضف أول موظف لديك للبدء", staffManagement: "إدارة الموظفين", manageYourTeam: "إدارة فريقك", searchByNameOrRole: "البحث بالاسم أو الدور...", noStaffAddedYet: "لم تتم إضافة موظفين بعد", startByAddingFirstStaff: "ابدأ بإضافة أول موظف لديك", addStaffVendor: "إضافة موظف", noResultsFound: "لم يتم العثور على نتائج", owed: "مستحق", settled: "مسدد", searchByTitleOrVendor: "البحث بالعنوان أو المورد...",
@@ -5105,7 +5117,7 @@ const ar: Partial<typeof en> = {
   inrIndianRupee: "INR - روبية هندية", usdUsDollar: "USD - دولار أمريكي", eurEuro: "EUR - يورو", gbpBritishPound: "GBP - جنيه إسترليني", aedUaeDirham: "AED - درهم إماراتي", jpyJapaneseYen: "JPY - ين ياباني", cnyChinseYuan: "CNY - يوان صيني", cadCanadianDollar: "CAD - دولار كندي", audAustralianDollar: "AUD - دولار أسترالي", chfSwissFranc: "CHF - فرنك سويسري", sgdSingaporeDollar: "SGD - دولار سنغافوري", mxnMexicanPeso: "MXN - بيزو مكسيكي", brlBrazilianReal: "BRL - ريال برازيلي", zarSouthAfricanRand: "ZAR - راند جنوب أفريقي", otherCustom: "أخرى (مخصص)",
   reportTemplate: "قالب التقرير", salaryReport: "تقرير الرواتب", salaryReportDesc: "ملخص رواتب الموظفين وسجل المدفوعات", expenseReport: "تقرير المصروفات", expenseReportDesc: "ملخص مصروفات المنزل", laundryReport: "تقرير الغسيل", laundryReportDesc: "سجلات خدمات الغسيل والتكاليف", summary: "ملخص", detailed: "مفصل", byCategory: "حسب الفئة", byStaff: "حسب الموظف", byClient: "حسب العميل", generatePdf: "إنشاء PDF", downloadCsv: "تحميل CSV", shareReport: "مشاركة التقرير",
   tour: "جولة", startTour: "بدء الجولة", skipTour: "تخطي الجولة", nextStep: "التالي", previousStep: "السابق", finishTour: "إنهاء", tourCompleted: "اكتملت الجولة", replayTour: "إعادة الجولة",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "موصى به", googlePay: "Google Pay", payDirectlyWithGooglePay: "ادفع مباشرة باستخدام Google Pay", paypal: "PayPal", paySecurelyWithPayPal: "ادفع بأمان باستخدام PayPal", donate: "تبرع", selectAnAmount: "اختر مبلغاً", whatYourSupportDoes: "ماذا يفعل دعمك", helpsMaintainApp: "يساعد في صيانة وتحسين التطبيق", supportsDevelopment: "يدعم تطوير ميزات جديدة", helpsCoversServerCosts: "يحافظ على التطبيق خالياً من الإعلانات ومركّزاً على الخصوصية", enablesFasterBugFixes: "يتيح إصلاحات أسرع للأخطاء والتحديثات", donationsVoluntary: "جميع التبرعات طوعية. التطبيق مجاني للأبد بغض النظر عن التبرعات. شكراً لدعمكم!", country: "البلد", version: "الإصدار", craftedBy: "صُنع بواسطة Dhairya Shah (The Team 360)", thankYouForUsing: "شكراً لاستخدام تطبيقنا", seeYouSoon: "نراكم قريباً!", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "موصى به", googlePay: "Google Pay", payDirectlyWithGooglePay: "ادفع مباشرة باستخدام Google Pay", paypal: "PayPal", paySecurelyWithPayPal: "ادفع بأمان باستخدام PayPal", donate: "تبرع", selectAnAmount: "اختر مبلغاً", whatYourSupportDoes: "ماذا يفعل دعمك", helpsMaintainApp: "يساعد في صيانة وتحسين التطبيق", supportsDevelopment: "يدعم تطوير ميزات جديدة", helpsCoversServerCosts: "يحافظ على التطبيق خالياً من الإعلانات ومركّزاً على الخصوصية", enablesFasterBugFixes: "يتيح إصلاحات أسرع للأخطاء والتحديثات", donationsVoluntary: "جميع التبرعات طوعية. التطبيق مجاني للأبد بغض النظر عن التبرعات. شكراً لدعمكم!", country: "البلد", version: "الإصدار", craftedBy: "Home Staff 360", thankYouForUsing: "شكراً لاستخدام تطبيقنا", seeYouSoon: "نراكم قريباً!", appTagline: "Built for homes and the people who run them.",
   searchClientHomes: "البحث في منازل العملاء...", business: "عمل", selectBusiness: "اختر العمل",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "تغييرات غير محفوظة",
@@ -5194,7 +5206,7 @@ const ar: Partial<typeof en> = {
   donationReminderMessage: "إذا وجدت هذا التطبيق مفيدًا، فكر في دعم تطويره.",
 };
 const zh: Partial<typeof en> = {
-  save: "保存", cancel: "取消", delete: "删除", edit: "编辑", view: "查看", add: "添加", back: "返回", confirm: "确认", loading: "加载中...", error: "错误", success: "成功", required: "必填", optional: "可选", comingSoon: "即将推出",
+  save: "保存", cancel: "取消", delete: "删除", restore: "恢复", merge: "合并", edit: "编辑", view: "查看", add: "添加", back: "返回", confirm: "确认", loading: "加载中...", error: "错误", success: "成功", required: "必填", optional: "可选", comingSoon: "即将推出",
   home: "首页", staff: "员工", expenses: "支出", expensesBills: "支出", payables: "应付款", reports: "报告", settings: "设置",
   welcome: "欢迎", quickActions: "快捷操作", markAttendance: "标记考勤", recordPayment: "记录付款", addExpense: "添加支出", viewReports: "查看报告", activeStaff: "在职员工", todayAttendance: "今日考勤", monthPayments: "本月付款", monthExpenses: "本月支出",
   staffMembers: "员工", addStaffMember: "添加员工", editStaffMember: "编辑员工", noStaffMembers: "暂无员工", addYourFirstStaff: "添加您的第一位员工开始", staffManagement: "员工管理", manageYourTeam: "管理您的团队", searchByNameOrRole: "按姓名或角色搜索...", noStaffAddedYet: "尚未添加员工", startByAddingFirstStaff: "从添加您的第一位员工开始", addStaffVendor: "添加员工", noResultsFound: "未找到结果", owed: "欠款", settled: "已结清", searchByTitleOrVendor: "按标题或供应商搜索...",
@@ -5334,7 +5346,7 @@ const zh: Partial<typeof en> = {
   inrIndianRupee: "INR - 印度卢比", usdUsDollar: "USD - 美元", eurEuro: "EUR - 欧元", gbpBritishPound: "GBP - 英镑", aedUaeDirham: "AED - 阿联酋迪拉姆", jpyJapaneseYen: "JPY - 日元", cnyChinseYuan: "CNY - 人民币", cadCanadianDollar: "CAD - 加拿大元", audAustralianDollar: "AUD - 澳大利亚元", chfSwissFranc: "CHF - 瑞士法郎", sgdSingaporeDollar: "SGD - 新加坡元", mxnMexicanPeso: "MXN - 墨西哥比索", brlBrazilianReal: "BRL - 巴西雷亚尔", zarSouthAfricanRand: "ZAR - 南非兰特", otherCustom: "其他（自定义）",
   reportTemplate: "报告模板", salaryReport: "薪资报告", salaryReportDesc: "员工薪资摘要和付款历史", expenseReport: "支出报告", expenseReportDesc: "家庭支出摘要", laundryReport: "洗衣报告", laundryReportDesc: "洗衣服务记录和费用", summary: "摘要", detailed: "详细", byCategory: "按类别", byStaff: "按员工", byClient: "按客户", generatePdf: "生成PDF", downloadCsv: "下载CSV", shareReport: "分享报告",
   tour: "导览", startTour: "开始导览", skipTour: "跳过导览", nextStep: "下一步", previousStep: "上一步", finishTour: "完成", tourCompleted: "导览完成", replayTour: "重新导览",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "推荐", googlePay: "Google Pay", payDirectlyWithGooglePay: "使用 Google Pay 直接付款", paypal: "PayPal", paySecurelyWithPayPal: "使用 PayPal 安全付款", donate: "捐赠", selectAnAmount: "选择金额", whatYourSupportDoes: "您的支持能做什么", helpsMaintainApp: "帮助维护和改进应用", supportsDevelopment: "支持新功能的开发", helpsCoversServerCosts: "保持应用无广告且注重隐私", enablesFasterBugFixes: "实现更快的错误修复和更新", donationsVoluntary: "所有捐赠都是自愿的。无论是否捐赠，应用永久免费。感谢您的支持！", country: "国家", version: "版本", craftedBy: "由 Dhairya Shah (The Team 360) 精心打造", thankYouForUsing: "感谢您使用我们的应用", seeYouSoon: "再见！", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "推荐", googlePay: "Google Pay", payDirectlyWithGooglePay: "使用 Google Pay 直接付款", paypal: "PayPal", paySecurelyWithPayPal: "使用 PayPal 安全付款", donate: "捐赠", selectAnAmount: "选择金额", whatYourSupportDoes: "您的支持能做什么", helpsMaintainApp: "帮助维护和改进应用", supportsDevelopment: "支持新功能的开发", helpsCoversServerCosts: "保持应用无广告且注重隐私", enablesFasterBugFixes: "实现更快的错误修复和更新", donationsVoluntary: "所有捐赠都是自愿的。无论是否捐赠，应用永久免费。感谢您的支持！", country: "国家", version: "版本", craftedBy: "Home Staff 360", thankYouForUsing: "感谢您使用我们的应用", seeYouSoon: "再见！", appTagline: "Built for homes and the people who run them.",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "未保存的更改",
   unsavedChangesDescription: "您有未保存的更改。是否要放弃它们？",
@@ -5422,7 +5434,7 @@ const zh: Partial<typeof en> = {
   donationReminderMessage: "如果您觉得这个应用有帮助，请考虑支持它的发展。",
 };
 const ja: Partial<typeof en> = {
-  save: "保存", cancel: "キャンセル", delete: "削除", edit: "編集", view: "表示", add: "追加", back: "戻る", confirm: "確認", loading: "読み込み中...", error: "エラー", success: "成功", required: "必須", optional: "任意", comingSoon: "近日公開",
+  save: "保存", cancel: "キャンセル", delete: "削除", restore: "復元", merge: "マージ", edit: "編集", view: "表示", add: "追加", back: "戻る", confirm: "確認", loading: "読み込み中...", error: "エラー", success: "成功", required: "必須", optional: "任意", comingSoon: "近日公開",
   home: "ホーム", staff: "スタッフ", expenses: "経費", expensesBills: "経費", payables: "支払い", reports: "レポート", settings: "設定",
   welcome: "ようこそ", quickActions: "クイックアクション", markAttendance: "出勤を記録", recordPayment: "支払いを記録", addExpense: "経費を追加", viewReports: "レポートを表示", activeStaff: "アクティブなスタッフ", todayAttendance: "今日の出勤", monthPayments: "今月の支払い", monthExpenses: "今月の経費",
   staffMembers: "スタッフ", addStaffMember: "スタッフを追加", editStaffMember: "スタッフを編集", noStaffMembers: "まだスタッフがいません", addYourFirstStaff: "最初のスタッフを追加して始めましょう", staffManagement: "スタッフ管理", manageYourTeam: "チームを管理", searchByNameOrRole: "名前または役割で検索...", noStaffAddedYet: "まだスタッフが追加されていません", startByAddingFirstStaff: "最初のスタッフを追加して始めましょう", addStaffVendor: "スタッフを追加", noResultsFound: "結果が見つかりません", owed: "未払い", settled: "精算済み", searchByTitleOrVendor: "タイトルまたはベンダーで検索...",
@@ -5493,7 +5505,7 @@ const ja: Partial<typeof en> = {
   inrIndianRupee: "INR - インドルピー", usdUsDollar: "USD - 米ドル", eurEuro: "EUR - ユーロ", gbpBritishPound: "GBP - 英ポンド", aedUaeDirham: "AED - UAEディルハム", jpyJapaneseYen: "JPY - 日本円", cnyChinseYuan: "CNY - 中国元", cadCanadianDollar: "CAD - カナダドル", audAustralianDollar: "AUD - オーストラリアドル", chfSwissFranc: "CHF - スイスフラン", sgdSingaporeDollar: "SGD - シンガポールドル", mxnMexicanPeso: "MXN - メキシコペソ", brlBrazilianReal: "BRL - ブラジルレアル", zarSouthAfricanRand: "ZAR - 南アフリカランド", otherCustom: "その他（カスタム）",
   reportTemplate: "レポートテンプレート", salaryReport: "給与レポート", salaryReportDesc: "スタッフの給与概要と支払い履歴", expenseReport: "経費レポート", expenseReportDesc: "家庭の経費概要", laundryReport: "洗濯レポート", laundryReportDesc: "洗濯サービスの記録とコスト", summary: "概要", detailed: "詳細", byCategory: "カテゴリー別", byStaff: "スタッフ別", byClient: "クライアント別", generatePdf: "PDFを生成", downloadCsv: "CSVをダウンロード", shareReport: "レポートを共有",
   tour: "ツアー", startTour: "ツアーを開始", skipTour: "ツアーをスキップ", nextStep: "次へ", previousStep: "前へ", finishTour: "完了", tourCompleted: "ツアー完了", replayTour: "ツアーを再生",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "おすすめ", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Payで直接支払う", paypal: "PayPal", paySecurelyWithPayPal: "PayPalで安全に支払う", donate: "寄付", selectAnAmount: "金額を選択", whatYourSupportDoes: "あなたのサポートでできること", helpsMaintainApp: "アプリの維持と改善に役立ちます", supportsDevelopment: "新機能の開発をサポートします", helpsCoversServerCosts: "アプリを広告なしでプライバシー重視に保ちます", enablesFasterBugFixes: "より速いバグ修正とアップデートを可能にします", donationsVoluntary: "すべての寄付は任意です。寄付に関係なく、アプリは永久に無料です。ご支援ありがとうございます！", country: "国", version: "バージョン", craftedBy: "Dhairya Shah (The Team 360) が心を込めて作成", thankYouForUsing: "アプリをご利用いただきありがとうございます", seeYouSoon: "またお会いしましょう！", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "おすすめ", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Payで直接支払う", paypal: "PayPal", paySecurelyWithPayPal: "PayPalで安全に支払う", donate: "寄付", selectAnAmount: "金額を選択", whatYourSupportDoes: "あなたのサポートでできること", helpsMaintainApp: "アプリの維持と改善に役立ちます", supportsDevelopment: "新機能の開発をサポートします", helpsCoversServerCosts: "アプリを広告なしでプライバシー重視に保ちます", enablesFasterBugFixes: "より速いバグ修正とアップデートを可能にします", donationsVoluntary: "すべての寄付は任意です。寄付に関係なく、アプリは永久に無料です。ご支援ありがとうございます！", country: "国", version: "バージョン", craftedBy: "Home Staff 360", thankYouForUsing: "アプリをご利用いただきありがとうございます", seeYouSoon: "またお会いしましょう！", appTagline: "Built for homes and the people who run them.",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "未保存の変更",
   unsavedChangesDescription: "未保存の変更があります。破棄しますか？",
@@ -5581,7 +5593,7 @@ const ja: Partial<typeof en> = {
   donationReminderMessage: "このアプリが役に立った場合は、開発をサポートすることをご検討ください。",
 };
 const pt: Partial<typeof en> = {
-  save: "Salvar", cancel: "Cancelar", delete: "Excluir", edit: "Editar", view: "Visualizar", add: "Adicionar", back: "Voltar", confirm: "Confirmar", loading: "Carregando...", error: "Erro", success: "Sucesso", required: "Obrigatório", optional: "Opcional", comingSoon: "Em breve",
+  save: "Salvar", cancel: "Cancelar", delete: "Excluir", restore: "Restaurar", merge: "Mesclar", edit: "Editar", view: "Visualizar", add: "Adicionar", back: "Voltar", confirm: "Confirmar", loading: "Carregando...", error: "Erro", success: "Sucesso", required: "Obrigatório", optional: "Opcional", comingSoon: "Em breve",
   home: "Início", staff: "Funcionários", expenses: "Despesas", expensesBills: "Despesas", payables: "A Pagar", reports: "Relatórios", settings: "Configurações",
   welcome: "Bem-vindo", quickActions: "Ações Rápidas", markAttendance: "Marcar Presença", recordPayment: "Registrar Pagamento", addExpense: "Adicionar Despesa", viewReports: "Ver Relatórios", activeStaff: "Funcionários Ativos", todayAttendance: "Presença Hoje", monthPayments: "Pagamentos do Mês", monthExpenses: "Despesas do Mês",
   staffMembers: "Funcionários", addStaffMember: "Adicionar Funcionário", editStaffMember: "Editar Funcionário", noStaffMembers: "Nenhum funcionário ainda", addYourFirstStaff: "Adicione seu primeiro funcionário para começar", staffManagement: "Gestão de Funcionários", manageYourTeam: "Gerencie sua equipe", searchByNameOrRole: "Pesquisar por nome ou função...", noStaffAddedYet: "Nenhum funcionário adicionado ainda", startByAddingFirstStaff: "Comece adicionando seu primeiro funcionário", addStaffVendor: "Adicionar Funcionário", noResultsFound: "Nenhum resultado encontrado", owed: "Devido", settled: "Quitado", searchByTitleOrVendor: "Pesquisar por título ou fornecedor...",
@@ -5721,7 +5733,7 @@ const pt: Partial<typeof en> = {
   inrIndianRupee: "INR - Rupia Indiana", usdUsDollar: "USD - Dólar Americano", eurEuro: "EUR - Euro", gbpBritishPound: "GBP - Libra Esterlina", aedUaeDirham: "AED - Dirham dos EAU", jpyJapaneseYen: "JPY - Iene Japonês", cnyChinseYuan: "CNY - Yuan Chinês", cadCanadianDollar: "CAD - Dólar Canadense", audAustralianDollar: "AUD - Dólar Australiano", chfSwissFranc: "CHF - Franco Suíço", sgdSingaporeDollar: "SGD - Dólar de Singapura", mxnMexicanPeso: "MXN - Peso Mexicano", brlBrazilianReal: "BRL - Real Brasileiro", zarSouthAfricanRand: "ZAR - Rand Sul-Africano", otherCustom: "Outro (personalizado)",
   reportTemplate: "Modelo de Relatório", salaryReport: "Relatório de Salários", salaryReportDesc: "Resumo de salários de funcionários e histórico de pagamentos", expenseReport: "Relatório de Despesas", expenseReportDesc: "Resumo de despesas domésticas", laundryReport: "Relatório de Lavanderia", laundryReportDesc: "Registros e custos de serviços de lavanderia", summary: "Resumo", detailed: "Detalhado", byCategory: "Por Categoria", byStaff: "Por Funcionário", byClient: "Por Cliente", generatePdf: "Gerar PDF", downloadCsv: "Baixar CSV", shareReport: "Compartilhar Relatório",
   tour: "Tour", startTour: "Iniciar Tour", skipTour: "Pular Tour", nextStep: "Próximo", previousStep: "Anterior", finishTour: "Finalizar", tourCompleted: "Tour Concluído", replayTour: "Repetir Tour",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "Recomendado", googlePay: "Google Pay", payDirectlyWithGooglePay: "Pague diretamente com Google Pay", paypal: "PayPal", paySecurelyWithPayPal: "Pague com segurança com PayPal", donate: "Doar", selectAnAmount: "Selecione um Valor", whatYourSupportDoes: "O que Seu Apoio Faz", helpsMaintainApp: "Ajuda a manter e melhorar o aplicativo", supportsDevelopment: "Apoia o desenvolvimento de novos recursos", helpsCoversServerCosts: "Ajuda a cobrir os custos de servidor e manutenção", enablesFasterBugFixes: "Permite correções de bugs e atualizações mais rápidas", donationsVoluntary: "Todas as doações são voluntárias. O aplicativo é gratuito para sempre, independentemente de doações. Obrigado pelo seu apoio!", country: "País", version: "Versão", craftedBy: "Criado por Dhairya Shah (The Team 360)", thankYouForUsing: "Obrigado por usar nosso aplicativo", seeYouSoon: "Até breve!", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "Recomendado", googlePay: "Google Pay", payDirectlyWithGooglePay: "Pague diretamente com Google Pay", paypal: "PayPal", paySecurelyWithPayPal: "Pague com segurança com PayPal", donate: "Doar", selectAnAmount: "Selecione um Valor", whatYourSupportDoes: "O que Seu Apoio Faz", helpsMaintainApp: "Ajuda a manter e melhorar o aplicativo", supportsDevelopment: "Apoia o desenvolvimento de novos recursos", helpsCoversServerCosts: "Ajuda a cobrir os custos de servidor e manutenção", enablesFasterBugFixes: "Permite correções de bugs e atualizações mais rápidas", donationsVoluntary: "Todas as doações são voluntárias. O aplicativo é gratuito para sempre, independentemente de doações. Obrigado pelo seu apoio!", country: "País", version: "Versão", craftedBy: "Home Staff 360", thankYouForUsing: "Obrigado por usar nosso aplicativo", seeYouSoon: "Até breve!", appTagline: "Built for homes and the people who run them.",
   searchClientHomes: "Pesquisar casas de clientes...", business: "Negócio", selectBusiness: "Selecionar negócio",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "Alterações Não Salvas",
@@ -5812,7 +5824,7 @@ const pt: Partial<typeof en> = {
 
 // Marathi - Complete translations
 const mr: Partial<typeof en> = {
-  save: "जतन करा", cancel: "रद्द करा", delete: "हटवा", edit: "संपादित करा", view: "पहा", add: "जोडा", back: "मागे", confirm: "पुष्टी करा", loading: "लोड होत आहे...", error: "त्रुटी", success: "यश", required: "आवश्यक", optional: "वैकल्पिक", comingSoon: "लवकरच येत आहे",
+  save: "जतन करा", cancel: "रद्द करा", delete: "हटवा", restore: "पुनर्संचयित करा", merge: "विलीन करा", edit: "संपादित करा", view: "पहा", add: "जोडा", back: "मागे", confirm: "पुष्टी करा", loading: "लोड होत आहे...", error: "त्रुटी", success: "यश", required: "आवश्यक", optional: "वैकल्पिक", comingSoon: "लवकरच येत आहे",
   home: "होम", staff: "कर्मचारी", expenses: "खर्च", expensesBills: "खर्च", payables: "देय", reports: "अहवाल", settings: "सेटिंग्ज",
   welcome: "स्वागत", quickActions: "द्रुत क्रिया", markAttendance: "उपस्थिती नोंदवा", recordPayment: "पेमेंट नोंदवा", addExpense: "खर्च जोडा", viewReports: "अहवाल पहा", activeStaff: "सक्रिय कर्मचारी", todayAttendance: "आजची उपस्थिती", monthPayments: "या महिन्याची पेमेंट्स", monthExpenses: "या महिन्याचे खर्च",
   staffMembers: "कर्मचारी", addStaffMember: "कर्मचारी जोडा", editStaffMember: "कर्मचारी संपादित करा", noStaffMembers: "अद्याप कोणीही कर्मचारी जोडला नाही", addYourFirstStaff: "सुरू करण्यासाठी तुमचा पहिला कर्मचारी जोडा", staffManagement: "कर्मचारी व्यवस्थापन", manageYourTeam: "तुमची टीम व्यवस्थापित करा", searchByNameOrRole: "नाव किंवा भूमिकेनुसार शोधा...", noStaffAddedYet: "अद्याप कर्मचारी जोडलेले नाहीत", startByAddingFirstStaff: "तुमचा पहिला कर्मचारी जोडून सुरू करा", addStaffVendor: "कर्मचारी जोडा", noResultsFound: "कोणतेही परिणाम सापडले नाहीत", owed: "देणे", settled: "पूर्ण", searchByTitleOrVendor: "शीर्षक किंवा विक्रेत्यानुसार शोधा...",
@@ -5884,7 +5896,7 @@ const mr: Partial<typeof en> = {
   reportTemplate: "अहवाल टेम्पलेट", salaryReport: "पगार अहवाल", salaryReportDesc: "कर्मचारी पगार सारांश आणि पेमेंट इतिहास", expenseReport: "खर्च अहवाल", expenseReportDesc: "घरगुती खर्च सारांश", laundryReport: "लॉन्ड्री अहवाल", laundryReportDesc: "लॉन्ड्री सेवा नोंदी आणि खर्च", summary: "सारांश", detailed: "तपशीलवार", byCategory: "श्रेणीनुसार", byStaff: "कर्मचाऱ्यांनुसार", byClient: "क्लायंटनुसार", generatePdf: "PDF तयार करा", downloadCsv: "CSV डाउनलोड करा", shareReport: "अहवाल शेअर करा",
   tour: "टूर", startTour: "टूर सुरू करा", skipTour: "टूर वगळा", nextStep: "पुढे", previousStep: "मागे", finishTour: "समाप्त करा", tourCompleted: "टूर पूर्ण", replayTour: "टूर पुन्हा प्ले करा",
   youAreNowSupporter: "तुम्ही आता समर्थक आहात!", paymentVerification: "पेमेंट पडताळणी", aboutTheDeveloper: "डेव्हलपरबद्दल", independentDeveloper: "भारतातील स्वतंत्र डेव्हलपर", basedInIndia: "भारतात स्थित", buildingApps: "जीवन सोपे करणारी अॅप्स बनवत आहे", developerDescription: "उपयुक्त आणि व्यक्ती-केंद्रित अॅप्स तयार करण्यासाठी उत्साही सोलो-प्रेन्योरने बनवलेले. होम स्टाफ 360 हे घरांना त्यांचे घरगुती कर्मचारी सहजपणे व्यवस्थापित करण्यासाठी प्रेम आणि समर्पणाने डिझाइन केले आहे, तसेच घरगुती सेवा उद्योगातील व्यावसायिकांना त्यांचे काम आणि कमाई सहजपणे व्यवस्थापित करण्यास सक्षम करते. तुमचे समर्थन हा प्रकल्प जिवंत आणि वाढत ठेवते!", chooseAmount: "रक्कम निवडा", orEnterCustomAmount: "किंवा कस्टम रक्कम प्रविष्ट करा", supporter: "समर्थक", openingUpiApp: "UPI अॅप उघडत आहे", chooseUpiApp: "पेमेंट पूर्ण करण्यासाठी तुमचे आवडते UPI अॅप निवडा", unableToOpenUpi: "UPI उघडण्यात अक्षम", useUpiIdManually: "कृपया मॅन्युअली पेमेंट करण्यासाठी खालील UPI ID वापरा", openingPayPal: "PayPal उघडत आहे", redirectingToPayPal: "PayPal वर पुनर्निर्देशित करत आहे...", unableToOpenPayPal: "PayPal उघडण्यात अक्षम", cannotVerifyUpi: "आम्ही UPI पेमेंट्स स्वयंचलितपणे पडताळू शकत नाही. कृपया मॅन्युअली पुष्टी करा.", yesIContributed: "हो, मी योगदान दिले", noNotYet: "नाही / अजून नाही", completePaymentOnPayPal: "PayPal वर पेमेंट पूर्ण करा", didPaymentGoThrough: "तुमची {amount} ची समर्थन व्यवहार पूर्ण झाली का?", pleaseTryAgain: "कृपया पुन्हा प्रयत्न करा",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "शिफारस केलेले", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay सह थेट पैसे द्या", paypal: "PayPal", paySecurelyWithPayPal: "PayPal सह सुरक्षितपणे पैसे द्या", donate: "दान करा", selectAnAmount: "रक्कम निवडा", whatYourSupportDoes: "तुमचा पाठिंबा काय करतो", helpsMaintainApp: "अॅप राखण्यात आणि सुधारण्यात मदत करते", supportsDevelopment: "नवीन वैशिष्ट्यांच्या विकासाला पाठिंबा देते", helpsCoversServerCosts: "सर्व्हर आणि देखभाल खर्च भागवण्यात मदत करते", enablesFasterBugFixes: "जलद बग फिक्सेस आणि अपडेट्स सक्षम करते", donationsVoluntary: "सर्व देणग्या स्वैच्छिक आहेत. देणग्यांशिवाय अॅप कायमस्वरूपी मोफत आहे. तुमच्या पाठिंब्याबद्दल धन्यवाद!", country: "देश", version: "आवृत्ती", craftedBy: "Dhairya Shah (The Team 360) यांनी तयार केलेले", thankYouForUsing: "आमचे अॅप वापरल्याबद्दल धन्यवाद", seeYouSoon: "लवकरच भेटू!", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "शिफारस केलेले", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay सह थेट पैसे द्या", paypal: "PayPal", paySecurelyWithPayPal: "PayPal सह सुरक्षितपणे पैसे द्या", donate: "दान करा", selectAnAmount: "रक्कम निवडा", whatYourSupportDoes: "तुमचा पाठिंबा काय करतो", helpsMaintainApp: "अॅप राखण्यात आणि सुधारण्यात मदत करते", supportsDevelopment: "नवीन वैशिष्ट्यांच्या विकासाला पाठिंबा देते", helpsCoversServerCosts: "सर्व्हर आणि देखभाल खर्च भागवण्यात मदत करते", enablesFasterBugFixes: "जलद बग फिक्सेस आणि अपडेट्स सक्षम करते", donationsVoluntary: "सर्व देणग्या स्वैच्छिक आहेत. देणग्यांशिवाय अॅप कायमस्वरूपी मोफत आहे. तुमच्या पाठिंब्याबद्दल धन्यवाद!", country: "देश", version: "आवृत्ती", craftedBy: "Home Staff 360", thankYouForUsing: "आमचे अॅप वापरल्याबद्दल धन्यवाद", seeYouSoon: "लवकरच भेटू!", appTagline: "Built for homes and the people who run them.",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "न जतन केलेले बदल",
   unsavedChangesDescription: "तुमच्याकडे न जतन केलेले बदल आहेत. तुम्हाला ते टाकून द्यायचे आहेत का?",
@@ -5973,7 +5985,7 @@ const mr: Partial<typeof en> = {
 };
 // Punjabi - Complete translations
 const pa: Partial<typeof en> = {
-  save: "ਸੇਵ ਕਰੋ", cancel: "ਰੱਦ ਕਰੋ", delete: "ਮਿਟਾਓ", edit: "ਸੋਧੋ", view: "ਵੇਖੋ", add: "ਜੋੜੋ", back: "ਪਿੱਛੇ", confirm: "ਪੁਸ਼ਟੀ ਕਰੋ", loading: "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...", error: "ਗਲਤੀ", success: "ਸਫਲਤਾ", required: "ਲੋੜੀਂਦਾ", optional: "ਵਿਕਲਪਿਕ", comingSoon: "ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ",
+  save: "ਸੇਵ ਕਰੋ", cancel: "ਰੱਦ ਕਰੋ", delete: "ਮਿਟਾਓ", restore: "ਰੀਸਟੋਰ ਕਰੋ", merge: "ਮਰਜ ਕਰੋ", edit: "ਸੋਧੋ", view: "ਵੇਖੋ", add: "ਜੋੜੋ", back: "ਪਿੱਛੇ", confirm: "ਪੁਸ਼ਟੀ ਕਰੋ", loading: "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...", error: "ਗਲਤੀ", success: "ਸਫਲਤਾ", required: "ਲੋੜੀਂਦਾ", optional: "ਵਿਕਲਪਿਕ", comingSoon: "ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ",
   home: "ਹੋਮ", staff: "ਸਟਾਫ", expenses: "ਖਰਚੇ", expensesBills: "ਖਰਚੇ", payables: "ਦੇਣਦਾਰੀਆਂ", reports: "ਰਿਪੋਰਟਾਂ", settings: "ਸੈਟਿੰਗਜ਼",
   welcome: "ਸੁਆਗਤ ਹੈ", quickActions: "ਤੇਜ਼ ਕਾਰਵਾਈਆਂ", markAttendance: "ਹਾਜ਼ਰੀ ਲਗਾਓ", recordPayment: "ਭੁਗਤਾਨ ਰਿਕਾਰਡ ਕਰੋ", addExpense: "ਖਰਚਾ ਜੋੜੋ", viewReports: "ਰਿਪੋਰਟਾਂ ਵੇਖੋ", activeStaff: "ਸਰਗਰਮ ਸਟਾਫ", todayAttendance: "ਅੱਜ ਦੀ ਹਾਜ਼ਰੀ", monthPayments: "ਇਸ ਮਹੀਨੇ ਦੇ ਭੁਗਤਾਨ", monthExpenses: "ਇਸ ਮਹੀਨੇ ਦੇ ਖਰਚੇ",
   staffMembers: "ਸਟਾਫ", addStaffMember: "ਸਟਾਫ ਜੋੜੋ", editStaffMember: "ਸਟਾਫ ਸੋਧੋ", noStaffMembers: "ਅਜੇ ਕੋਈ ਸਟਾਫ ਨਹੀਂ ਜੋੜਿਆ", addYourFirstStaff: "ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਆਪਣਾ ਪਹਿਲਾ ਸਟਾਫ ਮੈਂਬਰ ਜੋੜੋ", staffManagement: "ਸਟਾਫ ਪ੍ਰਬੰਧਨ", manageYourTeam: "ਆਪਣੀ ਟੀਮ ਦਾ ਪ੍ਰਬੰਧ ਕਰੋ", searchByNameOrRole: "ਨਾਮ ਜਾਂ ਭੂਮਿਕਾ ਨਾਲ ਖੋਜੋ...", noStaffAddedYet: "ਅਜੇ ਕੋਈ ਸਟਾਫ ਨਹੀਂ ਜੋੜਿਆ", startByAddingFirstStaff: "ਆਪਣਾ ਪਹਿਲਾ ਸਟਾਫ ਮੈਂਬਰ ਜੋੜ ਕੇ ਸ਼ੁਰੂ ਕਰੋ", addStaffVendor: "ਸਟਾਫ ਜੋੜੋ", noResultsFound: "ਕੋਈ ਨਤੀਜੇ ਨਹੀਂ ਮਿਲੇ", owed: "ਬਕਾਇਆ", settled: "ਨਿਪਟਾਇਆ", searchByTitleOrVendor: "ਸਿਰਲੇਖ ਜਾਂ ਵਿਕਰੇਤਾ ਨਾਲ ਖੋਜੋ...",
@@ -6045,7 +6057,7 @@ const pa: Partial<typeof en> = {
   reportTemplate: "ਰਿਪੋਰਟ ਟੈਂਪਲੇਟ", salaryReport: "ਤਨਖਾਹ ਰਿਪੋਰਟ", salaryReportDesc: "ਸਟਾਫ ਤਨਖਾਹ ਸੰਖੇਪ ਅਤੇ ਭੁਗਤਾਨ ਇਤਿਹਾਸ", expenseReport: "ਖਰਚਾ ਰਿਪੋਰਟ", expenseReportDesc: "ਘਰੇਲੂ ਖਰਚੇ ਸੰਖੇਪ", laundryReport: "ਲਾਂਡਰੀ ਰਿਪੋਰਟ", laundryReportDesc: "ਲਾਂਡਰੀ ਸੇਵਾ ਰਿਕਾਰਡ ਅਤੇ ਲਾਗਤਾਂ", summary: "ਸੰਖੇਪ", detailed: "ਵਿਸਤ੍ਰਿਤ", byCategory: "ਸ਼੍ਰੇਣੀ ਅਨੁਸਾਰ", byStaff: "ਸਟਾਫ ਅਨੁਸਾਰ", byClient: "ਗਾਹਕ ਅਨੁਸਾਰ", generatePdf: "PDF ਬਣਾਓ", downloadCsv: "CSV ਡਾਊਨਲੋਡ ਕਰੋ", shareReport: "ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰੋ",
   tour: "ਟੂਰ", startTour: "ਟੂਰ ਸ਼ੁਰੂ ਕਰੋ", skipTour: "ਟੂਰ ਛੱਡੋ", nextStep: "ਅਗਲਾ", previousStep: "ਪਿਛਲਾ", finishTour: "ਖਤਮ ਕਰੋ", tourCompleted: "ਟੂਰ ਪੂਰਾ", replayTour: "ਟੂਰ ਦੁਬਾਰਾ ਚਲਾਓ",
   youAreNowSupporter: "ਤੁਸੀਂ ਹੁਣ ਸਮਰਥਕ ਹੋ!", paymentVerification: "ਭੁਗਤਾਨ ਤਸਦੀਕ", aboutTheDeveloper: "ਡਿਵੈਲਪਰ ਬਾਰੇ", independentDeveloper: "ਭਾਰਤ ਤੋਂ ਸੁਤੰਤਰ ਡਿਵੈਲਪਰ", basedInIndia: "ਭਾਰਤ ਵਿੱਚ ਸਥਿਤ", buildingApps: "ਜ਼ਿੰਦਗੀ ਨੂੰ ਆਸਾਨ ਬਣਾਉਣ ਵਾਲੇ ਐਪ ਬਣਾ ਰਿਹਾ ਹੈ", developerDescription: "ਉਪਯੋਗੀ ਅਤੇ ਵਿਅਕਤੀ-ਕੇਂਦਰਿਤ ਐਪਸ ਬਣਾਉਣ ਲਈ ਉਤਸ਼ਾਹੀ ਸੋਲੋ-ਪ੍ਰੇਨਿਓਰ ਦੁਆਰਾ ਬਣਾਇਆ ਗਿਆ। ਹੋਮ ਸਟਾਫ 360 ਨੂੰ ਘਰਾਂ ਨੂੰ ਉਹਨਾਂ ਦੇ ਘਰੇਲੂ ਸਟਾਫ਼ ਨੂੰ ਆਸਾਨੀ ਨਾਲ ਪ੍ਰਬੰਧਿਤ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਨ ਲਈ ਪਿਆਰ ਅਤੇ ਸਮਰਪਣ ਨਾਲ ਡਿਜ਼ਾਈਨ ਕੀਤਾ ਗਿਆ ਹੈ, ਨਾਲ ਹੀ ਘਰੇਲੂ ਸੇਵਾ ਉਦਯੋਗਾਂ ਵਿੱਚ ਪੇਸ਼ੇਵਰਾਂ ਨੂੰ ਆਪਣੇ ਕੰਮ ਅਤੇ ਕਮਾਈ ਨੂੰ ਆਸਾਨੀ ਨਾਲ ਵਿਵਸਥਿਤ ਕਰਨ ਲਈ ਸ਼ਕਤੀ ਦਿੱਤੀ ਗਈ ਹੈ। ਤੁਹਾਡੀ ਸਹਾਇਤਾ ਇਸ ਪ੍ਰੋਜੈਕਟ ਨੂੰ ਜ਼ਿੰਦਾ ਅਤੇ ਵਧਦਾ ਰੱਖਦੀ ਹੈ!", chooseAmount: "ਰਕਮ ਚੁਣੋ", orEnterCustomAmount: "ਜਾਂ ਕਸਟਮ ਰਕਮ ਦਰਜ ਕਰੋ", supporter: "ਸਮਰਥਕ", openingUpiApp: "UPI ਐਪ ਖੋਲ੍ਹ ਰਿਹਾ ਹੈ", chooseUpiApp: "ਭੁਗਤਾਨ ਪੂਰਾ ਕਰਨ ਲਈ ਆਪਣਾ ਪਸੰਦੀਦਾ UPI ਐਪ ਚੁਣੋ", unableToOpenUpi: "UPI ਖੋਲ੍ਹਣ ਵਿੱਚ ਅਸਮਰੱਥ", useUpiIdManually: "ਕਿਰਪਾ ਕਰਕੇ ਹੱਥੀਂ ਭੁਗਤਾਨ ਕਰਨ ਲਈ ਹੇਠਾਂ ਦਿੱਤੀ UPI ID ਵਰਤੋ", openingPayPal: "PayPal ਖੋਲ੍ਹ ਰਿਹਾ ਹੈ", redirectingToPayPal: "PayPal 'ਤੇ ਰੀਡਾਇਰੈਕਟ ਕਰ ਰਿਹਾ ਹੈ...", unableToOpenPayPal: "PayPal ਖੋਲ੍ਹਣ ਵਿੱਚ ਅਸਮਰੱਥ", cannotVerifyUpi: "ਅਸੀਂ UPI ਭੁਗਤਾਨ ਸਵੈਚਲਿਤ ਤੌਰ 'ਤੇ ਤਸਦੀਕ ਨਹੀਂ ਕਰ ਸਕਦੇ। ਕਿਰਪਾ ਕਰਕੇ ਹੱਥੀਂ ਪੁਸ਼ਟੀ ਕਰੋ।", yesIContributed: "ਹਾਂ, ਮੈਂ ਯੋਗਦਾਨ ਦਿੱਤਾ", noNotYet: "ਨਹੀਂ / ਅਜੇ ਨਹੀਂ", completePaymentOnPayPal: "PayPal 'ਤੇ ਭੁਗਤਾਨ ਪੂਰਾ ਕਰੋ", didPaymentGoThrough: "ਕੀ ਤੁਹਾਡਾ {amount} ਦਾ ਸਹਾਇਤਾ ਲੈਣ-ਦੇਣ ਪੂਰਾ ਹੋਇਆ?", pleaseTryAgain: "ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "ਸਿਫਾਰਸ਼ ਕੀਤਾ", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay ਨਾਲ ਸਿੱਧਾ ਭੁਗਤਾਨ ਕਰੋ", paypal: "PayPal", paySecurelyWithPayPal: "PayPal ਨਾਲ ਸੁਰੱਖਿਅਤ ਭੁਗਤਾਨ ਕਰੋ", donate: "ਦਾਨ ਕਰੋ", selectAnAmount: "ਰਕਮ ਚੁਣੋ", whatYourSupportDoes: "ਤੁਹਾਡੀ ਸਹਾਇਤਾ ਕੀ ਕਰਦੀ ਹੈ", helpsMaintainApp: "ਐਪ ਨੂੰ ਬਣਾਈ ਰੱਖਣ ਅਤੇ ਸੁਧਾਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦੀ ਹੈ", supportsDevelopment: "ਨਵੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੇ ਵਿਕਾਸ ਨੂੰ ਸਹਾਇਤਾ ਦਿੰਦੀ ਹੈ", helpsCoversServerCosts: "ਸਰਵਰ ਅਤੇ ਰੱਖ-ਰਖਾਅ ਖਰਚੇ ਨੂੰ ਕਵਰ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ", enablesFasterBugFixes: "ਤੇਜ਼ ਬੱਗ ਫਿਕਸ ਅਤੇ ਅੱਪਡੇਟ ਸਮਰੱਥ ਬਣਾਉਂਦੀ ਹੈ", donationsVoluntary: "ਸਾਰੇ ਦਾਨ ਸਵੈ-ਇੱਛਤ ਹਨ। ਦਾਨ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਐਪ ਹਮੇਸ਼ਾ ਮੁਫਤ ਹੈ। ਤੁਹਾਡੀ ਸਹਾਇਤਾ ਲਈ ਧੰਨਵਾਦ!", country: "ਦੇਸ਼", version: "ਸੰਸਕਰਣ", craftedBy: "Dhairya Shah (The Team 360) ਦੁਆਰਾ ਬਣਾਇਆ ਗਿਆ", thankYouForUsing: "ਸਾਡੀ ਐਪ ਵਰਤਣ ਲਈ ਧੰਨਵਾਦ", seeYouSoon: "ਜਲਦੀ ਮਿਲਾਂਗੇ!", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "ਸਿਫਾਰਸ਼ ਕੀਤਾ", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay ਨਾਲ ਸਿੱਧਾ ਭੁਗਤਾਨ ਕਰੋ", paypal: "PayPal", paySecurelyWithPayPal: "PayPal ਨਾਲ ਸੁਰੱਖਿਅਤ ਭੁਗਤਾਨ ਕਰੋ", donate: "ਦਾਨ ਕਰੋ", selectAnAmount: "ਰਕਮ ਚੁਣੋ", whatYourSupportDoes: "ਤੁਹਾਡੀ ਸਹਾਇਤਾ ਕੀ ਕਰਦੀ ਹੈ", helpsMaintainApp: "ਐਪ ਨੂੰ ਬਣਾਈ ਰੱਖਣ ਅਤੇ ਸੁਧਾਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦੀ ਹੈ", supportsDevelopment: "ਨਵੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੇ ਵਿਕਾਸ ਨੂੰ ਸਹਾਇਤਾ ਦਿੰਦੀ ਹੈ", helpsCoversServerCosts: "ਸਰਵਰ ਅਤੇ ਰੱਖ-ਰਖਾਅ ਖਰਚੇ ਨੂੰ ਕਵਰ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ", enablesFasterBugFixes: "ਤੇਜ਼ ਬੱਗ ਫਿਕਸ ਅਤੇ ਅੱਪਡੇਟ ਸਮਰੱਥ ਬਣਾਉਂਦੀ ਹੈ", donationsVoluntary: "ਸਾਰੇ ਦਾਨ ਸਵੈ-ਇੱਛਤ ਹਨ। ਦਾਨ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਐਪ ਹਮੇਸ਼ਾ ਮੁਫਤ ਹੈ। ਤੁਹਾਡੀ ਸਹਾਇਤਾ ਲਈ ਧੰਨਵਾਦ!", country: "ਦੇਸ਼", version: "ਸੰਸਕਰਣ", craftedBy: "Home Staff 360", thankYouForUsing: "ਸਾਡੀ ਐਪ ਵਰਤਣ ਲਈ ਧੰਨਵਾਦ", seeYouSoon: "ਜਲਦੀ ਮਿਲਾਂਗੇ!", appTagline: "Built for homes and the people who run them.",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "ਬਿਨਾਂ ਸੇਵ ਕੀਤੇ ਬਦਲਾਅ",
   unsavedChangesDescription: "ਤੁਹਾਡੇ ਕੋਲ ਬਿਨਾਂ ਸੇਵ ਕੀਤੇ ਬਦਲਾਅ ਹਨ। ਕੀ ਤੁਸੀਂ ਇਨ੍ਹਾਂ ਨੂੰ ਰੱਦ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?",
@@ -6133,7 +6145,7 @@ const pa: Partial<typeof en> = {
   donationReminderMessage: "ਜੇਕਰ ਤੁਹਾਨੂੰ ਇਹ ਐਪ ਲਾਭਦਾਇਕ ਲੱਗੀ, ਤਾਂ ਇਸਦੇ ਵਿਕਾਸ ਵਿੱਚ ਸਹਾਇਤਾ ਕਰਨ ਬਾਰੇ ਸੋਚੋ।",
 };
 const te: Partial<typeof en> = {
-  save: "సేవ్ చేయండి", cancel: "రద్దు చేయండి", delete: "తొలగించు", edit: "సవరించు", view: "చూడండి", add: "జోడించు", back: "వెనుకకు", confirm: "నిర్ధారించు", loading: "లోడ్ అవుతోంది...", error: "లోపం", success: "విజయం", required: "అవసరం", optional: "ఐచ్ఛికం", comingSoon: "త్వరలో వస్తోంది",
+  save: "సేవ్ చేయండి", cancel: "రద్దు చేయండి", delete: "తొలగించు", restore: "పునరుద్ధరించు", merge: "విలీనం చేయి", edit: "సవరించు", view: "చూడండి", add: "జోడించు", back: "వెనుకకు", confirm: "నిర్ధారించు", loading: "లోడ్ అవుతోంది...", error: "లోపం", success: "విజయం", required: "అవసరం", optional: "ఐచ్ఛికం", comingSoon: "త్వరలో వస్తోంది",
   home: "హోమ్", staff: "సిబ్బంది", expenses: "ఖర్చులు", expensesBills: "ఖర్చులు", payables: "చెల్లింపులు", reports: "నివేదికలు", settings: "సెట్టింగ్‌లు",
   welcome: "స్వాగతం", quickActions: "త్వరిత చర్యలు", markAttendance: "హాజరు నమోదు చేయండి", recordPayment: "చెల్లింపు రికార్డ్ చేయండి", addExpense: "ఖర్చు జోడించండి", viewReports: "నివేదికలు చూడండి", activeStaff: "సక్రియ సిబ్బంది", todayAttendance: "ఈ రోజు హాజరు", monthPayments: "ఈ నెల చెల్లింపులు", monthExpenses: "ఈ నెల ఖర్చులు",
   staffMembers: "సిబ్బంది", addStaffMember: "సిబ్బంది జోడించండి", editStaffMember: "సిబ్బంది సవరించండి", noStaffMembers: "ఇంకా సిబ్బంది లేరు", addYourFirstStaff: "ప్రారంభించడానికి మీ మొదటి సిబ్బంది సభ్యుడిని జోడించండి", staffManagement: "సిబ్బంది నిర్వహణ", manageYourTeam: "మీ టీమ్‌ను నిర్వహించండి", searchByNameOrRole: "పేరు లేదా పాత్ర ద్వారా వెతకండి...", noStaffAddedYet: "ఇంకా సిబ్బంది జోడించలేదు", startByAddingFirstStaff: "మీ మొదటి సిబ్బంది సభ్యుడిని జోడించడం ద్వారా ప్రారంభించండి", addStaffVendor: "సిబ్బంది జోడించండి", noResultsFound: "ఫలితాలు కనుగొనబడలేదు", owed: "బకాయి", settled: "పూర్తయింది", searchByTitleOrVendor: "శీర్షిక లేదా విక్రేత ద్వారా వెతకండి...",
@@ -6274,7 +6286,7 @@ const te: Partial<typeof en> = {
   reportTemplate: "నివేదిక టెంప్లేట్", salaryReport: "జీతం నివేదిక", salaryReportDesc: "సిబ్బంది జీతం సారాంశం మరియు చెల్లింపు చరిత్ర", expenseReport: "ఖర్చు నివేదిక", expenseReportDesc: "గృహ ఖర్చు సారాంశం", laundryReport: "లాండ్రీ నివేదిక", laundryReportDesc: "లాండ్రీ సేవ రికార్డులు మరియు ఖర్చులు", summary: "సారాంశం", detailed: "వివరమైన", byCategory: "వర్గం వారీగా", byStaff: "సిబ్బంది వారీగా", byClient: "క్లయింట్ వారీగా", generatePdf: "PDF రూపొందించండి", downloadCsv: "CSV డౌన్‌లోడ్ చేయండి", shareReport: "నివేదిక పంచుకోండి",
   tour: "టూర్", startTour: "టూర్ ప్రారంభించండి", skipTour: "టూర్ స్కిప్ చేయండి", nextStep: "తదుపరి", previousStep: "మునుపటి", finishTour: "ముగించండి", tourCompleted: "టూర్ పూర్తయింది", replayTour: "టూర్ మళ్ళీ ప్లే చేయండి",
   youAreNowSupporter: "మీరు ఇప్పుడు మద్దతుదారు!", paymentVerification: "చెల్లింపు ధృవీకరణ", aboutTheDeveloper: "డెవలపర్ గురించి", independentDeveloper: "భారతదేశం నుండి స్వతంత్ర డెవలపర్", basedInIndia: "భారతదేశంలో ఆధారపడి", buildingApps: "జీవితాన్ని సులభతరం చేసే యాప్‌లను నిర్మిస్తున్నారు", developerDescription: "ఉపయోగకరమైన మరియు వ్యక్తి-కేంద్రీకృత యాప్‌లను నిర్మించడంలో ఆసక్తి ఉన్న ఒక సోలో-ప్రెన్యూర్ చేత నిర్మించబడింది. హోమ్ స్టాఫ్ 360 ను కుటుంబాలకు వారి గృహ సిబ్బందిని సులభంగా నిర్వహించడంలో సహాయపడటానికి ప్రేమ మరియు అంకితభావంతో రూపొందించబడింది, అదే సమయంలో గృహ సేవా పరిశ్రమలలో నిపుణులకు వారి పని మరియు ఆదాయాన్ని సులభంగా నిర్వహించడానికి సాధికారత కల్పిస్తుంది. మీ మద్దతు ఈ ప్రాజెక్ట్‌ను సజీవంగా మరియు ఎదుగుతూ ఉంచుతుంది!", chooseAmount: "మొత్తాన్ని ఎంచుకోండి", orEnterCustomAmount: "లేదా కస్టమ్ మొత్తాన్ని నమోదు చేయండి", supporter: "మద్దతుదారు", openingUpiApp: "UPI యాప్ తెరుస్తోంది", chooseUpiApp: "చెల్లింపును పూర్తి చేయడానికి మీకు ఇష్టమైన UPI యాప్‌ను ఎంచుకోండి", unableToOpenUpi: "UPI తెరవడం సాధ్యం కాలేదు", useUpiIdManually: "దయచేసి మాన్యువల్‌గా చెల్లించడానికి క్రింది UPI ID వాడండి", openingPayPal: "PayPal తెరుస్తోంది", redirectingToPayPal: "PayPal కు రీడైరెక్ట్ అవుతోంది...", unableToOpenPayPal: "PayPal తెరవడం సాధ్యం కాలేదు", cannotVerifyUpi: "UPI చెల్లింపులను మేము స్వయంచాలకంగా ధృవీకరించలేము. దయచేసి మాన్యువల్‌గా నిర్ధారించండి.", yesIContributed: "అవును, నేను సహకరించాను", noNotYet: "లేదు / ఇంకా లేదు", completePaymentOnPayPal: "PayPal లో చెల్లింపును పూర్తి చేయండి", didPaymentGoThrough: "మీ {amount} మద్దతు లావాదేవీ విజయవంతమైందా?", pleaseTryAgain: "దయచేసి మళ్ళీ ప్రయత్నించండి",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "సిఫార్సు చేయబడింది", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay తో నేరుగా చెల్లించండి", paypal: "PayPal", paySecurelyWithPayPal: "PayPal తో సురక్షితంగా చెల్లించండి", donate: "దానం చేయండి", selectAnAmount: "మొత్తాన్ని ఎంచుకోండి", whatYourSupportDoes: "మీ మద్దతు ఏమి చేస్తుంది", helpsMaintainApp: "యాప్‌ను నిర్వహించడానికి మరియు మెరుగుపరచడానికి సహాయపడుతుంది", supportsDevelopment: "కొత్త ఫీచర్ల అభివృద్ధికి మద్దతు ఇస్తుంది", helpsCoversServerCosts: "యాప్‌ను ప్రకటన-రహితంగా మరియు గోప్యత-కేంద్రీకృతంగా ఉంచుతుంది", enablesFasterBugFixes: "వేగవంతమైన బగ్ ఫిక్సులు మరియు అప్‌డేట్‌లను ఎనేబుల్ చేస్తుంది", donationsVoluntary: "అన్ని విరాళాలు స్వచ్ఛందమైనవి. విరాళాలతో సంబంధం లేకుండా యాప్ ఎల్లప్పుడూ ఉచితం. మీ మద్దతుకు ధన్యవాదాలు!", country: "దేశం", version: "సంస్కరణ", craftedBy: "Dhairya Shah (The Team 360) చే తయారు చేయబడింది", thankYouForUsing: "మా యాప్‌ను ఉపయోగించినందుకు ధన్యవాదాలు", seeYouSoon: "త్వరలో కలుద్దాం!", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "సిఫార్సు చేయబడింది", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay తో నేరుగా చెల్లించండి", paypal: "PayPal", paySecurelyWithPayPal: "PayPal తో సురక్షితంగా చెల్లించండి", donate: "దానం చేయండి", selectAnAmount: "మొత్తాన్ని ఎంచుకోండి", whatYourSupportDoes: "మీ మద్దతు ఏమి చేస్తుంది", helpsMaintainApp: "యాప్‌ను నిర్వహించడానికి మరియు మెరుగుపరచడానికి సహాయపడుతుంది", supportsDevelopment: "కొత్త ఫీచర్ల అభివృద్ధికి మద్దతు ఇస్తుంది", helpsCoversServerCosts: "యాప్‌ను ప్రకటన-రహితంగా మరియు గోప్యత-కేంద్రీకృతంగా ఉంచుతుంది", enablesFasterBugFixes: "వేగవంతమైన బగ్ ఫిక్సులు మరియు అప్‌డేట్‌లను ఎనేబుల్ చేస్తుంది", donationsVoluntary: "అన్ని విరాళాలు స్వచ్ఛందమైనవి. విరాళాలతో సంబంధం లేకుండా యాప్ ఎల్లప్పుడూ ఉచితం. మీ మద్దతుకు ధన్యవాదాలు!", country: "దేశం", version: "సంస్కరణ", craftedBy: "Home Staff 360", thankYouForUsing: "మా యాప్‌ను ఉపయోగించినందుకు ధన్యవాదాలు", seeYouSoon: "త్వరలో కలుద్దాం!", appTagline: "Built for homes and the people who run them.",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "సేవ్ చేయని మార్పులు",
   unsavedChangesDescription: "మీకు సేవ్ చేయని మార్పులు ఉన్నాయి. మీరు వాటిని విస్మరించాలనుకుంటున్నారా?",
@@ -6362,7 +6374,7 @@ const te: Partial<typeof en> = {
   donationReminderMessage: "ఈ యాప్ మీకు సహాయకరంగా ఉంటే, దాని అభివృద్ధికి సపోర్ట్ చేయడాన్ని పరిగణించండి।",
 };
 const ta: Partial<typeof en> = {
-  save: "சேமி", cancel: "ரத்து செய்", delete: "நீக்கு", edit: "திருத்து", view: "பார்", add: "சேர்", back: "பின்", confirm: "உறுதிப்படுத்து", loading: "ஏற்றுகிறது...", error: "பிழை", success: "வெற்றி", required: "தேவை", optional: "விருப்ப", comingSoon: "விரைவில் வரும்",
+  save: "சேமி", cancel: "ரத்து செய்", delete: "நீக்கு", restore: "மீட்டமை", merge: "இணை", edit: "திருத்து", view: "பார்", add: "சேர்", back: "பின்", confirm: "உறுதிப்படுத்து", loading: "ஏற்றுகிறது...", error: "பிழை", success: "வெற்றி", required: "தேவை", optional: "விருப்ப", comingSoon: "விரைவில் வரும்",
   home: "முகப்பு", staff: "ஊழியர்கள்", expenses: "செலவுகள்", expensesBills: "செலவுகள்", payables: "செலுத்த வேண்டியவை", reports: "அறிக்கைகள்", settings: "அமைப்புகள்",
   welcome: "வரவேற்கிறோம்", quickActions: "விரைவு செயல்கள்", markAttendance: "வருகை பதிவு செய்யவும்", recordPayment: "பணம் செலுத்துதல் பதிவு செய்யவும்", addExpense: "செலவு சேர்க்கவும்", viewReports: "அறிக்கைகளைப் பார்க்கவும்", activeStaff: "செயலில் உள்ள ஊழியர்கள்", todayAttendance: "இன்றைய வருகை", monthPayments: "இந்த மாத பணம் செலுத்துதல்கள்", monthExpenses: "இந்த மாத செலவுகள்",
   staffMembers: "ஊழியர்கள்", addStaffMember: "ஊழியர் சேர்க்கவும்", editStaffMember: "ஊழியர் திருத்தவும்", noStaffMembers: "இன்னும் ஊழியர்கள் இல்லை", addYourFirstStaff: "தொடங்க உங்கள் முதல் ஊழியரைச் சேர்க்கவும்", staffManagement: "ஊழியர் மேலாண்மை", manageYourTeam: "உங்கள் குழுவை நிர்வகிக்கவும்", searchByNameOrRole: "பெயர் அல்லது பணி மூலம் தேடவும்...", noStaffAddedYet: "இன்னும் ஊழியர் சேர்க்கப்படவில்லை", startByAddingFirstStaff: "உங்கள் முதல் ஊழியரைச் சேர்ப்பதன் மூலம் தொடங்கவும்", addStaffVendor: "ஊழியர் சேர்க்கவும்", noResultsFound: "முடிவுகள் இல்லை", owed: "பாக்கி", settled: "முடிந்தது", searchByTitleOrVendor: "தலைப்பு அல்லது விற்பனையாளர் மூலம் தேடவும்...",
@@ -6503,7 +6515,7 @@ const ta: Partial<typeof en> = {
   reportTemplate: "அறிக்கை வார்ப்புரு", salaryReport: "சம்பள அறிக்கை", salaryReportDesc: "ஊழியர் சம்பள சுருக்கம் மற்றும் பணம் செலுத்துதல் வரலாறு", expenseReport: "செலவு அறிக்கை", expenseReportDesc: "வீட்டு செலவு சுருக்கம்", laundryReport: "சலவை அறிக்கை", laundryReportDesc: "சலவை சேவை பதிவுகள் மற்றும் செலவுகள்", summary: "சுருக்கம்", detailed: "விரிவான", byCategory: "வகை வாரியாக", byStaff: "ஊழியர் வாரியாக", byClient: "வாடிக்கையாளர் வாரியாக", generatePdf: "PDF உருவாக்கவும்", downloadCsv: "CSV பதிவிறக்கவும்", shareReport: "அறிக்கை பகிரவும்",
   tour: "சுற்றுலா", startTour: "சுற்றுலா தொடங்கவும்", skipTour: "சுற்றுலா தவிர்க்கவும்", nextStep: "அடுத்து", previousStep: "முந்தைய", finishTour: "முடிக்கவும்", tourCompleted: "சுற்றுலா முடிந்தது", replayTour: "சுற்றுலா மீண்டும் இயக்கவும்",
   youAreNowSupporter: "நீங்கள் இப்போது ஆதரவாளர்!", paymentVerification: "கட்டண சரிபார்ப்பு", aboutTheDeveloper: "டெவலப்பர் பற்றி", independentDeveloper: "இந்தியாவின் சுதந்திர டெவலப்பர்", basedInIndia: "இந்தியாவில் அமைந்துள்ளது", buildingApps: "வாழ்க்கையை எளிதாக்கும் ஆப்களை உருவாக்குகிறது", developerDescription: "பயனுள்ள மற்றும் நபர்-மையமான ஆப்களை உருவாக்குவதில் ஆர்வமுள்ள ஒரு சோலோ-ப்ரெனியூரால் உருவாக்கப்பட்டது. ஹோம் ஸ்டாஃப் 360 வீடுகளுக்கு அவர்களின் வீட்டு ஊழியர்களை எளிதாக நிர்வகிக்க அன்பு மற்றும் அர்ப்பணிப்புடன் வடிவமைக்கப்பட்டுள்ளது, அதே நேரத்தில் வீட்டு சேவை தொழில்களில் நிபுணர்களுக்கு தங்கள் வேலை மற்றும் வருமானத்தை எளிதாக ஒழுங்கமைக்க உதவுகிறது. உங்கள் ஆதரவு இந்த திட்டத்தை உயிருடன் வளர்ந்து கொண்டிருக்கும்!", chooseAmount: "தொகையைத் தேர்வு செய்யவும்", orEnterCustomAmount: "அல்லது தனிப்பயன் தொகையை உள்ளிடவும்", supporter: "ஆதரவாளர்", openingUpiApp: "UPI ஆப் திறக்கிறது", chooseUpiApp: "கட்டணத்தை முடிக்க உங்கள் விருப்பமான UPI ஆப்பைத் தேர்வு செய்யவும்", unableToOpenUpi: "UPI திறக்க இயலவில்லை", useUpiIdManually: "தயவுசெய்து கைமுறையாக செலுத்த கீழே உள்ள UPI ID ஐப் பயன்படுத்தவும்", openingPayPal: "PayPal திறக்கிறது", redirectingToPayPal: "PayPal-க்கு திருப்பி விடப்படுகிறது...", unableToOpenPayPal: "PayPal திறக்க இயலவில்லை", cannotVerifyUpi: "UPI கட்டணங்களை நாங்கள் தானாகச் சரிபார்க்க முடியாது. தயவுசெய்து கைமுறையாக உறுதிப்படுத்தவும்.", yesIContributed: "ஆம், நான் பங்களித்தேன்", noNotYet: "இல்லை / இன்னும் இல்லை", completePaymentOnPayPal: "PayPal-இல் கட்டணத்தை முடிக்கவும்", didPaymentGoThrough: "உங்கள் {amount} ஆதரவு பரிவர்த்தனை நடந்ததா?", pleaseTryAgain: "தயவுசெய்து மீண்டும் முயற்சிக்கவும்",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "பரிந்துரைக்கப்பட்டது", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay மூலம் நேரடியாக செலுத்தவும்", paypal: "PayPal", paySecurelyWithPayPal: "PayPal மூலம் பாதுகாப்பாக செலுத்தவும்", donate: "நன்கொடை", selectAnAmount: "தொகையைத் தேர்வு செய்யவும்", whatYourSupportDoes: "உங்கள் ஆதரவு என்ன செய்கிறது", helpsMaintainApp: "ஆப்பை பராமரிக்கவும் மேம்படுத்தவும் உதவுகிறது", supportsDevelopment: "புதிய அம்சங்களின் வளர்ச்சியை ஆதரிக்கிறது", helpsCoversServerCosts: "சர்வர் மற்றும் பராமரிப்பு செலவுகளை ஈடுசெய்ய உதவுகிறது", enablesFasterBugFixes: "வேகமான பிழை திருத்தங்களையும் புதுப்பிப்புகளையும் செயல்படுத்துகிறது", donationsVoluntary: "அனைத்து நன்கொடைகளும் தன்னார்வமானவை. நன்கொடைகளைப் பொருட்படுத்தாமல் ஆப் எப்போதும் இலவசம். உங்கள் ஆதரவுக்கு நன்றி!", country: "நாடு", version: "பதிப்பு", craftedBy: "Dhairya Shah (The Team 360) ஆல் உருவாக்கப்பட்டது", thankYouForUsing: "எங்கள் ஆப்பைப் பயன்படுத்தியதற்கு நன்றி", seeYouSoon: "விரைவில் சந்திப்போம்!", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "பரிந்துரைக்கப்பட்டது", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay மூலம் நேரடியாக செலுத்தவும்", paypal: "PayPal", paySecurelyWithPayPal: "PayPal மூலம் பாதுகாப்பாக செலுத்தவும்", donate: "நன்கொடை", selectAnAmount: "தொகையைத் தேர்வு செய்யவும்", whatYourSupportDoes: "உங்கள் ஆதரவு என்ன செய்கிறது", helpsMaintainApp: "ஆப்பை பராமரிக்கவும் மேம்படுத்தவும் உதவுகிறது", supportsDevelopment: "புதிய அம்சங்களின் வளர்ச்சியை ஆதரிக்கிறது", helpsCoversServerCosts: "சர்வர் மற்றும் பராமரிப்பு செலவுகளை ஈடுசெய்ய உதவுகிறது", enablesFasterBugFixes: "வேகமான பிழை திருத்தங்களையும் புதுப்பிப்புகளையும் செயல்படுத்துகிறது", donationsVoluntary: "அனைத்து நன்கொடைகளும் தன்னார்வமானவை. நன்கொடைகளைப் பொருட்படுத்தாமல் ஆப் எப்போதும் இலவசம். உங்கள் ஆதரவுக்கு நன்றி!", country: "நாடு", version: "பதிப்பு", craftedBy: "Home Staff 360", thankYouForUsing: "எங்கள் ஆப்பைப் பயன்படுத்தியதற்கு நன்றி", seeYouSoon: "விரைவில் சந்திப்போம்!", appTagline: "Built for homes and the people who run them.",
   // Dirty Tracking & Exit Confirmation
   unsavedChangesTitle: "சேமிக்கப்படாத மாற்றங்கள்",
   unsavedChangesDescription: "உங்களிடம் சேமிக்கப்படாத மாற்றங்கள் உள்ளன. அவற்றை நிராகரிக்க விரும்புகிறீர்களா?",
@@ -6595,6 +6607,8 @@ const ur: Partial<typeof en> = {
   save: "محفوظ کریں",
   cancel: "منسوخ کریں",
   delete: "حذف کریں",
+  restore: "بحال کریں",
+  merge: "ضم کریں",
   edit: "ترمیم کریں",
   view: "دیکھیں",
   add: "شامل کریں",
@@ -7217,7 +7231,7 @@ const ur: Partial<typeof en> = {
   donationsVoluntary: "تمام عطیات رضاکارانہ ہیں۔ عطیات سے قطع نظر ایپ ہمیشہ مفت ہے۔ آپ کی مدد کا شکریہ!",
   country: "ملک",
   version: "ورژن",
-  craftedBy: "Dhairya Shah (The Team 360) نے بنایا",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "ہماری ایپ استعمال کرنے کا شکریہ",
   seeYouSoon: "جلد ملیں گے!",
   appTagline: "Built for homes and the people who run them.",
@@ -7555,6 +7569,8 @@ const bn: Partial<typeof en> = {
   save: "সংরক্ষণ করুন",
   cancel: "বাতিল করুন",
   delete: "মুছুন",
+  restore: "পুনরুদ্ধার করুন",
+  merge: "মার্জ করুন",
   edit: "সম্পাদনা করুন",
   view: "দেখুন",
   add: "যোগ করুন",
@@ -8343,7 +8359,7 @@ const bn: Partial<typeof en> = {
   exitAppDescription: "আপনি কি সত্যিই অ্যাপ বন্ধ করতে চান?",
   exitApp: "বন্ধ করুন",
   stayInApp: "থাকুন", logout: "লগ আউট", logoutDescription: "আপনার অ্যাকাউন্ট থেকে সাইন আউট করুন", logoutConfirmTitle: "লগ আউট", logoutConfirmDescription: "আপনি কি সত্যিই লগ আউট করতে চান? সহযোগিতা বৈশিষ্ট্যগুলি অ্যাক্সেস করতে আপনাকে আবার সাইন ইন করতে হবে।", loggedOut: "সফলভাবে লগ আউট হয়েছে", independentDeveloper: "ভারতের স্বাধীন ডেভেলপার", basedInIndia: "ভারতে অবস্থিত", buildingApps: "জীবনকে সহজ করে এমন অ্যাপ তৈরি করছেন", developerDescription: "উপযোগী এবং মানুষ-কেন্দ্রিক অ্যাপ তৈরি করতে আগ্রহী একজন সোলো-প্রেনিউর দ্বারা নির্মিত। হোম স্টাফ 360 কে পরিবারগুলিকে তাদের গৃহকর্মী সহজে পরিচালনা করতে সাহায্য করার জন্য ভালোবাসা এবং নিষ্ঠার সাথে ডিজাইন করা হয়েছে, সেইসাথে গৃহ সেবা শিল্পের পেশাদারদের তাদের কাজ এবং উপার্জন সহজে সংগঠিত করার ক্ষমতা দিয়েছে। আপনার সাপোর্ট এই প্রকল্পটিকে জীবিত এবং বর্ধনশীল রাখে!", chooseAmount: "পরিমাণ নির্বাচন করুন", orEnterCustomAmount: "অথবা কাস্টম পরিমাণ লিখুন", supporter: "সাপোর্টার", openingUpiApp: "UPI অ্যাপ খোলা হচ্ছে", chooseUpiApp: "পেমেন্ট সম্পন্ন করতে আপনার পছন্দের UPI অ্যাপ নির্বাচন করুন", unableToOpenUpi: "UPI খুলতে অক্ষম", useUpiIdManually: "দয়া করে ম্যানুয়ালি পেমেন্ট করতে নীচের UPI ID ব্যবহার করুন", openingPayPal: "PayPal খোলা হচ্ছে", redirectingToPayPal: "PayPal-এ রিডাইরেক্ট করা হচ্ছে...", unableToOpenPayPal: "PayPal খুলতে অক্ষম", cannotVerifyUpi: "আমরা স্বয়ংক্রিয়ভাবে UPI পেমেন্ট যাচাই করতে পারি না। দয়া করে ম্যানুয়ালি নিশ্চিত করুন।", yesIContributed: "হ্যাঁ, আমি অবদান রেখেছি", noNotYet: "না / এখনও না", completePaymentOnPayPal: "PayPal-এ পেমেন্ট সম্পন্ন করুন", didPaymentGoThrough: "আপনার {amount} এর সাপোর্ট লেনদেন সফল হয়েছে?", pleaseTryAgain: "দয়া করে আবার চেষ্টা করুন",
-  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "প্রস্তাবিত", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay দিয়ে সরাসরি পেমেন্ট করুন", paypal: "PayPal", paySecurelyWithPayPal: "PayPal দিয়ে নিরাপদে পেমেন্ট করুন", donate: "দান করুন", selectAnAmount: "একটি পরিমাণ নির্বাচন করুন", whatYourSupportDoes: "আপনার সাপোর্ট কী করে", helpsMaintainApp: "অ্যাপ রক্ষণাবেক্ষণ ও উন্নত করতে সাহায্য করে", supportsDevelopment: "নতুন বৈশিষ্ট্যের উন্নয়নে সাহায্য করে", helpsCoversServerCosts: "অ্যাপটিকে বিজ্ঞাপন-মুক্ত এবং গোপনীয়তা-কেন্দ্রিক রাখে", enablesFasterBugFixes: "দ্রুত বাগ ফিক্স এবং আপডেট সক্ষম করে", donationsVoluntary: "সমস্ত দান স্বেচ্ছাসেবী। দান নির্বিশেষে অ্যাপটি চিরকাল বিনামূল্যে। আপনার সাপোর্টের জন্য ধন্যবাদ!", country: "দেশ", version: "সংস্করণ", craftedBy: "Dhairya Shah (The Team 360) দ্বারা তৈরি", thankYouForUsing: "আমাদের অ্যাপ ব্যবহার করার জন্য ধন্যবাদ", seeYouSoon: "শীঘ্রই দেখা হবে!", appTagline: "Built for homes and the people who run them.",
+  upiApps: "UPI Apps", upiAppsDescription: "Google Pay, PhonePe, Paytm, BHIM & more", recommended: "প্রস্তাবিত", googlePay: "Google Pay", payDirectlyWithGooglePay: "Google Pay দিয়ে সরাসরি পেমেন্ট করুন", paypal: "PayPal", paySecurelyWithPayPal: "PayPal দিয়ে নিরাপদে পেমেন্ট করুন", donate: "দান করুন", selectAnAmount: "একটি পরিমাণ নির্বাচন করুন", whatYourSupportDoes: "আপনার সাপোর্ট কী করে", helpsMaintainApp: "অ্যাপ রক্ষণাবেক্ষণ ও উন্নত করতে সাহায্য করে", supportsDevelopment: "নতুন বৈশিষ্ট্যের উন্নয়নে সাহায্য করে", helpsCoversServerCosts: "অ্যাপটিকে বিজ্ঞাপন-মুক্ত এবং গোপনীয়তা-কেন্দ্রিক রাখে", enablesFasterBugFixes: "দ্রুত বাগ ফিক্স এবং আপডেট সক্ষম করে", donationsVoluntary: "সমস্ত দান স্বেচ্ছাসেবী। দান নির্বিশেষে অ্যাপটি চিরকাল বিনামূল্যে। আপনার সাপোর্টের জন্য ধন্যবাদ!", country: "দেশ", version: "সংস্করণ", craftedBy: "Home Staff 360", thankYouForUsing: "আমাদের অ্যাপ ব্যবহার করার জন্য ধন্যবাদ", seeYouSoon: "শীঘ্রই দেখা হবে!", appTagline: "Built for homes and the people who run them.",
 
   // Collaboration & Sync
   collaboration: "সহযোগিতা",
@@ -8421,6 +8437,8 @@ const or: Partial<typeof en> = {
   save: "ସେଭ କରନ୍ତୁ",
   cancel: "ବାତିଲ କରନ୍ତୁ",
   delete: "ଡିଲିଟ କରନ୍ତୁ",
+  restore: "ପୁନଃସ୍ଥାପନ କରନ୍ତୁ",
+  merge: "ମର୍ଜ କରନ୍ତୁ",
   edit: "ସମ୍ପାଦନା କରନ୍ତୁ",
   view: "ଦେଖନ୍ତୁ",
   add: "ଯୋଡନ୍ତୁ",
@@ -9043,7 +9061,7 @@ const or: Partial<typeof en> = {
   donationsVoluntary: "ସମସ୍ତ ଦାନ ସ୍ୱେଚ୍ଛାକୃତ। ଦାନ ନିରପେକ୍ଷ ଭାବେ ଆପ୍ ସବୁଦିନ ମାଗଣା। ଆପଣଙ୍କ ସମର୍ଥନ ପାଇଁ ଧନ୍ୟବାଦ!",
   country: "ଦେଶ",
   version: "ସଂସ୍କରଣ",
-  craftedBy: "Dhairya Shah (The Team 360) ଦ୍ୱାରା ନିର୍ମିତ",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "ଆମ ଆପ୍ ବ୍ୟବହାର କରିଥିବାରୁ ଧନ୍ୟବାଦ",
   seeYouSoon: "ଶୀଘ୍ର ଦେଖା ହେବ!",
   appTagline: "Built for homes and the people who run them.",
@@ -9382,6 +9400,8 @@ const as: Partial<typeof en> = {
   save: "সংৰক্ষণ কৰক",
   cancel: "বাতিল কৰক",
   delete: "মচি পেলাওক",
+  restore: "পুনৰুদ্ধাৰ কৰক",
+  merge: "মাৰ্জ কৰক",
   edit: "সম্পাদনা কৰক",
   view: "চাওক",
   add: "যোগ কৰক",
@@ -10004,7 +10024,7 @@ const as: Partial<typeof en> = {
   donationsVoluntary: "সকলো দান স্বেচ্ছামূলক। দান নিৰ্বিশেষে এপটো চিৰকাল বিনামূল্যে। আপোনাৰ সহায়ৰ বাবে ধন্যবাদ!",
   country: "দেশ",
   version: "সংস্কৰণ",
-  craftedBy: "Dhairya Shah (The Team 360) ৰ দ্বাৰা নিৰ্মিত",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "আমাৰ এপ ব্যৱহাৰ কৰাৰ বাবে ধন্যবাদ",
   seeYouSoon: "সোনকালে দেখা হ'ব!",
   appTagline: "Built for homes and the people who run them.",
@@ -10351,6 +10371,8 @@ const ru: Partial<typeof en> = {
   save: "Сохранить",
   cancel: "Отмена",
   delete: "Удалить",
+  restore: "Восстановить",
+  merge: "Объединить",
   edit: "Редактировать",
   view: "Просмотр",
   add: "Добавить",
@@ -10973,7 +10995,7 @@ const ru: Partial<typeof en> = {
   donationsVoluntary: "Все пожертвования добровольны. Приложение бесплатно навсегда, независимо от пожертвований. Спасибо за вашу поддержку!",
   country: "Страна",
   version: "Версия",
-  craftedBy: "Создано Dhairya Shah (The Team 360)",
+  craftedBy: "Home Staff 360",
   thankYouForUsing: "Спасибо за использование нашего приложения",
   seeYouSoon: "До скорой встречи!",
   appTagline: "Built for homes and the people who run them.",

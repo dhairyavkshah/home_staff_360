@@ -34,6 +34,7 @@ import { useNavigation, useNavigationData } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
+import { useDirtyForm } from "@/lib/dirty-tracking";
 import { useActiveContext } from "@/hooks/use-active-context";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getTodayString, formatCurrency } from "@/lib/calculations";
@@ -50,6 +51,7 @@ export function AddLaundryScreen() {
   const navData = useNavigationData<{ laundryId?: string }>();
   const { toast } = useToast();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  useDirtyForm(isDirty);
   const { contextLabel, contextMode } = useActiveContext();
   const { getCurrencySymbol } = useCurrency();
   const settings = useMemo(() => storage.getSettings(), []);

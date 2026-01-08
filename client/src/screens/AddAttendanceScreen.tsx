@@ -11,6 +11,7 @@ import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
+import { useDirtyForm } from "@/lib/dirty-tracking";
 import { getTodayString } from "@/lib/calculations";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import type { AttendanceStatus } from "@shared/schema";
@@ -20,6 +21,7 @@ export function AddAttendanceScreen() {
   const { toast } = useToast();
   const { t } = useTranslation();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
+  useDirtyForm(isDirty);
   const personId = data.personId as string;
   const source = data.source as "attendance" | "payables" | "quick-pay" | "person-detail" | undefined;
 
