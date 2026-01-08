@@ -7,8 +7,27 @@ import { fileURLToPath } from "url";
 import routes from "./routes";
 import { initRealtime } from "./realtime";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Handle both ESM and CJS environments for __dirname
+const getFilename = () => {
+  try {
+    if (typeof import.meta?.url === 'string' && import.meta.url) {
+      return fileURLToPath(import.meta.url);
+    }
+  } catch {}
+  return process.cwd() + '/server/index.ts';
+};
+
+const getDirname = () => {
+  try {
+    if (typeof import.meta?.url === 'string' && import.meta.url) {
+      return dirname(fileURLToPath(import.meta.url));
+    }
+  } catch {}
+  return process.cwd();
+};
+
+const __filename = getFilename();
+const __dirname = getDirname();
 
 const viteLogger = createLogger();
 
