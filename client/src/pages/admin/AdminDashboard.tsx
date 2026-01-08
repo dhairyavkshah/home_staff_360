@@ -103,10 +103,11 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
-    if (token) {
+    // Only fetch users if a search has been performed (to reduce server load)
+    if (token && hasSearched) {
       fetchUsers(token);
     }
-  }, [appliedSearch, userTypeFilter, isVerifiedFilter, isActiveFilter, page]);
+  }, [appliedSearch, userTypeFilter, isVerifiedFilter, isActiveFilter, page, hasSearched]);
 
   const fetchInitialData = async (token: string) => {
     try {
@@ -132,7 +133,7 @@ export default function AdminDashboard() {
       setStats(statsData);
       setBackupStats(backupStatsData);
       
-      await fetchUsers(token);
+      // Don't fetch users on initial load - wait for search to reduce server load
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -506,7 +507,11 @@ export default function AdminDashboard() {
                             <p className="text-xs">Try adjusting your search criteria</p>
                           </div>
                         ) : (
-                          "No users found"
+                          <div className="flex flex-col items-center gap-2">
+                            <Search className="w-8 h-8 text-muted-foreground/50" />
+                            <p>Search for users</p>
+                            <p className="text-xs">Enter a username or phone number above and click Search</p>
+                          </div>
                         )}
                       </td>
                     </tr>
