@@ -35,6 +35,20 @@ export function LauncherScreen() {
         if (pinService.isPinEnabled()) {
           navigate("pin-entry");
         } else {
+          try {
+            const response = await fetch("/api/subscriptions/status", {
+              credentials: "include",
+            });
+            if (response.ok) {
+              const status = await response.json();
+              if (!status.isSubscribed) {
+                navigate("subscription");
+                return;
+              }
+            }
+          } catch {
+          }
+          
           const defaultMode = settings.defaultAppMode || profile.type || "HOME";
           if (defaultMode === "STAFF") {
             navigate("staff-home");

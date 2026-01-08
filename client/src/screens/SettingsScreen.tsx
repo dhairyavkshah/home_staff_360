@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, HelpCircle, Volume2, Vibrate, MapPin, Link2 } from "lucide-react";
+import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, HelpCircle, Volume2, Vibrate, MapPin, Link2, Crown } from "lucide-react";
 import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ import { LanguageSelector } from "@/components/ui/language-selector";
 import { CurrencySelector } from "@/components/ui/currency-selector";
 import { notifyCurrencyChange } from "@/hooks/useCurrency";
 import { collaborationService } from "@/lib/collaboration-service";
+import { useSubscription } from "@/hooks/useSubscription";
+import { format } from "date-fns";
 
 export function SettingsScreen() {
   const { navigate, goBack } = useNavigation();
@@ -119,6 +121,7 @@ export function SettingsScreen() {
   const { startTour } = useTour();
   const [hapticFeedback, setHapticFeedback] = useState(isHapticEnabled());
   const [soundEffects, setSoundEffects] = useState(isSoundEnabled());
+  const { isSubscribed, expiryDate } = useSubscription();
 
   const handleStartTour = () => {
     const mode = profile?.type || "HOME";
@@ -384,6 +387,46 @@ export function SettingsScreen() {
                 </div>
               </button>
             )}
+          </Card>
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Subscription</h2>
+          <Card className="divide-y">
+            <button
+              className="w-full p-4 text-left hover-elevate"
+              onClick={() => navigate("subscription")}
+              data-testid="button-subscription"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 ${isSubscribed ? "icon-halo-success" : "icon-halo-warning"}`}>
+                  <Crown className={`w-4.5 h-4.5 ${isSubscribed ? "text-success" : "text-warning"}`} />
+                </div>
+                <div className="flex-1">
+                  {isSubscribed ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">Premium Active</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {expiryDate 
+                          ? `Active until ${format(new Date(expiryDate), "MMM dd, yyyy")}`
+                          : "Full access to all features"
+                        }
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium text-sm">Free Plan</p>
+                      <p className="text-xs text-muted-foreground">
+                        Upgrade to unlock all features
+                      </p>
+                    </>
+                  )}
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </button>
           </Card>
         </section>
 

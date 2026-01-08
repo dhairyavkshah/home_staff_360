@@ -75,6 +75,7 @@ import { ApprovalDetailScreen } from "@/screens/collaboration/ApprovalDetailScre
 import { ChatScreen } from "@/screens/collaboration/ChatScreen";
 import { AuthScreen } from "@/screens/auth/AuthScreen";
 import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
+import { SubscriptionScreen } from "@/screens/SubscriptionScreen";
 import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { RealtimeProvider } from "@/lib/realtime-provider";
@@ -195,6 +196,8 @@ function MobileAppRouter() {
       return <AuthScreen />;
     case "profile-settings":
       return <ProfileSettingsScreen />;
+    case "subscription":
+      return <SubscriptionScreen />;
     default:
       return <LauncherScreen />;
   }
