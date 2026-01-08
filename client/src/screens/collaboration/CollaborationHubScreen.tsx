@@ -65,8 +65,9 @@ export function CollaborationHubScreen() {
               <TabsTrigger value="messages" data-testid="tab-messages">
                 <MessageCircle className="w-4 h-4" />
               </TabsTrigger>
-              <TabsTrigger value="spaces" data-testid="tab-spaces">
+              <TabsTrigger value="spaces" data-testid="tab-spaces" disabled className="flex flex-col gap-0.5 opacity-50 cursor-not-allowed">
                 <Share2 className="w-4 h-4" />
+                <span className="text-[8px] text-muted-foreground leading-none">coming soon</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
