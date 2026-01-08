@@ -134,7 +134,9 @@ export function PinSetupScreen() {
 
   return (
     <div className="min-h-screen bg-background page-enter">
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border/50 flex-shrink-0">
+      {/* Safe area spacer for status bar */}
+      <div className="safe-area-top bg-background" />
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border/50 flex-shrink-0" style={{ top: 'var(--app-safe-area-top, 0px)' }}>
         <div className="content-container py-3 min-h-14">
           <div className="flex items-center gap-2">
             <Button

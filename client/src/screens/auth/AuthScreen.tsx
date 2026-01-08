@@ -144,11 +144,8 @@ export function AuthScreen() {
           description: displayName ? `Hello, ${displayName}!` : "Login successful",
         });
         
-        if (result.user?.needsOnboarding) {
-          navigate("onboarding");
-        } else {
-          navigate("launcher");
-        }
+        // Always go through launcher which handles permissions check
+        navigate("launcher");
       } else if (result.needsOtp) {
         await handleRequestOtp();
         setStep("otp");
@@ -182,9 +179,8 @@ export function AuthScreen() {
         if (result.user?.isNewUser || !result.user?.hasPassword) {
           setNeedsOnboarding(result.user?.needsOnboarding ?? true);
           setStep("set-password");
-        } else if (result.user?.needsOnboarding) {
-          navigate("onboarding");
         } else {
+          // Always go through launcher which handles permissions check
           navigate("launcher");
         }
       }
@@ -228,11 +224,8 @@ export function AuthScreen() {
           description: "Your account is now secured",
         });
         
-        if (needsOnboarding) {
-          navigate("onboarding");
-        } else {
-          navigate("launcher");
-        }
+        // Always go through launcher which handles permissions check
+        navigate("launcher");
       }
     } catch (error: any) {
       toast({
@@ -336,11 +329,8 @@ export function AuthScreen() {
           description: "Your password has been reset successfully",
         });
         
-        if (result.user?.needsOnboarding) {
-          navigate("onboarding");
-        } else {
-          navigate("launcher");
-        }
+        // Always go through launcher which handles permissions check
+        navigate("launcher");
       }
     } catch (error: any) {
       toast({
