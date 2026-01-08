@@ -7,12 +7,23 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://homestaff360.replit.app',
     androidScheme: 'https',
-    allowNavigation: ['homestaff360.replit.app']
+    cleartext: false,
+    allowNavigation: [
+      'homestaff360.replit.app',
+      '*.replit.app',
+      '*.replit.dev'
+    ]
   },
   android: {
     allowMixedContent: false,
     captureInput: true,
-    webContentsDebuggingEnabled: false
+    webContentsDebuggingEnabled: true,
+    useLegacyBridge: false
+  },
+  plugins: {
+    CapacitorHttp: {
+      enabled: true
+    }
   }
 };
 
