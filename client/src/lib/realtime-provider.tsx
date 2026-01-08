@@ -149,10 +149,17 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
     const unsubNotification = realtimeService.on("notifications:created", onNotification);
     const unsubMessage = realtimeService.on("chat:new-message", onMessage);
+    const unsubMessageReceived = realtimeService.on("chat:message-received", (data: { chatId: number; message: MessagePayload }) => {
+      console.log("[RealtimeProvider] Received chat:message-received:", data);
+      if (messageHandlerRef.current) {
+        messageHandlerRef.current(data.message);
+      }
+    });
 
     return () => {
       unsubNotification();
       unsubMessage();
+      unsubMessageReceived();
     };
   }, []);
 
