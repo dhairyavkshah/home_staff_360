@@ -14,7 +14,6 @@ import "@/lib/demo-data";
 
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminAds from "@/pages/admin/AdminAds";
 import AdminManagement from "@/pages/admin/AdminManagement";
 import AdminBackups from "@/pages/admin/AdminBackups";
 import AdminRolesPage from "@/pages/admin/AdminRolesPage";
@@ -76,9 +75,7 @@ import { ApprovalDetailScreen } from "@/screens/collaboration/ApprovalDetailScre
 import { ChatScreen } from "@/screens/collaboration/ChatScreen";
 import { AuthScreen } from "@/screens/auth/AuthScreen";
 import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
-import { AdOverlay } from "@/components/AdOverlay";
 import { MaintenanceBanner } from "@/components/MaintenanceBanner";
-import { useAds } from "@/hooks/useAds";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { RealtimeProvider } from "@/lib/realtime-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -203,14 +200,6 @@ function MobileAppRouter() {
   }
 }
 
-function AdManager() {
-  const { currentAd, dismissAd } = useAds();
-
-  if (!currentAd) return null;
-
-  return <AdOverlay ad={currentAd} onClose={dismissAd} />;
-}
-
 function MobileAppWithSplash() {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -230,7 +219,6 @@ function MobileAppWithSplash() {
           <GuidedTourProvider>
             <MaintenanceBanner />
             <MobileAppRouter />
-            <AdManager />
             <Toaster />
           </GuidedTourProvider>
         </DirtyTrackingProvider>
@@ -245,7 +233,6 @@ function AdminApp() {
       <TooltipProvider>
         <Switch>
           <Route path="/admin/dashboard" component={AdminDashboard} />
-          <Route path="/admin/ads" component={AdminAds} />
           <Route path="/admin/admins" component={AdminManagement} />
           <Route path="/admin/backups" component={AdminBackups} />
           <Route path="/admin/maintenance" component={AdminMaintenance} />

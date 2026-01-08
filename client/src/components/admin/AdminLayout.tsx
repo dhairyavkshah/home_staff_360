@@ -37,7 +37,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/lib/theme-provider";
 import {
   LayoutDashboard,
-  Film,
   UserCog,
   Archive,
   Shield,
@@ -66,7 +65,6 @@ const navItems: NavItem[] = [
   { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
   { title: "Team", url: "/admin/team", icon: UsersRound },
   { title: "Roles & Permissions", url: "/admin/roles", icon: Shield },
-  { title: "Advertisements", url: "/admin/ads", icon: Film },
   { title: "Admin Users", url: "/admin/admins", icon: UserCog },
   { title: "Backups", url: "/admin/backups", icon: Archive },
   { title: "Maintenance", url: "/admin/maintenance", icon: Wrench },

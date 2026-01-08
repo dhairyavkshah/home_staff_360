@@ -97,6 +97,11 @@ const PhoneNumberFormat = libphonenumber.PhoneNumberFormat;
 const router = Router();
 
 // ============================================
+// Ad Feature Flag
+// ============================================
+const AD_FEATURE_ENABLED = false; // Set to true to re-enable ads
+
+// ============================================
 // Standardized API Error Response System
 // ============================================
 interface APIErrorResponse {
@@ -4973,10 +4978,15 @@ router.post("/api/admin/seed-test-data", async (req: Request, res: Response) => 
 // GET /api/ads/settings - Get global ad settings (public)
 router.get("/api/ads/settings", async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.json({ adsEnabled: false });
+    }
+
     const settings = await db.query.adSettings.findFirst();
     
     if (!settings) {
-      return res.json({ adsEnabled: true });
+      return res.json({ adsEnabled: false });
     }
     
     res.json({ adsEnabled: settings.adsEnabled });
@@ -4989,6 +4999,11 @@ router.get("/api/ads/settings", async (req: Request, res: Response) => {
 // GET /api/ads/next - Get next ad to display (weighted random selection)
 router.get("/api/ads/next", async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(404).json({ error: "Ads are disabled", adsDisabled: true });
+    }
+
     const deviceId = req.query.deviceId as string | undefined;
     
     // Check global ads enabled setting
@@ -5075,6 +5090,11 @@ router.get("/api/ads/next", async (req: Request, res: Response) => {
 // POST /api/ads/impression - Record an ad impression
 router.post("/api/ads/impression", async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally, return success but do nothing
+    if (!AD_FEATURE_ENABLED) {
+      return res.json({ success: true });
+    }
+
     const validationResult = insertAdImpressionSchema.safeParse(req.body);
     
     if (!validationResult.success) {
@@ -5124,6 +5144,11 @@ router.post("/api/ads/impression", async (req: Request, res: Response) => {
 // GET /api/admin/ads - List all ads with pagination
 router.get("/api/admin/ads", authenticateAdmin, async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(503).json({ error: "Ads feature disabled" });
+    }
+
     const { page = "1", limit = "20" } = req.query;
     const pageNum = parseInt(page as string);
     const limitNum = parseInt(limit as string);
@@ -5156,6 +5181,11 @@ router.get("/api/admin/ads", authenticateAdmin, async (req: Request, res: Respon
 // GET /api/admin/ads/analytics - Get aggregated analytics
 router.get("/api/admin/ads/analytics", authenticateAdmin, async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(503).json({ error: "Ads feature disabled" });
+    }
+
     // Get all ads with impression stats
     const adsWithStats = await db.select({
       id: advertisements.id,
@@ -5238,10 +5268,15 @@ router.get("/api/admin/ads/analytics", authenticateAdmin, async (req: Request, r
 // GET /api/admin/ads/settings - Get ad settings (admin)
 router.get("/api/admin/ads/settings", authenticateAdmin, async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(503).json({ error: "Ads feature disabled" });
+    }
+
     const settings = await db.query.adSettings.findFirst();
     
     if (!settings) {
-      return res.json({ adsEnabled: true, updatedAt: null, updatedBy: null });
+      return res.json({ adsEnabled: false, updatedAt: null, updatedBy: null });
     }
     
     res.json(settings);
@@ -5254,6 +5289,11 @@ router.get("/api/admin/ads/settings", authenticateAdmin, async (req: Request, re
 // PATCH /api/admin/ads/settings - Update ad settings (admin only)
 router.patch("/api/admin/ads/settings", authenticateAdmin, async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(503).json({ error: "Ads feature disabled" });
+    }
+
     const adminId = (req as any).adminId;
     const validationResult = insertAdSettingsSchema.safeParse(req.body);
     
@@ -5293,6 +5333,11 @@ router.patch("/api/admin/ads/settings", authenticateAdmin, async (req: Request, 
 // GET /api/admin/ads/:id - Get single ad details
 router.get("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(503).json({ error: "Ads feature disabled" });
+    }
+
     const { id } = req.params;
 
     const ad = await db.query.advertisements.findFirst({
@@ -5313,6 +5358,11 @@ router.get("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: Re
 // POST /api/admin/ads - Create new ad
 router.post("/api/admin/ads", authenticateAdmin, async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(503).json({ error: "Ads feature disabled" });
+    }
+
     const validationResult = insertAdvertisementSchema.safeParse(req.body);
     
     if (!validationResult.success) {
@@ -5352,6 +5402,11 @@ router.post("/api/admin/ads", authenticateAdmin, async (req: Request, res: Respo
 // PATCH /api/admin/ads/:id - Update ad
 router.patch("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(503).json({ error: "Ads feature disabled" });
+    }
+
     const { id } = req.params;
 
     const existingAd = await db.query.advertisements.findFirst({
@@ -5394,6 +5449,11 @@ router.patch("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: 
 // DELETE /api/admin/ads/:id - Delete ad (soft delete if has impressions, hard delete otherwise)
 router.delete("/api/admin/ads/:id", authenticateAdmin, async (req: Request, res: Response) => {
   try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(503).json({ error: "Ads feature disabled" });
+    }
+
     const { id } = req.params;
 
     const existingAd = await db.query.advertisements.findFirst({

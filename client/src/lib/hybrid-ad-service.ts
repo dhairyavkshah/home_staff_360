@@ -87,7 +87,8 @@ class HybridAdService {
   }
 
   shouldShowAd(): boolean {
-    return adService.shouldShowAd();
+    // Ads feature is disabled - always return false
+    return false;
   }
 
   markAdShown(): void {
@@ -95,6 +96,9 @@ class HybridAdService {
   }
 
   async getNextAd(): Promise<{ ad: Advertisement | null; provider: AdProvider }> {
+    // Ads feature is disabled - always return none
+    return { ad: null, provider: "none" };
+
     const preference = this.config.sourcePreference;
 
     if (preference === "admob_only") {

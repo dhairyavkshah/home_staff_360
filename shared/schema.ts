@@ -1860,7 +1860,7 @@ export const advertisements = pgTable("advertisements", {
 
 export const adSettings = pgTable("ad_settings", {
   id: serial("id").primaryKey(),
-  adsEnabled: boolean("ads_enabled").notNull().default(true),
+  adsEnabled: boolean("ads_enabled").notNull().default(false),
   updatedAt: timestamp("updated_at").defaultNow(),
   updatedBy: varchar("updated_by", { length: 255 }).references(() => adminUsers.id),
 });
@@ -1884,7 +1884,7 @@ export type InsertAdvertisement = z.infer<typeof insertAdvertisementSchema>;
 export type Advertisement = typeof advertisements.$inferSelect;
 
 export const insertAdSettingsSchema = z.object({
-  adsEnabled: z.boolean().default(true),
+  adsEnabled: z.boolean().default(false),
 });
 export type InsertAdSettings = z.infer<typeof insertAdSettingsSchema>;
 export type AdSettings = typeof adSettings.$inferSelect;
