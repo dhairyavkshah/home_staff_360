@@ -12,6 +12,8 @@ import {
   X,
   Check,
   Clock,
+  Download,
+  Trash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +35,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Message {
@@ -86,6 +98,10 @@ export function ChatScreen() {
   
   // Timer for editable messages
   const [, setTick] = useState(0);
+  
+  // Clear chat confirmation state
+  const [isClearChatDialogOpen, setIsClearChatDialogOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   useRealtimeConnection();
   useRealtimeChat(chatId || null);
@@ -390,6 +406,78 @@ export function ChatScreen() {
     }
   };
 
+  const exportChatHistory = () => {
+    if (messages.length === 0) {
+      toast({
+        title: "No messages",
+        description: "There are no messages to export",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const chatExport = messages
+        .filter((m) => !m.isDeleted)
+        .map((m) => {
+          const date = new Date(m.createdAt);
+          const formattedDate = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+          const sender = m.isOwn ? "You" : (m.senderName || "Other");
+          return `[${formattedDate}] ${sender}: ${m.content}`;
+        })
+        .join("\n");
+
+      const header = `Chat History with ${chatName}\nExported on: ${new Date().toLocaleDateString()}\n${"=".repeat(50)}\n\n`;
+      const content = header + chatExport;
+
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `chat-${chatName.replace(/[^a-zA-Z0-9]/g, "_")}-${new Date().toISOString().split("T")[0]}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Chat exported",
+        description: "Chat history has been downloaded",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to export chat history",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const clearChatHistory = async () => {
+    if (!chatId) return;
+    
+    setIsClearing(true);
+    try {
+      await collaborationService.fetchWithAuth(`/chats/${chatId}/clear`, {
+        method: "DELETE",
+      });
+      setMessages([]);
+      toast({
+        title: "Chat cleared",
+        description: "All messages have been removed",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to clear chat history",
+        variant: "destructive",
+      });
+    } finally {
+      setIsClearing(false);
+      setIsClearChatDialogOpen(false);
+    }
+  };
+
   const isEditable = (message: Message): boolean => {
     if (!message.isOwn || message.isDeleted) return false;
     if (!message.editableUntil) return false;
@@ -483,6 +571,18 @@ export function ChatScreen() {
             <DropdownMenuItem onClick={loadChatData}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={exportChatHistory} data-testid="button-export-chat">
+              <Download className="w-4 h-4 mr-2" />
+              Export Chat
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setIsClearChatDialogOpen(true)}
+              className="text-destructive"
+              data-testid="button-clear-chat"
+            >
+              <Trash className="w-4 h-4 mr-2" />
+              Clear Chat
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -669,6 +769,38 @@ export function ChatScreen() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Clear Chat Confirmation Dialog */}
+      <AlertDialog open={isClearChatDialogOpen} onOpenChange={setIsClearChatDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear Chat History</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to clear all messages in this chat? This action cannot be undone and will remove all messages for both you and the other person.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isClearing} data-testid="button-cancel-clear">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={clearChatHistory}
+              disabled={isClearing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-clear"
+            >
+              {isClearing ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Clearing...
+                </>
+              ) : (
+                "Clear Chat"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div className="safe-area-bottom" />
     </div>
   );

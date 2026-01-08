@@ -3865,6 +3865,47 @@ router.patch("/api/chats/:chatId/mute", authenticateToken, async (req: Request, 
   }
 });
 
+// Clear all messages in a chat
+router.delete("/api/chats/:chatId/clear", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { chatId } = req.params;
+
+    // SECURITY: Verify user is a participant
+    const participation = await db.query.chatParticipants.findFirst({
+      where: and(
+        eq(chatParticipants.chatId, chatId),
+        eq(chatParticipants.userId, userId),
+        sql`${chatParticipants.leftAt} IS NULL`
+      )
+    });
+
+    if (!participation) {
+      return res.status(403).json({ error: "Not a participant of this chat" });
+    }
+
+    // Delete all messages in this chat (soft delete by marking as deleted)
+    await db.update(chatMessages)
+      .set({ 
+        isDeleted: true, 
+        content: "[This message was deleted]",
+        updatedAt: new Date()
+      })
+      .where(eq(chatMessages.chatId, chatId));
+
+    // Emit real-time event to notify other participants
+    const io = getIO();
+    if (io) {
+      io.to(`chat:${chatId}`).emit("chat:cleared", { chatId });
+    }
+
+    res.json({ success: true, message: "Chat history cleared" });
+  } catch (error) {
+    console.error("Clear chat error:", error);
+    res.status(500).json({ error: "Failed to clear chat history" });
+  }
+});
+
 // Get chat by connection ID (useful for opening chat from connections list)
 router.get("/api/chats/by-connection/:connectionId", authenticateToken, async (req: Request, res: Response) => {
   try {
