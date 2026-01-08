@@ -95,9 +95,41 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 - google-libphonenumber types not installed (runtime works)
 
 ### Deployment Readiness
-The application is ready for MVP deployment with:
+The application is **production-ready** for MVP deployment with:
 - Core authentication and user management
 - Real-time collaboration and messaging
 - Home user and staff user feature sets
 - Security measures (rate limiting, JWT, bcrypt)
 - Error handling and recovery flows
+
+## Production Deployment Guide
+
+### Replit Deployment Options
+1. **Autoscale Deployment** (Recommended): Ideal for this app with variable traffic, auto-scales based on demand
+2. **Reserved VM Deployment**: For consistent performance with always-on WebSocket connections
+3. **Static Deployment**: Not suitable (app has server-side logic)
+
+### Pre-Deployment Checklist
+- [ ] All 151 automated tests passing
+- [ ] Rate limiting configured (OTP: 10/15min, Auth: 20/15min, Password Reset: 5/15min)
+- [ ] Twilio credentials configured (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER)
+- [ ] JWT_SECRET set for production
+- [ ] ADMIN_DEFAULT_EMAIL and ADMIN_DEFAULT_PASSWORD configured
+- [ ] Privacy Policy at docs/PRIVACY_POLICY.md (GDPR/DPDP compliant)
+- [ ] PostgreSQL database connected via DATABASE_URL
+
+### Required Environment Secrets
+| Secret | Purpose |
+|--------|---------|
+| DATABASE_URL | PostgreSQL connection string |
+| JWT_SECRET | JWT token signing |
+| TWILIO_ACCOUNT_SID | SMS/OTP service |
+| TWILIO_AUTH_TOKEN | SMS/OTP service |
+| TWILIO_PHONE_NUMBER | SMS sender number |
+| ADMIN_DEFAULT_EMAIL | Admin login |
+| ADMIN_DEFAULT_PASSWORD | Admin login |
+
+### Post-Deployment Notes
+- Use Replit's built-in PostgreSQL for persistent data (filesystem is ephemeral on Autoscale/Reserved VM)
+- Monitor Socket.IO connections for real-time feature health
+- Subscription validation integrates with Google Play Billing
