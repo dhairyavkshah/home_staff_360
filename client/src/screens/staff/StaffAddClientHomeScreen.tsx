@@ -25,7 +25,6 @@ import {
   type Currency,
   CURRENCIES,
 } from "@shared/schema";
-import { CurrencySelector } from "@/components/ui/currency-selector";
 import { useCurrency } from "@/hooks/useCurrency";
 
 interface PhoneCheckResult {
@@ -522,27 +521,15 @@ export function StaffAddClientHomeScreen() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <Label>{t("currency")} <span className="text-destructive">*</span></Label>
-          <CurrencySelector
-            value={currency}
-            onValueChange={(v) => { setCurrency(v); markDirty(); }}
-            data-testid="select-currency"
-          />
-          <p className="text-xs text-muted-foreground">{tLabel("allRecordsUseCurrency", "All records for this client will use this currency")}</p>
-        </div>
-
-        {currency === "OTHER" && (
-          <div className="flex flex-col gap-4">
-            <Label>{t("currencySymbol")} <span className="text-destructive">*</span></Label>
-            <Input
-              value={customCurrencySymbol}
-              onChange={(e) => { setCustomCurrencySymbol(e.target.value); markDirty(); }}
-              placeholder="e.g., Fr, kr"
-              data-testid="input-custom-currency"
-            />
-            {errors.customCurrencySymbol && <p className="text-xs text-destructive">{errors.customCurrencySymbol}</p>}
+          <Label>{t("currency")}</Label>
+          <div className="flex items-center gap-2 p-2 bg-muted rounded-md border">
+            <span className="text-sm font-medium" data-testid="display-currency">
+              {CURRENCIES[currency]?.symbol} {CURRENCIES[currency]?.name} ({currency})
+            </span>
+            <span className="text-xs text-muted-foreground ml-auto">{tLabel("fromSettings", "(From Settings)")}</span>
           </div>
-        )}
+          <p className="text-xs text-muted-foreground">{tLabel("currencySetInSettings", "Currency is set in Settings and applies to all client records")}</p>
+        </div>
 
         {role !== 'Laundry' && (
           <div className="flex flex-col gap-4">
