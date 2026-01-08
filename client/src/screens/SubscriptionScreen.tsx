@@ -245,16 +245,7 @@ export function SubscriptionScreen() {
                 data-testid="button-subscribe"
               >
                 <Crown className="w-4 h-4 mr-2" />
-                Subscribe Now
-              </Button>
-
-              <Button
-                variant="ghost"
-                className="w-full text-muted-foreground"
-                onClick={handleContinue}
-                data-testid="button-continue-free"
-              >
-                Continue with Free Version
+                Subscribe Now - {pricing.symbol}{pricing.amount}/year
               </Button>
             </div>
 

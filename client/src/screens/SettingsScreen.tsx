@@ -417,9 +417,9 @@ export function SettingsScreen() {
                     </>
                   ) : (
                     <>
-                      <p className="font-medium text-sm">Free Plan</p>
+                      <p className="font-medium text-sm">No Active Subscription</p>
                       <p className="text-xs text-muted-foreground">
-                        Upgrade to unlock all features
+                        Subscribe to access all features
                       </p>
                     </>
                   )}
