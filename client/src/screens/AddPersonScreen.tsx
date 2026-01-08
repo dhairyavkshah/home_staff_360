@@ -36,12 +36,14 @@ import {
   CURRENCIES,
 } from "@shared/schema";
 import { CurrencySelector } from "@/components/ui/currency-selector";
+import { useCurrency } from "@/hooks/useCurrency";
 
 export function AddPersonScreen() {
   const { navigate, goBack, data } = useNavigation();
   const { toast } = useToast();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
   useDirtyForm(isDirty);
+  const { getCurrencyInputLabel } = useCurrency();
   const editMode = data.editMode && data.personId;
   
   const [name, setName] = useState("");
@@ -610,8 +612,8 @@ export function AddPersonScreen() {
           <div className="flex flex-col gap-1">
             <Label htmlFor="baseRate">
               {role === "Laundry" 
-                ? "Minimum Base Rate * (per item or cloth)"
-                : `Base Rate * (${salaryType === "MONTHLY" ? "per month" : salaryType === "DAILY" ? "per day" : "per hour"})`
+                ? `Minimum Base Rate (${getCurrencyInputLabel()}) * (per item or cloth)`
+                : `Base Rate (${getCurrencyInputLabel()}) * (${salaryType === "MONTHLY" ? "per month" : salaryType === "DAILY" ? "per day" : "per hour"})`
               }
             </Label>
             <Input

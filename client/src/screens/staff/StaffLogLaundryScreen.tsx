@@ -55,7 +55,7 @@ export function StaffLogLaundryScreen() {
   const { t } = useTranslation();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
   useDirtyForm(isDirty);
-  const { getCurrencySymbol } = useCurrency();
+  const { getCurrencySymbol, getCurrencyInputLabel } = useCurrency();
   const data = useNavigationData<{ laundryJobId?: string }>();
 
   const profile = useMemo(() => storage.getProfile(), []);
@@ -628,7 +628,7 @@ export function StaffLogLaundryScreen() {
 
             {pickupDelivery && (
               <div className="flex flex-col gap-2 pt-2 border-t">
-                <Label htmlFor="deliveryCharge">{t("pickupDeliveryCharge") || "Pick-up & Delivery Charge"} <span className="text-destructive">*</span></Label>
+                <Label htmlFor="deliveryCharge">{t("pickupDeliveryCharge") || "Pick-up & Delivery Charge"} ({getCurrencyInputLabel()}) <span className="text-destructive">*</span></Label>
                 <Input
                   id="deliveryCharge"
                   type="number"

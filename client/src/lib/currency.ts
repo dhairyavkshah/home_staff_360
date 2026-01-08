@@ -41,3 +41,20 @@ export function parseCurrencyInput(value: string): number {
   const parsed = parseFloat(cleaned);
   return isNaN(parsed) ? 0 : parsed;
 }
+
+const AMBIGUOUS_SYMBOLS = new Set(['$', '¥', 'kr', 'R', 'Rs', '£']);
+
+export function getCurrencyInputLabel(currency: CurrencyCode, customSymbol?: string): string {
+  if (currency === "OTHER" && customSymbol) {
+    return customSymbol;
+  }
+  
+  const config = CURRENCIES[currency];
+  const symbol = config.symbol;
+  
+  if (AMBIGUOUS_SYMBOLS.has(symbol)) {
+    return `${currency} ${symbol}`;
+  }
+  
+  return symbol;
+}

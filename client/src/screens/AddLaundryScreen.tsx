@@ -53,7 +53,7 @@ export function AddLaundryScreen() {
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
   useDirtyForm(isDirty);
   const { contextLabel, contextMode } = useActiveContext();
-  const { getCurrencySymbol } = useCurrency();
+  const { getCurrencySymbol, getCurrencyInputLabel } = useCurrency();
   const settings = useMemo(() => storage.getSettings(), []);
   const symbol = settings.customCurrencySymbol || currencySymbols[settings.currency];
   
@@ -603,7 +603,7 @@ export function AddLaundryScreen() {
 
             {pickupDelivery && (
               <div className="flex flex-col gap-2 pt-3 border-t">
-                <Label htmlFor="deliveryCharge" className="text-sm">Pick-up & Delivery Charge <span className="text-destructive">*</span></Label>
+                <Label htmlFor="deliveryCharge" className="text-sm">Pick-up & Delivery Charge ({getCurrencyInputLabel()}) <span className="text-destructive">*</span></Label>
                 <Input
                   id="deliveryCharge"
                   type="number"

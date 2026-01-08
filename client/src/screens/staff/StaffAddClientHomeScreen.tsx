@@ -26,6 +26,7 @@ import {
   CURRENCIES,
 } from "@shared/schema";
 import { CurrencySelector } from "@/components/ui/currency-selector";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface PhoneCheckResult {
   exists: boolean;
@@ -40,6 +41,7 @@ export function StaffAddClientHomeScreen() {
   const { t, tLabel } = useTranslation();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
   useDirtyForm(isDirty);
+  const { getCurrencyInputLabel } = useCurrency();
   const data = useNavigationData<{ clientHomeId?: string }>();
   
   const profile = useMemo(() => storage.getProfile(), []);
@@ -560,7 +562,7 @@ export function StaffAddClientHomeScreen() {
 
         <div className="flex flex-col gap-4">
           <Label htmlFor="rate">
-            {role === 'Laundry' ? tLabel("ratePerItem", "Rate (per Item)") : t("rate")} <span className="text-destructive">*</span>
+            {role === 'Laundry' ? `${tLabel("ratePerItem", "Rate")} (${getCurrencyInputLabel()})` : `${t("rate")} (${getCurrencyInputLabel()})`} <span className="text-destructive">*</span>
           </Label>
           <Input
             id="rate"

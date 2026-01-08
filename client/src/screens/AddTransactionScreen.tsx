@@ -50,7 +50,7 @@ export function AddTransactionScreen() {
   useDirtyForm(isDirty);
   const { tLabel } = useTranslation();
   const { contextLabel, contextMode } = useActiveContext();
-  const { getCurrencySymbol } = useCurrency();
+  const { getCurrencySymbol, getCurrencyInputLabel } = useCurrency();
   
   const isViewMode = data?.editMode && data?.transactionId;
   const existingTransaction = useMemo(() => {
@@ -468,7 +468,7 @@ export function AddTransactionScreen() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label htmlFor="amount">{tLabel('amount', 'Amount')} <span className="text-destructive">*</span></Label>
+            <Label htmlFor="amount">{tLabel('amount', 'Amount')} ({getCurrencyInputLabel()}) <span className="text-destructive">*</span></Label>
             <Input
               id="amount"
               type="number"

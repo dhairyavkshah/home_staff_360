@@ -58,7 +58,7 @@ export function StaffAddExpenseScreen() {
   const { t } = useTranslation();
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
   useDirtyForm(isDirty);
-  const { getCurrencySymbol } = useCurrency();
+  const { getCurrencySymbol, getCurrencyInputLabel } = useCurrency();
   
   const isViewMode = data?.editMode && data?.expenseId;
   const expenseId = data?.expenseId as string | undefined;
@@ -356,7 +356,7 @@ export function StaffAddExpenseScreen() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <Label htmlFor="amount">{t("amount")} <span className="text-destructive">*</span></Label>
+            <Label htmlFor="amount">{t("amount")} ({getCurrencyInputLabel()}) <span className="text-destructive">*</span></Label>
             <Input
               id="amount"
               type="number"

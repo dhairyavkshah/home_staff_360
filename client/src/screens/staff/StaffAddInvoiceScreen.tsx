@@ -52,7 +52,7 @@ export function StaffAddInvoiceScreen() {
   const { isDirty, markDirty, markClean } = useSimpleDirtyTracker();
   useDirtyForm(isDirty);
   const data = useNavigationData<{ invoiceId?: string; editMode?: boolean }>();
-  const { getCurrencySymbol } = useCurrency();
+  const { getCurrencySymbol, getCurrencyInputLabel } = useCurrency();
   
   const profile = useMemo(() => storage.getProfile(), []);
   const clientHomes = useMemo(() => storage.getActiveClientHomes(), []);

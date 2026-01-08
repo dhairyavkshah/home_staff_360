@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStore, useMemo } from 'react';
 import { storage } from '@/lib/storage';
-import { formatCurrency as formatCurrencyFn, getCurrencySymbol as getSymbolFn } from '@/lib/currency';
+import { formatCurrency as formatCurrencyFn, getCurrencySymbol as getSymbolFn, getCurrencyInputLabel as getInputLabelFn } from '@/lib/currency';
 import type { Currency } from '@shared/schema';
 
 let currencyVersion = 0;
@@ -45,10 +45,16 @@ export function useCurrency() {
     [currency, customSymbol]
   );
 
+  const getCurrencyInputLabel = useCallback(
+    () => getInputLabelFn(currency, customSymbol),
+    [currency, customSymbol]
+  );
+
   return {
     currency,
     customSymbol,
     formatCurrency,
     getCurrencySymbol,
+    getCurrencyInputLabel,
   };
 }
