@@ -9,7 +9,7 @@ import { useNavigation } from "@/lib/navigation";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useToast } from "@/hooks/use-toast";
 import { storage } from "@/lib/storage";
-import { SUBSCRIPTION_PRICES, CURRENCIES, type Currency, type SubscriptionPlan } from "@shared/schema";
+import { getCountryPricing, CURRENCIES, type SubscriptionPlan, type PricingTier, type Currency } from "@shared/schema";
 import { format } from "date-fns";
 
 const BENEFITS = [
@@ -38,92 +38,21 @@ const BENEFITS = [
 interface PricingInfo {
   monthly: number;
   annual: number;
-  symbol: string;
+  tier: PricingTier;
   currency: string;
-  tier: 1 | 2;
+  symbol: string;
 }
 
+// Prices displayed in local currency - actual prices come from Google Play Store at runtime
 function getPriceForCountry(countryCode: string): PricingInfo {
-  const currencyMapping: Record<string, string> = {
-    IN: "INR",
-    US: "USD",
-    GB: "GBP",
-    AU: "AUD",
-    CA: "CAD",
-    CH: "CHF",
-    CZ: "CZK",
-    DK: "DKK",
-    HK: "HKD",
-    HU: "HUF",
-    IL: "ILS",
-    JP: "JPY",
-    MX: "MXN",
-    NO: "NOK",
-    NZ: "NZD",
-    PH: "PHP",
-    PL: "PLN",
-    RU: "RUB",
-    SE: "SEK",
-    SG: "SGD",
-    TH: "THB",
-    TW: "TWD",
-    AE: "AED",
-    CN: "CNY",
-    BR: "BRL",
-    ZA: "ZAR",
-    KR: "KRW",
-    ID: "IDR",
-    MY: "MYR",
-    VN: "VND",
-    TR: "TRY",
-    EG: "EGP",
-    PK: "PKR",
-    BD: "BDT",
-    NG: "NGN",
-    CO: "COP",
-    AR: "ARS",
-    CL: "CLP",
-    PE: "PEN",
-    SA: "SAR",
-    QA: "QAR",
-    KW: "KWD",
-    RO: "RON",
-    UA: "UAH",
-    KE: "KES",
-    LK: "LKR",
-    DE: "EUR",
-    FR: "EUR",
-    IT: "EUR",
-    ES: "EUR",
-    NL: "EUR",
-    BE: "EUR",
-    AT: "EUR",
-    PT: "EUR",
-    IE: "EUR",
-    FI: "EUR",
-    GR: "EUR",
-  };
-
-  const currencyKey = currencyMapping[countryCode?.toUpperCase()] || "USD";
-  const priceInfo = SUBSCRIPTION_PRICES[currencyKey];
-  const currencyConfig = CURRENCIES[currencyKey as Currency];
-
-  if (!priceInfo) {
-    return {
-      monthly: 3,
-      annual: 33,
-      symbol: "$",
-      currency: "USD",
-      tier: 1,
-    };
-  }
-
+  const pricing = getCountryPricing(countryCode?.toUpperCase() || "US");
+  const currencyConfig = CURRENCIES[pricing.currency as Currency];
   return {
-    monthly: priceInfo.monthly,
-    annual: priceInfo.annual,
-    symbol: currencyConfig?.symbol || "$",
-    currency: priceInfo.currency,
-    tier: priceInfo.tier,
+    monthly: pricing.monthly,
+    annual: pricing.annual,
+    tier: pricing.tier,
+    currency: pricing.currency,
+    symbol: currencyConfig?.symbol || pricing.currency + ' ',
   };
 }
 
@@ -356,6 +285,9 @@ export function SubscriptionScreen() {
                 <Crown className="w-4 h-4 mr-2" />
                 Subscribe {selectedPlan === "monthly" ? "Monthly" : "Annually"} - {pricing.symbol}{formatPrice(selectedPlan === "monthly" ? pricing.monthly : pricing.annual)}/{selectedPlan === "monthly" ? "mo" : "yr"}
               </Button>
+              <p className="text-xs text-center text-muted-foreground px-4 mt-2">
+                Prices shown are reference values. Actual price will be displayed in Google Play checkout.
+              </p>
             </div>
 
             <p className="text-xs text-center text-muted-foreground px-4 mt-2">

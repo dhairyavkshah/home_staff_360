@@ -2370,275 +2370,206 @@ export const insertSubscriptionSchema = z.object({
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
 
-// Subscription pricing tiers
-// Tier 1 (US-level): US, EU, UK, Australia, Canada, UAE, Russia, China, Switzerland, Norway, Sweden, Denmark, NZ, Singapore, HK, Japan, South Korea, Israel
-// Tier 2 (India-level): All other countries
+// Subscription pricing tiers (5 tiers based on Google Play Store regions)
+// Tier 1: $1/month, $11/year (lowest - developing countries)
+// Tier 2: $1.8/month, $20/year
+// Tier 3: $2.5/month, $27/year
+// Tier 4: $3/month, $33/year
+// Tier 5: $4/month, $44/year (highest - developed countries)
 
 export type SubscriptionPlan = 'monthly' | 'annual';
+export type PricingTier = 1 | 2 | 3 | 4 | 5;
 
-export interface SubscriptionPriceConfig {
-  monthly: number;
-  annual: number;
-  currency: string;
-  country: string;
-  tier: 1 | 2;
-}
-
-export const SUBSCRIPTION_PRICES: Record<string, SubscriptionPriceConfig> = {
-  // Tier 1: US-level pricing ($3/month, $33/year equivalent)
-  USD: { monthly: 3, annual: 33, currency: 'USD', country: 'US', tier: 1 },
-  EUR: { monthly: 2.80, annual: 31, currency: 'EUR', country: 'EU', tier: 1 },
-  GBP: { monthly: 2.40, annual: 26, currency: 'GBP', country: 'GB', tier: 1 },
-  AUD: { monthly: 4.50, annual: 50, currency: 'AUD', country: 'AU', tier: 1 },
-  CAD: { monthly: 4, annual: 44, currency: 'CAD', country: 'CA', tier: 1 },
-  AED: { monthly: 11, annual: 121, currency: 'AED', country: 'AE', tier: 1 },
-  RUB: { monthly: 280, annual: 3080, currency: 'RUB', country: 'RU', tier: 1 },
-  CNY: { monthly: 22, annual: 240, currency: 'CNY', country: 'CN', tier: 1 },
-  CHF: { monthly: 2.70, annual: 30, currency: 'CHF', country: 'CH', tier: 1 },
-  NOK: { monthly: 33, annual: 363, currency: 'NOK', country: 'NO', tier: 1 },
-  SEK: { monthly: 32, annual: 352, currency: 'SEK', country: 'SE', tier: 1 },
-  DKK: { monthly: 21, annual: 231, currency: 'DKK', country: 'DK', tier: 1 },
-  NZD: { monthly: 5, annual: 55, currency: 'NZD', country: 'NZ', tier: 1 },
-  SGD: { monthly: 4, annual: 44, currency: 'SGD', country: 'SG', tier: 1 },
-  HKD: { monthly: 24, annual: 260, currency: 'HKD', country: 'HK', tier: 1 },
-  JPY: { monthly: 450, annual: 4950, currency: 'JPY', country: 'JP', tier: 1 },
-  KRW: { monthly: 4000, annual: 44000, currency: 'KRW', country: 'KR', tier: 1 },
-  ILS: { monthly: 11, annual: 121, currency: 'ILS', country: 'IL', tier: 1 },
-  
-  // Tier 2: India-level pricing (90 INR/month, 990 INR/year equivalent)
-  INR: { monthly: 90, annual: 990, currency: 'INR', country: 'IN', tier: 2 },
-  BRL: { monthly: 5, annual: 55, currency: 'BRL', country: 'BR', tier: 2 },
-  MXN: { monthly: 18, annual: 198, currency: 'MXN', country: 'MX', tier: 2 },
-  PHP: { monthly: 60, annual: 660, currency: 'PHP', country: 'PH', tier: 2 },
-  THB: { monthly: 35, annual: 385, currency: 'THB', country: 'TH', tier: 2 },
-  IDR: { monthly: 16000, annual: 176000, currency: 'IDR', country: 'ID', tier: 2 },
-  MYR: { monthly: 5, annual: 55, currency: 'MYR', country: 'MY', tier: 2 },
-  VND: { monthly: 25000, annual: 275000, currency: 'VND', country: 'VN', tier: 2 },
-  PLN: { monthly: 4, annual: 44, currency: 'PLN', country: 'PL', tier: 2 },
-  CZK: { monthly: 25, annual: 275, currency: 'CZK', country: 'CZ', tier: 2 },
-  HUF: { monthly: 400, annual: 4400, currency: 'HUF', country: 'HU', tier: 2 },
-  TWD: { monthly: 35, annual: 385, currency: 'TWD', country: 'TW', tier: 2 },
-  ZAR: { monthly: 20, annual: 220, currency: 'ZAR', country: 'ZA', tier: 2 },
-  TRY: { monthly: 35, annual: 385, currency: 'TRY', country: 'TR', tier: 2 },
-  EGP: { monthly: 50, annual: 550, currency: 'EGP', country: 'EG', tier: 2 },
-  PKR: { monthly: 300, annual: 3300, currency: 'PKR', country: 'PK', tier: 2 },
-  BDT: { monthly: 110, annual: 1210, currency: 'BDT', country: 'BD', tier: 2 },
-  NGN: { monthly: 1500, annual: 16500, currency: 'NGN', country: 'NG', tier: 2 },
-  COP: { monthly: 4000, annual: 44000, currency: 'COP', country: 'CO', tier: 2 },
-  ARS: { monthly: 900, annual: 9900, currency: 'ARS', country: 'AR', tier: 2 },
-  CLP: { monthly: 950, annual: 10450, currency: 'CLP', country: 'CL', tier: 2 },
-  PEN: { monthly: 4, annual: 44, currency: 'PEN', country: 'PE', tier: 2 },
-  SAR: { monthly: 4, annual: 44, currency: 'SAR', country: 'SA', tier: 2 },
-  QAR: { monthly: 4, annual: 44, currency: 'QAR', country: 'QA', tier: 2 },
-  KWD: { monthly: 0.30, annual: 3.30, currency: 'KWD', country: 'KW', tier: 2 },
-  RON: { monthly: 5, annual: 55, currency: 'RON', country: 'RO', tier: 2 },
-  UAH: { monthly: 40, annual: 440, currency: 'UAH', country: 'UA', tier: 2 },
-  KES: { monthly: 130, annual: 1430, currency: 'KES', country: 'KE', tier: 2 },
-  LKR: { monthly: 330, annual: 3630, currency: 'LKR', country: 'LK', tier: 2 },
-} as const;
+// Tier pricing in USD (used as fallback for web/testing)
+export const TIER_PRICING: Record<PricingTier, { monthly: number; annual: number }> = {
+  1: { monthly: 1, annual: 11 },
+  2: { monthly: 1.8, annual: 20 },
+  3: { monthly: 2.5, annual: 27 },
+  4: { monthly: 3, annual: 33 },
+  5: { monthly: 4, annual: 44 },
+};
 
 // ============ COUNTRY PRICING CONFIGURATION ============
-// Maps all Google Play Store countries to their currency and pricing tier
+// Maps all Google Play Store countries to their pricing tier with local currency prices
 
 export interface CountryPricingConfig {
+  tier: PricingTier;
   currency: string;
-  tier: 1 | 2;
+  monthly: number;
+  annual: number;
 }
 
 export const COUNTRY_PRICING: Record<string, CountryPricingConfig> = {
-  // ============ TIER 1 COUNTRIES (US-level: $3/mo, $33/yr equivalent) ============
-  
-  // United States
-  US: { currency: 'USD', tier: 1 },
-  
-  // EU Member States (all use EUR)
-  DE: { currency: 'EUR', tier: 1 },
-  FR: { currency: 'EUR', tier: 1 },
-  IT: { currency: 'EUR', tier: 1 },
-  ES: { currency: 'EUR', tier: 1 },
-  NL: { currency: 'EUR', tier: 1 },
-  BE: { currency: 'EUR', tier: 1 },
-  AT: { currency: 'EUR', tier: 1 },
-  PT: { currency: 'EUR', tier: 1 },
-  IE: { currency: 'EUR', tier: 1 },
-  FI: { currency: 'EUR', tier: 1 },
-  GR: { currency: 'EUR', tier: 1 },
-  LU: { currency: 'EUR', tier: 1 },
-  SK: { currency: 'EUR', tier: 1 },
-  SI: { currency: 'EUR', tier: 1 },
-  MT: { currency: 'EUR', tier: 1 },
-  CY: { currency: 'EUR', tier: 1 },
-  EE: { currency: 'EUR', tier: 1 },
-  LV: { currency: 'EUR', tier: 1 },
-  LT: { currency: 'EUR', tier: 1 },
-  
-  // Other Tier 1 Countries
-  GB: { currency: 'GBP', tier: 1 },
-  AU: { currency: 'AUD', tier: 1 },
-  CA: { currency: 'CAD', tier: 1 },
-  AE: { currency: 'AED', tier: 1 },
-  RU: { currency: 'RUB', tier: 1 },
-  CN: { currency: 'CNY', tier: 1 },
-  CH: { currency: 'CHF', tier: 1 },
-  NO: { currency: 'NOK', tier: 1 },
-  SE: { currency: 'SEK', tier: 1 },
-  DK: { currency: 'DKK', tier: 1 },
-  NZ: { currency: 'NZD', tier: 1 },
-  SG: { currency: 'SGD', tier: 1 },
-  HK: { currency: 'HKD', tier: 1 },
-  JP: { currency: 'JPY', tier: 1 },
-  KR: { currency: 'KRW', tier: 1 },
-  IL: { currency: 'ILS', tier: 1 },
-  
-  // Microstates (Tier 1)
-  MC: { currency: 'EUR', tier: 1 },
-  LI: { currency: 'CHF', tier: 1 },
-  SM: { currency: 'EUR', tier: 1 },
-  IS: { currency: 'USD', tier: 1 },
-  
-  // ============ TIER 2 COUNTRIES (India-level: 90 INR/mo, 990 INR/yr equivalent) ============
-  
-  // South Asia
-  IN: { currency: 'INR', tier: 2 },
-  PK: { currency: 'PKR', tier: 2 },
-  BD: { currency: 'BDT', tier: 2 },
-  LK: { currency: 'LKR', tier: 2 },
-  NP: { currency: 'INR', tier: 2 },
-  
-  // Southeast Asia
-  ID: { currency: 'IDR', tier: 2 },
-  MY: { currency: 'MYR', tier: 2 },
-  TH: { currency: 'THB', tier: 2 },
-  VN: { currency: 'VND', tier: 2 },
-  PH: { currency: 'PHP', tier: 2 },
-  KH: { currency: 'USD', tier: 2 },
-  MM: { currency: 'USD', tier: 2 },
-  LA: { currency: 'USD', tier: 2 },
-  
-  // East Asia
-  TW: { currency: 'TWD', tier: 2 },
-  
-  // Central & Eastern Europe
-  PL: { currency: 'PLN', tier: 2 },
-  CZ: { currency: 'CZK', tier: 2 },
-  HU: { currency: 'HUF', tier: 2 },
-  RO: { currency: 'RON', tier: 2 },
-  BG: { currency: 'EUR', tier: 2 },
-  HR: { currency: 'EUR', tier: 2 },
-  UA: { currency: 'UAH', tier: 2 },
-  BY: { currency: 'USD', tier: 2 },
-  MD: { currency: 'USD', tier: 2 },
-  RS: { currency: 'USD', tier: 2 },
-  BA: { currency: 'USD', tier: 2 },
-  AL: { currency: 'USD', tier: 2 },
-  MK: { currency: 'USD', tier: 2 },
-  GE: { currency: 'USD', tier: 2 },
-  AM: { currency: 'USD', tier: 2 },
-  AZ: { currency: 'USD', tier: 2 },
-  
-  // Central Asia
-  KZ: { currency: 'USD', tier: 2 },
-  KG: { currency: 'USD', tier: 2 },
-  TJ: { currency: 'USD', tier: 2 },
-  TM: { currency: 'USD', tier: 2 },
-  UZ: { currency: 'USD', tier: 2 },
-  
-  // Middle East
-  TR: { currency: 'TRY', tier: 2 },
-  SA: { currency: 'SAR', tier: 2 },
-  QA: { currency: 'QAR', tier: 2 },
-  KW: { currency: 'KWD', tier: 2 },
-  BH: { currency: 'USD', tier: 2 },
-  OM: { currency: 'USD', tier: 2 },
-  IQ: { currency: 'USD', tier: 2 },
-  JO: { currency: 'USD', tier: 2 },
-  LB: { currency: 'USD', tier: 2 },
-  
-  // Africa
-  EG: { currency: 'EGP', tier: 2 },
-  NG: { currency: 'NGN', tier: 2 },
-  ZA: { currency: 'ZAR', tier: 2 },
-  KE: { currency: 'KES', tier: 2 },
-  DZ: { currency: 'USD', tier: 2 },
-  MA: { currency: 'USD', tier: 2 },
-  TN: { currency: 'USD', tier: 2 },
-  GH: { currency: 'USD', tier: 2 },
-  TZ: { currency: 'USD', tier: 2 },
-  UG: { currency: 'USD', tier: 2 },
-  RW: { currency: 'USD', tier: 2 },
-  AO: { currency: 'USD', tier: 2 },
-  CM: { currency: 'USD', tier: 2 },
-  CI: { currency: 'USD', tier: 2 },
-  SN: { currency: 'USD', tier: 2 },
-  ML: { currency: 'USD', tier: 2 },
-  BF: { currency: 'USD', tier: 2 },
-  NE: { currency: 'USD', tier: 2 },
-  BJ: { currency: 'USD', tier: 2 },
-  TG: { currency: 'USD', tier: 2 },
-  GA: { currency: 'USD', tier: 2 },
-  GW: { currency: 'USD', tier: 2 },
-  CV: { currency: 'USD', tier: 2 },
-  MZ: { currency: 'USD', tier: 2 },
-  ZM: { currency: 'USD', tier: 2 },
-  ZW: { currency: 'USD', tier: 2 },
-  BW: { currency: 'USD', tier: 2 },
-  NA: { currency: 'USD', tier: 2 },
-  MU: { currency: 'USD', tier: 2 },
-  
-  // Latin America
-  BR: { currency: 'BRL', tier: 2 },
-  MX: { currency: 'MXN', tier: 2 },
-  AR: { currency: 'ARS', tier: 2 },
-  CL: { currency: 'CLP', tier: 2 },
-  CO: { currency: 'COP', tier: 2 },
-  PE: { currency: 'PEN', tier: 2 },
-  VE: { currency: 'USD', tier: 2 },
-  EC: { currency: 'USD', tier: 2 },
-  BO: { currency: 'USD', tier: 2 },
-  PY: { currency: 'USD', tier: 2 },
-  UY: { currency: 'USD', tier: 2 },
-  
-  // Central America & Caribbean
-  PA: { currency: 'USD', tier: 2 },
-  CR: { currency: 'USD', tier: 2 },
-  GT: { currency: 'USD', tier: 2 },
-  HN: { currency: 'USD', tier: 2 },
-  SV: { currency: 'USD', tier: 2 },
-  NI: { currency: 'USD', tier: 2 },
-  BZ: { currency: 'USD', tier: 2 },
-  DO: { currency: 'USD', tier: 2 },
-  JM: { currency: 'USD', tier: 2 },
-  TT: { currency: 'USD', tier: 2 },
-  HT: { currency: 'USD', tier: 2 },
-  BS: { currency: 'USD', tier: 2 },
-  AG: { currency: 'USD', tier: 2 },
-  AW: { currency: 'USD', tier: 2 },
-  
-  // Oceania
-  FJ: { currency: 'USD', tier: 2 },
-  PG: { currency: 'USD', tier: 2 },
-  
-  // British Overseas Territory
-  GI: { currency: 'GBP', tier: 2 },
+  // ============ TIER 1: ~$1/month, ~$11/year ============
+  IN: { tier: 1, currency: 'INR', monthly: 90, annual: 990 },
+  BD: { tier: 1, currency: 'BDT', monthly: 120, annual: 1300 },
+  PK: { tier: 1, currency: 'PKR', monthly: 300, annual: 3300 },
+  NP: { tier: 1, currency: 'NPR', monthly: 140, annual: 1540 },
+  LK: { tier: 1, currency: 'LKR', monthly: 300, annual: 3300 },
+  KH: { tier: 1, currency: 'KHR', monthly: 4000, annual: 44000 },
+  LA: { tier: 1, currency: 'LAK', monthly: 21000, annual: 231000 },
+  MM: { tier: 1, currency: 'MMK', monthly: 3500, annual: 38500 },
+  VN: { tier: 1, currency: 'VND', monthly: 25000, annual: 275000 },
+  NG: { tier: 1, currency: 'NGN', monthly: 1200, annual: 13200 },
+  KE: { tier: 1, currency: 'KES', monthly: 150, annual: 1650 },
+  TZ: { tier: 1, currency: 'TZS', monthly: 2500, annual: 27500 },
+  UG: { tier: 1, currency: 'UGX', monthly: 3700, annual: 40700 },
+  RW: { tier: 1, currency: 'RWF', monthly: 1300, annual: 14300 },
+  SN: { tier: 1, currency: 'XOF', monthly: 600, annual: 6600 },
+  BJ: { tier: 1, currency: 'XOF', monthly: 600, annual: 6600 },
+  BF: { tier: 1, currency: 'XOF', monthly: 600, annual: 6600 },
+  GW: { tier: 1, currency: 'XOF', monthly: 600, annual: 6600 },
+  NE: { tier: 1, currency: 'XOF', monthly: 600, annual: 6600 },
+  ML: { tier: 1, currency: 'XOF', monthly: 600, annual: 6600 },
+  HT: { tier: 1, currency: 'HTG', monthly: 150, annual: 1650 },
+  NI: { tier: 1, currency: 'NIO', monthly: 40, annual: 440 },
+  BO: { tier: 1, currency: 'BOB', monthly: 7, annual: 77 },
+  PY: { tier: 1, currency: 'PYG', monthly: 7500, annual: 82500 },
+  MZ: { tier: 1, currency: 'MZN', monthly: 70, annual: 770 },
+  ZM: { tier: 1, currency: 'ZMW', monthly: 25, annual: 275 },
+  ZW: { tier: 1, currency: 'USD', monthly: 1, annual: 11 },
+
+  // ============ TIER 2: ~$1.8/month, ~$20/year ============
+  ID: { tier: 2, currency: 'IDR', monthly: 28000, annual: 308000 },
+  PH: { tier: 2, currency: 'PHP', monthly: 100, annual: 1100 },
+  TH: { tier: 2, currency: 'THB', monthly: 70, annual: 770 },
+  EG: { tier: 2, currency: 'EGP', monthly: 90, annual: 990 },
+  MA: { tier: 2, currency: 'MAD', monthly: 18, annual: 198 },
+  TN: { tier: 2, currency: 'TND', monthly: 6, annual: 66 },
+  DZ: { tier: 2, currency: 'DZD', monthly: 250, annual: 2800 },
+  AM: { tier: 2, currency: 'AMD', monthly: 700, annual: 7700 },
+  GE: { tier: 2, currency: 'GEL', monthly: 5, annual: 55 },
+  UA: { tier: 2, currency: 'UAH', monthly: 75, annual: 825 },
+  MD: { tier: 2, currency: 'MDL', monthly: 35, annual: 385 },
+  GH: { tier: 2, currency: 'GHS', monthly: 20, annual: 220 },
+  CM: { tier: 2, currency: 'XAF', monthly: 1100, annual: 12000 },
+  AO: { tier: 2, currency: 'AOA', monthly: 900, annual: 9900 },
+  HN: { tier: 2, currency: 'HNL', monthly: 45, annual: 495 },
+  GT: { tier: 2, currency: 'GTQ', monthly: 15, annual: 165 },
+  SV: { tier: 2, currency: 'USD', monthly: 1.8, annual: 20 },
+  EC: { tier: 2, currency: 'USD', monthly: 1.8, annual: 20 },
+  PE: { tier: 2, currency: 'PEN', monthly: 7, annual: 77 },
+  CO: { tier: 2, currency: 'COP', monthly: 7500, annual: 82500 },
+  UZ: { tier: 2, currency: 'UZS', monthly: 22000, annual: 242000 },
+  KG: { tier: 2, currency: 'KGS', monthly: 160, annual: 1760 },
+  TJ: { tier: 2, currency: 'TJS', monthly: 20, annual: 220 },
+  TM: { tier: 2, currency: 'TMT', monthly: 6, annual: 66 },
+  PG: { tier: 2, currency: 'PGK', monthly: 7, annual: 77 },
+  CV: { tier: 2, currency: 'CVE', monthly: 180, annual: 1980 },
+
+  // ============ TIER 3: ~$2.5/month, ~$27/year ============
+  BR: { tier: 3, currency: 'BRL', monthly: 13, annual: 143 },
+  MX: { tier: 3, currency: 'MXN', monthly: 45, annual: 495 },
+  AR: { tier: 3, currency: 'ARS', monthly: 2500, annual: 27000 },
+  CL: { tier: 3, currency: 'CLP', monthly: 2500, annual: 27000 },
+  CR: { tier: 3, currency: 'CRC', monthly: 1300, annual: 14300 },
+  PA: { tier: 3, currency: 'PAB', monthly: 2.5, annual: 27 },
+  DO: { tier: 3, currency: 'DOP', monthly: 150, annual: 1650 },
+  TR: { tier: 3, currency: 'TRY', monthly: 85, annual: 935 },
+  KZ: { tier: 3, currency: 'KZT', monthly: 1200, annual: 13200 },
+  AZ: { tier: 3, currency: 'AZN', monthly: 4.5, annual: 49 },
+  MY: { tier: 3, currency: 'MYR', monthly: 12, annual: 132 },
+  ZA: { tier: 3, currency: 'ZAR', monthly: 45, annual: 495 },
+  RO: { tier: 3, currency: 'RON', monthly: 12, annual: 132 },
+  BG: { tier: 3, currency: 'BGN', monthly: 4.5, annual: 49 },
+  RS: { tier: 3, currency: 'RSD', monthly: 300, annual: 3300 },
+  BA: { tier: 3, currency: 'BAM', monthly: 4.5, annual: 49 },
+  MK: { tier: 3, currency: 'MKD', monthly: 150, annual: 1650 },
+  AL: { tier: 3, currency: 'ALL', monthly: 250, annual: 2700 },
+  NA: { tier: 3, currency: 'NAD', monthly: 45, annual: 495 },
+  MU: { tier: 3, currency: 'MUR', monthly: 110, annual: 1210 },
+  JM: { tier: 3, currency: 'JMD', monthly: 400, annual: 4400 },
+  UY: { tier: 3, currency: 'UYU', monthly: 100, annual: 1100 },
+  TT: { tier: 3, currency: 'TTD', monthly: 17, annual: 187 },
+  GA: { tier: 3, currency: 'XAF', monthly: 1500, annual: 16500 },
+  BW: { tier: 3, currency: 'BWP', monthly: 35, annual: 385 },
+  BZ: { tier: 3, currency: 'BZD', monthly: 5, annual: 55 },
+  MO: { tier: 3, currency: 'MOP', monthly: 20, annual: 220 },
+
+  // ============ TIER 4: ~$3/month, ~$33/year ============
+  US: { tier: 4, currency: 'USD', monthly: 3, annual: 33 },
+  GB: { tier: 4, currency: 'GBP', monthly: 2.5, annual: 27 },
+  CA: { tier: 4, currency: 'CAD', monthly: 4, annual: 44 },
+  AU: { tier: 4, currency: 'AUD', monthly: 4.5, annual: 49 },
+  NZ: { tier: 4, currency: 'NZD', monthly: 4.5, annual: 49 },
+  JP: { tier: 4, currency: 'JPY', monthly: 450, annual: 4950 },
+  KR: { tier: 4, currency: 'KRW', monthly: 4000, annual: 44000 },
+  IL: { tier: 4, currency: 'ILS', monthly: 11, annual: 120 },
+  TW: { tier: 4, currency: 'TWD', monthly: 95, annual: 1045 },
+  ES: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  IT: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  PT: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  GR: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  PL: { tier: 4, currency: 'PLN', monthly: 12, annual: 132 },
+  CZ: { tier: 4, currency: 'CZK', monthly: 75, annual: 825 },
+  SK: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  SI: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  HR: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  EE: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  LV: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  LT: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  CY: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  MT: { tier: 4, currency: 'EUR', monthly: 3, annual: 33 },
+  HU: { tier: 4, currency: 'HUF', monthly: 900, annual: 9900 },
+  AW: { tier: 4, currency: 'USD', monthly: 3, annual: 33 },
+  BS: { tier: 4, currency: 'USD', monthly: 3, annual: 33 },
+  AG: { tier: 4, currency: 'USD', monthly: 3, annual: 33 },
+
+  // ============ TIER 5: ~$4/month, ~$44/year ============
+  CH: { tier: 5, currency: 'CHF', monthly: 4, annual: 44 },
+  NO: { tier: 5, currency: 'NOK', monthly: 45, annual: 495 },
+  DK: { tier: 5, currency: 'DKK', monthly: 30, annual: 330 },
+  SE: { tier: 5, currency: 'SEK', monthly: 45, annual: 495 },
+  FI: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  IS: { tier: 5, currency: 'ISK', monthly: 550, annual: 6050 },
+  LU: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  NL: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  BE: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  DE: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  FR: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  AT: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  IE: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  MC: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  LI: { tier: 5, currency: 'CHF', monthly: 4, annual: 44 },
+  SM: { tier: 5, currency: 'EUR', monthly: 3.99, annual: 44 },
+  SG: { tier: 5, currency: 'SGD', monthly: 5.5, annual: 60 },
+  HK: { tier: 5, currency: 'HKD', monthly: 32, annual: 350 },
+  AE: { tier: 5, currency: 'AED', monthly: 15, annual: 165 },
+  QA: { tier: 5, currency: 'QAR', monthly: 15, annual: 165 },
+  KW: { tier: 5, currency: 'KWD', monthly: 1.2, annual: 13 },
+  BH: { tier: 5, currency: 'BHD', monthly: 1.5, annual: 16 },
+  SA: { tier: 5, currency: 'SAR', monthly: 15, annual: 165 },
+  OM: { tier: 5, currency: 'OMR', monthly: 1.5, annual: 16 },
+  GI: { tier: 5, currency: 'GBP', monthly: 3.5, annual: 38 },
 };
 
-export function getCountryPricing(countryCode: string): { currency: string; tier: 1 | 2; monthly: number; annual: number } {
-  const config = COUNTRY_PRICING[countryCode] || { currency: 'USD', tier: 2 };
-  const priceConfig = SUBSCRIPTION_PRICES[config.currency] || SUBSCRIPTION_PRICES['USD'];
+// Helper function to get pricing for a country with local currency
+export function getCountryPricing(countryCode: string): { 
+  tier: PricingTier; 
+  currency: string;
+  monthly: number; 
+  annual: number;
+} {
+  const config = COUNTRY_PRICING[countryCode.toUpperCase()];
+  if (config) {
+    return {
+      tier: config.tier,
+      currency: config.currency,
+      monthly: config.monthly,
+      annual: config.annual,
+    };
+  }
+  // Default to USD Tier 4 for unknown countries
   return {
-    currency: config.currency,
-    tier: config.tier,
-    monthly: priceConfig.monthly,
-    annual: priceConfig.annual,
+    tier: 4,
+    currency: 'USD',
+    monthly: 3,
+    annual: 33,
   };
 }
 
 // Helper function to get price for a plan type
-export function getSubscriptionPrice(currencyCode: string, plan: SubscriptionPlan): number {
-  const priceConfig = SUBSCRIPTION_PRICES[currencyCode];
-  if (!priceConfig) {
-    // Default to USD pricing if currency not found
-    return plan === 'monthly' ? 3 : 33;
-  }
-  return plan === 'monthly' ? priceConfig.monthly : priceConfig.annual;
+export function getSubscriptionPrice(countryCode: string, plan: SubscriptionPlan): number {
+  const pricing = getCountryPricing(countryCode);
+  return plan === 'monthly' ? pricing.monthly : pricing.annual;
 }

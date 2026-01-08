@@ -83,7 +83,9 @@ import {
   subscriptions,
   insertSubscriptionSchema,
   subscriptionStates,
-  SUBSCRIPTION_PRICES
+  TIER_PRICING,
+  COUNTRY_PRICING,
+  getCountryPricing
 } from "@shared/schema";
 import { eq, and, or, desc, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -8490,9 +8492,26 @@ router.post("/api/subscriptions/check", authenticateToken, async (req: Request, 
 });
 
 // GET /api/subscriptions/prices - Get subscription prices for all regions
+// Returns tier pricing (USD fallback) and country-to-tier mapping
+// Actual prices should be fetched from Google Play Store at runtime
 router.get("/api/subscriptions/prices", async (req: Request, res: Response) => {
   try {
-    return apiSuccess(res, SUBSCRIPTION_PRICES);
+    const { country } = req.query;
+    
+    // If country is specified, return pricing for that country
+    if (country && typeof country === 'string') {
+      const pricing = getCountryPricing(country.toUpperCase());
+      return apiSuccess(res, {
+        country: country.toUpperCase(),
+        ...pricing
+      });
+    }
+    
+    // Return all pricing data (for web fallback / testing)
+    return apiSuccess(res, {
+      tiers: TIER_PRICING,
+      countries: COUNTRY_PRICING
+    });
   } catch (error) {
     console.error("Get subscription prices error:", error);
     return apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to get subscription prices");
