@@ -17,7 +17,19 @@ class RealtimeService {
   connect(token: string): Promise<void> {
     this.currentToken = token;
     
-    if (this.socket?.connected) {
+    // If socket exists (even if not connected), don't create a new one
+    // Socket.io will handle auto-reconnection
+    if (this.socket) {
+      if (this.socket.connected) {
+        return Promise.resolve();
+      }
+      // Socket exists but disconnected - wait for auto-reconnection
+      // or return the existing connection promise
+      if (this.connectionPromise) {
+        return this.connectionPromise;
+      }
+      // Socket is disconnected and no promise - try to reconnect manually
+      this.socket.connect();
       return Promise.resolve();
     }
 
