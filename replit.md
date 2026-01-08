@@ -37,10 +37,16 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 - **Auto-Connection System**: Automatically creates connection invites based on phone numbers, resolving pending links upon user registration.
 
 ### Subscription Model
-- **Annual Subscription**: Users must subscribe to access the app
+- **Two Plan Options**: Monthly and Annual subscriptions available
 - **Google Play Billing**: All subscriptions managed through Google Play services
-- **Pricing**: India: 300 INR/year, US: $30/year, other countries based on equivalent USD pricing
-- **International Pricing**: Defined for 27 currencies in SUBSCRIPTION_PRICES constant
+- **Tiered Pricing**: Two pricing tiers based on market:
+  - **Tier 1 (US-level)**: US, EU, UK, Australia, Canada, UAE, Russia, China, Switzerland, Norway, Sweden, Denmark, NZ, Singapore, HK, Japan, South Korea, Israel
+    - Monthly: $3 USD (or equivalent)
+    - Annual: $33 USD (or equivalent)
+  - **Tier 2 (India-level)**: India and all other emerging markets
+    - Monthly: 90 INR (or equivalent)
+    - Annual: 990 INR (or equivalent)
+- **International Pricing**: Defined for 47 currencies in SUBSCRIPTION_PRICES constant with monthly/annual rates
 - **Subscription Endpoints**: /api/subscriptions/validate, /api/subscriptions/status, /api/subscriptions/check, /api/subscriptions/prices
 - **Ad System**: Disabled (code preserved for future use via AD_FEATURE_ENABLED flag)
 

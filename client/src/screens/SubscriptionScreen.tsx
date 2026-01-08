@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { Shield, Check, Crown, Cloud, Users, Calendar, RefreshCw, ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Shield, Check, Crown, Cloud, Users, Calendar, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { useNavigation } from "@/lib/navigation";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useToast } from "@/hooks/use-toast";
 import { storage } from "@/lib/storage";
-import { SUBSCRIPTION_PRICES, CURRENCIES, type Currency } from "@shared/schema";
+import { SUBSCRIPTION_PRICES, CURRENCIES, type Currency, type SubscriptionPlan } from "@shared/schema";
 import { format } from "date-fns";
 
 const BENEFITS = [
@@ -35,8 +35,16 @@ const BENEFITS = [
   },
 ];
 
-function getPriceForCountry(countryCode: string): { amount: number; symbol: string; currency: string } {
-  const currencyMapping: Record<string, keyof typeof SUBSCRIPTION_PRICES> = {
+interface PricingInfo {
+  monthly: number;
+  annual: number;
+  symbol: string;
+  currency: string;
+  tier: 1 | 2;
+}
+
+function getPriceForCountry(countryCode: string): PricingInfo {
+  const currencyMapping: Record<string, string> = {
     IN: "INR",
     US: "USD",
     GB: "GBP",
@@ -63,6 +71,26 @@ function getPriceForCountry(countryCode: string): { amount: number; symbol: stri
     CN: "CNY",
     BR: "BRL",
     ZA: "ZAR",
+    KR: "KRW",
+    ID: "IDR",
+    MY: "MYR",
+    VN: "VND",
+    TR: "TRY",
+    EG: "EGP",
+    PK: "PKR",
+    BD: "BDT",
+    NG: "NGN",
+    CO: "COP",
+    AR: "ARS",
+    CL: "CLP",
+    PE: "PEN",
+    SA: "SAR",
+    QA: "QAR",
+    KW: "KWD",
+    RO: "RON",
+    UA: "UAH",
+    KE: "KES",
+    LK: "LKR",
     DE: "EUR",
     FR: "EUR",
     IT: "EUR",
@@ -80,17 +108,40 @@ function getPriceForCountry(countryCode: string): { amount: number; symbol: stri
   const priceInfo = SUBSCRIPTION_PRICES[currencyKey];
   const currencyConfig = CURRENCIES[currencyKey as Currency];
 
+  if (!priceInfo) {
+    return {
+      monthly: 3,
+      annual: 33,
+      symbol: "$",
+      currency: "USD",
+      tier: 1,
+    };
+  }
+
   return {
-    amount: priceInfo.amount,
+    monthly: priceInfo.monthly,
+    annual: priceInfo.annual,
     symbol: currencyConfig?.symbol || "$",
     currency: priceInfo.currency,
+    tier: priceInfo.tier,
   };
+}
+
+function formatPrice(amount: number, decimals: number = 2): string {
+  if (amount >= 1000) {
+    return amount.toLocaleString();
+  }
+  if (Number.isInteger(amount)) {
+    return amount.toString();
+  }
+  return amount.toFixed(decimals);
 }
 
 export function SubscriptionScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
-  const { isLoading, isSubscribed, expiryDate, subscription, refreshSubscription } = useSubscription();
+  const { isLoading, isSubscribed, expiryDate, subscription } = useSubscription();
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("annual");
 
   const settings = useMemo(() => storage.getSettings(), []);
   const profile = useMemo(() => storage.getProfile(), []);
@@ -98,10 +149,20 @@ export function SubscriptionScreen() {
 
   const pricing = useMemo(() => getPriceForCountry(country), [country]);
 
-  const handleSubscribe = () => {
+  const monthlyEquivalent = useMemo(() => {
+    return (pricing.annual / 12).toFixed(2);
+  }, [pricing.annual]);
+
+  const savingsPercent = useMemo(() => {
+    const monthlyTotal = pricing.monthly * 12;
+    const savings = ((monthlyTotal - pricing.annual) / monthlyTotal) * 100;
+    return Math.round(savings);
+  }, [pricing.monthly, pricing.annual]);
+
+  const handleSubscribe = (plan: SubscriptionPlan) => {
     toast({
       title: "Google Play Billing",
-      description: "Subscription will be handled through Google Play Billing. This feature will be available soon.",
+      description: `${plan === "monthly" ? "Monthly" : "Annual"} subscription will be handled through Google Play Billing. This feature will be available soon.`,
     });
   };
 
@@ -110,11 +171,6 @@ export function SubscriptionScreen() {
       title: "Manage Subscription",
       description: "You can manage your subscription through Google Play Store.",
     });
-  };
-
-  const handleContinue = () => {
-    const defaultMode = settings.defaultAppMode || profile?.type || "HOME";
-    navigate(defaultMode === "STAFF" ? "staff-home" : "home");
   };
 
   return (
@@ -207,19 +263,72 @@ export function SubscriptionScreen() {
               </p>
             </div>
 
-            <Card className="p-5 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
-              <div className="text-center">
-                <div className="flex items-baseline justify-center gap-1 mb-2">
-                  <span className="text-3xl font-bold">{pricing.symbol}{pricing.amount}</span>
-                  <span className="text-sm text-muted-foreground">/year</span>
+            <div className="flex flex-col gap-3">
+              <Card 
+                className={`p-4 cursor-pointer transition-all ${
+                  selectedPlan === "annual" 
+                    ? "ring-2 ring-primary bg-primary/5" 
+                    : "hover-elevate"
+                }`}
+                onClick={() => setSelectedPlan("annual")}
+                data-testid="plan-annual"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold">Annual Plan</h3>
+                      <Badge variant="default" className="text-xs">Save {savingsPercent}%</Badge>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold">{pricing.symbol}{formatPrice(pricing.annual)}</span>
+                      <span className="text-sm text-muted-foreground">/year</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Only {pricing.symbol}{monthlyEquivalent}/month when billed annually
+                    </p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    selectedPlan === "annual" 
+                      ? "border-primary bg-primary" 
+                      : "border-muted-foreground"
+                  }`}>
+                    {selectedPlan === "annual" && <Check className="w-3 h-3 text-primary-foreground" />}
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Billed annually in {pricing.currency}
-                </p>
-              </div>
-            </Card>
+              </Card>
 
-            <section className="flex flex-col gap-3">
+              <Card 
+                className={`p-4 cursor-pointer transition-all ${
+                  selectedPlan === "monthly" 
+                    ? "ring-2 ring-primary bg-primary/5" 
+                    : "hover-elevate"
+                }`}
+                onClick={() => setSelectedPlan("monthly")}
+                data-testid="plan-monthly"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold mb-1">Monthly Plan</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold">{pricing.symbol}{formatPrice(pricing.monthly)}</span>
+                      <span className="text-sm text-muted-foreground">/month</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Flexible monthly billing
+                    </p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    selectedPlan === "monthly" 
+                      ? "border-primary bg-primary" 
+                      : "border-muted-foreground"
+                  }`}>
+                    {selectedPlan === "monthly" && <Check className="w-3 h-3 text-primary-foreground" />}
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <section className="flex flex-col gap-3 mt-2">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                 What You Get
               </h3>
@@ -241,11 +350,11 @@ export function SubscriptionScreen() {
             <div className="flex flex-col gap-3 mt-2">
               <Button
                 className="w-full"
-                onClick={handleSubscribe}
+                onClick={() => handleSubscribe(selectedPlan)}
                 data-testid="button-subscribe"
               >
                 <Crown className="w-4 h-4 mr-2" />
-                Subscribe Now - {pricing.symbol}{pricing.amount}/year
+                Subscribe {selectedPlan === "monthly" ? "Monthly" : "Annually"} - {pricing.symbol}{formatPrice(selectedPlan === "monthly" ? pricing.monthly : pricing.annual)}/{selectedPlan === "monthly" ? "mo" : "yr"}
               </Button>
             </div>
 

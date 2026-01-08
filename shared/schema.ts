@@ -66,7 +66,9 @@ export const BUSINESS_PROFESSIONS = [
 export const currencies = [
   'INR', 'USD', 'EUR', 'GBP', 'AUD', 'CAD', 'CHF', 'CZK', 'DKK', 'HKD', 
   'HUF', 'ILS', 'JPY', 'MXN', 'NOK', 'NZD', 'PHP', 'PLN', 'RUB', 'SEK', 
-  'SGD', 'THB', 'TWD', 'AED', 'CNY', 'BRL', 'ZAR', 'OTHER'
+  'SGD', 'THB', 'TWD', 'AED', 'CNY', 'BRL', 'ZAR', 'KRW', 'IDR', 'MYR',
+  'VND', 'TRY', 'EGP', 'PKR', 'BDT', 'NGN', 'COP', 'ARS', 'CLP', 'PEN',
+  'SAR', 'QAR', 'KWD', 'RON', 'UAH', 'KES', 'LKR', 'OTHER'
 ] as const;
 export type Currency = typeof currencies[number];
 
@@ -106,6 +108,26 @@ export const CURRENCIES: Record<Currency, CurrencyConfig> = {
   CNY: { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', locale: 'zh-CN', decimals: 2 },
   BRL: { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', locale: 'pt-BR', decimals: 2 },
   ZAR: { code: 'ZAR', name: 'South African Rand', symbol: 'R', locale: 'en-ZA', decimals: 2 },
+  KRW: { code: 'KRW', name: 'South Korean Won', symbol: '₩', locale: 'ko-KR', decimals: 0 },
+  IDR: { code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp', locale: 'id-ID', decimals: 0 },
+  MYR: { code: 'MYR', name: 'Malaysian Ringgit', symbol: 'RM', locale: 'ms-MY', decimals: 2 },
+  VND: { code: 'VND', name: 'Vietnamese Dong', symbol: '₫', locale: 'vi-VN', decimals: 0 },
+  TRY: { code: 'TRY', name: 'Turkish Lira', symbol: '₺', locale: 'tr-TR', decimals: 2 },
+  EGP: { code: 'EGP', name: 'Egyptian Pound', symbol: 'E£', locale: 'ar-EG', decimals: 2 },
+  PKR: { code: 'PKR', name: 'Pakistani Rupee', symbol: 'Rs', locale: 'ur-PK', decimals: 2 },
+  BDT: { code: 'BDT', name: 'Bangladeshi Taka', symbol: '৳', locale: 'bn-BD', decimals: 2 },
+  NGN: { code: 'NGN', name: 'Nigerian Naira', symbol: '₦', locale: 'en-NG', decimals: 2 },
+  COP: { code: 'COP', name: 'Colombian Peso', symbol: '$', locale: 'es-CO', decimals: 0 },
+  ARS: { code: 'ARS', name: 'Argentine Peso', symbol: '$', locale: 'es-AR', decimals: 2 },
+  CLP: { code: 'CLP', name: 'Chilean Peso', symbol: '$', locale: 'es-CL', decimals: 0 },
+  PEN: { code: 'PEN', name: 'Peruvian Sol', symbol: 'S/', locale: 'es-PE', decimals: 2 },
+  SAR: { code: 'SAR', name: 'Saudi Riyal', symbol: 'ر.س', locale: 'ar-SA', decimals: 2 },
+  QAR: { code: 'QAR', name: 'Qatari Riyal', symbol: 'ر.ق', locale: 'ar-QA', decimals: 2 },
+  KWD: { code: 'KWD', name: 'Kuwaiti Dinar', symbol: 'د.ك', locale: 'ar-KW', decimals: 3 },
+  RON: { code: 'RON', name: 'Romanian Leu', symbol: 'lei', locale: 'ro-RO', decimals: 2 },
+  UAH: { code: 'UAH', name: 'Ukrainian Hryvnia', symbol: '₴', locale: 'uk-UA', decimals: 2 },
+  KES: { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh', locale: 'sw-KE', decimals: 2 },
+  LKR: { code: 'LKR', name: 'Sri Lankan Rupee', symbol: 'Rs', locale: 'si-LK', decimals: 2 },
   OTHER: { code: 'OTHER', name: 'Custom', symbol: '$', locale: 'en-US', decimals: 2 },
 };
 
@@ -453,6 +475,26 @@ export const currencySymbols: Record<Currency, string> = {
   CNY: '¥',
   BRL: 'R$',
   ZAR: 'R',
+  KRW: '₩',
+  IDR: 'Rp',
+  MYR: 'RM',
+  VND: '₫',
+  TRY: '₺',
+  EGP: 'E£',
+  PKR: 'Rs',
+  BDT: '৳',
+  NGN: '₦',
+  COP: '$',
+  ARS: '$',
+  CLP: '$',
+  PEN: 'S/',
+  SAR: 'ر.س',
+  QAR: 'ر.ق',
+  KWD: 'د.ك',
+  RON: 'lei',
+  UAH: '₴',
+  KES: 'KSh',
+  LKR: 'Rs',
   OTHER: '$',
 };
 
@@ -2328,33 +2370,79 @@ export const insertSubscriptionSchema = z.object({
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
 
-// Subscription pricing for different regions (~$30 USD equivalent)
-export const SUBSCRIPTION_PRICES = {
-  INR: { amount: 300, currency: 'INR', country: 'IN' },
-  USD: { amount: 30, currency: 'USD', country: 'US' },
-  EUR: { amount: 28, currency: 'EUR', country: 'EU' },
-  GBP: { amount: 24, currency: 'GBP', country: 'GB' },
-  AUD: { amount: 45, currency: 'AUD', country: 'AU' },
-  CAD: { amount: 40, currency: 'CAD', country: 'CA' },
-  CHF: { amount: 27, currency: 'CHF', country: 'CH' },
-  CZK: { amount: 700, currency: 'CZK', country: 'CZ' },
-  DKK: { amount: 210, currency: 'DKK', country: 'DK' },
-  HKD: { amount: 235, currency: 'HKD', country: 'HK' },
-  HUF: { amount: 11000, currency: 'HUF', country: 'HU' },
-  ILS: { amount: 110, currency: 'ILS', country: 'IL' },
-  JPY: { amount: 4500, currency: 'JPY', country: 'JP' },
-  MXN: { amount: 520, currency: 'MXN', country: 'MX' },
-  NOK: { amount: 330, currency: 'NOK', country: 'NO' },
-  NZD: { amount: 50, currency: 'NZD', country: 'NZ' },
-  PHP: { amount: 1700, currency: 'PHP', country: 'PH' },
-  PLN: { amount: 120, currency: 'PLN', country: 'PL' },
-  RUB: { amount: 2800, currency: 'RUB', country: 'RU' },
-  SEK: { amount: 320, currency: 'SEK', country: 'SE' },
-  SGD: { amount: 40, currency: 'SGD', country: 'SG' },
-  THB: { amount: 1050, currency: 'THB', country: 'TH' },
-  TWD: { amount: 950, currency: 'TWD', country: 'TW' },
-  AED: { amount: 110, currency: 'AED', country: 'AE' },
-  CNY: { amount: 215, currency: 'CNY', country: 'CN' },
-  BRL: { amount: 150, currency: 'BRL', country: 'BR' },
-  ZAR: { amount: 560, currency: 'ZAR', country: 'ZA' },
+// Subscription pricing tiers
+// Tier 1 (US-level): US, EU, UK, Australia, Canada, UAE, Russia, China, Switzerland, Norway, Sweden, Denmark, NZ, Singapore, HK, Japan, South Korea, Israel
+// Tier 2 (India-level): All other countries
+
+export type SubscriptionPlan = 'monthly' | 'annual';
+
+export interface SubscriptionPriceConfig {
+  monthly: number;
+  annual: number;
+  currency: string;
+  country: string;
+  tier: 1 | 2;
+}
+
+export const SUBSCRIPTION_PRICES: Record<string, SubscriptionPriceConfig> = {
+  // Tier 1: US-level pricing ($3/month, $33/year equivalent)
+  USD: { monthly: 3, annual: 33, currency: 'USD', country: 'US', tier: 1 },
+  EUR: { monthly: 2.80, annual: 31, currency: 'EUR', country: 'EU', tier: 1 },
+  GBP: { monthly: 2.40, annual: 26, currency: 'GBP', country: 'GB', tier: 1 },
+  AUD: { monthly: 4.50, annual: 50, currency: 'AUD', country: 'AU', tier: 1 },
+  CAD: { monthly: 4, annual: 44, currency: 'CAD', country: 'CA', tier: 1 },
+  AED: { monthly: 11, annual: 121, currency: 'AED', country: 'AE', tier: 1 },
+  RUB: { monthly: 280, annual: 3080, currency: 'RUB', country: 'RU', tier: 1 },
+  CNY: { monthly: 22, annual: 240, currency: 'CNY', country: 'CN', tier: 1 },
+  CHF: { monthly: 2.70, annual: 30, currency: 'CHF', country: 'CH', tier: 1 },
+  NOK: { monthly: 33, annual: 363, currency: 'NOK', country: 'NO', tier: 1 },
+  SEK: { monthly: 32, annual: 352, currency: 'SEK', country: 'SE', tier: 1 },
+  DKK: { monthly: 21, annual: 231, currency: 'DKK', country: 'DK', tier: 1 },
+  NZD: { monthly: 5, annual: 55, currency: 'NZD', country: 'NZ', tier: 1 },
+  SGD: { monthly: 4, annual: 44, currency: 'SGD', country: 'SG', tier: 1 },
+  HKD: { monthly: 24, annual: 260, currency: 'HKD', country: 'HK', tier: 1 },
+  JPY: { monthly: 450, annual: 4950, currency: 'JPY', country: 'JP', tier: 1 },
+  KRW: { monthly: 4000, annual: 44000, currency: 'KRW', country: 'KR', tier: 1 },
+  ILS: { monthly: 11, annual: 121, currency: 'ILS', country: 'IL', tier: 1 },
+  
+  // Tier 2: India-level pricing (90 INR/month, 990 INR/year equivalent)
+  INR: { monthly: 90, annual: 990, currency: 'INR', country: 'IN', tier: 2 },
+  BRL: { monthly: 5, annual: 55, currency: 'BRL', country: 'BR', tier: 2 },
+  MXN: { monthly: 18, annual: 198, currency: 'MXN', country: 'MX', tier: 2 },
+  PHP: { monthly: 60, annual: 660, currency: 'PHP', country: 'PH', tier: 2 },
+  THB: { monthly: 35, annual: 385, currency: 'THB', country: 'TH', tier: 2 },
+  IDR: { monthly: 16000, annual: 176000, currency: 'IDR', country: 'ID', tier: 2 },
+  MYR: { monthly: 5, annual: 55, currency: 'MYR', country: 'MY', tier: 2 },
+  VND: { monthly: 25000, annual: 275000, currency: 'VND', country: 'VN', tier: 2 },
+  PLN: { monthly: 4, annual: 44, currency: 'PLN', country: 'PL', tier: 2 },
+  CZK: { monthly: 25, annual: 275, currency: 'CZK', country: 'CZ', tier: 2 },
+  HUF: { monthly: 400, annual: 4400, currency: 'HUF', country: 'HU', tier: 2 },
+  TWD: { monthly: 35, annual: 385, currency: 'TWD', country: 'TW', tier: 2 },
+  ZAR: { monthly: 20, annual: 220, currency: 'ZAR', country: 'ZA', tier: 2 },
+  TRY: { monthly: 35, annual: 385, currency: 'TRY', country: 'TR', tier: 2 },
+  EGP: { monthly: 50, annual: 550, currency: 'EGP', country: 'EG', tier: 2 },
+  PKR: { monthly: 300, annual: 3300, currency: 'PKR', country: 'PK', tier: 2 },
+  BDT: { monthly: 110, annual: 1210, currency: 'BDT', country: 'BD', tier: 2 },
+  NGN: { monthly: 1500, annual: 16500, currency: 'NGN', country: 'NG', tier: 2 },
+  COP: { monthly: 4000, annual: 44000, currency: 'COP', country: 'CO', tier: 2 },
+  ARS: { monthly: 900, annual: 9900, currency: 'ARS', country: 'AR', tier: 2 },
+  CLP: { monthly: 950, annual: 10450, currency: 'CLP', country: 'CL', tier: 2 },
+  PEN: { monthly: 4, annual: 44, currency: 'PEN', country: 'PE', tier: 2 },
+  SAR: { monthly: 4, annual: 44, currency: 'SAR', country: 'SA', tier: 2 },
+  QAR: { monthly: 4, annual: 44, currency: 'QAR', country: 'QA', tier: 2 },
+  KWD: { monthly: 0.30, annual: 3.30, currency: 'KWD', country: 'KW', tier: 2 },
+  RON: { monthly: 5, annual: 55, currency: 'RON', country: 'RO', tier: 2 },
+  UAH: { monthly: 40, annual: 440, currency: 'UAH', country: 'UA', tier: 2 },
+  KES: { monthly: 130, annual: 1430, currency: 'KES', country: 'KE', tier: 2 },
+  LKR: { monthly: 330, annual: 3630, currency: 'LKR', country: 'LK', tier: 2 },
 } as const;
+
+// Helper function to get price for a plan type
+export function getSubscriptionPrice(currencyCode: string, plan: SubscriptionPlan): number {
+  const priceConfig = SUBSCRIPTION_PRICES[currencyCode];
+  if (!priceConfig) {
+    // Default to USD pricing if currency not found
+    return plan === 'monthly' ? 3 : 33;
+  }
+  return plan === 'monthly' ? priceConfig.monthly : priceConfig.annual;
+}
