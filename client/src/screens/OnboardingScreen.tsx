@@ -360,7 +360,7 @@ export function OnboardingScreen() {
               <div className="flex flex-col gap-1">
                 <h3 className="text-sm font-semibold">100% Private</h3>
                 <p className="text-xs text-muted-foreground">
-                  All your data stays on your device. No cloud, no accounts, complete privacy.
+                  Your data is securely encrypted and synced across devices.
                 </p>
               </div>
             </div>

@@ -19,6 +19,7 @@ import AdminBackups from "@/pages/admin/AdminBackups";
 import AdminRolesPage from "@/pages/admin/AdminRolesPage";
 import AdminTeamPage from "@/pages/admin/AdminTeamPage";
 import AdminMaintenance from "@/pages/admin/AdminMaintenance";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 
 import { SplashScreen } from "@/screens/SplashScreen";
 import { LauncherScreen } from "@/screens/LauncherScreen";
@@ -76,6 +77,7 @@ import { ChatScreen } from "@/screens/collaboration/ChatScreen";
 import { AuthScreen } from "@/screens/auth/AuthScreen";
 import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
 import { SubscriptionScreen } from "@/screens/SubscriptionScreen";
+import { PrivacyPolicyScreen } from "@/screens/PrivacyPolicyScreen";
 import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { RealtimeProvider } from "@/lib/realtime-provider";
@@ -198,6 +200,8 @@ function MobileAppRouter() {
       return <ProfileSettingsScreen />;
     case "subscription":
       return <SubscriptionScreen />;
+    case "privacy-policy":
+      return <PrivacyPolicyScreen />;
     default:
       return <LauncherScreen />;
   }
@@ -249,8 +253,27 @@ function AdminApp() {
   );
 }
 
+function PrivacyPolicyApp() {
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="homestaff360-theme">
+      <TooltipProvider>
+        <PrivacyPolicy />
+      </TooltipProvider>
+    </ThemeProvider>
+  );
+}
+
 function App() {
   const isAdminRoute = window.location.pathname.startsWith("/admin");
+  const isPrivacyRoute = window.location.pathname === "/privacypolicy";
+
+  if (isPrivacyRoute) {
+    return (
+      <ErrorBoundary>
+        <PrivacyPolicyApp />
+      </ErrorBoundary>
+    );
+  }
 
   if (isAdminRoute) {
     return (

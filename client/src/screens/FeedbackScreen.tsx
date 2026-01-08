@@ -48,7 +48,7 @@ export function FeedbackScreen() {
     const mailtoBody = encodeURIComponent(
       `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}\n\n---\nSent from Home Staff 360 v1.0`
     );
-    const mailtoLink = `mailto:support@theteam360.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+    const mailtoLink = `mailto:support@homestaff360.com?subject=${mailtoSubject}&body=${mailtoBody}`;
     window.open(mailtoLink, "_blank");
     setIsSubmitted(true);
   };

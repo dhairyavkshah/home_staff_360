@@ -623,7 +623,7 @@ export function SettingsScreen() {
               <p className="text-xs text-muted-foreground/70 pt-1">{t("craftedBy")}</p>
               <button
                 className="text-xs text-primary underline pt-2"
-                onClick={() => window.open("https://www.theteam360.com/homestaff360", "_blank")}
+                onClick={() => navigate("privacy-policy")}
                 data-testid="button-privacy-policy"
               >
                 Privacy Policy

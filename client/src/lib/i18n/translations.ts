@@ -255,7 +255,7 @@ const en = {
   continueAsStaff: "Continue as Staff User",
   canSwitchModes: "You can switch between the modes and change the default mode from the Settings easily.",
   hundredPercentPrivate: "100% Private",
-  privacyDescription: "All your data stays on your device. No cloud, no accounts, complete privacy.",
+  privacyDescription: "Your data is securely encrypted and synced across devices.",
   yourName: "Your Name",
   firstName: "First Name",
   createFirstHome: "Create Your First Home",

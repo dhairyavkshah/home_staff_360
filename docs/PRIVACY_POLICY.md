@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Home Staff 360**  
-**Last Updated: January 7, 2026**
+**Last Updated: January 8, 2026**
 
 ---
 
@@ -216,6 +216,6 @@ California residents have rights under CCPA. We do not sell personal information
 
 ---
 
-*This Privacy Policy is effective as of January 7, 2026.*
+*This Privacy Policy is effective as of January 8, 2026.*
 
 *Home Staff 360 - Your Data, Securely Connected*
