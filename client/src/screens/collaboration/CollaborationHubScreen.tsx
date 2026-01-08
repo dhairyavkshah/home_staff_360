@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, MessageCircle, Share2 } from "lucide-react";
+import { Users, MessageCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
@@ -8,7 +8,6 @@ import { useTranslation } from "@/lib/i18n/i18n-context";
 import { collaborationService } from "@/lib/collaboration-service";
 import { ConnectionsTab } from "./ConnectionsTab";
 import { MessagesTab } from "./MessagesTab";
-import { SharedSpacesTab } from "./SharedSpacesTab";
 import { useRealtimeConnection } from "@/hooks/use-realtime";
 import { Button } from "@/components/ui/button";
 import { Link2 } from "lucide-react";
@@ -58,15 +57,12 @@ export function CollaborationHubScreen() {
       <div className="flex flex-col h-full">
         <div className="px-4 pt-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full grid grid-cols-3">
+            <TabsList className="w-full grid grid-cols-2">
               <TabsTrigger value="connections" data-testid="tab-connections">
                 <Users className="w-4 h-4" />
               </TabsTrigger>
               <TabsTrigger value="messages" data-testid="tab-messages">
                 <MessageCircle className="w-4 h-4" />
-              </TabsTrigger>
-              <TabsTrigger value="spaces" data-testid="tab-spaces">
-                <Share2 className="w-4 h-4" />
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -75,7 +71,6 @@ export function CollaborationHubScreen() {
         <ScrollContent>
           {activeTab === "connections" && <ConnectionsTab />}
           {activeTab === "messages" && <MessagesTab />}
-          {activeTab === "spaces" && <SharedSpacesTab />}
         </ScrollContent>
       </div>
     </AppLayout>

@@ -93,6 +93,7 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 - Staff invoices/earnings use localStorage (no backend endpoints yet)
 - Minor TypeScript warnings in test files (tests run correctly)
 - google-libphonenumber types not installed (runtime works)
+- **Share households/businesses feature**: Disabled for MVP (code preserved in SharedSpacesTab.tsx for future use)
 
 ### Deployment Readiness
 The application is ready for MVP deployment with:

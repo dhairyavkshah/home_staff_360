@@ -341,14 +341,6 @@ export function StaffHomeScreen() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("collaboration-hub")}
-              data-testid="button-collaboration"
-            >
-              <Link2 className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
               onClick={() => navigate("settings")}
               data-testid="button-settings"
               data-tour-id="tour-settings-button"
