@@ -365,10 +365,13 @@ export function QuickAddClothModal({
                 <span className="text-base font-medium">{currencySymbol}</span>
                 <Input
                   type="number"
-                  min="0"
-                  step="0.01"
+                  min="1"
+                  step="1"
                   value={rate}
-                  onChange={(e) => setRate(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    setRate(val);
+                  }}
                   className="w-20 text-center text-base"
                   data-testid="input-rate"
                 />
@@ -392,7 +395,7 @@ export function QuickAddClothModal({
             </Button>
             <Button
               onClick={handleConfirm}
-              disabled={!rate || parseFloat(rate) <= 0}
+              disabled={!rate || parseInt(rate, 10) <= 0}
               className="flex-1"
               data-testid="button-add-confirm"
             >

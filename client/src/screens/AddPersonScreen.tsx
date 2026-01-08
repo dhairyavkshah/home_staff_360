@@ -237,8 +237,9 @@ export function AddPersonScreen() {
     if (!phone.trim() || phone.replace(/\D/g, "").length < 10) {
       newErrors.phone = "Valid phone number required (10+ digits)";
     }
-    if (baseRate === "" || parseFloat(baseRate) < 0) {
-      newErrors.baseRate = "Base rate is required (0 allowed for volunteers)";
+    const baseRateNum = parseInt(baseRate, 10);
+    if (baseRate === "" || isNaN(baseRateNum) || baseRateNum < 1 || !Number.isInteger(parseFloat(baseRate))) {
+      newErrors.baseRate = "Base rate must be a positive whole number (no decimals)";
     }
     if (halfDayPercentage && (parseFloat(halfDayPercentage) < 0 || parseFloat(halfDayPercentage) > 100)) {
       newErrors.halfDayPercentage = "Must be between 0 and 100";
@@ -259,7 +260,7 @@ export function AddPersonScreen() {
       role: role.trim(),
       phone: phone.trim(),
       salaryType,
-      baseRate: parseFloat(baseRate),
+      baseRate: parseInt(baseRate, 10),
       halfDayPercentage: halfDayPercentage ? parseFloat(halfDayPercentage) : undefined,
       notes: notes.trim() || undefined,
       photoData: photoData || undefined,
@@ -616,9 +617,15 @@ export function AddPersonScreen() {
             <Input
               id="baseRate"
               type="number"
+              step="1"
+              min="1"
               value={baseRate}
-              onChange={(e) => { setBaseRate(e.target.value); markDirty(); }}
-              placeholder="0.00"
+              onChange={(e) => { 
+                const val = e.target.value.replace(/[^0-9]/g, '');
+                setBaseRate(val); 
+                markDirty(); 
+              }}
+              placeholder="500"
               data-testid="input-base-rate"
             />
             {role === "Laundry" && (

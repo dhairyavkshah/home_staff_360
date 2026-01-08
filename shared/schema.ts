@@ -316,7 +316,7 @@ export const personSchema = z.object({
   role: z.string().min(1),
   phone: z.string().min(10),
   salaryType: z.enum(salaryTypes),
-  baseRate: z.number().min(0),
+  baseRate: z.number().int().min(1),
   halfDayPercentage: z.number().min(0).max(100).optional(),
   notes: z.string().optional(),
   photoData: z.string().optional(),
@@ -390,7 +390,7 @@ export const laundryItemSchema = z.object({
   id: z.string(),
   type: z.string().min(1),
   quantity: z.number().int().positive(),
-  rate: z.number().positive(),
+  rate: z.number().int().min(1),
   subtotal: z.number(),
   details: z.string().optional(),
 });
@@ -509,7 +509,7 @@ export const clientHomeSchema = z.object({
   contactPhone: z.string().optional(),
   role: z.string().min(1),
   salaryType: z.enum(salaryTypes),
-  rate: z.number().positive(),
+  rate: z.number().int().min(1),
   isActive: z.boolean(),
   createdAt: z.string(),
   currency: z.enum(currencies).optional(),
@@ -548,7 +548,7 @@ export const staffLaundryJobSchema = z.object({
   clientHomeId: z.string(),
   date: z.string(),
   itemCount: z.number().int().nonnegative(),
-  ratePerItem: z.number().nonnegative(),
+  ratePerItem: z.number().int().nonnegative(),
   totalEarned: z.number(),
   items: z.array(laundryItemSchema).optional(),
   serviceType: z.string().optional(),
@@ -614,8 +614,8 @@ export type InvoiceStatus = typeof invoiceStatuses[number];
 export const invoiceItemSchema = z.object({
   id: z.string(),
   description: z.string().min(1),
-  quantity: z.number().positive(),
-  rate: z.number().nonnegative(),
+  quantity: z.number().int().positive(),
+  rate: z.number().int().nonnegative(),
   amount: z.number(),
 });
 

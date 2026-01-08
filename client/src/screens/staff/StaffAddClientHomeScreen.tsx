@@ -265,7 +265,10 @@ export function StaffAddClientHomeScreen() {
     const newErrors: Record<string, string> = {};
     if (!name.trim()) newErrors.name = t("nameRequired");
     if (!role.trim()) newErrors.role = t("roleRequired");
-    if (!rate || parseFloat(rate) <= 0) newErrors.rate = t("baseRateRequired");
+    const rateNum = parseInt(rate, 10);
+    if (!rate || isNaN(rateNum) || rateNum < 1 || !Number.isInteger(parseFloat(rate))) {
+      newErrors.rate = "Rate must be a positive whole number (no decimals)";
+    }
     if (currency === "OTHER" && !customCurrencySymbol.trim()) {
       newErrors.customCurrencySymbol = "Custom symbol required";
     }
@@ -300,7 +303,7 @@ export function StaffAddClientHomeScreen() {
         contactPhone: contactPhone.trim() || undefined,
         role: role.trim(),
         salaryType,
-        rate: parseFloat(rate),
+        rate: parseInt(rate, 10),
         isActive,
         currency,
         customCurrencySymbol: currency === "OTHER" ? customCurrencySymbol.trim() : undefined,
@@ -316,7 +319,7 @@ export function StaffAddClientHomeScreen() {
         contactPhone: contactPhone.trim() || undefined,
         role: role.trim(),
         salaryType,
-        rate: parseFloat(rate),
+        rate: parseInt(rate, 10),
         isActive,
         currency,
         customCurrencySymbol: currency === "OTHER" ? customCurrencySymbol.trim() : undefined,
@@ -562,8 +565,14 @@ export function StaffAddClientHomeScreen() {
           <Input
             id="rate"
             type="number"
+            step="1"
+            min="1"
             value={rate}
-            onChange={(e) => { setRate(e.target.value); markDirty(); }}
+            onChange={(e) => { 
+              const val = e.target.value.replace(/[^0-9]/g, '');
+              setRate(val); 
+              markDirty(); 
+            }}
             placeholder={role === 'Laundry' ? "10" : (salaryType === 'DAILY' ? "500" : salaryType === 'HOURLY' ? "100" : "15000")}
             data-testid="input-rate"
           />
