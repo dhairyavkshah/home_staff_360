@@ -17,6 +17,7 @@ import { usePlanStatus } from "@/hooks/use-plan-status";
 import { useTour, shouldShowTour } from "@/lib/guided-tour";
 import { useToast } from "@/hooks/use-toast";
 import { StorageWarningBanner } from "@/components/StorageWarningBanner";
+import { useRealtimeContext } from "@/lib/realtime-provider";
 
 export function HomeScreen() {
   const { navigate, data } = useNavigation();
@@ -26,6 +27,7 @@ export function HomeScreen() {
   const { planType } = usePlanStatus();
   const { startTour } = useTour();
   const tourStartedRef = useRef(false);
+  const { unreadNotificationCount } = useRealtimeContext();
 
   useEffect(() => {
     if (tourStartedRef.current) return;
@@ -251,8 +253,14 @@ export function HomeScreen() {
               size="icon"
               onClick={() => navigate("notification-center")}
               data-testid="button-notifications"
+              className="relative"
             >
               <Bell className="h-5 w-5" />
+              {unreadNotificationCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center">
+                  {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
+                </span>
+              )}
             </Button>
             <Button
               variant="ghost"
