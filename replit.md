@@ -27,6 +27,14 @@ Home Staff 360 v1.0 is a fully live, cloud-connected application using a client-
 ### Authentication Flow
 The system uses a phone+password authentication flow with OTP verification for phone ownership. Users can register or log in with their phone number and password. OTP is used for verification and password resets. Passwords require a minimum of 6 characters and are mandatory for all users.
 
+### Session Persistence
+- **Auto-Login**: JWT token stored in localStorage (`homestaff360_collab_token`) provides persistent auto-login until explicit logout
+- **Profile Sync**: After login on a new device (reinstall), `syncProfileToLocalStorage()` fetches server profile and syncs to local storage
+- **Returning Users**: If server shows `onboardingCompleted=true`, local settings are restored and onboarding is skipped
+- **Permissions Required**: Device permissions (notifications, camera) still required on new device even for returning users
+- **Logout Behavior**: Clears token but preserves phone number for quick re-login. User must re-enter password
+- **Account Deletion**: `localStorage.clear()` wipes all data. Returning users are treated as completely fresh
+
 ### UI/UX Design
 The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "squircle" corners (24px radius) for a soft aesthetic. It supports both Light and Dark modes. The primary color is Google Blue (#0B57D0), and navigation is handled via a bottom navigation bar with 5 tabs.
 
