@@ -22,6 +22,12 @@ const en = {
   comingSoon: "Coming Soon",
   
   // Navigation
+  profile: "Profile",
+  payments: "Payments",
+  welcomeMessage: "Welcome",
+  selectLanguage: "Select Language",
+  camera: "Camera",
+  location: "Location",
   home: "Home",
   staff: "Staff",
   expenses: "Expenses",
@@ -1080,6 +1086,12 @@ const hi: Partial<typeof en> = {
   expenses: "खर्चे",
   reports: "रिपोर्ट",
   settings: "सेटिंग्स",
+  profile: "प्रोफाइल",
+  payments: "भुगतान",
+  welcomeMessage: "स्वागत है",
+  selectLanguage: "भाषा चुनें",
+  camera: "कैमरा",
+  location: "स्थान",
   
   // Home Screen
   welcome: "स्वागत है",
@@ -2035,6 +2047,12 @@ const gu: Partial<typeof en> = {
   expenses: "ખર્ચ",
   reports: "રિપોર્ટ્સ",
   settings: "સેટિંગ્સ",
+  profile: "પ્રોફાઇલ",
+  payments: "ચુકવણી",
+  welcomeMessage: "સ્વાગત છે",
+  selectLanguage: "ભાષા પસંદ કરો",
+  camera: "કેમેરા",
+  location: "સ્થાન",
   welcome: "સ્વાગત છે",
   quickActions: "ઝડપી ક્રિયાઓ",
   markAttendance: "હાજરી નોંધો",
@@ -2606,6 +2624,12 @@ const kn: Partial<typeof en> = {
   expenses: "ವೆಚ್ಚಗಳು",
   reports: "ವರದಿಗಳು",
   settings: "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+  profile: "ಪ್ರೊಫೈಲ್",
+  payments: "ಪಾವತಿಗಳು",
+  welcomeMessage: "ಸ್ವಾಗತ",
+  selectLanguage: "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ",
+  camera: "ಕ್ಯಾಮರಾ",
+  location: "ಸ್ಥಳ",
   welcome: "ಸ್ವಾಗತ",
   quickActions: "ತ್ವರಿತ ಕ್ರಿಯೆಗಳು",
   markAttendance: "ಹಾಜರಾತಿ ಗುರುತಿಸಿ",
@@ -3177,6 +3201,12 @@ const ml: Partial<typeof en> = {
   expenses: "ചെലവുകൾ",
   reports: "റിപ്പോർട്ടുകൾ",
   settings: "ക്രമീകരണങ്ങൾ",
+  profile: "പ്രൊഫൈൽ",
+  payments: "പേയ്‌മെന്റുകൾ",
+  welcomeMessage: "സ്വാഗതം",
+  selectLanguage: "ഭാഷ തിരഞ്ഞെടുക്കുക",
+  camera: "ക്യാമറ",
+  location: "സ്ഥാനം",
   welcome: "സ്വാഗതം",
   quickActions: "ദ്രുത പ്രവർത്തനങ്ങൾ",
   markAttendance: "ഹാജർ രേഖപ്പെടുത്തുക",
@@ -3755,6 +3785,12 @@ const es: Partial<typeof en> = {
   payables: "Cuentas por Pagar",
   reports: "Informes",
   settings: "Ajustes",
+  profile: "Perfil",
+  payments: "Pagos",
+  welcomeMessage: "Bienvenido",
+  selectLanguage: "Seleccionar idioma",
+  camera: "Cámara",
+  location: "Ubicación",
   
   // Home Screen
   welcome: "Bienvenido",
@@ -4746,6 +4782,12 @@ const fr: Partial<typeof en> = {
   continueButton: "Continuer",
   donationReminderTitle: "Soutenez l'application",
   donationReminderMessage: "Si vous avez trouvé cette application utile, envisagez de soutenir son développement.",
+  profile: "Profil",
+  payments: "Paiements",
+  welcomeMessage: "Bienvenue",
+  selectLanguage: "Sélectionner la langue",
+  camera: "Caméra",
+  location: "Localisation",
 };
 const de: Partial<typeof en> = {
   save: "Speichern", cancel: "Abbrechen", delete: "Löschen", restore: "Wiederherstellen", merge: "Zusammenführen", edit: "Bearbeiten", view: "Ansehen", add: "Hinzufügen", back: "Zurück", confirm: "Bestätigen", loading: "Wird geladen...", error: "Fehler", success: "Erfolg", required: "Erforderlich", optional: "Optional", comingSoon: "Demnächst verfügbar",
@@ -4975,6 +5017,12 @@ const de: Partial<typeof en> = {
   continueButton: "Fortfahren",
   donationReminderTitle: "Unterstützen Sie die App",
   donationReminderMessage: "Wenn Sie diese App hilfreich fanden, erwägen Sie, ihre Entwicklung zu unterstützen.",
+  profile: "Profil",
+  payments: "Zahlungen",
+  welcomeMessage: "Willkommen",
+  selectLanguage: "Sprache auswählen",
+  camera: "Kamera",
+  location: "Standort",
 };
 const ar: Partial<typeof en> = {
   save: "حفظ", cancel: "إلغاء", delete: "حذف", restore: "استعادة", merge: "دمج", edit: "تعديل", view: "عرض", add: "إضافة", back: "رجوع", confirm: "تأكيد", loading: "جاري التحميل...", error: "خطأ", success: "نجاح", required: "مطلوب", optional: "اختياري", comingSoon: "قريباً",
@@ -5204,9 +5252,16 @@ const ar: Partial<typeof en> = {
   continueButton: "متابعة",
   donationReminderTitle: "ادعم التطبيق",
   donationReminderMessage: "إذا وجدت هذا التطبيق مفيدًا، فكر في دعم تطويره.",
+  profile: "الملف الشخصي",
+  payments: "المدفوعات",
+  welcomeMessage: "مرحباً",
+  selectLanguage: "اختر اللغة",
+  camera: "الكاميرا",
+  location: "الموقع",
 };
 const zh: Partial<typeof en> = {
   save: "保存", cancel: "取消", delete: "删除", restore: "恢复", merge: "合并", edit: "编辑", view: "查看", add: "添加", back: "返回", confirm: "确认", loading: "加载中...", error: "错误", success: "成功", required: "必填", optional: "可选", comingSoon: "即将推出",
+  profile: "个人资料", payments: "付款", welcomeMessage: "欢迎", selectLanguage: "选择语言", camera: "相机", location: "位置",
   home: "首页", staff: "员工", expenses: "支出", expensesBills: "支出", payables: "应付款", reports: "报告", settings: "设置",
   welcome: "欢迎", quickActions: "快捷操作", markAttendance: "标记考勤", recordPayment: "记录付款", addExpense: "添加支出", viewReports: "查看报告", activeStaff: "在职员工", todayAttendance: "今日考勤", monthPayments: "本月付款", monthExpenses: "本月支出",
   staffMembers: "员工", addStaffMember: "添加员工", editStaffMember: "编辑员工", noStaffMembers: "暂无员工", addYourFirstStaff: "添加您的第一位员工开始", staffManagement: "员工管理", manageYourTeam: "管理您的团队", searchByNameOrRole: "按姓名或角色搜索...", noStaffAddedYet: "尚未添加员工", startByAddingFirstStaff: "从添加您的第一位员工开始", addStaffVendor: "添加员工", noResultsFound: "未找到结果", owed: "欠款", settled: "已结清", searchByTitleOrVendor: "按标题或供应商搜索...",
@@ -5435,6 +5490,7 @@ const zh: Partial<typeof en> = {
 };
 const ja: Partial<typeof en> = {
   save: "保存", cancel: "キャンセル", delete: "削除", restore: "復元", merge: "マージ", edit: "編集", view: "表示", add: "追加", back: "戻る", confirm: "確認", loading: "読み込み中...", error: "エラー", success: "成功", required: "必須", optional: "任意", comingSoon: "近日公開",
+  profile: "プロフィール", payments: "支払い", welcomeMessage: "ようこそ", selectLanguage: "言語を選択", camera: "カメラ", location: "位置情報",
   home: "ホーム", staff: "スタッフ", expenses: "経費", expensesBills: "経費", payables: "支払い", reports: "レポート", settings: "設定",
   welcome: "ようこそ", quickActions: "クイックアクション", markAttendance: "出勤を記録", recordPayment: "支払いを記録", addExpense: "経費を追加", viewReports: "レポートを表示", activeStaff: "アクティブなスタッフ", todayAttendance: "今日の出勤", monthPayments: "今月の支払い", monthExpenses: "今月の経費",
   staffMembers: "スタッフ", addStaffMember: "スタッフを追加", editStaffMember: "スタッフを編集", noStaffMembers: "まだスタッフがいません", addYourFirstStaff: "最初のスタッフを追加して始めましょう", staffManagement: "スタッフ管理", manageYourTeam: "チームを管理", searchByNameOrRole: "名前または役割で検索...", noStaffAddedYet: "まだスタッフが追加されていません", startByAddingFirstStaff: "最初のスタッフを追加して始めましょう", addStaffVendor: "スタッフを追加", noResultsFound: "結果が見つかりません", owed: "未払い", settled: "精算済み", searchByTitleOrVendor: "タイトルまたはベンダーで検索...",
@@ -5820,6 +5876,12 @@ const pt: Partial<typeof en> = {
   continueButton: "Continuar",
   donationReminderTitle: "Apoie o App",
   donationReminderMessage: "Se você achou este aplicativo útil, considere apoiar seu desenvolvimento.",
+  profile: "Perfil",
+  payments: "Pagamentos",
+  welcomeMessage: "Bem-vindo",
+  selectLanguage: "Selecionar idioma",
+  camera: "Câmera",
+  location: "Localização",
 };
 
 // Marathi - Complete translations
@@ -5835,6 +5897,7 @@ const mr: Partial<typeof en> = {
   reportsAndLedger: "अहवाल आणि खातेवही", generateReport: "अहवाल तयार करा", exportReport: "अहवाल निर्यात करा", dateRange: "तारीख श्रेणी", fromDate: "पासून तारीख", toDate: "पर्यंत तारीख", totalIncome: "एकूण उत्पन्न", totalExpenses: "एकूण खर्च", netBalance: "निव्वळ शिल्लक",
   settingsTitle: "सेटिंग्ज", general: "सामान्य", householdName: "घराचे नाव", vendorCompanyName: "विक्रेता/कंपनी नाव", currency: "चलन", currencySymbol: "चलन चिन्ह", language: "भाषा", salaryStartDay: "पगार सुरू दिवस", halfDayPercentageLabel: "अर्धा दिवस टक्केवारी",
   account: "खाते", manageHomes: "घरे व्यवस्थापित करा", manageBusinesses: "व्यवसाय व्यवस्थापित करा", homeUser: "होम युजर", staffProfessional: "स्टाफ/व्यावसायिक", configured: "कॉन्फिगर केलेले",
+  profile: "प्रोफाइल", payments: "पेमेंट", welcomeMessage: "स्वागत आहे", selectLanguage: "भाषा निवडा", camera: "कॅमेरा", location: "स्थान",
   security: "सुरक्षा", appLock: "अॅप लॉक", protectedWithPin: "PIN ने संरक्षित", protectWith4DigitPin: "4-अंकी PIN ने संरक्षित करा", changePin: "PIN बदला", setNewPin: "नवीन 4-अंकी PIN सेट करा", enterPin: "PIN प्रविष्ट करा", confirmPin: "PIN पुष्टी करा", pinMismatch: "PIN जुळत नाही", incorrectPin: "चुकीचा PIN",
   appearance: "स्वरूप", darkMode: "डार्क मोड", toggleLightDarkTheme: "लाइट/डार्क थीम टॉगल करा",
   hapticFeedback: "हॅप्टिक फीडबॅक", vibrationOnTouch: "टच इंटरॅक्शनवर व्हायब्रेशन", soundEffects: "साउंड इफेक्ट्स", playTapSounds: "इंटरॅक्शनवर टॅप साउंड प्ले करा",
@@ -5996,6 +6059,7 @@ const pa: Partial<typeof en> = {
   reportsAndLedger: "ਰਿਪੋਰਟਾਂ ਅਤੇ ਖਾਤਾ", generateReport: "ਰਿਪੋਰਟ ਬਣਾਓ", exportReport: "ਰਿਪੋਰਟ ਐਕਸਪੋਰਟ ਕਰੋ", dateRange: "ਮਿਤੀ ਸੀਮਾ", fromDate: "ਤੋਂ ਮਿਤੀ", toDate: "ਤੱਕ ਮਿਤੀ", totalIncome: "ਕੁੱਲ ਆਮਦਨ", totalExpenses: "ਕੁੱਲ ਖਰਚੇ", netBalance: "ਸ਼ੁੱਧ ਬਕਾਇਆ",
   settingsTitle: "ਸੈਟਿੰਗਜ਼", general: "ਆਮ", householdName: "ਘਰ ਦਾ ਨਾਮ", vendorCompanyName: "ਵਿਕਰੇਤਾ/ਕੰਪਨੀ ਦਾ ਨਾਮ", currency: "ਮੁਦਰਾ", currencySymbol: "ਮੁਦਰਾ ਚਿੰਨ੍ਹ", language: "ਭਾਸ਼ਾ", salaryStartDay: "ਤਨਖਾਹ ਸ਼ੁਰੂ ਦਿਨ", halfDayPercentageLabel: "ਅੱਧੇ ਦਿਨ ਪ੍ਰਤੀਸ਼ਤ",
   account: "ਖਾਤਾ", manageHomes: "ਘਰਾਂ ਦਾ ਪ੍ਰਬੰਧ ਕਰੋ", manageBusinesses: "ਕਾਰੋਬਾਰਾਂ ਦਾ ਪ੍ਰਬੰਧ ਕਰੋ", homeUser: "ਹੋਮ ਯੂਜ਼ਰ", staffProfessional: "ਸਟਾਫ/ਪੇਸ਼ੇਵਰ", configured: "ਸੰਰਚਿਤ",
+  profile: "ਪ੍ਰੋਫਾਈਲ", payments: "ਭੁਗਤਾਨ", welcomeMessage: "ਜੀ ਆਇਆਂ ਨੂੰ", selectLanguage: "ਭਾਸ਼ਾ ਚੁਣੋ", camera: "ਕੈਮਰਾ", location: "ਟਿਕਾਣਾ",
   security: "ਸੁਰੱਖਿਆ", appLock: "ਐਪ ਲੌਕ", protectedWithPin: "PIN ਨਾਲ ਸੁਰੱਖਿਅਤ", protectWith4DigitPin: "4-ਅੰਕੀ PIN ਨਾਲ ਸੁਰੱਖਿਅਤ ਕਰੋ", changePin: "PIN ਬਦਲੋ", setNewPin: "ਨਵਾਂ 4-ਅੰਕੀ PIN ਸੈੱਟ ਕਰੋ", enterPin: "PIN ਦਾਖਲ ਕਰੋ", confirmPin: "PIN ਪੁਸ਼ਟੀ ਕਰੋ", pinMismatch: "PIN ਮੇਲ ਨਹੀਂ ਖਾਂਦੇ", incorrectPin: "ਗਲਤ PIN",
   appearance: "ਦਿੱਖ", darkMode: "ਡਾਰਕ ਮੋਡ", toggleLightDarkTheme: "ਲਾਈਟ/ਡਾਰਕ ਥੀਮ ਟੌਗਲ ਕਰੋ",
   hapticFeedback: "ਹੈਪਟਿਕ ਫੀਡਬੈਕ", vibrationOnTouch: "ਟੱਚ ਇੰਟਰੈਕਸ਼ਨ ਤੇ ਵਾਈਬ੍ਰੇਸ਼ਨ", soundEffects: "ਸਾਊਂਡ ਇਫੈਕਟਸ", playTapSounds: "ਇੰਟਰੈਕਸ਼ਨ ਤੇ ਟੈਪ ਸਾਊਂਡ ਚਲਾਓ",
@@ -6372,6 +6436,12 @@ const te: Partial<typeof en> = {
   continueButton: "కొనసాగించు",
   donationReminderTitle: "యాప్‌ను సపోర్ట్ చేయండి",
   donationReminderMessage: "ఈ యాప్ మీకు సహాయకరంగా ఉంటే, దాని అభివృద్ధికి సపోర్ట్ చేయడాన్ని పరిగణించండి।",
+  profile: "ప్రొఫైల్",
+  payments: "చెల్లింపులు",
+  welcomeMessage: "స్వాగతం",
+  selectLanguage: "భాష ఎంచుకోండి",
+  camera: "కెమెరా",
+  location: "స్థానం",
 };
 const ta: Partial<typeof en> = {
   save: "சேமி", cancel: "ரத்து செய்", delete: "நீக்கு", restore: "மீட்டமை", merge: "இணை", edit: "திருத்து", view: "பார்", add: "சேர்", back: "பின்", confirm: "உறுதிப்படுத்து", loading: "ஏற்றுகிறது...", error: "பிழை", success: "வெற்றி", required: "தேவை", optional: "விருப்ப", comingSoon: "விரைவில் வரும்",
@@ -6601,6 +6671,12 @@ const ta: Partial<typeof en> = {
   continueButton: "தொடரவும்",
   donationReminderTitle: "செயலியை ஆதரிக்கவும்",
   donationReminderMessage: "இந்த செயலி உங்களுக்கு உதவியாக இருந்தால், அதன் வளர்ச்சிக்கு ஆதரவு அளிக்க பரிசீலிக்கவும்।",
+  profile: "சுயவிவரம்",
+  payments: "பணம்",
+  welcomeMessage: "வரவேற்கிறோம்",
+  selectLanguage: "மொழியைத் தேர்ந்தெடு",
+  camera: "கேமரா",
+  location: "இருப்பிடம்",
 };
 const ur: Partial<typeof en> = {
   // Common - عام
@@ -6629,6 +6705,12 @@ const ur: Partial<typeof en> = {
   payables: "واجب الادا",
   reports: "رپورٹس",
   settings: "ترتیبات",
+  profile: "پروفائل",
+  payments: "ادائیگیاں",
+  welcomeMessage: "خوش آمدید",
+  selectLanguage: "زبان منتخب کریں",
+  camera: "کیمرہ",
+  location: "مقام",
 
   // Home Screen - ہوم اسکرین
   welcome: "خوش آمدید",
@@ -7590,6 +7672,12 @@ const bn: Partial<typeof en> = {
   payables: "বকেয়া",
   reports: "রিপোর্ট",
   settings: "সেটিংস",
+  profile: "প্রোফাইল",
+  payments: "পেমেন্ট",
+  welcomeMessage: "স্বাগতম",
+  selectLanguage: "ভাষা নির্বাচন করুন",
+  camera: "ক্যামেরা",
+  location: "অবস্থান",
 
   welcome: "স্বাগতম",
   quickActions: "দ্রুত কাজ",
@@ -8459,6 +8547,12 @@ const or: Partial<typeof en> = {
   payables: "ପ୍ରଦେୟ",
   reports: "ରିପୋର୍ଟ",
   settings: "ସେଟିଂସ",
+  profile: "ପ୍ରୋଫାଇଲ୍",
+  payments: "ପେମେଣ୍ଟ",
+  welcomeMessage: "ସ୍ୱାଗତ",
+  selectLanguage: "ଭାଷା ବାଛନ୍ତୁ",
+  camera: "କ୍ୟାମେରା",
+  location: "ଅବସ୍ଥାନ",
 
   // Home Screen
   welcome: "ସ୍ୱାଗତ",
@@ -9422,6 +9516,12 @@ const as: Partial<typeof en> = {
   payables: "দেয় ধন",
   reports: "প্ৰতিবেদন",
   settings: "ছেটিংছ",
+  profile: "প্ৰ'ফাইল",
+  payments: "পেমেণ্ট",
+  welcomeMessage: "স্বাগতম",
+  selectLanguage: "ভাষা নিৰ্বাচন কৰক",
+  camera: "কেমেৰা",
+  location: "স্থান",
 
   // Home Screen
   welcome: "স্বাগতম",
@@ -10393,6 +10493,12 @@ const ru: Partial<typeof en> = {
   payables: "К оплате",
   reports: "Отчёты",
   settings: "Настройки",
+  profile: "Профиль",
+  payments: "Платежи",
+  welcomeMessage: "Добро пожаловать",
+  selectLanguage: "Выберите язык",
+  camera: "Камера",
+  location: "Местоположение",
   
   // Home Screen
   welcome: "Добро пожаловать",
