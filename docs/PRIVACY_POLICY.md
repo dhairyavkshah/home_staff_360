@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Home Staff 360**  
-**Last Updated: January 8, 2026**
+**Last Updated: January 7, 2026**
 
 ---
 
@@ -25,6 +25,7 @@ Home Staff 360 ("we," "our," or "us") is committed to protecting your privacy. T
 - **Device Information**: Device type and operating system for app compatibility
 - **Usage Data**: Anonymous analytics to improve app performance
 - **Connection Data**: When using real-time features, we maintain WebSocket connections for live updates
+- **Ad Interaction Data**: When ads are displayed, we track impressions, completion rates, and clicks (not tied to personal profiles)
 
 ### 1.3 Information NOT Collected
 
@@ -87,12 +88,26 @@ We may share information only in these circumstances:
 
 ## 4. Advertising
 
-Home Staff 360 v1.0 **does not display advertisements**. The app operates on a subscription model with no ad-supported tier.
+### 4.1 Ad Display
 
-If advertising features are introduced in future versions:
-- Ads will **not be targeted** based on your personal data, household information, or financial details
-- We will NOT build advertising profiles from your app usage
-- Any ad metrics collected will be anonymous and not linked to individual user profiles
+Home Staff 360 may display advertisements to support free access to the app.
+
+### 4.2 No Personalized Targeting
+
+- Ads are **not targeted** based on your personal data, household information, or financial details
+- We do NOT build advertising profiles from your app usage
+- Ad selection is based on random rotation, not personal preferences
+
+### 4.3 Ad Interaction Tracking
+
+We track anonymous, aggregate metrics for ads:
+
+- Impression counts
+- Completion rates
+- Skip rates
+- Click-through rates
+
+This data is used solely to measure ad performance and is not linked to individual user profiles.
 
 ---
 
@@ -201,6 +216,6 @@ California residents have rights under CCPA. We do not sell personal information
 
 ---
 
-*This Privacy Policy is effective as of January 8, 2026.*
+*This Privacy Policy is effective as of January 7, 2026.*
 
 *Home Staff 360 - Your Data, Securely Connected*

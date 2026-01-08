@@ -37,8 +37,8 @@ Instant Messaging
 - Read receipts and timestamps
 - Push notifications for new messages
 
-Connection & Invites System
-- Send connection invites to staff or clients
+Auto-Connection System
+- Automatically link with new staff or clients
 - Pending invites for users not yet registered
 - Seamless onboarding when they join
 
@@ -79,6 +79,7 @@ Laundry Batch Tracking
 - Create and manage laundry batches
 - Track individual items with categories
 - Record costs and payments
+- Share batch details for approval
 
 Expense Tracking
 - Categorize household or business expenses
@@ -98,6 +99,7 @@ Your data is protected:
 - Phone + password authentication with OTP
 - Encrypted data transmission (HTTPS/TLS)
 - Biometric lock and PIN security options
+- No personal data used for ad targeting
 - GDPR and DPDP Act compliant
 
 GLOBAL ACCESSIBILITY
@@ -116,12 +118,9 @@ BEAUTIFUL & INTUITIVE
 - Smooth animations and transitions
 - Mobile-optimized real-time interactions
 
-AFFORDABLE SUBSCRIPTION
+FREE TO USE
 
-Home Staff 360 is available with an annual subscription:
-- India: INR 300/year
-- United States: $30/year
-- 27 currencies supported worldwide
+Home Staff 360 is free with all core features included. Support development through optional donations.
 
 Download now and experience real-time household management!
 ```
@@ -209,20 +208,4 @@ See Home Staff 360 in action! Experience live real-time collaboration with your 
 
 ---
 
-## Subscription Information
-
-**Subscription Type**: Annual (auto-renewing)
-
-**Pricing**:
-- India: INR 300/year
-- United States: $30/year
-- 27 currencies supported with localized pricing
-
-**Subscription Terms**:
-- Payment charged to your Google Play account at confirmation
-- Subscription automatically renews unless canceled at least 24 hours before the end of the current period
-- Manage subscriptions in Google Play Store settings
-
----
-
-*Last Updated: January 8, 2026*
+*Last Updated: January 7, 2026*
