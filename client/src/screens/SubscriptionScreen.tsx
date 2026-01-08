@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Shield, Check, Crown, Cloud, Users, Calendar, RefreshCw } from "lucide-react";
+import { Shield, Check, Crown, Cloud, Users, Calendar, RefreshCw, Gift, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -293,6 +293,29 @@ export function SubscriptionScreen() {
             <p className="text-xs text-center text-muted-foreground px-4 mt-2">
               Subscription will be processed through Google Play. You can cancel anytime from your Google Play subscriptions.
             </p>
+
+            <section className="flex flex-col gap-3 mt-6 pt-6 border-t">
+              <Card className="p-4 bg-muted/30">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <Gift className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-sm">Free Plan</h3>
+                      <Badge variant="outline" className="text-xs">Current</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Continue using all features for free with occasional ads
+                    </p>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Megaphone className="w-3.5 h-3.5" />
+                      <span>Includes ads to support development</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </section>
           </section>
         )}
 

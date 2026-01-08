@@ -1803,6 +1803,27 @@ router.get("/api/admin/stats", authenticateAdmin, async (req: Request, res: Resp
   }
 });
 
+router.get("/api/admin/subscription-stats", authenticateAdmin, async (req: Request, res: Response) => {
+  try {
+    const [totalUsersResult] = await db.select({ count: sql<number>`count(*)` }).from(serverUsers);
+    const [paidUsersResult] = await db.select({ count: sql<number>`count(DISTINCT ${subscriptions.userId})` })
+      .from(subscriptions)
+      .where(eq(subscriptions.purchaseState, 'purchased'));
+
+    const totalUsers = Number(totalUsersResult.count);
+    const totalPaidUsers = Number(paidUsersResult.count);
+    const totalFreeUsers = totalUsers - totalPaidUsers;
+
+    res.json({
+      totalFreeUsers,
+      totalPaidUsers
+    });
+  } catch (error) {
+    console.error("Admin subscription stats error:", error);
+    res.status(500).json({ error: "Failed to get subscription stats" });
+  }
+});
+
 router.get("/api/admin/users", authenticateAdmin, async (req: Request, res: Response) => {
   try {
     const { page = "1", limit = "50", name, phone, userType, isVerified, isActive } = req.query;

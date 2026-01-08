@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, Smartphone, Link2, Activity, Search, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Archive, Phone, User } from "lucide-react";
+import { Users, Smartphone, Link2, Activity, Search, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Archive, Phone, User, CreditCard } from "lucide-react";
 import * as XLSX from "xlsx";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 
@@ -38,6 +38,11 @@ interface BackupStats {
   }>;
 }
 
+interface SubscriptionStats {
+  totalFreeUsers: number;
+  totalPaidUsers: number;
+}
+
 interface User {
   id: string;
   phone: string;
@@ -62,6 +67,7 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [stats, setStats] = useState<Stats | null>(null);
   const [backupStats, setBackupStats] = useState<BackupStats | null>(null);
+  const [subscriptionStats, setSubscriptionStats] = useState<SubscriptionStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUsersLoading, setIsUsersLoading] = useState(false);
@@ -111,11 +117,14 @@ export default function AdminDashboard() {
 
   const fetchInitialData = async (token: string) => {
     try {
-      const [statsRes, backupStatsRes] = await Promise.all([
+      const [statsRes, backupStatsRes, subscriptionStatsRes] = await Promise.all([
         fetch("/api/admin/stats", {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch("/api/admin/backups/stats", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/admin/subscription-stats", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -129,9 +138,11 @@ export default function AdminDashboard() {
 
       const statsData = await statsRes.json();
       const backupStatsData = backupStatsRes.ok ? await backupStatsRes.json() : null;
+      const subscriptionStatsData = subscriptionStatsRes.ok ? await subscriptionStatsRes.json() : null;
 
       setStats(statsData);
       setBackupStats(backupStatsData);
+      setSubscriptionStats(subscriptionStatsData);
       
       // Don't fetch users on initial load - wait for search to reduce server load
     } catch (error) {
@@ -372,6 +383,27 @@ export default function AdminDashboard() {
             </div>
           </Card>
         </div>
+
+        {subscriptionStats && (
+          <Card className="p-3">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <CreditCard className="w-4 h-4" />
+                Subscription Metrics
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div>
+                <p className="text-lg font-bold text-muted-foreground" data-testid="text-free-users">{subscriptionStats.totalFreeUsers}</p>
+                <p className="text-[10px] text-muted-foreground">Free Users</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-green-600" data-testid="text-paid-users">{subscriptionStats.totalPaidUsers}</p>
+                <p className="text-[10px] text-muted-foreground">Paid Users</p>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {backupStats && (
           <Card className="cursor-pointer hover-elevate p-3" onClick={() => setLocation("/admin/backups")}>

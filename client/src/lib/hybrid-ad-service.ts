@@ -2,6 +2,7 @@ import type { Advertisement } from "@shared/schema";
 import { adService } from "./ad-service";
 import { admobService } from "./admob-service";
 import { Capacitor } from "@capacitor/core";
+import { storage } from "./storage";
 
 export type AdProvider = "custom" | "admob" | "none";
 export type AdSourcePreference = "custom_first" | "admob_first" | "admob_only" | "custom_only";
@@ -87,8 +88,14 @@ class HybridAdService {
   }
 
   shouldShowAd(): boolean {
-    // Ads feature is disabled - always return false
-    return false;
+    // Check if user has premium subscription - premium users don't see ads
+    const planInfo = storage.getPlanInfo();
+    if (planInfo.isPremium) {
+      return false;
+    }
+    
+    // Free users see ads based on timing interval
+    return adService.shouldShowAd();
   }
 
   markAdShown(): void {
@@ -96,8 +103,11 @@ class HybridAdService {
   }
 
   async getNextAd(): Promise<{ ad: Advertisement | null; provider: AdProvider }> {
-    // Ads feature is disabled - always return none
-    return { ad: null, provider: "none" };
+    // Premium users don't see ads
+    const planInfo = storage.getPlanInfo();
+    if (planInfo.isPremium) {
+      return { ad: null, provider: "none" };
+    }
 
     const preference = this.config.sourcePreference;
 
