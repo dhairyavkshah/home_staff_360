@@ -576,8 +576,8 @@ router.post("/api/auth/request-otp", rateLimitMiddleware('otp'), async (req: Req
       cooldownSeconds: OTP_COOLDOWN_SECONDS
     };
     
-    // Return OTP in dev mode for testing (regardless of SMS status)
-    if (process.env.NODE_ENV === "development") {
+    // Return OTP in dev mode for testing only when SMS was not sent
+    if (process.env.NODE_ENV === "development" && !smsSent) {
       response.devOtp = otp;
     }
 
