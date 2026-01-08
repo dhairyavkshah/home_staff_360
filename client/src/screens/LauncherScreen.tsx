@@ -39,7 +39,8 @@ export function LauncherScreen() {
       const hasCompletedPermissions = permissionsService.hasCompletedPermissionsFlow();
       
       if (settings.hasCompletedOnboarding && currentProfile) {
-        if (!permissionsGranted) {
+        // For returning users, check BOTH actual permissions AND if they've completed the flow on this device
+        if (!permissionsGranted || !hasCompletedPermissions) {
           permissionsService.clearPermissionsGranted();
           navigate("permissions", { userType: currentProfile.type, returnToApp: true });
           return;

@@ -82,6 +82,12 @@ import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { RealtimeProvider } from "@/lib/realtime-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useNotificationAlerts } from "@/hooks/use-notification-alerts";
+
+function NotificationHandler() {
+  useNotificationAlerts();
+  return null;
+}
 
 function MobileAppRouter() {
   const { currentScreen } = useNavigation();
@@ -227,6 +233,7 @@ function MobileAppWithSplash() {
             <MaintenanceBanner />
             <MobileAppRouter />
             <Toaster />
+            <NotificationHandler />
           </GuidedTourProvider>
         </DirtyTrackingProvider>
       </RealtimeProvider>
