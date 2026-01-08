@@ -962,12 +962,20 @@ router.post("/api/auth/reset-password", async (req: Request, res: Response) => {
 router.post("/api/user/complete-onboarding", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.userId;
+    const { displayName, userType, language, currency } = req.body;
+
+    const updateData: any = { 
+      onboardingCompleted: true,
+      isNewUser: false
+    };
+
+    if (displayName) updateData.displayName = displayName;
+    if (userType) updateData.userType = userType;
+    if (language) updateData.preferredLanguage = language;
+    if (currency) updateData.preferredCurrency = currency;
 
     await db.update(serverUsers)
-      .set({ 
-        onboardingCompleted: true,
-        isNewUser: false
-      })
+      .set(updateData)
       .where(eq(serverUsers.id, userId));
 
     res.json({ success: true, message: "Onboarding completed" });
