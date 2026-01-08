@@ -614,6 +614,58 @@ class CollaborationService {
     });
   }
 
+  async syncProfileToLocalStorage(): Promise<{
+    synced: boolean;
+    profile?: any;
+    needsOnboarding: boolean;
+  }> {
+    try {
+      const serverProfile = await this.getProfile();
+      
+      if (!serverProfile) {
+        return { synced: false, needsOnboarding: true };
+      }
+
+      // Import storage dynamically to avoid circular deps
+      const { storage } = await import("./storage");
+      
+      // Check if local profile already exists
+      let localProfile = storage.getProfile();
+      
+      if (!localProfile) {
+        // Create local profile from server data
+        localProfile = storage.createProfile({
+          type: (serverProfile.userType as any) || "HOME",
+          displayName: serverProfile.displayName || "",
+        });
+      }
+      
+      // If server says onboarding is complete, sync local settings
+      if (serverProfile.onboardingCompleted) {
+        const settings = storage.getSettings();
+        storage.saveSettings({
+          ...settings,
+          hasCompletedOnboarding: true,
+          defaultAppMode: (serverProfile.userType as any) || settings.defaultAppMode,
+        });
+        
+        // Update profile with server display name if available
+        if (serverProfile.displayName) {
+          storage.updateProfile({ displayName: serverProfile.displayName });
+        }
+      }
+      
+      return {
+        synced: true,
+        profile: serverProfile,
+        needsOnboarding: !serverProfile.onboardingCompleted,
+      };
+    } catch (error) {
+      console.error("Failed to sync profile from server:", error);
+      return { synced: false, needsOnboarding: true };
+    }
+  }
+
   async verifyPassword(password: string): Promise<{ 
     success: boolean; 
     message?: string;

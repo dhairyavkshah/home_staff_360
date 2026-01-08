@@ -11,9 +11,6 @@ export function LauncherScreen() {
 
   useEffect(() => {
     const checkAndNavigate = async () => {
-      const settings = storage.getSettings();
-      const profile = storage.getProfile();
-      
       const isAuthenticated = collaborationService.isAuthenticated();
       
       if (!isAuthenticated) {
@@ -21,14 +18,30 @@ export function LauncherScreen() {
         return;
       }
       
+      // Sync profile from server if local profile is missing
+      let currentProfile = storage.getProfile();
+      if (!currentProfile) {
+        await collaborationService.syncProfileToLocalStorage();
+        // Re-read profile after sync
+        currentProfile = storage.getProfile();
+        if (!currentProfile) {
+          // Still no profile, go to auth
+          navigate("auth");
+          return;
+        }
+      }
+      
+      // Now continue with the rest of the logic using updated profile/settings
+      const settings = storage.getSettings();
+      
       const permissionsStatus = await permissionsService.checkAllPermissions();
       const permissionsGranted = permissionsService.areRequiredPermissionsGranted(permissionsStatus);
       const hasCompletedPermissions = permissionsService.hasCompletedPermissionsFlow();
       
-      if (settings.hasCompletedOnboarding && profile) {
+      if (settings.hasCompletedOnboarding && currentProfile) {
         if (!permissionsGranted) {
           permissionsService.clearPermissionsGranted();
-          navigate("permissions", { userType: profile.type, returnToApp: true });
+          navigate("permissions", { userType: currentProfile.type, returnToApp: true });
           return;
         }
         
@@ -49,18 +62,18 @@ export function LauncherScreen() {
           } catch {
           }
           
-          const defaultMode = settings.defaultAppMode || profile.type || "HOME";
+          const defaultMode = settings.defaultAppMode || currentProfile.type || "HOME";
           if (defaultMode === "STAFF") {
             navigate("staff-home");
           } else {
             navigate("home");
           }
         }
-      } else if (profile) {
+      } else if (currentProfile) {
         if (!hasCompletedPermissions) {
-          navigate("permissions", { userType: profile.type });
+          navigate("permissions", { userType: currentProfile.type });
         } else {
-          navigate("onboarding", { userType: profile.type });
+          navigate("onboarding", { userType: currentProfile.type });
         }
       } else {
         // No profile exists - navigate to auth first, then role selection after authentication

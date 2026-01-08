@@ -139,12 +139,14 @@ export function AuthScreen() {
       const result = await collaborationService.login(phone, password);
       
       if (result.success) {
+        // Sync profile from server to local storage
+        await collaborationService.syncProfileToLocalStorage();
+        
         toast({
           title: "Welcome Back",
           description: displayName ? `Hello, ${displayName}!` : "Login successful",
         });
         
-        // Always go through launcher which handles permissions check
         navigate("launcher");
       } else if (result.needsOtp) {
         await handleRequestOtp();
@@ -180,7 +182,8 @@ export function AuthScreen() {
           setNeedsOnboarding(result.user?.needsOnboarding ?? true);
           setStep("set-password");
         } else {
-          // Always go through launcher which handles permissions check
+          // Sync profile from server to local storage
+          await collaborationService.syncProfileToLocalStorage();
           navigate("launcher");
         }
       }
@@ -219,12 +222,14 @@ export function AuthScreen() {
       const result = await collaborationService.setPassword(password);
       
       if (result.success) {
+        // Sync profile from server to local storage
+        await collaborationService.syncProfileToLocalStorage();
+        
         toast({
           title: "Password Set",
           description: "Your account is now secured",
         });
         
-        // Always go through launcher which handles permissions check
         navigate("launcher");
       }
     } catch (error: any) {
@@ -324,12 +329,14 @@ export function AuthScreen() {
       const result = await collaborationService.resetPassword(phone, otp, password);
       
       if (result.success) {
+        // Sync profile from server to local storage
+        await collaborationService.syncProfileToLocalStorage();
+        
         toast({
           title: "Password Reset",
           description: "Your password has been reset successfully",
         });
         
-        // Always go through launcher which handles permissions check
         navigate("launcher");
       }
     } catch (error: any) {
