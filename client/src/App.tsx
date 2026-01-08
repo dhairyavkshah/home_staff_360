@@ -10,6 +10,7 @@ import { GuidedTourProvider } from "@/lib/guided-tour";
 import { SafeAreaProvider } from "@/lib/safe-area-provider";
 import { storage } from "@/lib/storage";
 import { initializeAutoBackup } from "@/lib/auto-backup";
+import { AdProvider } from "@/components/AdProvider";
 import "@/lib/demo-data";
 
 import AdminLogin from "@/pages/admin/AdminLogin";
@@ -234,6 +235,7 @@ function MobileAppWithSplash() {
             <MobileAppRouter />
             <Toaster />
             <NotificationHandler />
+            <AdProvider />
           </GuidedTourProvider>
         </DirtyTrackingProvider>
       </RealtimeProvider>
