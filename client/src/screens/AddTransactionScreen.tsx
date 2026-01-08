@@ -165,7 +165,7 @@ export function AddTransactionScreen() {
     const newErrors: Record<string, string> = {};
 
     if (!description.trim()) newErrors.description = "Description is required";
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!amount || parseInt(amount, 10) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
     }
     if (!date) newErrors.date = "Date is required";
@@ -183,7 +183,7 @@ export function AddTransactionScreen() {
       category,
       description: description.trim(),
       transactionNo: transactionNo.trim() || undefined,
-      amount: parseFloat(amount),
+      amount: parseInt(amount, 10),
       date,
       isPaid,
     });
@@ -472,9 +472,10 @@ export function AddTransactionScreen() {
             <Input
               id="amount"
               type="number"
+              step="1"
               value={amount}
-              onChange={(e) => { setAmount(e.target.value); markDirty(); }}
-              placeholder="0.00"
+              onChange={(e) => { const val = e.target.value.replace(/[^0-9]/g, ''); setAmount(val); markDirty(); }}
+              placeholder="0"
               data-testid="input-amount"
             />
             {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}

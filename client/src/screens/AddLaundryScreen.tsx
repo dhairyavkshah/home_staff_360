@@ -608,9 +608,13 @@ export function AddLaundryScreen() {
                   id="deliveryCharge"
                   type="number"
                   min="0"
-                  step="0.01"
+                  step="1"
                   value={pickupDeliveryCharge}
-                  onChange={(e) => { setPickupDeliveryCharge(e.target.value); markDirty(); }}
+                  onChange={(e) => { 
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    setPickupDeliveryCharge(val); 
+                    markDirty(); 
+                  }}
                   placeholder="Enter charge amount"
                   data-testid="input-delivery-charge"
                 />

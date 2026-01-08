@@ -111,7 +111,7 @@ export function StaffAddExpenseScreen() {
     const newErrors: Record<string, string> = {};
 
     if (!title.trim()) newErrors.title = t("titleRequired");
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!amount || parseInt(amount, 10) <= 0) {
       newErrors.amount = t("amountRequired");
     }
     if (!dueDate) newErrors.dueDate = t("dueDateRequired");
@@ -141,7 +141,7 @@ export function StaffAddExpenseScreen() {
     const expenseData = {
       title: title.trim(),
       category,
-      amount: parseFloat(amount),
+      amount: parseInt(amount, 10),
       dueDate,
       vendor: vendor.trim() || undefined,
       notes: notes.trim() || undefined,
@@ -360,8 +360,9 @@ export function StaffAddExpenseScreen() {
             <Input
               id="amount"
               type="number"
+              step="1"
               value={amount}
-              onChange={(e) => { setAmount(e.target.value); markDirty(); }}
+              onChange={(e) => { const val = e.target.value.replace(/[^0-9]/g, ''); setAmount(val); markDirty(); }}
               placeholder={t("amount")}
               data-testid="input-amount"
             />

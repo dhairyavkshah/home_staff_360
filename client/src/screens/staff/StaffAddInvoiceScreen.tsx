@@ -534,9 +534,10 @@ export function StaffAddInvoiceScreen() {
                         />
                         <Input
                           type="number"
+                          step="1"
                           placeholder="Rate"
                           value={item.rate || ""}
-                          onChange={(e) => { handleUpdateItem(item.id, 'rate', parseFloat(e.target.value) || 0); markDirty(); }}
+                          onChange={(e) => { const val = e.target.value.replace(/[^0-9]/g, ''); handleUpdateItem(item.id, 'rate', parseInt(val, 10) || 0); markDirty(); }}
                           data-testid={`input-item-rate-${index}`}
                         />
                         <div className="flex items-center justify-end font-medium">

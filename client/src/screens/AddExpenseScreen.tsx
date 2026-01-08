@@ -143,7 +143,7 @@ export function AddExpenseScreen() {
     const newErrors: Record<string, string> = {};
 
     if (!title.trim()) newErrors.title = "Title is required";
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!amount || parseInt(amount, 10) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
     }
     if (!dueDate) newErrors.dueDate = "Due date is required";
@@ -161,7 +161,7 @@ export function AddExpenseScreen() {
       customCategory: category === "other" ? customCategory.trim() || undefined : undefined,
       title: title.trim(),
       vendor: vendor.trim() || undefined,
-      amount: parseFloat(amount),
+      amount: parseInt(amount, 10),
       dueDate,
       recurrence: isRecurring ? recurrence : "NONE" as RecurrenceType,
       reminderDays: isRecurring ? parseInt(reminderDays) : undefined,
@@ -450,9 +450,10 @@ export function AddExpenseScreen() {
             <Input
               id="amount"
               type="number"
+              step="1"
               value={amount}
-              onChange={(e) => { setAmount(e.target.value); markDirty(); }}
-              placeholder="0.00"
+              onChange={(e) => { const val = e.target.value.replace(/[^0-9]/g, ''); setAmount(val); markDirty(); }}
+              placeholder="0"
               data-testid="input-amount"
             />
             {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
