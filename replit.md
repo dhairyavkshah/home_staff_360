@@ -89,16 +89,24 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 2. **Collaboration link creation failing**: Fixed NULL constraint issue with staff_account_id
 3. **Auto-connect TypeScript errors**: Fixed schema mismatches (targetPhone, isResolved) and undefined personId
 
+### Disabled Features (MVP Scope)
+The following features are built but disabled for v1.0 MVP:
+- **Share households/businesses feature**: Disabled (code preserved in SharedSpacesTab.tsx for future use)
+- **Advertising system**: Disabled (code preserved, controlled by AD_FEATURE_ENABLED flag in server/routes.ts)
+
 ### Known Limitations (Non-Critical)
 - Staff invoices/earnings use localStorage (no backend endpoints yet)
 - Minor TypeScript warnings in test files (tests run correctly)
 - google-libphonenumber types not installed (runtime works)
-- **Share households/businesses feature**: Disabled for MVP (code preserved in SharedSpacesTab.tsx for future use)
 
 ### Deployment Readiness
 The application is ready for MVP deployment with:
 - Core authentication and user management
+- Annual subscription model (no free tier)
 - Real-time collaboration and messaging
 - Home user and staff user feature sets
 - Security measures (rate limiting, JWT, bcrypt)
 - Error handling and recovery flows
+
+## Version History
+- **v1.0** (January 2026): MVP release with subscription model, real-time collaboration, 21 languages, 27 currencies

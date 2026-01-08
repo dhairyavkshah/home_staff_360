@@ -1813,6 +1813,9 @@ router.get("/api/admin/users", authenticateAdmin, async (req: Request, res: Resp
     });
 
     const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(serverUsers);
+    const total = Number(countResult.count);
+    const limitNum = parseInt(limit as string);
+    const totalPages = Math.ceil(total / limitNum);
 
     res.json({
       users: users.map(u => ({
@@ -1826,9 +1829,10 @@ router.get("/api/admin/users", authenticateAdmin, async (req: Request, res: Resp
         lastLoginAt: u.lastLoginAt,
         createdAt: u.createdAt
       })),
-      total: Number(countResult.count),
+      total,
       page: parseInt(page as string),
-      limit: parseInt(limit as string)
+      limit: limitNum,
+      totalPages
     });
   } catch (error) {
     console.error("Admin get users error:", error);

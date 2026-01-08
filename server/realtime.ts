@@ -162,6 +162,7 @@ export function getIO(): SocketIOServer | null {
 
 export function emitToUser(userId: string, event: string, data: any) {
   if (io) {
+    console.log(`[Realtime] emitToUser: ${event} to user:${userId}`);
     io.to(`user:${userId}`).emit(event, data);
   }
 }

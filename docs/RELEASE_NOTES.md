@@ -68,14 +68,17 @@ Home Staff 360 is now a **fully live, real-time platform** for household and sta
 - Admin dashboard with comprehensive analytics
 - User management interface with search and filtering
 
-**Advertising System**
-- Full-screen video ad overlay with Fluent 2 design
-- Skip button appears after 5 seconds of viewing
-- Maximum ad duration: 30 seconds
-- Equal weight distribution for fair ad rotation
-- Click-through tracking for advertisers
-- Admin interface for ad campaign management
-- Comprehensive ad analytics dashboard
+**Subscription Model**
+- Annual subscription required for app access
+- India: INR 300/year, US: $30/year
+- 27 currencies supported with localized pricing
+- Google Play Billing integration
+- Subscription validation and status APIs
+
+**Features Reserved for Future Releases**
+The following features have been built but are disabled for MVP:
+- **Share Households/Businesses**: Code preserved in SharedSpacesTab.tsx for future collaborative space sharing
+- **Advertising System**: Full ad infrastructure ready (AD_FEATURE_ENABLED flag) for potential ad-supported tier
 
 ---
 
@@ -218,4 +221,4 @@ v1.0: Live real-time collaboration! Instant messaging, auto-connections, 21 lang
 
 ---
 
-*Last Updated: January 7, 2026*
+*Last Updated: January 8, 2026*

@@ -73,7 +73,7 @@ export default function AdminDashboard() {
   const [isVerifiedFilter, setIsVerifiedFilter] = useState<string>("all");
   const [isActiveFilter, setIsActiveFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
-  const [limit] = useState(100);
+  const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -484,69 +484,62 @@ export default function AdminDashboard() {
               </Button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-2">Phone</th>
-                    <th className="text-left py-2 px-2 hidden md:table-cell">Name</th>
-                    <th className="text-left py-2 px-2 hidden sm:table-cell">Type</th>
-                    <th className="text-left py-2 px-2">Status</th>
-                    <th className="text-left py-2 px-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {isUsersLoading ? (
-                    <tr>
-                      <td colSpan={5} className="py-4 text-center text-muted-foreground">
-                        Loading users...
-                      </td>
-                    </tr>
-                  ) : users.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-4 text-center text-muted-foreground">
-                        No users found
-                      </td>
-                    </tr>
-                  ) : (
-                    users.map((user) => (
-                      <tr key={user.id} className="border-b" data-testid={`row-user-${user.id}`}>
-                        <td className="py-2 px-2">{user.phone}</td>
-                        <td className="py-2 px-2 hidden md:table-cell">
-                          {user.displayName || "-"}
-                        </td>
-                        <td className="py-2 px-2 hidden sm:table-cell">
+            {isUsersLoading ? (
+              <div className="py-8 text-center text-muted-foreground">
+                Loading users...
+              </div>
+            ) : users.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">
+                No users found
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+                {users.map((user) => (
+                  <div 
+                    key={user.id} 
+                    className="border rounded-md p-3 bg-card hover-elevate"
+                    data-testid={`card-user-${user.id}`}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate">{user.displayName || "No name"}</p>
+                          <p className="text-xs text-muted-foreground truncate">{user.phone}</p>
+                        </div>
+                        <Badge 
+                          variant={user.userType === "HOME" ? "secondary" : "outline"}
+                          className="text-[10px] shrink-0"
+                        >
                           {user.userType || "-"}
-                        </td>
-                        <td className="py-2 px-2">
-                          <div className="flex gap-1 flex-wrap">
-                            {user.isVerified && (
-                              <Badge variant="secondary" className="text-xs">Verified</Badge>
-                            )}
-                            <Badge 
-                              variant={user.isActive ? "default" : "destructive"}
-                              className="text-xs"
-                            >
-                              {user.isActive ? "Active" : "Disabled"}
-                            </Badge>
-                          </div>
-                        </td>
-                        <td className="py-2 px-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleUserStatus(user.id, user.isActive)}
-                            data-testid={`button-toggle-user-${user.id}`}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex gap-1 flex-wrap">
+                          {user.isVerified && (
+                            <Badge variant="secondary" className="text-[10px]">Verified</Badge>
+                          )}
+                          <Badge 
+                            variant={user.isActive ? "default" : "destructive"}
+                            className="text-[10px]"
                           >
-                            {user.isActive ? "Disable" : "Enable"}
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                            {user.isActive ? "Active" : "Disabled"}
+                          </Badge>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={() => toggleUserStatus(user.id, user.isActive)}
+                          data-testid={`button-toggle-user-${user.id}`}
+                        >
+                          {user.isActive ? "Disable" : "Enable"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {totalPages > 1 && renderPagination()}
           </CardContent>
