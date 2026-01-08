@@ -51,9 +51,11 @@ export function useSubscription() {
         credentials: "include",
       });
       if (response.ok) {
-        const data = await response.json();
+        const json = await response.json();
+        // Handle API response format: { success: true, data: {...} }
+        const data = json.data || json;
         setStatus({
-          isSubscribed: data.isSubscribed ?? false,
+          isSubscribed: data.isActive ?? false,
           expiryDate: data.expiryDate ?? null,
           subscription: data.subscription ?? null,
         });

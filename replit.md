@@ -35,7 +35,14 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 - **Multi-Currency Support**: Supports 27 currencies, including INR, USD, EUR, GBP, AUD, and CAD.
 - **Real-Time Collaboration**: Includes a chat system with message edit/delete within a 5-minute window, real-time message delivery, and live events for attendance, laundry, and expense updates.
 - **Auto-Connection System**: Automatically creates connection invites based on phone numbers, resolving pending links upon user registration.
-- **Advertising System**: Displays full-screen video ads approximately every 5 minutes of app usage, with a skip option after 5 seconds and click-through functionality. Includes analytics for impressions, completion rates, and CTR, managed via an admin interface.
+
+### Subscription Model
+- **Annual Subscription**: Users must subscribe to access the app
+- **Google Play Billing**: All subscriptions managed through Google Play services
+- **Pricing**: India: 300 INR/year, US: $30/year, other countries based on equivalent USD pricing
+- **International Pricing**: Defined for 27 currencies in SUBSCRIPTION_PRICES constant
+- **Subscription Endpoints**: /api/subscriptions/validate, /api/subscriptions/status, /api/subscriptions/check, /api/subscriptions/prices
+- **Ad System**: Disabled (code preserved for future use via AD_FEATURE_ENABLED flag)
 
 ### Security Measures
 - **Authentication**: Passwords are hashed with bcrypt (10 rounds), JWT tokens are used (30-day user, 8-hour admin), and OTPs expire in 10 minutes with a max of 5 attempts.
