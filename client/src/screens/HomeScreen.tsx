@@ -11,6 +11,7 @@ import {
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { getDashboardStats, formatCurrency, formatCurrencyTotals } from "@/lib/calculations";
+import { currencySymbols } from "@shared/schema";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { notifyActiveContextChange } from "@/hooks/use-active-context";
 import { usePlanStatus } from "@/hooks/use-plan-status";
@@ -49,6 +50,7 @@ export function HomeScreen() {
   const stats = useMemo(() => getDashboardStats(), [refreshKey]);
   const settings = useMemo(() => storage.getSettings(), [refreshKey]);
   const planLimit = useMemo(() => storage.checkHomePlanLimit('households'), [refreshKey, planType]);
+  const symbol = settings.customCurrencySymbol || currencySymbols[settings.currency];
 
   const hasHouseholds = accounts.length > 0;
   const activePeople = useMemo(() => {
@@ -133,7 +135,7 @@ export function HomeScreen() {
       color: 'info',
       screen: 'laundry-view' as const,
       subtitle: stats.unpaidLaundryByCurrency.length > 0 
-        ? `${formatCurrencyTotals(stats.unpaidLaundryByCurrency)} ${tLabel('unpaid', 'Unpaid')}`
+        ? `${formatCurrencyTotals(stats.unpaidLaundryByCurrency, symbol)} ${tLabel('unpaid', 'Unpaid')}`
         : tLabel('allPaid', 'All Paid'),
     },
     {
@@ -143,7 +145,7 @@ export function HomeScreen() {
       color: 'warning',
       screen: 'payables' as const,
       subtitle: stats.totalPayableByCurrency.length > 0 
-        ? formatCurrencyTotals(stats.totalPayableByCurrency)
+        ? formatCurrencyTotals(stats.totalPayableByCurrency, symbol)
         : formatCurrency(0, settings.currency, settings.customCurrencySymbol),
     },
     {
@@ -153,7 +155,7 @@ export function HomeScreen() {
       color: 'destructive',
       screen: 'expenses' as const,
       subtitle: stats.expensesByCurrency.length > 0 
-        ? formatCurrencyTotals(stats.expensesByCurrency)
+        ? formatCurrencyTotals(stats.expensesByCurrency, symbol)
         : formatCurrency(0, settings.currency, settings.customCurrencySymbol),
     },
     {
@@ -337,7 +339,7 @@ export function HomeScreen() {
               >
                 <p className="text-xl font-bold text-warning">
                   {stats.totalPayableByCurrency.length > 0 
-                    ? formatCurrencyTotals(stats.totalPayableByCurrency)
+                    ? formatCurrencyTotals(stats.totalPayableByCurrency, symbol)
                     : formatCurrency(0, settings.currency, settings.customCurrencySymbol)}
                 </p>
                 <p className="text-[10px] text-muted-foreground">{tLabel('payable', 'Payable')}</p>

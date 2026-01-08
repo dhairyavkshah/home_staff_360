@@ -276,10 +276,7 @@ export function formatCurrency(
   customSymbol?: string
 ): string {
   const symbol = currency === "OTHER" && customSymbol ? customSymbol : currencySymbols[currency];
-  const formatted = Math.abs(amount).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const formatted = Math.round(Math.abs(amount)).toLocaleString("en-US");
 
   if (amount < 0) {
     return `-${symbol}${formatted}`;
@@ -344,26 +341,21 @@ export function groupTotalsByCurrency<T>(
     .sort((a, b) => b.amount - a.amount);
 }
 
-export function formatCurrencyTotals(totals: CurrencyTotal[], asInteger: boolean = false): string {
+export function formatCurrencyTotals(totals: CurrencyTotal[], fallbackSymbol: string = "$"): string {
   if (totals.length === 0) {
-    return asInteger ? "$0" : "$0.00";
+    return `${fallbackSymbol}0`;
   }
   
   return totals
     .map(t => {
-      const formatted = asInteger
-        ? Math.round(Math.abs(t.amount)).toLocaleString("en-US")
-        : Math.abs(t.amount).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          });
+      const formatted = Math.round(Math.abs(t.amount)).toLocaleString("en-US");
       return t.amount < 0 ? `-${t.symbol}${formatted}` : `${t.symbol}${formatted}`;
     })
     .join(", ");
 }
 
-export function formatCurrencyTotalsAsInteger(totals: CurrencyTotal[]): string {
-  return formatCurrencyTotals(totals, true);
+export function formatCurrencyTotalsAsInteger(totals: CurrencyTotal[], fallbackSymbol: string = "$"): string {
+  return formatCurrencyTotals(totals, fallbackSymbol);
 }
 
 export function mergeCurrencyTotals(...totalsArrays: CurrencyTotal[][]): CurrencyTotal[] {

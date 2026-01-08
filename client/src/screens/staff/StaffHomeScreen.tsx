@@ -220,7 +220,7 @@ export function StaffHomeScreen() {
       icon: Shirt,
       color: 'info',
       screen: 'staff-laundry' as const,
-      subtitle: formatCurrencyTotals(earnings.laundryByCurrency),
+      subtitle: formatCurrencyTotals(earnings.laundryByCurrency, symbol),
     },
     {
       id: 'expenses',
@@ -228,7 +228,7 @@ export function StaffHomeScreen() {
       icon: Receipt,
       color: 'destructive',
       screen: 'staff-expenses' as const,
-      subtitle: formatCurrencyTotals(staffExpensesByCurrency),
+      subtitle: formatCurrencyTotals(staffExpensesByCurrency, symbol),
     },
     {
       id: 'reports',
@@ -236,7 +236,7 @@ export function StaffHomeScreen() {
       icon: ClipboardList,
       color: 'muted',
       screen: 'staff-reports' as const,
-      subtitle: formatCurrencyTotals(totalEarningsByCurrency),
+      subtitle: formatCurrencyTotals(totalEarningsByCurrency, symbol),
     },
     {
       id: 'documents',
@@ -429,7 +429,7 @@ export function StaffHomeScreen() {
                 onClick={() => handleModuleClick('reports', 'staff-reports')}
                 data-testid="card-overview-wage-earnings"
               >
-                <p className="text-xl font-bold text-success">{formatCurrencyTotals(earnings.earningsByCurrency)}</p>
+                <p className="text-xl font-bold text-success">{formatCurrencyTotals(earnings.earningsByCurrency, symbol)}</p>
                 <p className="text-[10px] text-muted-foreground">{tLabel('thisMonthWageEarnings', 'Wage/Salary')}</p>
               </Card>
               <Card 
@@ -437,7 +437,7 @@ export function StaffHomeScreen() {
                 onClick={() => handleModuleClick('laundry', 'staff-laundry')}
                 data-testid="card-overview-laundry-earnings"
               >
-                <p className="text-xl font-bold text-info">{formatCurrencyTotals(earnings.laundryByCurrency)}</p>
+                <p className="text-xl font-bold text-info">{formatCurrencyTotals(earnings.laundryByCurrency, symbol)}</p>
                 <p className="text-[10px] text-muted-foreground">{tLabel('thisMonthLaundryEarnings', 'Laundry Jobs')}</p>
               </Card>
             </div>
