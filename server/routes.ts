@@ -1006,7 +1006,11 @@ function authenticateToken(req: Request, res: Response, next: Function) {
 
   jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
     if (err) {
-      return apiError(res, 403, ERROR_CODES.AUTHORIZATION_DENIED, "Invalid or expired token");
+      console.error("JWT verification failed:", err.name, err.message);
+      const errorMessage = err.name === 'TokenExpiredError' 
+        ? "Session expired. Please log in again."
+        : "Invalid or expired token";
+      return apiError(res, 403, ERROR_CODES.AUTHORIZATION_DENIED, errorMessage, { tokenExpired: err.name === 'TokenExpiredError' });
     }
     (req as any).user = decoded;
     next();
