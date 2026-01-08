@@ -184,7 +184,6 @@ Home Staff 360 is not intended for children under 13 years of age. We do not kno
 
 We may update this Privacy Policy from time to time. We will notify you of significant changes through:
 
-- In-app notifications
 - Updated "Last Updated" date at the top of this policy
 
 Your continued use of the app after changes constitutes acceptance of the updated policy.
@@ -195,9 +194,7 @@ Your continued use of the app after changes constitutes acceptance of the update
 
 If you have questions, concerns, or requests regarding your privacy:
 
-**Email**: privacy@homestaff360.app
-
-**In-App**: Settings > Feedback > Privacy Inquiry
+**Email**: privacy@homestaff360.com
 
 We will respond to privacy-related inquiries within 30 days.
 

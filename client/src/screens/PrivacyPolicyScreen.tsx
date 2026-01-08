@@ -279,7 +279,6 @@ export function PrivacyPolicyScreen() {
               We may update this Privacy Policy from time to time. We will notify you of significant changes through:
             </p>
             <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
-              <li>In-app notifications</li>
               <li>Updated &quot;Last Updated&quot; date at the top of this policy</li>
             </ul>
             <p className="text-sm text-muted-foreground">Your continued use of the app after changes constitutes acceptance of the updated policy.</p>
@@ -293,10 +292,7 @@ export function PrivacyPolicyScreen() {
               If you have questions, concerns, or requests regarding your privacy:
             </p>
             <p className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">Email</span>: privacy@homestaff360.app
-            </p>
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">In-App</span>: Settings &gt; Feedback &gt; Privacy Inquiry
+              <span className="font-medium text-foreground">Email</span>: privacy@homestaff360.com
             </p>
             <p className="text-sm text-muted-foreground">We will respond to privacy-related inquiries within 30 days.</p>
           </section>
