@@ -1803,16 +1803,43 @@ router.get("/api/admin/stats", authenticateAdmin, async (req: Request, res: Resp
 
 router.get("/api/admin/users", authenticateAdmin, async (req: Request, res: Response) => {
   try {
-    const { page = "1", limit = "50", search } = req.query;
+    const { page = "1", limit = "50", name, phone, userType, isVerified, isActive } = req.query;
     const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+    const limitNum = parseInt(limit as string);
+
+    const conditions: SQL[] = [];
+    
+    if (name && typeof name === 'string' && name.trim()) {
+      conditions.push(sql`LOWER(${serverUsers.displayName}) LIKE LOWER(${'%' + name.trim() + '%'})`);
+    }
+    if (phone && typeof phone === 'string' && phone.trim()) {
+      conditions.push(sql`${serverUsers.phone} LIKE ${'%' + phone.trim() + '%'}`);
+    }
+    if (userType && typeof userType === 'string' && userType !== 'all') {
+      conditions.push(eq(serverUsers.userType, userType));
+    }
+    if (isVerified !== undefined && isVerified !== 'all') {
+      conditions.push(eq(serverUsers.isVerified, isVerified === 'true'));
+    }
+    if (isActive !== undefined && isActive !== 'all') {
+      conditions.push(eq(serverUsers.isActive, isActive === 'true'));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const users = await db.query.serverUsers.findMany({
-      limit: parseInt(limit as string),
+      where: whereClause,
+      limit: limitNum,
       offset,
       orderBy: desc(serverUsers.createdAt)
     });
 
-    const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(serverUsers);
+    const countQuery = conditions.length > 0
+      ? db.select({ count: sql<number>`count(*)` }).from(serverUsers).where(whereClause)
+      : db.select({ count: sql<number>`count(*)` }).from(serverUsers);
+    const [countResult] = await countQuery;
+
+    const totalPages = Math.ceil(Number(countResult.count) / limitNum);
 
     res.json({
       users: users.map(u => ({
@@ -1828,7 +1855,8 @@ router.get("/api/admin/users", authenticateAdmin, async (req: Request, res: Resp
       })),
       total: Number(countResult.count),
       page: parseInt(page as string),
-      limit: parseInt(limit as string)
+      limit: limitNum,
+      totalPages
     });
   } catch (error) {
     console.error("Admin get users error:", error);

@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, Smartphone, Link2, Activity, Search, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Archive } from "lucide-react";
+import { Users, Smartphone, Link2, Activity, Search, Download, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Archive, Phone, User } from "lucide-react";
 import * as XLSX from "xlsx";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 
@@ -67,33 +67,23 @@ export default function AdminDashboard() {
   const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [adminUser, setAdminUser] = useState<any>(null);
 
-  const [searchText, setSearchText] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [usernameSearch, setUsernameSearch] = useState("");
+  const [phoneSearch, setPhoneSearch] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState({ username: "", phone: "" });
   const [userTypeFilter, setUserTypeFilter] = useState<string>("all");
   const [isVerifiedFilter, setIsVerifiedFilter] = useState<string>("all");
   const [isActiveFilter, setIsActiveFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
-  const [limit] = useState(100);
+  const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-    debounceTimeoutRef.current = setTimeout(() => {
-      setDebouncedSearch(searchText);
-      setPage(1);
-    }, 300);
-
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, [searchText]);
+  const handleSearch = () => {
+    setAppliedSearch({ username: usernameSearch, phone: phoneSearch });
+    setPage(1);
+    setHasSearched(true);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
@@ -116,7 +106,7 @@ export default function AdminDashboard() {
     if (token) {
       fetchUsers(token);
     }
-  }, [debouncedSearch, userTypeFilter, isVerifiedFilter, isActiveFilter, page]);
+  }, [appliedSearch, userTypeFilter, isVerifiedFilter, isActiveFilter, page]);
 
   const fetchInitialData = async (token: string) => {
     try {
@@ -157,8 +147,11 @@ export default function AdminDashboard() {
       params.set("limit", limit.toString());
       params.set("page", page.toString());
       
-      if (debouncedSearch) {
-        params.set("search", debouncedSearch);
+      if (appliedSearch.username) {
+        params.set("name", appliedSearch.username);
+      }
+      if (appliedSearch.phone) {
+        params.set("phone", appliedSearch.phone);
       }
       if (userTypeFilter !== "all") {
         params.set("userType", userTypeFilter);
@@ -190,7 +183,7 @@ export default function AdminDashboard() {
     } finally {
       setIsUsersLoading(false);
     }
-  }, [debouncedSearch, userTypeFilter, isVerifiedFilter, isActiveFilter, page, limit]);
+  }, [appliedSearch, userTypeFilter, isVerifiedFilter, isActiveFilter, page, limit]);
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
@@ -333,93 +326,75 @@ export default function AdminDashboard() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Card className="p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Users</p>
+                <p className="text-xl font-bold" data-testid="text-total-users">{stats?.totalUsers || 0}</p>
+                <p className="text-[10px] text-muted-foreground">{stats?.verifiedUsers || 0} verified</p>
+              </div>
               <Users className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" data-testid="text-total-users">
-                {stats?.totalUsers || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {stats?.verifiedUsers || 0} verified
-              </p>
-            </CardContent>
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-              <CardTitle className="text-sm font-medium">Devices</CardTitle>
+          <Card className="p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Devices</p>
+                <p className="text-xl font-bold" data-testid="text-total-devices">{stats?.totalDevices || 0}</p>
+                <p className="text-[10px] text-muted-foreground">Registered</p>
+              </div>
               <Smartphone className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" data-testid="text-total-devices">
-                {stats?.totalDevices || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">Registered</p>
-            </CardContent>
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-              <CardTitle className="text-sm font-medium">Collaborations</CardTitle>
+          <Card className="p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Collaborations</p>
+                <p className="text-xl font-bold" data-testid="text-total-links">{stats?.totalLinks || 0}</p>
+                <p className="text-[10px] text-muted-foreground">{stats?.activeLinks || 0} active</p>
+              </div>
               <Link2 className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" data-testid="text-total-links">
-                {stats?.totalLinks || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {stats?.activeLinks || 0} active
-              </p>
-            </CardContent>
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-              <CardTitle className="text-sm font-medium">Status</CardTitle>
+          <Card className="p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Status</p>
+                <p className="text-xl font-bold text-green-600">Online</p>
+                <p className="text-[10px] text-muted-foreground">Server running</p>
+              </div>
               <Activity className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">Online</div>
-              <p className="text-xs text-muted-foreground">Server running</p>
-            </CardContent>
+            </div>
           </Card>
         </div>
 
         {backupStats && (
-          <Card className="cursor-pointer hover-elevate" onClick={() => setLocation("/admin/backups")}>
-            <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <Card className="cursor-pointer hover-elevate p-3" onClick={() => setLocation("/admin/backups")}>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2 text-sm font-medium">
                 <Archive className="w-4 h-4" />
                 Backup Statistics
-              </CardTitle>
-              <Badge variant="secondary" data-testid="badge-backup-total">{backupStats.total} total</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-green-600" data-testid="text-backup-completed">
-                    {backupStats.completed}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Completed</p>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-yellow-600" data-testid="text-backup-pending">
-                    {backupStats.pending}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Pending</p>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-red-600" data-testid="text-backup-failed">
-                    {backupStats.failed}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Failed</p>
-                </div>
               </div>
-            </CardContent>
+              <Badge variant="secondary" className="text-xs" data-testid="badge-backup-total">{backupStats.total} total</Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <p className="text-lg font-bold text-green-600" data-testid="text-backup-completed">{backupStats.completed}</p>
+                <p className="text-[10px] text-muted-foreground">Completed</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-yellow-600" data-testid="text-backup-pending">{backupStats.pending}</p>
+                <p className="text-[10px] text-muted-foreground">Pending</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-red-600" data-testid="text-backup-failed">{backupStats.failed}</p>
+                <p className="text-[10px] text-muted-foreground">Failed</p>
+              </div>
+            </div>
           </Card>
         )}
 
@@ -428,15 +403,34 @@ export default function AdminDashboard() {
             <CardTitle>Users</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by phone or name..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="pl-10"
-                data-testid="input-search-users"
-              />
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="relative flex-1 min-w-[150px]">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Username"
+                  value={usernameSearch}
+                  onChange={(e) => setUsernameSearch(e.target.value)}
+                  className="pl-10"
+                  data-testid="input-search-username"
+                />
+              </div>
+              <div className="relative flex-1 min-w-[150px]">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Phone (with country code)"
+                  value={phoneSearch}
+                  onChange={(e) => setPhoneSearch(e.target.value)}
+                  className="pl-10"
+                  data-testid="input-search-phone"
+                />
+              </div>
+              <Button
+                onClick={handleSearch}
+                data-testid="button-search"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Search
+              </Button>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
@@ -504,8 +498,16 @@ export default function AdminDashboard() {
                     </tr>
                   ) : users.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-4 text-center text-muted-foreground">
-                        No users found
+                      <td colSpan={5} className="py-8 text-center text-muted-foreground">
+                        {hasSearched ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <Search className="w-8 h-8 text-muted-foreground/50" />
+                            <p>No matching records found</p>
+                            <p className="text-xs">Try adjusting your search criteria</p>
+                          </div>
+                        ) : (
+                          "No users found"
+                        )}
                       </td>
                     </tr>
                   ) : (
