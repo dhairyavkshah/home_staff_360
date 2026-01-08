@@ -413,7 +413,7 @@ export function StaffLogAttendanceScreen() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t("editAttendance") || "Edit Attendance"}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("editAttendanceConfirm") || "An attendance record already exists for this date. Do you want to update it with the new values?"}
+              Confirm editing attendance
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
