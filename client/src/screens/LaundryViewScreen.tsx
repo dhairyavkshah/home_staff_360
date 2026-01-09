@@ -337,7 +337,7 @@ export function LaundryViewScreen() {
                         )}
                       </div>
                       
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {batch.personId && <span>{getPersonName(batch.personId)}</span>}
                         {batch.provider && <span> • {batch.provider}</span>}
                       </p>

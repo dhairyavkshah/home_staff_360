@@ -321,10 +321,10 @@ export function StaffHomeScreen() {
                     className="flex items-center gap-2"
                     data-testid={`menu-item-account-${account.id}`}
                   >
-                    <Briefcase className="w-4 h-4" />
-                    <span className="flex-1">{account.name}</span>
+                    <Briefcase className="w-4 h-4 flex-shrink-0" />
+                    <span className="flex-1 truncate">{account.name}</span>
                     {account.id === activeAccountId && (
-                      <Check className="w-4 h-4 text-primary" />
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
                     )}
                   </DropdownMenuItem>
                 ))}
@@ -393,9 +393,9 @@ export function StaffHomeScreen() {
                     <div className={`${getHaloClass(module.color)} w-9 h-9`}>
                       <Icon className={`w-4.5 h-4.5 ${getIconClass(module.color)}`} />
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">{module.title}</p>
-                      <p className="text-xs text-muted-foreground">{module.subtitle}</p>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{module.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{module.subtitle}</p>
                     </div>
                   </div>
                 </Card>
@@ -441,7 +441,7 @@ export function StaffHomeScreen() {
                 <p className="text-[10px] text-muted-foreground">{tLabel('thisMonthWageEarnings', 'Wage/Salary')}</p>
               </Card>
               <Card 
-                className="p-2.5 text-center hover-elevate cursor-pointer"
+                className="p-4 text-center hover-elevate cursor-pointer"
                 onClick={() => handleModuleClick('laundry', 'staff-laundry')}
                 data-testid="card-overview-laundry-earnings"
               >

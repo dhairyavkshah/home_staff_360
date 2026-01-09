@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
 import { formatDistanceToNow } from "date-fns";
 import { useRealtime, useRealtimeChat, useRealtimeConnection } from "@/hooks/use-realtime";
+import { getErrorMessage, TIMING, FILE_SIZE } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +76,31 @@ interface ChatInfo {
   }>;
 }
 
+interface RealtimeMessageEvent {
+  id?: string;
+  chatId?: string;
+  senderId?: string;
+  content?: string;
+  messageType?: string;
+  createdAt?: string;
+}
+
+interface RealtimeMessageReceivedEvent {
+  chatId?: string;
+  message?: RealtimeMessageEvent;
+}
+
+interface RealtimeMessageUpdateEvent {
+  chatId?: string;
+  messageId?: string;
+  content?: string;
+  editedAt?: string;
+}
+
+interface RealtimeChatClearedEvent {
+  chatId?: string;
+}
+
 export function ChatScreen() {
   const { goBack } = useNavigation();
   const { chatId } = useNavigationData<{ chatId?: string }>();
@@ -106,26 +132,23 @@ export function ChatScreen() {
   useRealtimeConnection();
   useRealtimeChat(chatId || null);
 
-  // Force re-render every 10 seconds to update edit timer
   useEffect(() => {
-    const interval = setInterval(() => setTick(t => t + 1), 10000);
+    const interval = setInterval(() => setTick(t => t + 1), TIMING.CHAT_MESSAGE_REFRESH_MS);
     return () => clearInterval(interval);
   }, []);
 
-  const handleNewMessage = useCallback((message: any) => {
-    console.log("[ChatScreen] Received chat:new-message:", message);
+  const handleNewMessage = useCallback((message: RealtimeMessageEvent) => {
     const messageChatId = String(message.chatId);
     if (messageChatId !== chatId) return;
     
     setMessages((prev) => {
       const messageId = String(message.id);
       if (prev.some((m) => m.id === messageId)) return prev;
-      return [...prev, { ...message, id: messageId, chatId: messageChatId, isOwn: false }];
+      return [...prev, { ...message, id: messageId, chatId: messageChatId, isOwn: false } as Message];
     });
   }, [chatId]);
 
-  const handleMessageReceived = useCallback((data: any) => {
-    console.log("[ChatScreen] Received chat:message-received:", data);
+  const handleMessageReceived = useCallback((data: RealtimeMessageReceivedEvent) => {
     const message = data.message;
     if (!message) return;
     const messageChatId = String(data.chatId || message.chatId);
@@ -134,29 +157,25 @@ export function ChatScreen() {
     setMessages((prev) => {
       const messageId = String(message.id);
       if (prev.some((m) => m.id === messageId)) return prev;
-      return [...prev, { ...message, id: messageId, chatId: messageChatId, isOwn: false }];
+      return [...prev, { ...message, id: messageId, chatId: messageChatId, isOwn: false } as Message];
     });
   }, [chatId]);
 
-  const handleMessageUpdated = useCallback((data: any) => {
-    console.log("[ChatScreen] Received chat:message-updated:", data);
+  const handleMessageUpdated = useCallback((data: RealtimeMessageUpdateEvent) => {
     const { messageId, content, editedAt } = data;
     const messageChatId = String(data.chatId);
     if (!messageId) return;
-    // Only update if this is the current chat
     if (messageChatId !== chatId) return;
     
     setMessages((prev) => prev.map((m) => 
-      m.id === messageId ? { ...m, content, isEdited: true, editedAt } : m
+      m.id === messageId ? { ...m, content: content || '', isEdited: true, editedAt } : m
     ));
   }, [chatId]);
 
-  const handleMessageDeleted = useCallback((data: any) => {
-    console.log("[ChatScreen] Received chat:message-deleted:", data);
+  const handleMessageDeleted = useCallback((data: RealtimeMessageUpdateEvent) => {
     const { messageId } = data;
     const messageChatId = String(data.chatId);
     if (!messageId) return;
-    // Only update if this is the current chat
     if (messageChatId !== chatId) return;
     
     setMessages((prev) => prev.map((m) => 
@@ -164,12 +183,10 @@ export function ChatScreen() {
     ));
   }, [chatId]);
 
-  const handleChatCleared = useCallback((data: any) => {
-    console.log("[ChatScreen] Received chat:cleared:", data);
+  const handleChatCleared = useCallback((data: RealtimeChatClearedEvent) => {
     const clearedChatId = String(data.chatId);
     if (clearedChatId !== chatId) return;
     
-    // Clear all messages when chat is cleared
     setMessages([]);
     toast({
       title: "Chat cleared",
@@ -288,10 +305,10 @@ export function ChatScreen() {
       ));
 
       toast({ title: "Message edited" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to edit message",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -315,10 +332,10 @@ export function ChatScreen() {
       ));
 
       toast({ title: "Message deleted" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to delete message",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     }
@@ -332,11 +349,10 @@ export function ChatScreen() {
     const file = e.target.files?.[0];
     if (!file || !chatId) return;
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > FILE_SIZE.MAX_CHAT_ATTACHMENT_MB * FILE_SIZE.BYTES_PER_MB) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 5MB",
+        description: `Maximum file size is ${FILE_SIZE.MAX_CHAT_ATTACHMENT_MB}MB`,
         variant: "destructive",
       });
       return;

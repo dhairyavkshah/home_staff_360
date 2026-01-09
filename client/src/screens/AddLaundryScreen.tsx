@@ -280,7 +280,6 @@ export function AddLaundryScreen() {
             title: "Laundry synced", 
             description: "Laundry batch shared with linked staff member" 
           });
-          console.log("[AddLaundryScreen] Laundry synced with collaboration service");
         }
       } catch (err) {
         console.error("[AddLaundryScreen] Failed to sync laundry:", err);

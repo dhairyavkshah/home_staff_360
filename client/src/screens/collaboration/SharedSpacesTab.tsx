@@ -34,6 +34,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
 import { storage } from "@/lib/storage";
+import { getErrorMessage } from "@/lib/utils";
+import type { Account } from "@shared/schema";
 
 interface SharedSpace {
   id: string;
@@ -132,7 +134,7 @@ export function SharedSpacesTab() {
     }
 
     const localItems = createType === "household" ? households : businesses;
-    const localItem = localItems.find((item: any) => item.name === createName || item.id === createName);
+    const localItem = localItems.find((item: Account) => item.name === createName || item.id === createName);
     
     if (!localItem) {
       toast({
@@ -160,10 +162,10 @@ export function SharedSpacesTab() {
       setShowCreateDialog(false);
       setCreateName("");
       loadData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Failed",
-        description: error.message || "Failed to create shared space",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -197,10 +199,10 @@ export function SharedSpacesTab() {
       setShowInviteDialog(false);
       setSelectedConnection("");
       loadData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Failed",
-        description: error.message || "Failed to send invitation",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -462,7 +464,7 @@ export function SharedSpacesTab() {
                 </SelectTrigger>
                 <SelectContent>
                   {(createType === "household" ? households : businesses).map(
-                    (item: any) => (
+                    (item: Account) => (
                       <SelectItem key={item.id} value={item.id}>
                         {item.name}
                       </SelectItem>

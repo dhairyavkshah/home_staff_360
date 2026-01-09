@@ -77,8 +77,7 @@ export function AttendanceScreen() {
   useEffect(() => {
     if (!isAuthenticated) return;
     
-    const unsubscribe = realtimeService.on("collab:attendance-update", (data) => {
-      console.log("[AttendanceScreen] Received attendance update:", data);
+    const unsubscribe = realtimeService.on("collab:attendance-update", () => {
       fetchBindings();
       setRefreshKey(prev => prev + 1);
     });
@@ -319,11 +318,11 @@ export function AttendanceScreen() {
 
       <ScrollContent>
         <div className="flex items-center justify-between gap-2">
-          <Button size="icon" variant="ghost" onClick={prevMonth} data-testid="button-prev-month">
+          <Button size="icon" variant="ghost" onClick={prevMonth} data-testid="button-prev-month" aria-label="Previous month">
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <span className="font-semibold text-lg">{monthName}</span>
-          <Button size="icon" variant="ghost" onClick={nextMonth} data-testid="button-next-month">
+          <Button size="icon" variant="ghost" onClick={nextMonth} data-testid="button-next-month" aria-label="Next month">
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
@@ -456,6 +455,10 @@ export function AttendanceScreen() {
                         key={person.id} 
                         className="flex items-center gap-3 p-4 rounded-lg border bg-card hover-elevate cursor-pointer"
                         onClick={() => handlePersonClick(person.id)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePersonClick(person.id); } }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Mark attendance for ${person.name}, ${person.role}${record ? `, current status: ${record.status === 'FULL' ? 'Full day' : record.status === 'HALF' ? 'Half day' : 'Absent'}` : ', not marked'}`}
                         data-testid={`staff-attendance-${person.id}`}
                       >
                         <div className="icon-halo-primary w-9 h-9 shrink-0 relative">
@@ -478,7 +481,7 @@ export function AttendanceScreen() {
                               <span className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground">{person.role}</p>
+                          <p className="text-xs text-muted-foreground truncate">{person.role}</p>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {isPending && (

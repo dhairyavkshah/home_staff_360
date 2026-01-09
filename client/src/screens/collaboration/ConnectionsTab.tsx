@@ -19,6 +19,7 @@ import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
 import { storage } from "@/lib/storage";
 import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
+import { getErrorMessage } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -151,8 +152,9 @@ export function ConnectionsTab() {
           description: "No registered user found with this phone number",
         });
       }
-    } catch (error: any) {
-      if (error.message?.includes("429")) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
+      if (message.includes("429")) {
         toast({
           title: "Rate Limited",
           description: "Too many searches. Please wait a moment.",
@@ -201,10 +203,10 @@ export function ConnectionsTab() {
       setSearchPhone("");
       setSearchResult(null);
       loadData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Failed",
-        description: error.message || "Failed to send request",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {

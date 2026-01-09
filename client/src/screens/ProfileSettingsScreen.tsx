@@ -25,6 +25,7 @@ import { collaborationService } from "@/lib/collaboration-service";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { storage } from "@/lib/storage";
 import { useDirtyForm } from "@/lib/dirty-tracking";
+import { getErrorMessage, TIMING } from "@/lib/utils";
 
 type ProfileStep = "view" | "edit-name" | "change-password" | "change-phone" | "verify-phone" | "clear-all-data" | "delete-account";
 
@@ -100,10 +101,10 @@ export function ProfileSettingsScreen() {
         });
         setDisplayName(data.displayName || "");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: "Failed to load profile",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -118,7 +119,7 @@ export function ProfileSettingsScreen() {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (cooldown > 0) {
-      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      timer = setTimeout(() => setCooldown(cooldown - 1), TIMING.COOLDOWN_TICK_MS);
     }
     return () => clearTimeout(timer);
   }, [cooldown]);
@@ -157,10 +158,10 @@ export function ProfileSettingsScreen() {
         setProfile(prev => prev ? { ...prev, displayName: displayName.trim() } : null);
         setStep("view");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to update name",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -207,10 +208,10 @@ export function ProfileSettingsScreen() {
         setNewPassword("");
         setConfirmPassword("");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to change password",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -245,10 +246,10 @@ export function ProfileSettingsScreen() {
         setCooldown(result.expiresIn ? Math.min(result.expiresIn, 60) : 60);
         setStep("verify-phone");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to request phone change",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -277,10 +278,10 @@ export function ProfileSettingsScreen() {
         setPhonePassword("");
         setOtp("");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to verify phone change",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -309,10 +310,10 @@ export function ProfileSettingsScreen() {
         localStorage.clear();
         navigate("auth");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to delete account",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -347,10 +348,10 @@ export function ProfileSettingsScreen() {
           variant: "destructive",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: t("error"),
-        description: error.message || t("clearAllDataFailed"),
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -544,6 +545,8 @@ export function ProfileSettingsScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -566,6 +569,8 @@ export function ProfileSettingsScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -588,6 +593,8 @@ export function ProfileSettingsScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -661,6 +668,7 @@ export function ProfileSettingsScreen() {
                       size="icon"
                       className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </Button>
@@ -793,6 +801,8 @@ export function ProfileSettingsScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -873,6 +883,8 @@ export function ProfileSettingsScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>

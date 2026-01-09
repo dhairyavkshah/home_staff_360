@@ -91,10 +91,11 @@ export function ApprovalDetailScreen() {
   const currentMode = profile?.type || "HOME";
   const isOnline = syncQueue.isOnline();
 
-  // Local cache keys for offline support
   const CACHE_KEY = `hm_shared_records_cache`;
 
-  function getCachedRecord(type: string, id: string): { record: any; revisions: any[] } | null {
+  type CachedRecordData = AttendanceRecord | LaundryRecord | null;
+  
+  function getCachedRecord(type: string, id: string): { record: CachedRecordData; revisions: RevisionHistoryItem[] } | null {
     try {
       const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
       return cache[`${type}_${id}`] || null;
@@ -103,7 +104,7 @@ export function ApprovalDetailScreen() {
     }
   }
 
-  function setCachedRecord(type: string, id: string, record: any, revisions: any[]) {
+  function setCachedRecord(type: string, id: string, record: CachedRecordData, revisions: RevisionHistoryItem[]) {
     try {
       const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
       cache[`${type}_${id}`] = { record, revisions, cachedAt: new Date().toISOString() };

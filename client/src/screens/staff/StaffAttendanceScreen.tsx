@@ -85,8 +85,7 @@ export function StaffAttendanceScreen() {
   useEffect(() => {
     if (!isAuthenticated) return;
     
-    const unsubscribe = realtimeService.on("collab:attendance-update", (data) => {
-      console.log("[StaffAttendanceScreen] Received attendance update:", data);
+    const unsubscribe = realtimeService.on("collab:attendance-update", () => {
       fetchBindings();
       refresh();
     });

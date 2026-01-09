@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
+import { getErrorMessage, TIMING } from "@/lib/utils";
 
 type AuthStep = "phone" | "password" | "otp" | "set-password" | "reset-otp" | "reset-password";
 
@@ -52,7 +53,7 @@ export function AuthScreen() {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (cooldown > 0) {
-      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      timer = setTimeout(() => setCooldown(cooldown - 1), TIMING.COOLDOWN_TICK_MS);
     }
     return () => clearTimeout(timer);
   }, [cooldown]);
@@ -80,10 +81,10 @@ export function AuthScreen() {
         await handleRequestOtp();
         setStep("otp");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to check phone number",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -113,10 +114,10 @@ export function AuthScreen() {
           });
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to send OTP",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -152,10 +153,10 @@ export function AuthScreen() {
         await handleRequestOtp();
         setStep("otp");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid credentials",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -187,10 +188,10 @@ export function AuthScreen() {
           navigate("launcher");
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Verification Failed",
-        description: error.message || "Invalid OTP",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -237,10 +238,10 @@ export function AuthScreen() {
           navigate("launcher");
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to set password",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -263,10 +264,10 @@ export function AuthScreen() {
           description: "Check your phone for the password reset code",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to send reset code",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -287,10 +288,10 @@ export function AuthScreen() {
           description: "Check your phone for the password reset code",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to send reset code",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -320,10 +321,10 @@ export function AuthScreen() {
           variant: "destructive",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Verification Failed",
-        description: error.message || "Failed to verify reset code",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -365,10 +366,10 @@ export function AuthScreen() {
         
         navigate("launcher");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Reset Failed",
-        description: error.message || "Failed to reset password",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -468,6 +469,8 @@ export function AuthScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -678,6 +681,8 @@ export function AuthScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -705,6 +710,8 @@ export function AuthScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -770,6 +777,8 @@ export function AuthScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -797,6 +806,8 @@ export function AuthScreen() {
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPassword(!showPassword); } }}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />

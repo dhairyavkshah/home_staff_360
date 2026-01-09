@@ -384,10 +384,14 @@ export function AddPersonScreen() {
             <div 
               className="relative w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover-elevate overflow-hidden border-2 border-dashed border-muted-foreground/30"
               onClick={() => setShowPhotoDialog(true)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPhotoDialog(true); } }}
+              role="button"
+              tabIndex={0}
+              aria-label={photoData ? "Change staff photo" : "Add staff photo"}
               data-testid="button-photo-upload"
             >
               {photoData ? (
-                <img src={photoData} alt="Staff photo" className="w-full h-full object-cover" />
+                <img src={photoData} alt={name ? `Photo of ${name}` : "Staff member photo"} className="w-full h-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center gap-1">
                   <Camera className="w-6 h-6 text-muted-foreground" />

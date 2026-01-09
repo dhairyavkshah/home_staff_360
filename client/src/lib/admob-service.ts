@@ -42,7 +42,6 @@ class AdMobService {
     }
 
     if (!this.isNativeEnvironment) {
-      console.log("[AdMob] Not a native platform, skipping initialization");
       return false;
     }
 
@@ -60,7 +59,6 @@ class AdMobService {
 
       this.setupListeners();
       this.initialized = true;
-      console.log("[AdMob] Initialized successfully");
       return true;
     } catch (error) {
       console.error("[AdMob] Failed to initialize:", error);
@@ -88,40 +86,12 @@ class AdMobService {
   }
 
   private setupListeners(): void {
-    AdMob.addListener(InterstitialAdPluginEvents.Loaded, (info: AdLoadInfo) => {
-      console.log("[AdMob] Interstitial ad loaded");
-    });
-
-    AdMob.addListener(InterstitialAdPluginEvents.Showed, () => {
-      console.log("[AdMob] Interstitial ad shown");
-    });
-
-    AdMob.addListener(InterstitialAdPluginEvents.Dismissed, () => {
-      console.log("[AdMob] Interstitial ad dismissed");
-    });
-
     AdMob.addListener(InterstitialAdPluginEvents.FailedToLoad, (error) => {
       console.error("[AdMob] Interstitial ad failed to load:", error);
     });
 
     AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error) => {
       console.error("[AdMob] Interstitial ad failed to show:", error);
-    });
-
-    AdMob.addListener(RewardAdPluginEvents.Loaded, (info: AdLoadInfo) => {
-      console.log("[AdMob] Rewarded ad loaded");
-    });
-
-    AdMob.addListener(RewardAdPluginEvents.Showed, () => {
-      console.log("[AdMob] Rewarded ad shown");
-    });
-
-    AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward) => {
-      console.log("[AdMob] User earned reward:", reward);
-    });
-
-    AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
-      console.log("[AdMob] Rewarded ad dismissed");
     });
 
     AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error) => {

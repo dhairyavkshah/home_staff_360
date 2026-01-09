@@ -235,7 +235,6 @@ export function AddTransactionScreen() {
           note: description.trim(),
           recordCurrency: recordCurrency || person?.currency || settings.currency,
         });
-        console.log("[AddTransactionScreen] Payment synced with collaboration service");
       } catch (err) {
         console.error("[AddTransactionScreen] Failed to sync payment:", err);
         // Don't block the transaction from being saved, just log the error

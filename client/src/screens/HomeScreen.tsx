@@ -247,10 +247,10 @@ export function HomeScreen() {
                     className="flex items-center gap-2"
                     data-testid={`menu-item-account-${account.id}`}
                   >
-                    <Home className="w-4 h-4" />
-                    <span className="flex-1">{account.name}</span>
+                    <Home className="w-4 h-4 flex-shrink-0" />
+                    <span className="flex-1 truncate">{account.name}</span>
                     {account.id === activeAccountId && (
-                      <Check className="w-4 h-4 text-primary" />
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
                     )}
                   </DropdownMenuItem>
                 ))}
@@ -264,6 +264,7 @@ export function HomeScreen() {
               onClick={() => navigate("notification-center")}
               data-testid="button-notifications"
               className="relative"
+              aria-label="Notifications"
             >
               <Bell className="h-5 w-5" />
               {unreadNotificationCount > 0 && (
@@ -277,6 +278,7 @@ export function HomeScreen() {
               size="icon"
               onClick={() => navigate("collaboration-hub")}
               data-testid="button-collaboration"
+              aria-label="Collaboration hub"
             >
               <Link2 className="h-5 w-5" />
             </Button>
@@ -286,6 +288,7 @@ export function HomeScreen() {
               onClick={() => navigate("settings")}
               data-testid="button-settings"
               data-tour-id="tour-settings-button"
+              aria-label="Settings"
             >
               <Settings className="h-5 w-5" />
             </Button>
@@ -312,6 +315,10 @@ export function HomeScreen() {
                   key={module.id}
                   className="p-4 hover-elevate cursor-pointer"
                   onClick={() => handleModuleClick(module.id, module.screen)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleModuleClick(module.id, module.screen); } }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${module.title}: ${module.subtitle}`}
                   data-testid={`card-module-${module.id}`}
                   data-tour-id={tourId}
                 >
@@ -319,9 +326,9 @@ export function HomeScreen() {
                     <div className={`${getHaloClass(module.color)} w-9 h-9`}>
                       <Icon className={`w-4.5 h-4.5 ${getIconClass(module.color)}`} />
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">{module.title}</p>
-                      <p className="text-xs text-muted-foreground">{module.subtitle}</p>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{module.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{module.subtitle}</p>
                     </div>
                   </div>
                 </Card>
@@ -335,6 +342,10 @@ export function HomeScreen() {
               <Card 
                 className="p-4 text-center hover-elevate cursor-pointer"
                 onClick={() => handleModuleClick('staff', 'people')}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleModuleClick('staff', 'people'); } }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Active Staff: ${stats.activeStaff}`}
                 data-testid="card-overview-active-staff"
               >
                 <p className="text-xl font-bold text-primary">{stats.activeStaff}</p>
@@ -343,6 +354,10 @@ export function HomeScreen() {
               <Card 
                 className="p-4 text-center hover-elevate cursor-pointer"
                 onClick={() => handleModuleClick('payables', 'payables')}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleModuleClick('payables', 'payables'); } }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Payable: ${stats?.totalPayableByCurrency?.length > 0 ? formatCurrencyTotals(stats.totalPayableByCurrency, symbol) : formatCurrency(0, settings.currency, settings.customCurrencySymbol)}`}
                 data-testid="card-overview-payable"
               >
                 <p className="text-xl font-bold text-warning">
@@ -355,6 +370,10 @@ export function HomeScreen() {
               <Card 
                 className="p-4 text-center hover-elevate cursor-pointer"
                 onClick={() => handleModuleClick('expenses', 'expenses')}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleModuleClick('expenses', 'expenses'); } }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Bills Due: ${stats?.unpaidBills || 0}`}
                 data-testid="card-overview-bills-due"
               >
                 <p className="text-xl font-bold text-destructive">{stats?.unpaidBills || 0}</p>

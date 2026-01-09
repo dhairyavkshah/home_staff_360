@@ -84,8 +84,7 @@ export function StaffLaundryScreen() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const unsubscribe = realtimeService.on("collab:laundry-update", (data) => {
-      console.log("[StaffLaundryScreen] Received laundry update:", data);
+    const unsubscribe = realtimeService.on("collab:laundry-update", () => {
       fetchBindings();
       refresh();
     });

@@ -15,6 +15,12 @@ import { collaborationService } from "@/lib/collaboration-service";
 import { formatDistanceToNow } from "date-fns";
 import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
 
+interface RealtimeMessageEvent {
+  chatId?: string;
+  content?: string;
+  createdAt?: string;
+}
+
 interface ChatParticipant {
   id: string;
   userId: string;
@@ -44,7 +50,7 @@ export function MessagesTab() {
 
   useRealtimeConnection();
 
-  const handleNewMessage = useCallback((message: any) => {
+  const handleNewMessage = useCallback((message: RealtimeMessageEvent) => {
     setChats((prev) =>
       prev.map((chat) =>
         chat.id === message.chatId
@@ -74,7 +80,7 @@ export function MessagesTab() {
     try {
       const result = await collaborationService.fetchWithAuth("/chats");
       // Transform API response to match client interface
-      const transformedChats = (result.chats || []).map((chat: any) => ({
+      const transformedChats = (result.chats || []).map((chat: Chat & { participants?: ChatParticipant[] }) => ({
         ...chat,
         otherParticipant: chat.participants?.[0] || null,
       }));

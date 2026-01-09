@@ -308,6 +308,12 @@
     @apply min-h-[44px] min-w-[44px];
   }
   
+  /* Accessibility - Focus indicators for custom clickable elements */
+  [role="button"]:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  
   /* Safe area utilities - uses native env() values which the plugin automatically patches */
   .safe-area-top {
     padding-top: env(safe-area-inset-top, 0px);

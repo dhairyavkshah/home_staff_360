@@ -48,8 +48,7 @@ export function PayablesScreen() {
   useEffect(() => {
     if (!isAuthenticated) return;
     
-    const unsubscribe = realtimeService.on("collab:payment-update", (data) => {
-      console.log("[PayablesScreen] Received payment update:", data);
+    const unsubscribe = realtimeService.on("collab:payment-update", () => {
       fetchBindings();
       setRefreshKey(prev => prev + 1);
     });

@@ -1,7 +1,8 @@
 import { useMemo, useState, useRef } from "react";
 import { FolderOpen, FileText, Image, File, Trash2, Eye, Download } from "lucide-react";
 import { Header } from "@/components/layout/Header";
-import { compressImage, formatBytes, MAX_FILE_SIZE } from "@/lib/imageCompression";
+import { compressImage, MAX_FILE_SIZE } from "@/lib/imageCompression";
+import { formatFileSize } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -137,11 +138,6 @@ export function StaffDocumentsScreen() {
     return File;
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
 
   return (
     <div className="h-screen flex flex-col bg-background" data-testid="screen-staff-documents">

@@ -75,8 +75,7 @@ export function StaffEarningsScreen() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const unsubscribe = realtimeService.on("collab:payment-update", (data) => {
-      console.log("[StaffEarningsScreen] Received payment update:", data);
+    const unsubscribe = realtimeService.on("collab:payment-update", () => {
       fetchBindings();
       refresh();
     });

@@ -213,28 +213,24 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const onNotification = (data: NotificationPayload) => {
-      console.log("[RealtimeProvider] Received notification:", data);
       if (notificationHandlerRef.current) {
         notificationHandlerRef.current(data);
       }
     };
 
     const onMessage = (data: MessagePayload) => {
-      console.log("[RealtimeProvider] Received message:", data);
       if (messageHandlerRef.current) {
         messageHandlerRef.current(data);
       }
     };
 
     const onInviteReceived = (data: ConnectionPayload) => {
-      console.log("[RealtimeProvider] Received invite:", data);
       if (inviteReceivedHandlerRef.current) {
         inviteReceivedHandlerRef.current(data);
       }
     };
 
     const onConnectionStatusChanged = (data: ConnectionPayload) => {
-      console.log("[RealtimeProvider] Connection status changed:", data);
       if (connectionStatusHandlerRef.current) {
         connectionStatusHandlerRef.current(data);
       }

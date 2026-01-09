@@ -1,7 +1,12 @@
 import { storage } from "./storage";
+import { getErrorMessage } from "./utils";
 
 const APP_NAME = "Home Staff 360";
 const RP_ID = window.location.hostname || "localhost";
+
+function isDOMException(error: unknown): error is DOMException {
+  return error instanceof DOMException;
+}
 
 interface BiometricSettings {
   enabled: boolean;
@@ -268,15 +273,17 @@ export const biometricService = {
       });
 
       return { success: true };
-    } catch (e: any) {
-      console.error("Biometric enrollment error:", e);
-      if (e.name === "NotAllowedError") {
-        return { success: false, error: "Biometric enrollment was cancelled" };
+    } catch (error: unknown) {
+      console.error("Biometric enrollment error:", error);
+      if (isDOMException(error)) {
+        if (error.name === "NotAllowedError") {
+          return { success: false, error: "Biometric enrollment was cancelled" };
+        }
+        if (error.name === "SecurityError") {
+          return { success: false, error: "Security error during enrollment" };
+        }
       }
-      if (e.name === "SecurityError") {
-        return { success: false, error: "Security error during enrollment" };
-      }
-      return { success: false, error: e.message || "Failed to enroll biometric" };
+      return { success: false, error: getErrorMessage(error) };
     }
   },
 
@@ -312,12 +319,12 @@ export const biometricService = {
       }
 
       return { success: true };
-    } catch (e: any) {
-      console.error("Biometric authentication error:", e);
-      if (e.name === "NotAllowedError") {
+    } catch (error: unknown) {
+      console.error("Biometric authentication error:", error);
+      if (isDOMException(error) && error.name === "NotAllowedError") {
         return { success: false, error: "Biometric authentication was cancelled" };
       }
-      return { success: false, error: e.message || "Authentication failed" };
+      return { success: false, error: getErrorMessage(error) };
     }
   },
 

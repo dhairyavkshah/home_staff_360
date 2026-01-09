@@ -128,8 +128,7 @@ export function SafeAreaProvider({ children }: SafeAreaProviderProps) {
       }
 
       setTimeout(() => {
-        const insets = refreshInsets();
-        console.log('[SafeArea] Initialized with insets:', insets);
+        refreshInsets();
         setIsReady(true);
       }, 300);
     }

@@ -7,6 +7,7 @@ import { Lock, X, Fingerprint, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NumericKeypad } from "@/components/ui/numeric-keypad";
 import { useTranslation } from "@/lib/i18n/i18n-context";
+import { getErrorMessage, TIMING } from "@/lib/utils";
 
 interface PinEntryScreenProps {
   onSuccess?: () => void;
@@ -57,7 +58,7 @@ export function PinEntryScreen({
     };
     
     checkLockout();
-    const interval = setInterval(checkLockout, 1000);
+    const interval = setInterval(checkLockout, TIMING.COOLDOWN_TICK_MS);
     return () => clearInterval(interval);
   }, []);
 
@@ -97,7 +98,7 @@ export function PinEntryScreen({
           }
           setPin("");
         }
-      }, 150);
+      }, TIMING.BUTTON_FEEDBACK_MS);
     }
   };
 
@@ -121,8 +122,8 @@ export function PinEntryScreen({
       } else {
         setError(result.error || t("biometricAuthFailed"));
       }
-    } catch (err: any) {
-      setError(err.message || t("biometricAuthFailed"));
+    } catch (error: unknown) {
+      setError(getErrorMessage(error));
     }
   };
 
