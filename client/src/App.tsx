@@ -20,6 +20,7 @@ import AdminBackups from "@/pages/admin/AdminBackups";
 import AdminRolesPage from "@/pages/admin/AdminRolesPage";
 import AdminTeamPage from "@/pages/admin/AdminTeamPage";
 import AdminMaintenance from "@/pages/admin/AdminMaintenance";
+import AdminAds from "@/pages/admin/AdminAds";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 
 import { SplashScreen } from "@/screens/SplashScreen";
@@ -249,6 +250,7 @@ function AdminApp() {
       <TooltipProvider>
         <Switch>
           <Route path="/admin/dashboard" component={AdminDashboard} />
+          <Route path="/admin/ads" component={AdminAds} />
           <Route path="/admin/admins" component={AdminManagement} />
           <Route path="/admin/backups" component={AdminBackups} />
           <Route path="/admin/maintenance" component={AdminMaintenance} />

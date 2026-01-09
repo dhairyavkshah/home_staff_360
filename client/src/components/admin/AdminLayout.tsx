@@ -49,6 +49,7 @@ import {
   Moon,
   Monitor,
   Home,
+  Megaphone,
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -63,6 +64,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
+  { title: "Ad Management", url: "/admin/ads", icon: Megaphone },
   { title: "Team", url: "/admin/team", icon: UsersRound },
   { title: "Roles & Permissions", url: "/admin/roles", icon: Shield },
   { title: "Admin Users", url: "/admin/admins", icon: UserCog },
