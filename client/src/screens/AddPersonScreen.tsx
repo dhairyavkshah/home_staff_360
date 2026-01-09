@@ -263,6 +263,13 @@ export function AddPersonScreen() {
     if (!name.trim()) newErrors.name = "Name is required";
     if (!role.trim()) newErrors.role = "Role is required";
     
+    // Block submission if phone check is still in progress
+    if (!noPhone && isCheckingPhone) {
+      newErrors.phone = "Please wait while we verify this phone number";
+      setErrors(newErrors);
+      return false;
+    }
+    
     // Skip phone validation if noPhone is checked
     if (!noPhone) {
       if (!phone.trim() || phone.replace(/\D/g, "").length < 10) {
