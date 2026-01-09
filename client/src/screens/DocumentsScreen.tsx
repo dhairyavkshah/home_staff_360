@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { FolderOpen, FileText, Image, File, Trash2, Eye, Link2, Download } from "lucide-react";
 import { Header } from "@/components/layout/Header";
-import { compressImage, formatBytes } from "@/lib/imageCompression";
+import { compressImage } from "@/lib/imageCompression";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -92,12 +92,9 @@ export function DocumentsScreen() {
         fileData: result.dataUrl,
       });
 
-      const savedSpace = result.originalSize - compressedSize;
       toast({
         title: tLabel('success', 'Success'),
-        description: savedSpace > 1024 
-          ? `Document added. Saved ${formatBytes(savedSpace)} with compression.`
-          : tLabel('documentAdded', 'Document added successfully'),
+        description: tLabel('documentAdded', 'Document added successfully'),
       });
 
       setShowAddDialog(false);

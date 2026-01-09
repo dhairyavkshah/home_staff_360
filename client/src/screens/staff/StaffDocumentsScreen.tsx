@@ -1,7 +1,7 @@
 import { useMemo, useState, useRef } from "react";
 import { FolderOpen, FileText, Image, File, Trash2, Eye, Download } from "lucide-react";
 import { Header } from "@/components/layout/Header";
-import { compressImage, formatBytes } from "@/lib/imageCompression";
+import { compressImage, formatBytes, MAX_FILE_SIZE } from "@/lib/imageCompression";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -71,10 +71,10 @@ export function StaffDocumentsScreen() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > MAX_FILE_SIZE) {
         toast({
           title: tLabel('error', 'Error'),
-          description: tLabel('fileTooLarge', 'File size must be less than 5MB'),
+          description: tLabel('fileTooLarge', 'File size must be less than 20 MB'),
           variant: 'destructive',
         });
         return;
@@ -102,12 +102,9 @@ export function StaffDocumentsScreen() {
         fileData: result.dataUrl,
       });
 
-      const savedSpace = result.originalSize - compressedSize;
       toast({
         title: tLabel('success', 'Success'),
-        description: savedSpace > 1024 
-          ? `Document added. Saved ${formatBytes(savedSpace)} with compression.`
-          : tLabel('documentAdded', 'Document added successfully'),
+        description: tLabel('documentAdded', 'Document added successfully'),
       });
 
       setShowAddDialog(false);

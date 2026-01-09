@@ -5,6 +5,7 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { getSafeAreaValues, getAvailableViewportHeight } from "@/hooks/use-keyboard-safe-area"
 
 const Select = SelectPrimitive.Root
 
@@ -67,32 +68,21 @@ const SelectScrollDownButton = React.forwardRef<
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName
 
+const DEFAULT_SAFE_AREA_PADDING = { top: 80, bottom: 80, left: 16, right: 16 };
+
 function getSafeAreaPadding() {
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
-    return { top: 80, bottom: 80, left: 16, right: 16 };
+  try {
+    const safeAreas = getSafeAreaValues();
+    
+    return { 
+      top: safeAreas.top + 24, 
+      bottom: safeAreas.bottom + 80,
+      left: 16, 
+      right: 16 
+    };
+  } catch {
+    return DEFAULT_SAFE_AREA_PADDING;
   }
-  
-  const style = getComputedStyle(document.documentElement);
-  const topValue = style.getPropertyValue('--app-safe-area-top')?.trim();
-  const bottomValue = style.getPropertyValue('--app-safe-area-bottom')?.trim();
-  
-  // Parse values, stripping 'px' suffix if present
-  const parseValue = (val: string | undefined): number => {
-    if (!val) return 0;
-    const cleaned = val.replace('px', '').trim();
-    const parsed = parseInt(cleaned, 10);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  };
-  
-  const safeTop = parseValue(topValue);
-  const safeBottom = parseValue(bottomValue);
-  
-  return { 
-    top: Math.max(safeTop, 48) + 24, 
-    bottom: Math.max(safeBottom, 48) + 24, 
-    left: 16, 
-    right: 16 
-  };
 }
 
 const SelectContent = React.forwardRef<
@@ -100,9 +90,32 @@ const SelectContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => {
   const [safeAreaPadding, setSafeAreaPadding] = React.useState({ top: 80, bottom: 80, left: 16, right: 16 });
+  const [maxHeight, setMaxHeight] = React.useState<string | undefined>(undefined);
   
   React.useEffect(() => {
-    setSafeAreaPadding(getSafeAreaPadding());
+    const updateSafeAreas = () => {
+      try {
+        const padding = getSafeAreaPadding();
+        setSafeAreaPadding(padding);
+        
+        const availableHeight = getAvailableViewportHeight();
+        const maxH = availableHeight - padding.top - padding.bottom;
+        setMaxHeight(`${Math.max(maxH, 200)}px`);
+      } catch {
+        setSafeAreaPadding(DEFAULT_SAFE_AREA_PADDING);
+      }
+    };
+    
+    updateSafeAreas();
+    
+    try {
+      if (typeof window !== 'undefined' && window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateSafeAreas);
+        return () => window.visualViewport?.removeEventListener('resize', updateSafeAreas);
+      }
+    } catch {
+      // Ignore errors in SSR contexts
+    }
   }, []);
   
   return (
@@ -119,6 +132,7 @@ const SelectContent = React.forwardRef<
         sideOffset={8}
         collisionPadding={safeAreaPadding}
         avoidCollisions={true}
+        style={{ maxHeight }}
         {...props}
       >
         <SelectScrollUpButton />

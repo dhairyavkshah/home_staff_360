@@ -2,49 +2,60 @@ import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 import { cn } from "@/lib/utils"
+import { getSafeAreaValues, getAvailableViewportHeight } from "@/hooks/use-keyboard-safe-area"
 
 const Popover = PopoverPrimitive.Root
 
 const PopoverTrigger = PopoverPrimitive.Trigger
 
+const DEFAULT_SAFE_AREA_PADDING = { top: 80, bottom: 80, left: 16, right: 16 };
+
 function getSafeAreaPadding() {
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
-    return { top: 80, bottom: 80, left: 16, right: 16 };
+  try {
+    const safeAreas = getSafeAreaValues();
+    
+    return { 
+      top: safeAreas.top + 24, 
+      bottom: safeAreas.bottom + 80,
+      left: 16, 
+      right: 16 
+    };
+  } catch {
+    return DEFAULT_SAFE_AREA_PADDING;
   }
-  
-  const style = getComputedStyle(document.documentElement);
-  const topValue = style.getPropertyValue('--app-safe-area-top')?.trim();
-  const bottomValue = style.getPropertyValue('--app-safe-area-bottom')?.trim();
-  
-  // Parse values, stripping 'px' suffix if present
-  const parseValue = (val: string | undefined): number => {
-    if (!val) return 0;
-    const cleaned = val.replace('px', '').trim();
-    const parsed = parseInt(cleaned, 10);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  };
-  
-  const safeTop = parseValue(topValue);
-  const safeBottom = parseValue(bottomValue);
-  
-  // Use larger minimum values to ensure dropdowns stay within visible area
-  // Samsung devices typically need at least 48px for status bar area + padding
-  return { 
-    top: Math.max(safeTop, 48) + 24, 
-    bottom: Math.max(safeBottom, 48) + 24, 
-    left: 16, 
-    right: 16 
-  };
 }
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
->(({ className, align = "center", sideOffset = 4, collisionPadding, ...props }, ref) => {
-  const [safeAreaPadding, setSafeAreaPadding] = React.useState({ top: 60, bottom: 60, left: 16, right: 16 });
+>(({ className, align = "center", sideOffset = 4, collisionPadding, style, ...props }, ref) => {
+  const [safeAreaPadding, setSafeAreaPadding] = React.useState({ top: 80, bottom: 80, left: 16, right: 16 });
+  const [maxHeight, setMaxHeight] = React.useState<string | undefined>(undefined);
   
   React.useEffect(() => {
-    setSafeAreaPadding(getSafeAreaPadding());
+    const updateSafeAreas = () => {
+      try {
+        const padding = getSafeAreaPadding();
+        setSafeAreaPadding(padding);
+        
+        const availableHeight = getAvailableViewportHeight();
+        const maxH = availableHeight - padding.top - padding.bottom;
+        setMaxHeight(`${Math.max(maxH, 200)}px`);
+      } catch {
+        setSafeAreaPadding(DEFAULT_SAFE_AREA_PADDING);
+      }
+    };
+    
+    updateSafeAreas();
+    
+    try {
+      if (typeof window !== 'undefined' && window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateSafeAreas);
+        return () => window.visualViewport?.removeEventListener('resize', updateSafeAreas);
+      }
+    } catch {
+      // Ignore errors in SSR contexts
+    }
   }, []);
 
   return (
@@ -56,9 +67,10 @@ const PopoverContent = React.forwardRef<
         collisionPadding={collisionPadding ?? safeAreaPadding}
         avoidCollisions={true}
         className={cn(
-          "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-popover-content-transform-origin]",
+          "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-popover-content-transform-origin]",
           className
         )}
+        style={{ maxHeight, ...style }}
         {...props}
       />
     </PopoverPrimitive.Portal>

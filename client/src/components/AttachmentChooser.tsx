@@ -21,7 +21,7 @@ export function AttachmentChooser({
   open,
   onOpenChange,
   onFileSelected,
-  maxSizeMB = 5,
+  maxSizeMB = 20,
 }: AttachmentChooserProps) {
   const { tLabel } = useTranslation();
   const { toast } = useToast();
@@ -34,7 +34,7 @@ export function AttachmentChooser({
       if (file.size > maxSizeMB * 1024 * 1024) {
         toast({
           title: tLabel('error', 'Error'),
-          description: tLabel('fileTooLarge', `File size must be less than ${maxSizeMB}MB`),
+          description: tLabel('fileTooLarge', `File size must be less than ${maxSizeMB} MB`),
           variant: 'destructive',
         });
         return;

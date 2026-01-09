@@ -264,6 +264,16 @@ home-staff-360/
 - Normalizes phone numbers for accurate comparison
 - Shows existing person's name in error message
 
+### File Size Limits Update
+- Increased maximum file size for documents and images from 5 MB to 20 MB
+- Removed automatic image compression for files under 20 MB
+- Files are now stored at full quality without resizing
+
+### Android Safe Area Improvements
+- Modals, drawers, and sheets now properly respect Android safe areas when keyboard is open
+- Select dropdowns and popovers dynamically adjust to keyboard visibility
+- All UI components avoid bleeding into Android status bar and navigation bar
+
 ### Bug Fixes
 - Fixed "All contexts" mode for notes display
 - Fixed pin toggle synchronization in view mode

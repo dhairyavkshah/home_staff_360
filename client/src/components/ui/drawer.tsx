@@ -4,6 +4,7 @@ import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "@/lib/utils"
+import { getSafeAreaValues } from "@/hooks/use-keyboard-safe-area"
 
 const Drawer = ({
   shouldScaleBackground = true,
@@ -34,25 +35,58 @@ const DrawerOverlay = React.forwardRef<
 ))
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
+const DEFAULT_SAFE_AREAS = { top: 48, bottom: 0 };
+
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DrawerPortal>
-    <DrawerOverlay />
-    <DrawerPrimitive.Content
-      ref={ref}
-      className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-xl border bg-background",
-        className
-      )}
-      {...props}
-    >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
-      {children}
-    </DrawerPrimitive.Content>
-  </DrawerPortal>
-))
+>(({ className, children, style, ...props }, ref) => {
+  const [safeAreas, setSafeAreas] = React.useState(DEFAULT_SAFE_AREAS);
+
+  React.useEffect(() => {
+    const updateSafeAreas = () => {
+      try {
+        setSafeAreas(getSafeAreaValues());
+      } catch {
+        setSafeAreas(DEFAULT_SAFE_AREAS);
+      }
+    };
+    updateSafeAreas();
+    
+    try {
+      if (typeof window !== 'undefined' && window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateSafeAreas);
+        return () => window.visualViewport?.removeEventListener('resize', updateSafeAreas);
+      }
+    } catch {
+      // Ignore errors in SSR contexts
+    }
+  }, []);
+
+  return (
+    <DrawerPortal>
+      <DrawerOverlay />
+      <DrawerPrimitive.Content
+        ref={ref}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-xl border bg-background",
+          className
+        )}
+        style={{
+          maxHeight: `calc(100vh - ${safeAreas.top + 16}px)`,
+          paddingBottom: `${Math.max(safeAreas.bottom, 16)}px`,
+          ...style,
+        }}
+        {...props}
+      >
+        <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+        <div className="flex-1 overflow-y-auto">
+          {children}
+        </div>
+      </DrawerPrimitive.Content>
+    </DrawerPortal>
+  );
+})
 DrawerContent.displayName = "DrawerContent"
 
 const DrawerHeader = ({

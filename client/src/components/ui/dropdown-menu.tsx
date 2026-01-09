@@ -3,6 +3,7 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { getSafeAreaValues, getAvailableViewportHeight } from "@/hooks/use-keyboard-safe-area"
 
 const DropdownMenu = DropdownMenuPrimitive.Root
 
@@ -54,44 +55,54 @@ const DropdownMenuSubContent = React.forwardRef<
 DropdownMenuSubContent.displayName =
   DropdownMenuPrimitive.SubContent.displayName
 
+const DEFAULT_SAFE_AREA_PADDING = { top: 80, bottom: 80, left: 16, right: 16 };
+
 function getSafeAreaPadding() {
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
-    return { top: 80, bottom: 80, left: 16, right: 16 };
+  try {
+    const safeAreas = getSafeAreaValues();
+    
+    return { 
+      top: safeAreas.top + 24, 
+      bottom: safeAreas.bottom + 80,
+      left: 16, 
+      right: 16 
+    };
+  } catch {
+    return DEFAULT_SAFE_AREA_PADDING;
   }
-  
-  const style = getComputedStyle(document.documentElement);
-  const topValue = style.getPropertyValue('--app-safe-area-top')?.trim();
-  const bottomValue = style.getPropertyValue('--app-safe-area-bottom')?.trim();
-  
-  // Parse values, stripping 'px' suffix if present
-  const parseValue = (val: string | undefined): number => {
-    if (!val) return 0;
-    const cleaned = val.replace('px', '').trim();
-    const parsed = parseInt(cleaned, 10);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  };
-  
-  const safeTop = parseValue(topValue);
-  const safeBottom = parseValue(bottomValue);
-  
-  // Use larger minimum values to ensure dropdowns stay within visible area
-  // Samsung devices typically need at least 48px for status bar area + padding
-  return { 
-    top: Math.max(safeTop, 48) + 24, 
-    bottom: Math.max(safeBottom, 48) + 24, 
-    left: 16, 
-    right: 16 
-  };
 }
 
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, collisionPadding, ...props }, ref) => {
-  const [safeAreaPadding, setSafeAreaPadding] = React.useState({ top: 60, bottom: 60, left: 16, right: 16 });
+>(({ className, sideOffset = 4, collisionPadding, style, ...props }, ref) => {
+  const [safeAreaPadding, setSafeAreaPadding] = React.useState({ top: 80, bottom: 80, left: 16, right: 16 });
+  const [maxHeight, setMaxHeight] = React.useState<string | undefined>(undefined);
   
   React.useEffect(() => {
-    setSafeAreaPadding(getSafeAreaPadding());
+    const updateSafeAreas = () => {
+      try {
+        const padding = getSafeAreaPadding();
+        setSafeAreaPadding(padding);
+        
+        const availableHeight = getAvailableViewportHeight();
+        const maxH = availableHeight - padding.top - padding.bottom;
+        setMaxHeight(`${Math.max(maxH, 200)}px`);
+      } catch {
+        setSafeAreaPadding(DEFAULT_SAFE_AREA_PADDING);
+      }
+    };
+    
+    updateSafeAreas();
+    
+    try {
+      if (typeof window !== 'undefined' && window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateSafeAreas);
+        return () => window.visualViewport?.removeEventListener('resize', updateSafeAreas);
+      }
+    } catch {
+      // Ignore errors in SSR contexts
+    }
   }, []);
 
   return (
@@ -102,9 +113,10 @@ const DropdownMenuContent = React.forwardRef<
         collisionPadding={collisionPadding ?? safeAreaPadding}
         avoidCollisions={true}
         className={cn(
-          "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
+          "z-50 min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
           className
         )}
+        style={{ maxHeight, ...style }}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
