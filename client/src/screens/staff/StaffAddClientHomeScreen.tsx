@@ -273,6 +273,23 @@ export function StaffAddClientHomeScreen() {
     if (currency === "OTHER" && !customCurrencySymbol.trim()) {
       newErrors.customCurrencySymbol = "Custom symbol required";
     }
+    // Check for duplicate phone number among client homes
+    if (contactPhone.trim()) {
+      const normalizedPhone = contactPhone.trim().replace(/\D/g, "");
+      if (normalizedPhone.length >= 10) {
+        const existingHomes = storage.getClientHomes();
+        const duplicate = existingHomes.find((h) => {
+          // Skip current client in edit mode
+          if (editMode && data.clientHomeId && h.id === data.clientHomeId) return false;
+          // Normalize existing phone for comparison
+          const existingNormalized = (h.contactPhone || "").replace(/\D/g, "");
+          return existingNormalized === normalizedPhone;
+        });
+        if (duplicate) {
+          newErrors.contactPhone = `A client with this phone number already exists (${duplicate.name})`;
+        }
+      }
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

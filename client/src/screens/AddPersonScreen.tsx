@@ -237,6 +237,20 @@ export function AddPersonScreen() {
     if (!role.trim()) newErrors.role = "Role is required";
     if (!phone.trim() || phone.replace(/\D/g, "").length < 10) {
       newErrors.phone = "Valid phone number required (10+ digits)";
+    } else {
+      // Check for duplicate phone number
+      const normalizedPhone = phone.trim().replace(/\D/g, "");
+      const existingPeople = storage.getPeople();
+      const duplicate = existingPeople.find((p) => {
+        // Skip current person in edit mode
+        if (editMode && data.personId && p.id === data.personId) return false;
+        // Normalize existing phone for comparison
+        const existingNormalized = p.phone.replace(/\D/g, "");
+        return existingNormalized === normalizedPhone;
+      });
+      if (duplicate) {
+        newErrors.phone = `A staff member with this phone number already exists (${duplicate.name})`;
+      }
     }
     const baseRateNum = parseInt(baseRate, 10);
     if (baseRate === "" || isNaN(baseRateNum) || baseRateNum < 1 || !Number.isInteger(parseFloat(baseRate))) {
