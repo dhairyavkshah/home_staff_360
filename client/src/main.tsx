@@ -45,4 +45,36 @@ window.addEventListener('error', (event) => {
 initSoundService();
 initSafeArea();
 
+// Remove Replit dev banner elements (for mobile/production builds)
+function removeDevBanners() {
+  const selectors = [
+    '[data-replit-dev-banner]',
+    '#replit-dev-banner',
+    '.replit-dev-banner',
+    '[data-replit-runtime-error-modal]',
+    '#replit-runtime-error-modal',
+    '.__replit_dev_banner__'
+  ];
+  
+  selectors.forEach(selector => {
+    const elements = document.querySelectorAll(selector);
+    elements.forEach(el => el.remove());
+  });
+  
+  // Also check for fixed positioned divs at top without id/class (common dev overlay pattern)
+  const allDivs = document.querySelectorAll('body > div');
+  allDivs.forEach(div => {
+    const style = window.getComputedStyle(div);
+    if (style.position === 'fixed' && style.top === '0px' && 
+        !div.id && !div.className && div !== document.getElementById('root')) {
+      div.remove();
+    }
+  });
+}
+
+// Run immediately and after short delay to catch dynamically injected banners
+removeDevBanners();
+setTimeout(removeDevBanners, 100);
+setTimeout(removeDevBanners, 500);
+
 createRoot(document.getElementById("root")!).render(<App />);

@@ -677,3 +677,19 @@
     max-height: calc(var(--available-height, 100vh) - var(--app-safe-area-top, 48px) - 100px);
   }
 }
+
+/* Hide Replit dev banner in production/mobile builds */
+[data-replit-dev-banner],
+#replit-dev-banner,
+.replit-dev-banner,
+[data-replit-runtime-error-modal],
+#replit-runtime-error-modal,
+.__replit_dev_banner__,
+body > div[style*="position: fixed"][style*="top: 0"][style*="z-index"]:first-of-type:not([id]):not([class]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
