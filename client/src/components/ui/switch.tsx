@@ -1,17 +1,19 @@
 import * as React from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
-import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
 import { cn } from "@/lib/utils"
 
 const triggerHaptic = () => {
   try {
-    if ((window as any).Capacitor?.isNativePlatform?.()) {
-      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {
-        // Silently fail if haptics not available
-      });
-    }
-  } catch (e) {
+    const capacitor = (window as any).Capacitor;
+    if (!capacitor) return;
+    if (typeof capacitor.isNativePlatform !== 'function') return;
+    if (!capacitor.isNativePlatform()) return;
+    
+    import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+    }).catch(() => {});
+  } catch {
     // Silently fail
   }
 };

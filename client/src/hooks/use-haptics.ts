@@ -1,43 +1,47 @@
-import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
-
 const isNativePlatform = () => {
   try {
-    return typeof window !== 'undefined' && 
-      (window as any).Capacitor?.isNativePlatform?.() === true;
+    const capacitor = (window as any).Capacitor;
+    if (!capacitor) return false;
+    if (typeof capacitor.isNativePlatform !== 'function') return false;
+    return capacitor.isNativePlatform() === true;
   } catch {
     return false;
   }
 };
 
 export const useHaptics = () => {
-  const impact = (style: ImpactStyle = ImpactStyle.Light) => {
+  const impact = (style: 'Light' | 'Medium' | 'Heavy' = 'Light') => {
     if (!isNativePlatform()) return;
     try {
-      Haptics.impact({ style }).catch(() => {
-        // Silently fail if haptics not available
-      });
+      import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+        const impactStyle = style === 'Heavy' ? ImpactStyle.Heavy : 
+                           style === 'Medium' ? ImpactStyle.Medium : ImpactStyle.Light;
+        Haptics.impact({ style: impactStyle }).catch(() => {});
+      }).catch(() => {});
     } catch {
-      // Silently fail if haptics not available
+      // Silently fail
     }
   };
 
-  const notification = (type: NotificationType = NotificationType.Success) => {
+  const notification = (type: 'Success' | 'Warning' | 'Error' = 'Success') => {
     if (!isNativePlatform()) return;
     try {
-      Haptics.notification({ type }).catch(() => {
-        // Silently fail if haptics not available
-      });
+      import('@capacitor/haptics').then(({ Haptics, NotificationType }) => {
+        const notifType = type === 'Error' ? NotificationType.Error :
+                         type === 'Warning' ? NotificationType.Warning : NotificationType.Success;
+        Haptics.notification({ type: notifType }).catch(() => {});
+      }).catch(() => {});
     } catch {
-      // Silently fail if haptics not available
+      // Silently fail
     }
   };
 
   const selectionStart = () => {
     if (!isNativePlatform()) return;
     try {
-      Haptics.selectionStart().catch(() => {
-        // Silently fail
-      });
+      import('@capacitor/haptics').then(({ Haptics }) => {
+        Haptics.selectionStart().catch(() => {});
+      }).catch(() => {});
     } catch {
       // Silently fail
     }
@@ -46,9 +50,9 @@ export const useHaptics = () => {
   const selectionChanged = () => {
     if (!isNativePlatform()) return;
     try {
-      Haptics.selectionChanged().catch(() => {
-        // Silently fail
-      });
+      import('@capacitor/haptics').then(({ Haptics }) => {
+        Haptics.selectionChanged().catch(() => {});
+      }).catch(() => {});
     } catch {
       // Silently fail
     }
@@ -57,20 +61,20 @@ export const useHaptics = () => {
   const selectionEnd = () => {
     if (!isNativePlatform()) return;
     try {
-      Haptics.selectionEnd().catch(() => {
-        // Silently fail
-      });
+      import('@capacitor/haptics').then(({ Haptics }) => {
+        Haptics.selectionEnd().catch(() => {});
+      }).catch(() => {});
     } catch {
       // Silently fail
     }
   };
 
-  const lightTap = () => impact(ImpactStyle.Light);
-  const mediumTap = () => impact(ImpactStyle.Medium);
-  const heavyTap = () => impact(ImpactStyle.Heavy);
-  const successNotification = () => notification(NotificationType.Success);
-  const warningNotification = () => notification(NotificationType.Warning);
-  const errorNotification = () => notification(NotificationType.Error);
+  const lightTap = () => impact('Light');
+  const mediumTap = () => impact('Medium');
+  const heavyTap = () => impact('Heavy');
+  const successNotification = () => notification('Success');
+  const warningNotification = () => notification('Warning');
+  const errorNotification = () => notification('Error');
 
   return {
     impact,
@@ -86,5 +90,3 @@ export const useHaptics = () => {
     errorNotification,
   };
 };
-
-export { ImpactStyle, NotificationType };

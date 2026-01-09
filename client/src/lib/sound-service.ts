@@ -1,6 +1,3 @@
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
-import { Capacitor } from '@capacitor/core';
-
 let hapticEnabled = true;
 let soundEnabled = true;
 let lastPlayTime = 0;
@@ -77,21 +74,29 @@ function playPopSound(): void {
   }
 }
 
+function triggerHaptic(style: 'Light' | 'Medium' = 'Light'): void {
+  try {
+    const capacitor = (window as any).Capacitor;
+    if (!capacitor) return;
+    if (typeof capacitor.isNativePlatform !== 'function') return;
+    if (!capacitor.isNativePlatform()) return;
+    
+    import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+      const impactStyle = style === 'Medium' ? ImpactStyle.Medium : ImpactStyle.Light;
+      Haptics.impact({ style: impactStyle }).catch(() => {});
+    }).catch(() => {});
+  } catch {
+    // Silently fail
+  }
+}
+
 export function playClickSound(): void {
   const now = Date.now();
   if (now - lastPlayTime < MIN_INTERVAL) return;
   lastPlayTime = now;
 
   if (hapticEnabled) {
-    try {
-      if ((window as any).Capacitor?.isNativePlatform?.()) {
-        Haptics.impact({ style: ImpactStyle.Light }).catch(() => {
-          // Silently fail if haptics not available
-        });
-      }
-    } catch {
-      // Silently fail
-    }
+    triggerHaptic('Light');
   }
 
   if (soundEnabled) {
@@ -101,15 +106,7 @@ export function playClickSound(): void {
 
 export function playSuccessSound(): void {
   if (hapticEnabled) {
-    try {
-      if ((window as any).Capacitor?.isNativePlatform?.()) {
-        Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {
-          // Silently fail if haptics not available
-        });
-      }
-    } catch {
-      // Silently fail
-    }
+    triggerHaptic('Medium');
   }
 
   if (soundEnabled) {
