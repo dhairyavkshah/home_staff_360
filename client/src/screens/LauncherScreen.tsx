@@ -71,7 +71,10 @@ export function LauncherScreen() {
           }
         }
       } else if (currentProfile) {
-        if (!hasCompletedPermissions) {
+        // Check if user has selected a role type yet
+        if (!currentProfile.type) {
+          navigate("role-selection");
+        } else if (!hasCompletedPermissions) {
           navigate("permissions", { userType: currentProfile.type });
         } else {
           navigate("onboarding", { userType: currentProfile.type });

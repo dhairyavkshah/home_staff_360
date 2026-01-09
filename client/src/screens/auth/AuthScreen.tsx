@@ -230,7 +230,12 @@ export function AuthScreen() {
           description: "Your account is now secured",
         });
         
-        navigate("launcher");
+        // For new users who need onboarding, go to role selection first
+        if (needsOnboarding) {
+          navigate("role-selection");
+        } else {
+          navigate("launcher");
+        }
       }
     } catch (error: any) {
       toast({
