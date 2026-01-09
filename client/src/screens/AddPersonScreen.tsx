@@ -79,6 +79,24 @@ export function AddPersonScreen() {
   
   // Get user profile for display name
   const profile = storage.getProfile();
+  
+  // Store user's own phone from server for self-phone validation
+  const [userPhoneFromServer, setUserPhoneFromServer] = useState<string>("");
+  
+  // Fetch user's phone from server on mount
+  useEffect(() => {
+    async function fetchUserPhone() {
+      try {
+        const serverProfile = await collaborationService.getProfile();
+        if (serverProfile?.phone) {
+          setUserPhoneFromServer(serverProfile.phone);
+        }
+      } catch (error) {
+        // Silent fail - user may not be logged in
+      }
+    }
+    fetchUserPhone();
+  }, []);
 
   useEffect(() => {
     if (editMode && data.personId) {
@@ -253,9 +271,8 @@ export function AddPersonScreen() {
         const normalizedPhone = phone.trim().replace(/\D/g, "");
         
         // Check if user is trying to add themselves
-        const userPhone = storage.getProfile()?.phone;
-        if (userPhone) {
-          const normalizedUserPhone = userPhone.replace(/\D/g, "");
+        if (userPhoneFromServer) {
+          const normalizedUserPhone = userPhoneFromServer.replace(/\D/g, "");
           if (normalizedPhone === normalizedUserPhone) {
             newErrors.phone = "You cannot add yourself as staff";
           }

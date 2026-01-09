@@ -79,6 +79,24 @@ export function StaffAddClientHomeScreen() {
   const [isSendingInvite, setIsSendingInvite] = useState(false);
   const phoneCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastCheckedPhoneRef = useRef<string>("");
+  
+  // Store user's own phone from server for self-phone validation
+  const [userPhoneFromServer, setUserPhoneFromServer] = useState<string>("");
+  
+  // Fetch user's phone from server on mount
+  useEffect(() => {
+    async function fetchUserPhone() {
+      try {
+        const serverProfile = await collaborationService.getProfile();
+        if (serverProfile?.phone) {
+          setUserPhoneFromServer(serverProfile.phone);
+        }
+      } catch (error) {
+        // Silent fail - user may not be logged in
+      }
+    }
+    fetchUserPhone();
+  }, []);
 
   const cleanPhoneNumber = (phone: string): string => {
     return phone.replace(/\D/g, "");
@@ -143,8 +161,8 @@ export function StaffAddClientHomeScreen() {
     const cleanedPhone = cleanPhoneNumber(value);
     
     // Check if this is the user's own phone number
-    const profilePhone = profile?.phone ? cleanPhoneNumber(profile.phone) : "";
-    if (cleanedPhone.length >= 10 && profilePhone && cleanedPhone === profilePhone) {
+    const normalizedUserPhone = userPhoneFromServer ? cleanPhoneNumber(userPhoneFromServer) : "";
+    if (cleanedPhone.length >= 10 && normalizedUserPhone && cleanedPhone === normalizedUserPhone) {
       setErrors(prev => ({ ...prev, contactPhone: "You cannot add yourself as a client" }));
       setPhoneCheckResult(null);
       lastCheckedPhoneRef.current = "";
@@ -325,8 +343,8 @@ export function StaffAddClientHomeScreen() {
       const normalizedPhone = contactPhone.trim().replace(/\D/g, "");
       if (normalizedPhone.length >= 10) {
         // Check if this is the user's own phone number
-        const profilePhone = profile?.phone ? cleanPhoneNumber(profile.phone) : "";
-        if (profilePhone && normalizedPhone === profilePhone) {
+        const normalizedUserPhone = userPhoneFromServer ? cleanPhoneNumber(userPhoneFromServer) : "";
+        if (normalizedUserPhone && normalizedPhone === normalizedUserPhone) {
           newErrors.contactPhone = "You cannot add yourself as a client";
         } else {
           // Check for duplicate phone number among client homes

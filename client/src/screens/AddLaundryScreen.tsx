@@ -39,6 +39,7 @@ import { useActiveContext } from "@/hooks/use-active-context";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getTodayString, formatCurrency } from "@/lib/calculations";
 import { QuickAddClothModal } from "@/components/laundry/QuickAddClothModal";
+import { collaborationService, type CollaborationBinding } from "@/lib/collaboration-service";
 import { LAUNDRY_SERVICE_TYPES, type LaundryItem, type LaundryServiceType, currencySymbols } from "@shared/schema";
 import type { Person } from "@shared/schema";
 
@@ -199,7 +200,7 @@ export function AddLaundryScreen() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isViewMode) return;
     if (!validate()) return;
 
@@ -227,6 +228,40 @@ export function AddLaundryScreen() {
 
     storage.addLaundry(laundryData);
     toast({ title: "Laundry batch added successfully" });
+
+    // Sync with collaboration service if staff has an active binding
+    if (selectedStaffId && collaborationService.isAuthenticated()) {
+      try {
+        const { bindings } = await collaborationService.getBindings();
+        const activeBinding = (bindings as CollaborationBinding[]).find(
+          (b: CollaborationBinding) => b.homePersonId === selectedStaffId && b.isActive
+        );
+
+        if (activeBinding) {
+          await collaborationService.submitLaundry({
+            bindingId: activeBinding.id,
+            date,
+            items,
+            itemsTotal,
+            pickupDelivery,
+            pickupDeliveryCharge: pickupDelivery ? deliveryCharge : undefined,
+            total,
+            serviceType,
+            recordCurrency: settings.currency,
+          });
+          
+          toast({ 
+            title: "Laundry synced", 
+            description: "Laundry batch shared with linked staff member" 
+          });
+          console.log("[AddLaundryScreen] Laundry synced with collaboration service");
+        }
+      } catch (err) {
+        console.error("[AddLaundryScreen] Failed to sync laundry:", err);
+        // Don't fail the operation if sync fails - local save already succeeded
+      }
+    }
+
     markClean();
     navigate("laundry-view");
   };

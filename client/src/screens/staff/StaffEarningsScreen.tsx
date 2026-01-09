@@ -91,7 +91,7 @@ export function StaffEarningsScreen() {
     try {
       await collaborationService.actionSharedPayment(paymentId, action);
       toast({
-        title: action === "approve" ? (t("paymentApproved") || "Payment approved") : (t("paymentRejected") || "Payment rejected"),
+        title: action === "approve" ? "Payment approved" : "Payment rejected",
       });
       fetchBindings();
     } catch (err) {
@@ -336,7 +336,7 @@ export function StaffEarningsScreen() {
           <section className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Link2 className="w-4 h-4 text-muted-foreground" />
-              <h3 className="font-semibold text-sm">{t("paymentsFromEmployers") || "Payments from Employers"} ({sharedPayments.length})</h3>
+              <h3 className="font-semibold text-sm">Payments from Employers ({sharedPayments.length})</h3>
             </div>
             <div className="flex flex-col gap-3">
               {sharedPayments.map((payment) => {
@@ -345,9 +345,9 @@ export function StaffEarningsScreen() {
                     case "pending":
                       return <Badge variant="secondary" className="text-xs shrink-0" data-testid={`badge-status-${payment.id}`}>{t("pending") || "Pending"}</Badge>;
                     case "approved":
-                      return <Badge variant="default" className="text-xs shrink-0 bg-green-600" data-testid={`badge-status-${payment.id}`}>{t("approved") || "Approved"}</Badge>;
+                      return <Badge variant="default" className="text-xs shrink-0 bg-green-600" data-testid={`badge-status-${payment.id}`}>Approved</Badge>;
                     case "rejected":
-                      return <Badge variant="destructive" className="text-xs shrink-0" data-testid={`badge-status-${payment.id}`}>{t("rejected") || "Rejected"}</Badge>;
+                      return <Badge variant="destructive" className="text-xs shrink-0" data-testid={`badge-status-${payment.id}`}>Rejected</Badge>;
                     default:
                       return null;
                   }

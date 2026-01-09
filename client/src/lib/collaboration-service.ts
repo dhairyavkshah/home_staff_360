@@ -810,4 +810,26 @@ export interface SharedPaymentRecord {
   createdAt: string;
 }
 
+export interface SharedLaundryRecord {
+  id: string;
+  bindingId: string;
+  date: string;
+  items: Array<{ type: string; quantity: number; rate: number }>;
+  itemsTotal: number;
+  pickupDelivery?: boolean;
+  pickupDeliveryCharge?: number;
+  total: number;
+  serviceType?: string;
+  approvalStatus: "pending" | "approved" | "rejected";
+  submittedBy: string;
+  submittedByRole: "HOME" | "STAFF";
+  actionRequiredBy?: string;
+  needsAction?: boolean;
+  recordCurrency?: string;
+  homePersonName?: string;
+  staffClientName?: string;
+  counterpartyName?: string;
+  createdAt: string;
+}
+
 export const collaborationService = new CollaborationService();
