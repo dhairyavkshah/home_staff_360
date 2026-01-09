@@ -74,13 +74,21 @@ function playPopSound(): void {
   }
 }
 
-function triggerHaptic(style: 'Light' | 'Medium' = 'Light'): void {
+// Check once at module load if we're on native platform
+const isNativeApp = (() => {
   try {
     const capacitor = (window as any).Capacitor;
-    if (!capacitor) return;
-    if (typeof capacitor.isNativePlatform !== 'function') return;
-    if (!capacitor.isNativePlatform()) return;
-    
+    return capacitor && typeof capacitor.isNativePlatform === 'function' && capacitor.isNativePlatform() === true;
+  } catch {
+    return false;
+  }
+})();
+
+function triggerHaptic(style: 'Light' | 'Medium' = 'Light'): void {
+  // Only attempt haptics on actual native platform
+  if (!isNativeApp) return;
+  
+  try {
     import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
       const impactStyle = style === 'Medium' ? ImpactStyle.Medium : ImpactStyle.Light;
       Haptics.impact({ style: impactStyle }).catch(() => {});

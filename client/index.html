@@ -18,6 +18,53 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Early error suppression for Capacitor plugins in web mode
+      // Must run before Vite's runtime-error-plugin loads
+      (function() {
+        var originalOnError = window.onerror;
+        window.onerror = function(msg, url, line, col, error) {
+          // Suppress non-Error object errors (common from Capacitor)
+          if (!error || (typeof error === 'object' && !error.message && !error.stack)) {
+            return true;
+          }
+          // Suppress Capacitor-related errors
+          var msgStr = String(msg || '');
+          if (msgStr.includes('Capacitor') || msgStr.includes('Haptics') || 
+              msgStr.includes('not implemented') || msgStr.includes('not available')) {
+            return true;
+          }
+          return originalOnError ? originalOnError(msg, url, line, col, error) : false;
+        };
+        
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = event.reason;
+          // Suppress non-Error rejections
+          if (!reason) {
+            event.preventDefault();
+            return;
+          }
+          if (typeof reason === 'object' && !reason.message && !reason.stack) {
+            event.preventDefault();
+            return;
+          }
+          var reasonStr = String(reason);
+          if (reasonStr.includes('Capacitor') || reasonStr.includes('Haptics') ||
+              reasonStr.includes('not implemented') || reasonStr.includes('not available')) {
+            event.preventDefault();
+            return;
+          }
+        });
+        
+        window.addEventListener('error', function(event) {
+          if (!event.error || (typeof event.error === 'object' && !event.error.message && !event.error.stack)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+          }
+        }, true);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

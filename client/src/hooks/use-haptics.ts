@@ -1,17 +1,16 @@
-const isNativePlatform = () => {
+// Check once at module load if we're on native platform
+const isNativeApp = (() => {
   try {
     const capacitor = (window as any).Capacitor;
-    if (!capacitor) return false;
-    if (typeof capacitor.isNativePlatform !== 'function') return false;
-    return capacitor.isNativePlatform() === true;
+    return capacitor && typeof capacitor.isNativePlatform === 'function' && capacitor.isNativePlatform() === true;
   } catch {
     return false;
   }
-};
+})();
 
 export const useHaptics = () => {
   const impact = (style: 'Light' | 'Medium' | 'Heavy' = 'Light') => {
-    if (!isNativePlatform()) return;
+    if (!isNativeApp) return;
     try {
       import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
         const impactStyle = style === 'Heavy' ? ImpactStyle.Heavy : 
@@ -24,7 +23,7 @@ export const useHaptics = () => {
   };
 
   const notification = (type: 'Success' | 'Warning' | 'Error' = 'Success') => {
-    if (!isNativePlatform()) return;
+    if (!isNativeApp) return;
     try {
       import('@capacitor/haptics').then(({ Haptics, NotificationType }) => {
         const notifType = type === 'Error' ? NotificationType.Error :
@@ -37,7 +36,7 @@ export const useHaptics = () => {
   };
 
   const selectionStart = () => {
-    if (!isNativePlatform()) return;
+    if (!isNativeApp) return;
     try {
       import('@capacitor/haptics').then(({ Haptics }) => {
         Haptics.selectionStart().catch(() => {});
@@ -48,7 +47,7 @@ export const useHaptics = () => {
   };
 
   const selectionChanged = () => {
-    if (!isNativePlatform()) return;
+    if (!isNativeApp) return;
     try {
       import('@capacitor/haptics').then(({ Haptics }) => {
         Haptics.selectionChanged().catch(() => {});
@@ -59,7 +58,7 @@ export const useHaptics = () => {
   };
 
   const selectionEnd = () => {
-    if (!isNativePlatform()) return;
+    if (!isNativeApp) return;
     try {
       import('@capacitor/haptics').then(({ Haptics }) => {
         Haptics.selectionEnd().catch(() => {});
