@@ -65,8 +65,8 @@ export function HomeScreen() {
   }, [refreshKey, showAllContexts, activeAccountId]);
   const hasStaff = activePeople.length > 0;
 
-  const modulesRequiringHousehold = ['staff', 'attendance', 'laundry', 'payables', 'expenses', 'transactions', 'reports', 'documents'];
-  const modulesRequiringStaff = ['attendance', 'laundry', 'payables', 'expenses', 'transactions', 'reports'];
+  const modulesRequiringHousehold = ['staff', 'attendance', 'laundry', 'payables'];
+  const modulesRequiringStaff = ['attendance', 'laundry', 'payables'];
 
   const handleModuleClick = (moduleId: string, screen: string) => {
     if (modulesRequiringHousehold.includes(moduleId) && !hasHouseholds) {

@@ -61,8 +61,8 @@ export function StaffHomeScreen() {
   const hasBusinesses = accounts.length > 0;
   const hasClients = clientHomes.length > 0;
 
-  const modulesRequiringBusiness = ['clients', 'attendance', 'laundry', 'expenses', 'reports', 'documents', 'invoices'];
-  const modulesRequiringClient = ['attendance', 'laundry', 'expenses', 'reports', 'invoices'];
+  const modulesRequiringBusiness = ['clients', 'attendance', 'laundry'];
+  const modulesRequiringClient = ['attendance', 'laundry'];
   
   const isLaundryBusiness = useMemo(() => {
     if (showAllContexts) {
