@@ -1,19 +1,11 @@
 import { useState, useMemo } from "react";
-import { Plus, Pin, Pencil, Trash2, StickyNote } from "lucide-react";
+import { Plus, Pin, Pencil, Trash2, StickyNote, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
@@ -23,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useActiveContext } from "@/hooks/use-active-context";
 import type { Note, NoteColor } from "@shared/schema";
 import { noteColors } from "@shared/schema";
+
+const MAX_CONTENT_LENGTH = 20000;
 
 const colorClasses: Record<NoteColor, string> = {
   yellow: "bg-yellow-100 dark:bg-yellow-900/30",
@@ -42,8 +36,10 @@ const colorPickerClasses: Record<NoteColor, string> = {
   orange: "bg-orange-400",
 };
 
+type ScreenMode = "list" | "view" | "edit";
+
 export function NotesScreen() {
-  const { navigate, goBack } = useNavigation();
+  const { navigate } = useNavigation();
   const { toast } = useToast();
   const { contextLabel, contextMode } = useActiveContext();
   
@@ -58,7 +54,8 @@ export function NotesScreen() {
     return storage.getNotesByAccount(accountId, userType);
   });
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [screenMode, setScreenMode] = useState<ScreenMode>("list");
+  const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   
@@ -83,22 +80,33 @@ export function NotesScreen() {
     });
   }, [notes]);
 
-  const openAddDialog = () => {
+  const openViewMode = (note: Note) => {
+    setViewingNote(note);
+    setScreenMode("view");
+  };
+
+  const openAddMode = () => {
     setEditingNote(null);
     setFormTitle("");
     setFormContent("");
     setFormColor("yellow");
     setFormPinned(false);
-    setDialogOpen(true);
+    setScreenMode("edit");
   };
 
-  const openEditDialog = (note: Note) => {
+  const openEditMode = (note: Note) => {
     setEditingNote(note);
     setFormTitle(note.title || "");
     setFormContent(note.content);
     setFormColor(note.color);
     setFormPinned(note.isPinned);
-    setDialogOpen(true);
+    setScreenMode("edit");
+  };
+
+  const backToList = () => {
+    setScreenMode("list");
+    setViewingNote(null);
+    setEditingNote(null);
   };
 
   const handleSave = () => {
@@ -142,8 +150,8 @@ export function NotesScreen() {
       toast({ title: "Note added" });
     }
 
-    setDialogOpen(false);
     refreshNotes();
+    backToList();
   };
 
   const handleDelete = () => {
@@ -152,6 +160,17 @@ export function NotesScreen() {
       toast({ title: "Note deleted" });
       setDeleteId(null);
       refreshNotes();
+      if (screenMode === "view") {
+        backToList();
+      }
+    }
+  };
+
+  const handleTogglePin = (note: Note) => {
+    storage.toggleNotePin(note.id);
+    refreshNotes();
+    if (viewingNote?.id === note.id) {
+      setViewingNote({ ...note, isPinned: !note.isPinned });
     }
   };
 
@@ -162,103 +181,86 @@ export function NotesScreen() {
 
   const homeScreen = contextMode === "staff" ? "staff-home" : "home";
 
-  return (
-    <AppLayout>
-      <Header
-        title="Notes"
-        subtitle="Quick sticky notes"
-        onBack={() => navigate(homeScreen)}
-        contextLabel={contextLabel}
-        contextMode={contextMode}
-        rightAction={
-          <Button size="icon" onClick={openAddDialog} data-testid="button-add-note">
-            <Plus className="h-5 w-5" />
-          </Button>
-        }
-      />
-
-      <ScrollContent>
-        {sortedNotes.length === 0 ? (
-          <Card className="p-6 flex flex-col items-center gap-3" data-testid="empty-state">
-            <div className="icon-halo-muted w-12 h-12">
-              <StickyNote className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <p className="text-muted-foreground text-sm text-center">
-              No notes yet. Tap the + button to add your first note.
-            </p>
-            <Button onClick={openAddDialog} data-testid="button-add-first-note">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Note
-            </Button>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-2 gap-3" data-testid="notes-grid">
-            {sortedNotes.map((note) => (
-              <div
-                key={note.id}
-                className={`rounded-lg p-3 ${colorClasses[note.color]} relative group`}
-                data-testid={`note-card-${note.id}`}
+  if (screenMode === "view" && viewingNote) {
+    return (
+      <AppLayout>
+        <Header
+          title={viewingNote.title || "Note"}
+          subtitle={viewingNote.isPinned ? "Pinned" : undefined}
+          onBack={backToList}
+          contextLabel={contextLabel}
+          contextMode={contextMode}
+          rightAction={
+            <div className="flex gap-1">
+              <Button 
+                size="icon" 
+                variant="ghost"
+                onClick={() => handleTogglePin(viewingNote)}
+                data-testid="button-toggle-pin"
               >
-                {note.isPinned && (
-                  <Pin 
-                    className="absolute top-2 right-2 h-3.5 w-3.5 text-foreground/60" 
-                    data-testid={`pin-icon-${note.id}`}
-                  />
-                )}
-                
-                {note.title && (
-                  <h3 
-                    className="font-semibold text-sm mb-1 pr-5 line-clamp-1 text-foreground"
-                    data-testid={`note-title-${note.id}`}
-                  >
-                    {note.title}
-                  </h3>
-                )}
-                
-                <p 
-                  className="text-xs text-foreground/80 mb-3 line-clamp-4"
-                  data-testid={`note-content-${note.id}`}
-                >
-                  {truncateContent(note.content)}
-                </p>
-                
-                <div className="flex gap-1 mt-auto">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7"
-                    onClick={() => openEditDialog(note)}
-                    data-testid={`button-edit-note-${note.id}`}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7 text-destructive"
-                    onClick={() => setDeleteId(note.id)}
-                    data-testid={`button-delete-note-${note.id}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+                <Pin className={`h-5 w-5 ${viewingNote.isPinned ? "fill-current" : ""}`} />
+              </Button>
+              <Button 
+                size="icon" 
+                variant="ghost"
+                onClick={() => openEditMode(viewingNote)}
+                data-testid="button-edit-note"
+              >
+                <Pencil className="h-5 w-5" />
+              </Button>
+              <Button 
+                size="icon" 
+                variant="ghost"
+                className="text-destructive"
+                onClick={() => setDeleteId(viewingNote.id)}
+                data-testid="button-delete-note"
+              >
+                <Trash2 className="h-5 w-5" />
+              </Button>
+            </div>
+          }
+        />
+
+        <ScrollContent>
+          <div className={`rounded-lg p-4 ${colorClasses[viewingNote.color]} min-h-[200px]`}>
+            <p 
+              className="text-foreground whitespace-pre-wrap break-words"
+              data-testid="note-full-content"
+            >
+              {viewingNote.content}
+            </p>
           </div>
-        )}
-      </ScrollContent>
+        </ScrollContent>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-sm" data-testid="note-dialog">
-          <DialogHeader>
-            <DialogTitle data-testid="dialog-title">
-              {editingNote ? "Edit Note" : "Add Note"}
-            </DialogTitle>
-            <DialogDescription className="sr-only">
-              {editingNote ? "Edit your note details" : "Create a new sticky note"}
-            </DialogDescription>
-          </DialogHeader>
+        <ConfirmModal
+          open={!!deleteId}
+          onOpenChange={(open) => !open && setDeleteId(null)}
+          title="Delete Note"
+          description="Are you sure you want to delete this note? This action cannot be undone."
+          confirmText="Delete"
+          onConfirm={handleDelete}
+          variant="destructive"
+        />
+      </AppLayout>
+    );
+  }
 
+  if (screenMode === "edit") {
+    return (
+      <AppLayout>
+        <Header
+          title={editingNote ? "Edit Note" : "New Note"}
+          onBack={backToList}
+          contextLabel={contextLabel}
+          contextMode={contextMode}
+          rightAction={
+            <Button size="icon" onClick={handleSave} data-testid="button-save-note">
+              <Check className="h-5 w-5" />
+            </Button>
+          }
+        />
+
+        <ScrollContent>
           <div className="flex flex-col gap-4">
             <div>
               <Label htmlFor="note-title">Title (optional)</Label>
@@ -279,12 +281,13 @@ export function NotesScreen() {
                 value={formContent}
                 onChange={(e) => setFormContent(e.target.value)}
                 placeholder="Write your note..."
-                maxLength={1000}
-                rows={5}
+                maxLength={MAX_CONTENT_LENGTH}
+                rows={12}
+                className="min-h-[200px]"
                 data-testid="input-note-content"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                {formContent.length}/1000 characters
+                {formContent.length.toLocaleString()}/{MAX_CONTENT_LENGTH.toLocaleString()} characters
               </p>
             </div>
 
@@ -318,21 +321,76 @@ export function NotesScreen() {
               />
             </div>
           </div>
+        </ScrollContent>
+      </AppLayout>
+    );
+  }
 
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setDialogOpen(false)}
-              data-testid="button-cancel"
-            >
-              Cancel
+  return (
+    <AppLayout>
+      <Header
+        title="Notes"
+        subtitle="Quick sticky notes"
+        onBack={() => navigate(homeScreen)}
+        contextLabel={contextLabel}
+        contextMode={contextMode}
+        rightAction={
+          <Button size="icon" onClick={openAddMode} data-testid="button-add-note">
+            <Plus className="h-5 w-5" />
+          </Button>
+        }
+      />
+
+      <ScrollContent>
+        {sortedNotes.length === 0 ? (
+          <Card className="p-6 flex flex-col items-center gap-3" data-testid="empty-state">
+            <div className="icon-halo-muted w-12 h-12">
+              <StickyNote className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <p className="text-muted-foreground text-sm text-center">
+              No notes yet. Tap the + button to add your first note.
+            </p>
+            <Button onClick={openAddMode} data-testid="button-add-first-note">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Note
             </Button>
-            <Button onClick={handleSave} data-testid="button-save-note">
-              {editingNote ? "Save Changes" : "Add Note"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-2 gap-3" data-testid="notes-grid">
+            {sortedNotes.map((note) => (
+              <div
+                key={note.id}
+                className={`rounded-lg p-3 ${colorClasses[note.color]} relative cursor-pointer hover-elevate active-elevate-2`}
+                onClick={() => openViewMode(note)}
+                data-testid={`note-card-${note.id}`}
+              >
+                {note.isPinned && (
+                  <Pin 
+                    className="absolute top-2 right-2 h-3.5 w-3.5 text-foreground/60" 
+                    data-testid={`pin-icon-${note.id}`}
+                  />
+                )}
+                
+                {note.title && (
+                  <h3 
+                    className="font-semibold text-sm mb-1 pr-5 line-clamp-1 text-foreground"
+                    data-testid={`note-title-${note.id}`}
+                  >
+                    {note.title}
+                  </h3>
+                )}
+                
+                <p 
+                  className="text-xs text-foreground/80 line-clamp-4"
+                  data-testid={`note-content-${note.id}`}
+                >
+                  {truncateContent(note.content)}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </ScrollContent>
 
       <ConfirmModal
         open={!!deleteId}
