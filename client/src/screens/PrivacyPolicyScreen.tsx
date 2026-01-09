@@ -252,7 +252,6 @@ export function PrivacyPolicyScreen() {
                   <tr className="border-t border-border"><td className="px-3 py-2">Microphone</td><td className="px-3 py-2">Voice messages (optional feature)</td></tr>
                   <tr className="border-t border-border"><td className="px-3 py-2">Location</td><td className="px-3 py-2">Optional geolocation for attendance verification</td></tr>
                   <tr className="border-t border-border"><td className="px-3 py-2">Phone State</td><td className="px-3 py-2">Auto-detect phone number for registration</td></tr>
-                  <tr className="border-t border-border"><td className="px-3 py-2">Phone Calls</td><td className="px-3 py-2">Enable direct calling of staff/clients</td></tr>
                   <tr className="border-t border-border"><td className="px-3 py-2">Storage/Media</td><td className="px-3 py-2">Save backups, import documents and photos</td></tr>
                   <tr className="border-t border-border"><td className="px-3 py-2">Notifications</td><td className="px-3 py-2">Receive alerts for messages and approvals</td></tr>
                   <tr className="border-t border-border"><td className="px-3 py-2">Vibration</td><td className="px-3 py-2">Haptic feedback for interactions</td></tr>

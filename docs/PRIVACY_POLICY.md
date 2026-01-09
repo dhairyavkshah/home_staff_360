@@ -165,7 +165,6 @@ Our app requests the following permissions for specific features:
 | Microphone | Voice messages (optional feature) |
 | Location | Optional geolocation for attendance verification |
 | Phone State | Auto-detect phone number for registration |
-| Phone Calls | Enable direct calling of staff/clients |
 | Storage/Media | Save backups, import documents and photos |
 | Notifications | Receive alerts for messages and approvals |
 | Vibration | Haptic feedback for interactions |

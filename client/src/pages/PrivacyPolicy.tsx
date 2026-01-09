@@ -259,7 +259,6 @@ export default function PrivacyPolicy() {
                   <tr><td className="p-2 border-b border-border">Microphone</td><td className="p-2 border-b border-border">Voice messages (optional feature)</td></tr>
                   <tr><td className="p-2 border-b border-border">Location</td><td className="p-2 border-b border-border">Optional geolocation for attendance verification</td></tr>
                   <tr><td className="p-2 border-b border-border">Phone State</td><td className="p-2 border-b border-border">Auto-detect phone number for registration</td></tr>
-                  <tr><td className="p-2 border-b border-border">Phone Calls</td><td className="p-2 border-b border-border">Enable direct calling of staff/clients</td></tr>
                   <tr><td className="p-2 border-b border-border">Storage/Media</td><td className="p-2 border-b border-border">Save backups, import documents and photos</td></tr>
                   <tr><td className="p-2 border-b border-border">Notifications</td><td className="p-2 border-b border-border">Receive alerts for messages and approvals</td></tr>
                   <tr><td className="p-2 border-b border-border">Vibration</td><td className="p-2 border-b border-border">Haptic feedback for interactions</td></tr>
