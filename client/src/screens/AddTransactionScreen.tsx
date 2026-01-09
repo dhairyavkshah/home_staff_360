@@ -60,18 +60,20 @@ export function AddTransactionScreen() {
 
   const displaySymbol = existingTransaction?.recordCurrencySymbol || getCurrencySymbol();
 
-  const personId = data.personId as string;
+  const initialPersonId = data.personId as string | undefined;
   const presetAmount = data.presetAmount as number | undefined;
   const defaultDescription = data.defaultDescription as string | undefined;
   const defaultCategory = data.defaultCategory as string | undefined;
-  const source = data.source as "attendance" | "payables" | "quick-pay" | "person-detail" | undefined;
+  const source = data.source as "attendance" | "payables" | "quick-pay" | "person-detail" | "transactions" | undefined;
 
-  const person = useMemo(() => storage.getPerson(personId), [personId]);
+  const [selectedPersonId, setSelectedPersonId] = useState<string | undefined>(initialPersonId);
+  const person = useMemo(() => selectedPersonId ? storage.getPerson(selectedPersonId) : null, [selectedPersonId]);
   const settings = useMemo(() => storage.getSettings(), []);
+  const allPeople = useMemo(() => storage.getPeople(), []);
   
   const currentBalance = useMemo(() => 
-    person ? calculatePersonBalance(personId) : 0, 
-    [personId, person]
+    person && selectedPersonId ? calculatePersonBalance(selectedPersonId) : 0, 
+    [selectedPersonId, person]
   );
 
   const getSmartDefaults = useMemo(() => {
@@ -120,20 +122,26 @@ export function AddTransactionScreen() {
       setAmount(existingTransaction.amount.toString());
       setDate(existingTransaction.date);
       setIsPaid(existingTransaction.isPaid);
+      if (existingTransaction.personId) {
+        setSelectedPersonId(existingTransaction.personId);
+      }
     }
   }, [existingTransaction]);
 
   const handleBack = () => {
-    if (isViewMode) {
-      navigate("person-detail", { personId, source });
+    if (isViewMode && selectedPersonId) {
+      navigate("person-detail", { personId: selectedPersonId });
     } else if (source === "payables") {
       navigate("payables");
+    } else if (source === "transactions" || !selectedPersonId) {
+      navigate("transactions");
     } else {
-      navigate("person-detail", { personId, source });
+      navigate("person-detail", { personId: selectedPersonId });
     }
   };
 
-  if (!person) {
+  // Only show error if we're in view/edit mode with an invalid person reference
+  if (isViewMode && existingTransaction?.personId && !person) {
     return (
       <AppLayout>
         <Header title={tLabel('staffNotFound', 'Staff Not Found')} onBack={handleBack} />
@@ -179,7 +187,7 @@ export function AddTransactionScreen() {
     if (!validate()) return;
 
     const newTransaction = storage.addTransaction({
-      personId,
+      personId: selectedPersonId,
       category,
       description: description.trim(),
       transactionNo: transactionNo.trim() || undefined,
@@ -212,7 +220,11 @@ export function AddTransactionScreen() {
 
     markClean();
     toast({ title: tLabel('transactionAdded', 'Transaction added successfully') });
-    navigate("person-detail", { personId, source });
+    if (selectedPersonId) {
+      navigate("person-detail", { personId: selectedPersonId });
+    } else {
+      navigate("transactions");
+    }
   };
 
   const handleDelete = () => {
@@ -224,7 +236,11 @@ export function AddTransactionScreen() {
     
     storage.deleteTransaction(data.transactionId);
     toast({ title: tLabel('transactionDeleted', 'Transaction deleted successfully') });
-    navigate("person-detail", { personId, source });
+    if (selectedPersonId) {
+      navigate("person-detail", { personId: selectedPersonId });
+    } else {
+      navigate("transactions");
+    }
   };
 
   const handleHomePress = () => {
@@ -258,7 +274,7 @@ export function AddTransactionScreen() {
       <AppLayout>
         <Header
           title={tLabel('viewTransaction', 'View Transaction')}
-          subtitle={`${tLabel('for', 'for')} ${person.name}`}
+          subtitle={person ? `${tLabel('for', 'for')} ${person.name}` : undefined}
           onBack={handleBack}
           onHome={() => navigate("home")}
           contextLabel={contextLabel}
@@ -283,6 +299,13 @@ export function AddTransactionScreen() {
                 </PopoverContent>
               </Popover>
             </div>
+
+            {person && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{tLabel('staff', 'Staff')}</Label>
+                <p className="font-medium" data-testid="view-staff">{person.name}</p>
+              </div>
+            )}
 
             <div className="flex flex-col gap-1">
               <Label className="text-muted-foreground text-sm">{tLabel('category', 'Category')}</Label>
@@ -393,8 +416,8 @@ export function AddTransactionScreen() {
   return (
     <AppLayout>
       <Header
-        title={tLabel('transactionDetails', 'Transaction Details')}
-        subtitle={`${tLabel('for', 'for')} ${person.name}`}
+        title={tLabel('addTransaction', 'Add Transaction')}
+        subtitle={person ? `${tLabel('for', 'for')} ${person.name}` : undefined}
         onBack={handleBack}
         onHome={handleHomePress}
         contextLabel={contextLabel}
@@ -423,6 +446,19 @@ export function AddTransactionScreen() {
 
         <section className="flex flex-col gap-4">
           <h2 className="text-base font-semibold">{tLabel('transactionDetails', 'Transaction Details')}</h2>
+
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="staff">{tLabel('staff', 'Staff')}</Label>
+            <SearchableSelect
+              value={selectedPersonId || ""}
+              onValueChange={(v) => { setSelectedPersonId(v || undefined); markDirty(); }}
+              placeholder={tLabel('selectStaff', 'Select staff (optional)')}
+              searchPlaceholder={tLabel('searchStaff', 'Search staff...')}
+              emptyMessage={tLabel('noStaffFound', 'No staff found')}
+              options={allPeople.map(p => ({ value: p.id, label: p.name }))}
+              data-testid="select-staff"
+            />
+          </div>
 
           <div className="flex flex-col gap-1">
             <Label htmlFor="category">{tLabel('category', 'Category')} <span className="text-destructive">*</span></Label>

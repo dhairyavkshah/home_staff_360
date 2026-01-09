@@ -40,6 +40,7 @@ export function TransactionsScreen() {
   const [selectedPersonId, setSelectedPersonId] = useState("");
   const [category, setCategory] = useState("payment");
   const [description, setDescription] = useState("");
+  const [transactionNo, setTransactionNo] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(getTodayString());
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -87,7 +88,7 @@ export function TransactionsScreen() {
     if (!showAllContexts && activeAccountId) {
       const accountPeople = storage.getPeopleByAccount(activeAccountId);
       const personIds = new Set(accountPeople.map(p => p.id));
-      allTransactions = allTransactions.filter(t => personIds.has(t.personId));
+      allTransactions = allTransactions.filter(t => t.personId && personIds.has(t.personId));
     }
     
     const categoryFilter = filters.category || [];
@@ -121,7 +122,8 @@ export function TransactionsScreen() {
     return linkedMap;
   }, [refreshKey]);
 
-  const getPersonName = (personId: string) => {
+  const getPersonName = (personId: string | undefined) => {
+    if (!personId) return 'No Staff';
     const person = people.find(p => p.id === personId);
     return person?.name || 'Unknown';
   };
@@ -140,6 +142,7 @@ export function TransactionsScreen() {
     setSelectedPersonId("");
     setCategory("payment");
     setDescription("");
+    setTransactionNo("");
     setAmount("");
     setDate(getTodayString());
     setErrors({});
@@ -162,6 +165,7 @@ export function TransactionsScreen() {
       personId: selectedPersonId,
       category,
       description: description.trim(),
+      transactionNo: transactionNo.trim() || undefined,
       amount: parseFloat(amount),
       date,
       isPaid: true,
@@ -262,6 +266,17 @@ export function TransactionsScreen() {
                 data-testid="input-description"
               />
               {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="transactionNo">{tLabel('transactionNo', 'Transaction No.')}</Label>
+              <Input
+                id="transactionNo"
+                value={transactionNo}
+                onChange={(e) => setTransactionNo(e.target.value)}
+                placeholder={tLabel('transactionNoPlaceholder', 'e.g., TXN-001, REF-123')}
+                data-testid="input-transaction-no"
+              />
             </div>
 
             <div className="flex flex-col gap-1">

@@ -354,7 +354,7 @@ export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
 
 export const transactionSchema = z.object({
   id: z.string(),
-  personId: z.string(),
+  personId: z.string().optional(),
   category: z.string(),
   description: z.string(),
   transactionNo: z.string().optional(),
