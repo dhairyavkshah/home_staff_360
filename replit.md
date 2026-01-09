@@ -269,10 +269,25 @@ home-staff-360/
 - Removed automatic image compression for files under 20 MB
 - Files are now stored at full quality without resizing
 
-### Android Safe Area Improvements
-- Modals, drawers, and sheets now properly respect Android safe areas when keyboard is open
-- Select dropdowns and popovers dynamically adjust to keyboard visibility
-- All UI components avoid bleeding into Android status bar and navigation bar
+### Android Safe Area Intelligent Protection (v2.0)
+- Uses `@capacitor-community/safe-area` plugin v8 with EdgeToEdge.enable() API
+- Capacitor config includes SafeArea, SystemBars (disabled), and Keyboard plugins
+- MainActivity calls EdgeToEdge.enable() before super.onCreate()
+- SafeAreaProvider measures CSS env() values and injects --app-safe-area-* variables
+
+**Plugin Behavior (key insight):**
+- Android Chromium <140: Plugin patches WebView with native padding; env() = 0; no CSS changes needed
+- Android Chromium ≥140: env(safe-area-inset-*) works correctly in CSS
+- iOS: Native env() support works correctly
+- Note: The plugin does NOT expose getSafeAreaInsets() JavaScript API - it works automatically
+
+**CSS Implementation:**
+- Uses native `env(safe-area-inset-*)` directly (not custom variables)
+- Global enforcement rules for modals, drawers, dialogs, and popovers
+- Keyboard visibility detection with `html.keyboard-open` class
+
+**How It Works:**
+The plugin automatically handles safe area protection at the WebView level for broken Android versions, so React developers don't need to manually offset content. For modern browsers, standard CSS env() values work correctly.
 
 ### Bug Fixes
 - Fixed "All contexts" mode for notes display

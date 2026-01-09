@@ -23,6 +23,21 @@ const config: CapacitorConfig = {
   plugins: {
     CapacitorHttp: {
       enabled: true
+    },
+    SafeArea: {
+      enabled: true,
+      customColorsForSystemBars: true,
+      statusBarColor: '#ffffff',
+      statusBarContent: 'dark',
+      navigationBarColor: '#ffffff',
+      navigationBarContent: 'dark',
+      offset: 0
+    },
+    SystemBars: {
+      insetsHandling: 'disable'
+    },
+    Keyboard: {
+      resizeOnFullScreen: false
     }
   }
 };
