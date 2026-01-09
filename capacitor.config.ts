@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.homestaff360.app',
+  appId: 'com.theteam360.homestaff360',
   appName: 'Home Staff 360',
   webDir: 'dist/public',
   server: {

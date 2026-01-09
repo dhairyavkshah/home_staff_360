@@ -1,4 +1,4 @@
-package com.homestaff360.app;
+package com.theteam360.homestaff360;
 
 import android.os.Bundle;
 import android.view.View;
