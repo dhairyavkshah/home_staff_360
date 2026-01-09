@@ -1,4 +1,4 @@
-# Home Staff 360 v1.0
+# Home Staff 360 v2.0
 
 ## Overview
 Home Staff 360 is a professional staff management platform built as a hybrid mobile application (React + Capacitor) with a backend server. Originally designed for household staff management, this comprehensive solution is equally applicable to hospitality businesses, restaurants, and other staff-oriented operations. It provides real-time workforce management with live data synchronization across all connected users.

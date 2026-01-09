@@ -310,4 +310,4 @@ The following areas require authenticated sessions or complex setup not covered 
 ---
 
 *Report generated: January 7, 2026*
-*Home Staff 360 v1.0 - Automated Test Suite (151 tests) + Test Specifications (1,500 cases)*
+*Home Staff 360 v2.0 - Automated Test Suite (151 tests) + Test Specifications (1,500 cases)*

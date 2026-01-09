@@ -399,4 +399,4 @@
 ---
 
 *Generated: January 7, 2026*
-*Home Staff 360 v1.0 Functional Test Suite*
+*Home Staff 360 v2.0 Functional Test Suite*

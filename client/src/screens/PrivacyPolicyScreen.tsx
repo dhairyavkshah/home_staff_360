@@ -80,7 +80,7 @@ export function PrivacyPolicyScreen() {
 
             <div className="space-y-3">
               <h3 className="text-base font-medium">2.1 Live Cloud Architecture</h3>
-              <p className="text-sm text-muted-foreground">Home Staff 360 v1.0 operates as a <span className="font-medium text-foreground">live, cloud-connected service</span>:</p>
+              <p className="text-sm text-muted-foreground">Home Staff 360 v2.0 operates as a <span className="font-medium text-foreground">live, cloud-connected service</span>:</p>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
                 <li><span className="font-medium text-foreground">Primary Storage</span>: All your data is securely stored on our cloud servers</li>
                 <li><span className="font-medium text-foreground">Real-Time Sync</span>: Data syncs instantly across all your connected devices</li>
