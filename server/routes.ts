@@ -15,6 +15,7 @@ import {
   emitSyncData,
   emitAttendanceUpdate,
   emitLaundryUpdate,
+  emitPaymentUpdate,
   emitHouseholdUpdate,
   isUserOnline,
   getOnlineUserIds
@@ -32,6 +33,7 @@ import {
   attendanceRevisions,
   sharedLaundry,
   laundryRevisions,
+  sharedPayments,
   notifications,
   collabConnectionInvites,
   collabConnections,
@@ -53,6 +55,7 @@ import {
   insertCollaborationBindingSchema,
   insertSharedAttendanceSchema,
   insertSharedLaundrySchema,
+  insertSharedPaymentSchema,
   insertNotificationSchema,
   insertAdvertisementSchema,
   insertAdImpressionSchema,
@@ -2679,6 +2682,274 @@ router.patch("/api/shared-laundry/:id/action", authenticateToken, async (req: Re
     res.json({ success: true, action });
   } catch (error) {
     console.error("Laundry action error:", error);
+    res.status(500).json({ error: "Failed to process action" });
+  }
+});
+
+// ============ SHARED PAYMENTS API WITH APPROVAL WORKFLOW ============
+
+// Submit payment (creates pending record)
+router.post("/api/shared-payments", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { bindingId, date, amount, category, paymentMethod, note, recordCurrency } = req.body;
+
+    if (!bindingId || !date || !amount || !category) {
+      return res.status(400).json({ error: "bindingId, date, amount, and category are required" });
+    }
+
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, bindingId)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link) {
+      return res.status(404).json({ error: "Collaboration link not found" });
+    }
+
+    if (link.homeUserId !== userId && link.staffUserId !== userId) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    if (link.status !== 'active') {
+      return res.status(403).json({ error: "Collaboration link is not active" });
+    }
+
+    const isHomeUser = userId === link.homeUserId;
+    const submitterRole = isHomeUser ? 'HOME' : 'STAFF';
+    const counterpartyId = isHomeUser ? link.staffUserId : link.homeUserId;
+    const counterpartyMode = isHomeUser ? 'STAFF' : 'HOME';
+
+    const paymentId = uuidv4();
+    const now = new Date();
+
+    await db.insert(sharedPayments).values({
+      id: paymentId,
+      bindingId,
+      date,
+      amount,
+      category,
+      paymentMethod: paymentMethod || null,
+      note: note || null,
+      approvalStatus: 'pending',
+      submittedBy: userId,
+      submittedByRole: submitterRole,
+      actionRequiredBy: counterpartyId,
+      recordCurrency: recordCurrency || null,
+      createdAt: now,
+      updatedAt: now
+    });
+
+    await createNotification(counterpartyId, counterpartyMode, 'payment_submitted',
+      'Payment Submitted', `A payment of ${amount} for ${date} needs your approval.`,
+      'payment', paymentId, { category, amount });
+
+    emitPaymentUpdate([userId, counterpartyId], 'created', {
+      id: paymentId,
+      bindingId,
+      date,
+      amount,
+      category,
+      approvalStatus: 'pending'
+    });
+
+    res.json({ success: true, paymentId });
+  } catch (error) {
+    console.error("Create shared payment error:", error);
+    res.status(500).json({ error: "Failed to create payment" });
+  }
+});
+
+// Get shared payments for a binding or user
+router.get("/api/shared-payments", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { bindingId, status, limit: limitParam } = req.query;
+    const limit = parseInt(limitParam as string) || 50;
+
+    const userLinks = await db.query.collaborationLinks.findMany({
+      where: or(
+        eq(collaborationLinks.homeUserId, userId),
+        eq(collaborationLinks.staffUserId, userId)
+      )
+    });
+
+    const linkIds = userLinks.map(l => l.id);
+    
+    if (linkIds.length === 0) {
+      return res.json({ payments: [] });
+    }
+
+    const userBindings = await db.query.collaborationBindings.findMany({
+      where: sql`${collaborationBindings.linkId} IN (${sql.join(linkIds.map(id => sql`${id}`), sql`, `)})`
+    });
+
+    const bindingIds = bindingId 
+      ? userBindings.filter(b => b.id === bindingId).map(b => b.id)
+      : userBindings.map(b => b.id);
+
+    if (bindingIds.length === 0) {
+      return res.json({ payments: [] });
+    }
+
+    let conditions: SQL[] = [sql`${sharedPayments.bindingId} IN (${sql.join(bindingIds.map(id => sql`${id}`), sql`, `)})`];
+    
+    if (status) {
+      conditions.push(eq(sharedPayments.approvalStatus, status as string));
+    }
+
+    const payments = await db.query.sharedPayments.findMany({
+      where: and(...conditions),
+      orderBy: desc(sharedPayments.createdAt),
+      limit
+    });
+
+    const bindingMap = new Map(userBindings.map(b => [b.id, b]));
+    const linkMap = new Map(userLinks.map(l => [l.id, l]));
+
+    const enrichedPayments = payments.map(p => {
+      const binding = bindingMap.get(p.bindingId);
+      const link = binding ? linkMap.get(binding.linkId) : null;
+      const isHomeUser = link?.homeUserId === userId;
+      
+      return {
+        ...p,
+        homePersonName: binding?.homePersonName,
+        staffClientName: binding?.staffClientName,
+        userRole: isHomeUser ? 'HOME' : 'STAFF',
+        needsAction: p.actionRequiredBy === userId,
+        counterpartyName: isHomeUser ? binding?.staffClientName : binding?.homePersonName
+      };
+    });
+
+    res.json({ payments: enrichedPayments });
+  } catch (error) {
+    console.error("Get shared payments error:", error);
+    res.status(500).json({ error: "Failed to get payments" });
+  }
+});
+
+// Get individual payment by ID
+router.get("/api/shared-payments/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+
+    const record = await db.query.sharedPayments.findFirst({
+      where: eq(sharedPayments.id, id)
+    });
+
+    if (!record) {
+      return res.status(404).json({ error: "Payment record not found" });
+    }
+
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, record.bindingId)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link || (link.homeUserId !== userId && link.staffUserId !== userId)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    res.json({ payment: record });
+  } catch (error) {
+    console.error("Get payment by ID error:", error);
+    res.status(500).json({ error: "Failed to get payment record" });
+  }
+});
+
+// Approve or reject payment
+router.patch("/api/shared-payments/:id/action", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { id } = req.params;
+    const { action, remarks } = req.body;
+
+    if (!action || !['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ error: "action must be 'approve' or 'reject'" });
+    }
+
+    if (action === 'reject' && !remarks) {
+      return res.status(400).json({ error: "remarks are required when rejecting" });
+    }
+
+    const record = await db.query.sharedPayments.findFirst({
+      where: eq(sharedPayments.id, id)
+    });
+
+    if (!record) {
+      return res.status(404).json({ error: "Payment record not found" });
+    }
+
+    if (record.actionRequiredBy !== userId) {
+      return res.status(403).json({ error: "You are not authorized to take action on this record" });
+    }
+
+    const now = new Date();
+
+    if (action === 'approve') {
+      await db.update(sharedPayments)
+        .set({
+          approvalStatus: 'approved',
+          approvedAt: now,
+          updatedAt: now
+        })
+        .where(eq(sharedPayments.id, id));
+
+      await createNotification(record.submittedBy, record.submittedByRole as 'HOME' | 'STAFF',
+        'payment_approved', 'Payment Approved',
+        `Your payment of ${record.amount} for ${record.date} has been approved.`,
+        'payment', id);
+
+      emitPaymentUpdate([userId, record.submittedBy], 'updated', {
+        id,
+        bindingId: record.bindingId,
+        date: record.date,
+        approvalStatus: 'approved'
+      });
+
+    } else {
+      await db.update(sharedPayments)
+        .set({
+          approvalStatus: 'rejected',
+          rejectedAt: now,
+          actionRequiredBy: record.submittedBy,
+          updatedAt: now
+        })
+        .where(eq(sharedPayments.id, id));
+
+      await createNotification(record.submittedBy, record.submittedByRole as 'HOME' | 'STAFF',
+        'payment_rejected', 'Payment Rejected',
+        `Your payment of ${record.amount} for ${record.date} was rejected: ${remarks}`,
+        'payment', id, { remarks });
+
+      emitPaymentUpdate([userId, record.submittedBy], 'updated', {
+        id,
+        bindingId: record.bindingId,
+        date: record.date,
+        approvalStatus: 'rejected',
+        remarks
+      });
+    }
+
+    res.json({ success: true, action });
+  } catch (error) {
+    console.error("Payment action error:", error);
     res.status(500).json({ error: "Failed to process action" });
   }
 });

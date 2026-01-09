@@ -101,6 +101,11 @@ class RealtimeService {
       "sync:user-online",
       "sync:user-offline",
       "sync:request-sync",
+      "collab:attendance-update",
+      "collab:laundry-update",
+      "collab:payment-update",
+      "collab:expense-update",
+      "collab:household-update",
     ];
 
     events.forEach((event) => {
