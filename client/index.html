@@ -19,65 +19,53 @@
   <body>
     <div id="root"></div>
     <script>
-      // Patch Vite's runtime error overlay to suppress non-Error exceptions
-      // This intercepts the sendError function before it shows the overlay
+      // Suppress non-Error runtime exceptions before Vite's error overlay sees them
       (function() {
-        // Intercept WebSocket messages to block error overlay
-        var originalSend = WebSocket.prototype.send;
-        WebSocket.prototype.send = function(data) {
-          try {
-            if (typeof data === 'string' && data.includes('"type":"error"')) {
-              var parsed = JSON.parse(data);
-              if (parsed.type === 'error' && !parsed.err) {
-                return; // Suppress empty/non-Error errors
-              }
-            }
-          } catch (e) {}
-          return originalSend.apply(this, arguments);
-        };
-        
-        // Early error suppression for Capacitor plugins in web mode
-        var originalOnError = window.onerror;
-        window.onerror = function(msg, url, line, col, error) {
-          // Suppress non-Error object errors (common from Capacitor)
-          if (!error || (typeof error === 'object' && !error.message && !error.stack)) {
-            return true;
-          }
-          // Suppress Capacitor-related errors
-          var msgStr = String(msg || '');
-          if (msgStr.includes('Capacitor') || msgStr.includes('Haptics') || 
-              msgStr.includes('not implemented') || msgStr.includes('not available')) {
-            return true;
-          }
-          return originalOnError ? originalOnError(msg, url, line, col, error) : false;
-        };
-        
-        window.addEventListener('unhandledrejection', function(event) {
-          var reason = event.reason;
-          // Suppress non-Error rejections
-          if (!reason) {
-            event.preventDefault();
-            return;
-          }
-          if (typeof reason === 'object' && !reason.message && !reason.stack) {
-            event.preventDefault();
-            return;
-          }
-          var reasonStr = String(reason);
-          if (reasonStr.includes('Capacitor') || reasonStr.includes('Haptics') ||
-              reasonStr.includes('not implemented') || reasonStr.includes('not available')) {
-            event.preventDefault();
-            return;
-          }
-        });
-        
+        // Capture errors in capturing phase and stop propagation for non-Error objects
         window.addEventListener('error', function(event) {
-          if (!event.error || (typeof event.error === 'object' && !event.error.message && !event.error.stack)) {
+          // Check if error is not a proper Error object
+          if (!event.error || !(event.error instanceof Error)) {
             event.preventDefault();
             event.stopPropagation();
-            return true;
+            event.stopImmediatePropagation();
+            return false;
+          }
+          // Also suppress Capacitor-related errors
+          var msg = event.error.message || '';
+          if (msg.includes('Capacitor') || msg.includes('Haptics') || 
+              msg.includes('not implemented') || msg.includes('not available')) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            return false;
+          }
+        }, true); // true = capturing phase, runs before bubbling
+        
+        // Also handle unhandled promise rejections
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = event.reason;
+          if (!reason || !(reason instanceof Error)) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            return;
+          }
+          var reasonMsg = reason.message || '';
+          if (reasonMsg.includes('Capacitor') || reasonMsg.includes('Haptics') ||
+              reasonMsg.includes('not implemented') || reasonMsg.includes('not available')) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
           }
         }, true);
+        
+        // Override onerror as backup
+        window.onerror = function(msg, url, line, col, error) {
+          if (!error || !(error instanceof Error)) {
+            return true; // Suppress
+          }
+          return false;
+        };
       })();
     </script>
     <script type="module" src="/src/main.tsx"></script>
