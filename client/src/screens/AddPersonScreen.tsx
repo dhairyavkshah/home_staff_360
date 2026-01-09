@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Dialog,
@@ -48,6 +49,7 @@ export function AddPersonScreen() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [phone, setPhone] = useState("");
+  const [noPhone, setNoPhone] = useState(false);
   const [salaryType, setSalaryType] = useState<SalaryType>("DAILY");
   const [baseRate, setBaseRate] = useState("");
   const [halfDayPercentage, setHalfDayPercentage] = useState("");
@@ -84,7 +86,8 @@ export function AddPersonScreen() {
       if (person) {
         setName(person.name);
         setRole(person.role);
-        setPhone(person.phone);
+        setPhone(person.phone || "");
+        setNoPhone(!person.phone);
         setSalaryType(person.salaryType);
         setBaseRate(person.baseRate.toString());
         setHalfDayPercentage(person.halfDayPercentage?.toString() || "");
@@ -135,6 +138,12 @@ export function AddPersonScreen() {
       clearTimeout(phoneCheckTimeoutRef.current);
     }
 
+    // Skip phone check if noPhone is checked
+    if (noPhone) {
+      setPhoneCheckResult(null);
+      return;
+    }
+
     const digitsOnly = phone.replace(/\D/g, "");
     if (digitsOnly.length >= 10) {
       phoneCheckTimeoutRef.current = setTimeout(() => {
@@ -149,7 +158,7 @@ export function AddPersonScreen() {
         clearTimeout(phoneCheckTimeoutRef.current);
       }
     };
-  }, [phone, checkPhoneNumber]);
+  }, [phone, noPhone, checkPhoneNumber]);
 
   // Handle send connect request
   const handleSendConnectRequest = async () => {
@@ -235,21 +244,37 @@ export function AddPersonScreen() {
 
     if (!name.trim()) newErrors.name = "Name is required";
     if (!role.trim()) newErrors.role = "Role is required";
-    if (!phone.trim() || phone.replace(/\D/g, "").length < 10) {
-      newErrors.phone = "Valid phone number required (10+ digits)";
-    } else {
-      // Check for duplicate phone number
-      const normalizedPhone = phone.trim().replace(/\D/g, "");
-      const existingPeople = storage.getPeople();
-      const duplicate = existingPeople.find((p) => {
-        // Skip current person in edit mode
-        if (editMode && data.personId && p.id === data.personId) return false;
-        // Normalize existing phone for comparison
-        const existingNormalized = p.phone.replace(/\D/g, "");
-        return existingNormalized === normalizedPhone;
-      });
-      if (duplicate) {
-        newErrors.phone = `A staff member with this phone number already exists (${duplicate.name})`;
+    
+    // Skip phone validation if noPhone is checked
+    if (!noPhone) {
+      if (!phone.trim() || phone.replace(/\D/g, "").length < 10) {
+        newErrors.phone = "Valid phone number required (10+ digits)";
+      } else {
+        const normalizedPhone = phone.trim().replace(/\D/g, "");
+        
+        // Check if user is trying to add themselves
+        const userPhone = storage.getProfile()?.phone;
+        if (userPhone) {
+          const normalizedUserPhone = userPhone.replace(/\D/g, "");
+          if (normalizedPhone === normalizedUserPhone) {
+            newErrors.phone = "You cannot add yourself as staff";
+          }
+        }
+        
+        // Check for duplicate phone number
+        if (!newErrors.phone) {
+          const existingPeople = storage.getPeople();
+          const duplicate = existingPeople.find((p) => {
+            // Skip current person in edit mode
+            if (editMode && data.personId && p.id === data.personId) return false;
+            // Normalize existing phone for comparison
+            const existingNormalized = p.phone.replace(/\D/g, "");
+            return existingNormalized === normalizedPhone;
+          });
+          if (duplicate) {
+            newErrors.phone = `A staff member with this phone number already exists (${duplicate.name})`;
+          }
+        }
       }
     }
     const baseRateNum = parseInt(baseRate, 10);
@@ -273,7 +298,7 @@ export function AddPersonScreen() {
     const updateData = {
       name: name.trim(),
       role: role.trim(),
-      phone: phone.trim(),
+      phone: noPhone ? "" : phone.trim(),
       salaryType,
       baseRate: parseInt(baseRate, 10),
       halfDayPercentage: halfDayPercentage ? parseFloat(halfDayPercentage) : undefined,
@@ -454,25 +479,49 @@ export function AddPersonScreen() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label htmlFor="phone">Phone Number <span className="text-destructive">*</span></Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="phone">Phone Number {!noPhone && <span className="text-destructive">*</span>}</Label>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="noPhone"
+                  checked={noPhone}
+                  onCheckedChange={(checked) => {
+                    setNoPhone(checked === true);
+                    if (checked) {
+                      setPhone("");
+                      setPhoneCheckResult(null);
+                    }
+                    markDirty();
+                  }}
+                  data-testid="checkbox-no-phone"
+                />
+                <Label htmlFor="noPhone" className="text-sm font-normal cursor-pointer">
+                  No phone
+                </Label>
+              </div>
+            </div>
             <Input
               id="phone"
               type="tel"
               value={phone}
               onChange={(e) => { setPhone(e.target.value); markDirty(); }}
-              placeholder="+91 98765 43210"
+              placeholder={noPhone ? "N/A" : "+91 98765 43210"}
+              disabled={noPhone}
+              className={noPhone ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}
               data-testid="input-phone"
             />
-            <p className="text-xs text-muted-foreground">
-              Include country code (e.g., +91 for India, +1 for USA)
-            </p>
-            {phone && !phone.trim().startsWith('+') && (
+            {!noPhone && (
+              <p className="text-xs text-muted-foreground">
+                Include country code (e.g., +91 for India, +1 for USA)
+              </p>
+            )}
+            {!noPhone && phone && !phone.trim().startsWith('+') && (
               <p className="text-xs text-destructive">Phone number must start with + and country code</p>
             )}
             {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
             
-            {/* Phone verification status */}
-            {isCheckingPhone && (
+            {/* Phone verification status - only show when phone is enabled */}
+            {!noPhone && isCheckingPhone && (
               <div 
                 className="flex items-center gap-2 p-3 mt-2 rounded-lg bg-muted/50"
                 data-testid="status-phone-checking"
@@ -482,7 +531,7 @@ export function AddPersonScreen() {
               </div>
             )}
             
-            {!isCheckingPhone && phoneCheckResult && (
+            {!noPhone && !isCheckingPhone && phoneCheckResult && (
               <>
                 {/* User exists and already connected */}
                 {phoneCheckResult.exists && phoneCheckResult.isConnected && (

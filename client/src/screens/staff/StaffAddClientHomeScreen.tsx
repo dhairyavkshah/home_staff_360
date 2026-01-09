@@ -67,6 +67,7 @@ export function StaffAddClientHomeScreen() {
   const [sameAsClientName, setSameAsClientName] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [noContactPhone, setNoContactPhone] = useState(false);
   
   const defaultCurrency = storage.getStaffSettings().currency || "USD";
   const [currency, setCurrency] = useState<Currency>(defaultCurrency);
@@ -131,7 +132,32 @@ export function StaffAddClientHomeScreen() {
       clearTimeout(phoneCheckTimeoutRef.current);
     }
 
+    // Clear any self-phone error when typing
+    if (errors.contactPhone === "You cannot add yourself as a client") {
+      setErrors(prev => {
+        const { contactPhone, ...rest } = prev;
+        return rest;
+      });
+    }
+
     const cleanedPhone = cleanPhoneNumber(value);
+    
+    // Check if this is the user's own phone number
+    const profilePhone = profile?.phone ? cleanPhoneNumber(profile.phone) : "";
+    if (cleanedPhone.length >= 10 && profilePhone && cleanedPhone === profilePhone) {
+      setErrors(prev => ({ ...prev, contactPhone: "You cannot add yourself as a client" }));
+      setPhoneCheckResult(null);
+      lastCheckedPhoneRef.current = "";
+      return;
+    }
+
+    // Skip phone check if noContactPhone is checked
+    if (noContactPhone) {
+      setPhoneCheckResult(null);
+      lastCheckedPhoneRef.current = "";
+      return;
+    }
+
     if (cleanedPhone.length >= 10) {
       phoneCheckTimeoutRef.current = setTimeout(() => {
         checkPhoneNumber(value);
@@ -142,9 +168,28 @@ export function StaffAddClientHomeScreen() {
     }
   };
 
+  const handleNoContactPhoneChange = (checked: boolean) => {
+    setNoContactPhone(checked);
+    markDirty();
+    if (checked) {
+      setContactPhone("");
+      setPhoneCheckResult(null);
+      lastCheckedPhoneRef.current = "";
+      // Clear any phone-related errors
+      setErrors(prev => {
+        const { contactPhone, ...rest } = prev;
+        return rest;
+      });
+    }
+  };
+
   const handlePhoneBlur = () => {
     if (phoneCheckTimeoutRef.current) {
       clearTimeout(phoneCheckTimeoutRef.current);
+    }
+    // Skip phone check if noContactPhone is checked or if self-phone error exists
+    if (noContactPhone || errors.contactPhone === "You cannot add yourself as a client") {
+      return;
     }
     const cleanedPhone = cleanPhoneNumber(contactPhone);
     if (cleanedPhone.length >= 10) {
@@ -242,6 +287,8 @@ export function StaffAddClientHomeScreen() {
       setRate(existingHome.rate.toString());
       setIsActive(existingHome.isActive);
       setSameAsClientName(existingHome.contactName === existingHome.name || !existingHome.contactName);
+      // Set noContactPhone to true if existing client has no phone
+      setNoContactPhone(!existingHome.contactPhone);
       if (existingHome.currency) {
         setCurrency(existingHome.currency);
         setCustomCurrencySymbol(existingHome.customCurrencySymbol || "");
@@ -273,20 +320,27 @@ export function StaffAddClientHomeScreen() {
     if (currency === "OTHER" && !customCurrencySymbol.trim()) {
       newErrors.customCurrencySymbol = "Custom symbol required";
     }
-    // Check for duplicate phone number among client homes
-    if (contactPhone.trim()) {
+    // Skip phone validation if noContactPhone is checked
+    if (!noContactPhone && contactPhone.trim()) {
       const normalizedPhone = contactPhone.trim().replace(/\D/g, "");
       if (normalizedPhone.length >= 10) {
-        const existingHomes = storage.getClientHomes();
-        const duplicate = existingHomes.find((h) => {
-          // Skip current client in edit mode
-          if (editMode && data.clientHomeId && h.id === data.clientHomeId) return false;
-          // Normalize existing phone for comparison
-          const existingNormalized = (h.contactPhone || "").replace(/\D/g, "");
-          return existingNormalized === normalizedPhone;
-        });
-        if (duplicate) {
-          newErrors.contactPhone = `A client with this phone number already exists (${duplicate.name})`;
+        // Check if this is the user's own phone number
+        const profilePhone = profile?.phone ? cleanPhoneNumber(profile.phone) : "";
+        if (profilePhone && normalizedPhone === profilePhone) {
+          newErrors.contactPhone = "You cannot add yourself as a client";
+        } else {
+          // Check for duplicate phone number among client homes
+          const existingHomes = storage.getClientHomes();
+          const duplicate = existingHomes.find((h) => {
+            // Skip current client in edit mode
+            if (editMode && data.clientHomeId && h.id === data.clientHomeId) return false;
+            // Normalize existing phone for comparison
+            const existingNormalized = (h.contactPhone || "").replace(/\D/g, "");
+            return existingNormalized === normalizedPhone;
+          });
+          if (duplicate) {
+            newErrors.contactPhone = `A client with this phone number already exists (${duplicate.name})`;
+          }
         }
       }
     }
@@ -312,13 +366,15 @@ export function StaffAddClientHomeScreen() {
     if (!validate() || !profile || !activeAccountId) return;
 
     const finalContactName = sameAsClientName ? name.trim() : contactName.trim();
+    // When noContactPhone is checked, save phone as undefined (no phone)
+    const finalContactPhone = noContactPhone ? undefined : (contactPhone.trim() || undefined);
 
     if (editMode && data.clientHomeId) {
       storage.updateClientHome(data.clientHomeId, {
         name: name.trim(),
         address: address.trim() || undefined,
         contactName: finalContactName || undefined,
-        contactPhone: contactPhone.trim() || undefined,
+        contactPhone: finalContactPhone,
         role: role.trim(),
         salaryType,
         rate: parseInt(rate, 10),
@@ -334,7 +390,7 @@ export function StaffAddClientHomeScreen() {
         name: name.trim(),
         address: address.trim() || undefined,
         contactName: finalContactName || undefined,
-        contactPhone: contactPhone.trim() || undefined,
+        contactPhone: finalContactPhone,
         role: role.trim(),
         salaryType,
         rate: parseInt(rate, 10),
@@ -408,30 +464,53 @@ export function StaffAddClientHomeScreen() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <Label htmlFor="contactPhone">{t("contactPhone")}</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="contactPhone">{t("contactPhone")}</Label>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="noContactPhone"
+                checked={noContactPhone}
+                onCheckedChange={(checked) => handleNoContactPhoneChange(checked === true)}
+                data-testid="checkbox-no-phone"
+              />
+              <Label htmlFor="noContactPhone" className="text-sm font-normal cursor-pointer">
+                {tLabel("noPhone", "No phone")}
+              </Label>
+            </div>
+          </div>
           <Input
             id="contactPhone"
             value={contactPhone}
             onChange={(e) => handlePhoneChange(e.target.value)}
             onBlur={handlePhoneBlur}
             placeholder="+91 98765 43210"
+            disabled={noContactPhone}
+            className={noContactPhone ? "bg-muted text-muted-foreground" : ""}
             data-testid="input-contact-phone"
           />
-          <p className="text-xs text-muted-foreground">
-            Include country code (e.g., +91 for India, +1 for USA)
-          </p>
-          {contactPhone && !contactPhone.trim().startsWith('+') && (
+          {!noContactPhone && (
+            <p className="text-xs text-muted-foreground">
+              Include country code (e.g., +91 for India, +1 for USA)
+            </p>
+          )}
+          {noContactPhone && (
+            <p className="text-xs text-muted-foreground">Phone number not available for this client</p>
+          )}
+          {errors.contactPhone && (
+            <p className="text-xs text-destructive" data-testid="error-contact-phone">{errors.contactPhone}</p>
+          )}
+          {!noContactPhone && contactPhone && !contactPhone.trim().startsWith('+') && !errors.contactPhone && (
             <p className="text-xs text-destructive">Phone number must start with + and country code</p>
           )}
           
-          {isCheckingPhone && (
+          {!noContactPhone && isCheckingPhone && (
             <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg" data-testid="status-phone-checking">
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Checking phone number...</span>
             </div>
           )}
 
-          {!isCheckingPhone && phoneCheckResult && (
+          {!noContactPhone && !isCheckingPhone && phoneCheckResult && (
             <>
               {phoneCheckResult.exists && phoneCheckResult.isConnected && (
                 <div 
