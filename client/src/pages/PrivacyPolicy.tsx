@@ -288,7 +288,6 @@ export default function PrivacyPolicy() {
               We may update this Privacy Policy from time to time. We will notify you of significant changes through:
             </p>
             <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
-              <li>In-app notifications</li>
               <li>Updated "Last Updated" date at the top of this policy</li>
             </ul>
             <p className="text-sm text-muted-foreground">
@@ -301,8 +300,7 @@ export default function PrivacyPolicy() {
           <section className="space-y-3">
             <h2 className="text-xl font-semibold">10. Contact Us</h2>
             <p className="text-sm text-muted-foreground">If you have questions, concerns, or requests regarding your privacy:</p>
-            <p className="text-sm"><span className="font-medium">Email</span>: <a href="mailto:privacy@homestaff360.app" className="text-primary underline">privacy@homestaff360.app</a></p>
-            <p className="text-sm"><span className="font-medium">In-App</span>: Settings &gt; Feedback &gt; Privacy Inquiry</p>
+            <p className="text-sm"><span className="font-medium">Email</span>: <a href="mailto:privacy@homestaff360.com" className="text-primary underline">privacy@homestaff360.com</a></p>
             <p className="text-sm text-muted-foreground">We will respond to privacy-related inquiries within 30 days.</p>
           </section>
 
