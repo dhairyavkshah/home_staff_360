@@ -77,8 +77,9 @@ export function PinEntryScreen({
     setError("");
 
     if (updatedPin.length === 4) {
-      setTimeout(() => {
-        if (pinService.validatePin(updatedPin)) {
+      setTimeout(async () => {
+        const isValid = await pinService.validatePin(updatedPin);
+        if (isValid) {
           if (onSuccess) {
             onSuccess();
           } else {

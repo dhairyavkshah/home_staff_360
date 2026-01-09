@@ -5,10 +5,35 @@ const PIN_LENGTH = 4;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 const LOCKOUT_STORAGE_KEY = "hm_pin_lockout";
+const PIN_HASH_STORAGE_KEY = "hm_pin_hash";
+const PIN_SALT = "homestaff360_pin_salt_v1";
 
 interface LockoutState {
   failedAttempts: number;
   lockoutUntil: number | null;
+}
+
+async function hashPin(pin: string): Promise<string> {
+  const data = new TextEncoder().encode(PIN_SALT + pin);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function getStoredPinHash(): string | null {
+  try {
+    return localStorage.getItem(PIN_HASH_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function setStoredPinHash(hash: string): void {
+  localStorage.setItem(PIN_HASH_STORAGE_KEY, hash);
+}
+
+function clearStoredPinHash(): void {
+  localStorage.removeItem(PIN_HASH_STORAGE_KEY);
 }
 
 function getLockoutState(): LockoutState {
@@ -34,7 +59,9 @@ function clearLockoutState(): void {
 export const pinService = {
   isPinEnabled(): boolean {
     const settings = storage.getSettings();
-    return settings.pinEnabled === true && !!settings.pinCode;
+    const hasHash = !!getStoredPinHash();
+    const hasLegacyPin = !!settings.pinCode;
+    return settings.pinEnabled === true && (hasHash || hasLegacyPin);
   },
 
   isLockedOut(): boolean {
@@ -84,25 +111,47 @@ export const pinService = {
     clearLockoutState();
   },
 
-  validatePin(pin: string): boolean {
-    const settings = storage.getSettings();
-    const isValid = settings.pinCode === pin;
-    if (isValid) {
-      this.clearFailedAttempts();
+  async validatePin(pin: string): Promise<boolean> {
+    const storedHash = getStoredPinHash();
+    
+    if (storedHash) {
+      const inputHash = await hashPin(pin);
+      const isValid = inputHash === storedHash;
+      if (isValid) {
+        this.clearFailedAttempts();
+      }
+      return isValid;
     }
-    return isValid;
+    
+    // Legacy fallback for users with plain text PIN (migrate on next set)
+    const settings = storage.getSettings();
+    if (settings.pinCode) {
+      const isValid = settings.pinCode === pin;
+      if (isValid) {
+        this.clearFailedAttempts();
+        // Migrate to hashed storage
+        await this.setPin(pin);
+      }
+      return isValid;
+    }
+    
+    return false;
   },
 
-  setPin(pin: string): void {
+  async setPin(pin: string): Promise<void> {
+    const hashedPin = await hashPin(pin);
+    setStoredPinHash(hashedPin);
+    
     const settings = storage.getSettings();
     storage.saveSettings({
       ...settings,
       pinEnabled: true,
-      pinCode: pin,
+      pinCode: undefined, // Clear legacy plain text storage
     });
   },
 
   disablePin(): void {
+    clearStoredPinHash();
     const settings = storage.getSettings();
     storage.saveSettings({
       ...settings,
@@ -112,11 +161,12 @@ export const pinService = {
     biometricService.disableBiometric();
   },
 
-  changePin(currentPin: string, newPin: string): boolean {
-    if (!this.validatePin(currentPin)) {
+  async changePin(currentPin: string, newPin: string): Promise<boolean> {
+    const isValid = await this.validatePin(currentPin);
+    if (!isValid) {
       return false;
     }
-    this.setPin(newPin);
+    await this.setPin(newPin);
     return true;
   },
 

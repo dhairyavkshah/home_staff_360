@@ -58,9 +58,9 @@ export function PinSetupScreen() {
           setConfirmPin("");
         }, 200);
       } else if (step === "confirm") {
-        setTimeout(() => {
+        setTimeout(async () => {
           if (updatedPin === pin) {
-            pinService.setPin(updatedPin);
+            await pinService.setPin(updatedPin);
             if (biometricAvailable) {
               setStep("biometric");
             } else {
