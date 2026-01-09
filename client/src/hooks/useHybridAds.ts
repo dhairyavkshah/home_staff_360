@@ -3,6 +3,19 @@ import type { Advertisement } from "@shared/schema";
 import { hybridAdService, AdProvider } from "@/lib/hybrid-ad-service";
 
 const AD_CHECK_INTERVAL_MS = 30 * 1000;
+const AD_INITIAL_DELAY_MS = 60 * 1000;
+
+export const AD_EXCLUDED_SCREENS = [
+  "launcher",
+  "auth",
+  "onboarding",
+  "permissions",
+  "pin-entry",
+  "pin-setup",
+  "splash",
+  "role-selection",
+  "privacy-policy",
+];
 
 interface UseHybridAdsReturn {
   currentAd: Advertisement | null;
@@ -15,7 +28,7 @@ interface UseHybridAdsReturn {
   showAdMobRewarded: () => Promise<{ type: string; amount: number } | null>;
 }
 
-export function useHybridAds(): UseHybridAdsReturn {
+export function useHybridAds(currentScreen?: string): UseHybridAdsReturn {
   const [currentAd, setCurrentAd] = useState<Advertisement | null>(null);
   const [showAd, setShowAd] = useState(false);
   const [adProvider, setAdProvider] = useState<AdProvider>("none");
@@ -32,6 +45,10 @@ export function useHybridAds(): UseHybridAdsReturn {
 
   const checkAndShowAd = useCallback(async () => {
     if (checkInProgressRef.current || showAd || isLoading) {
+      return;
+    }
+
+    if (currentScreen && AD_EXCLUDED_SCREENS.includes(currentScreen)) {
       return;
     }
 
@@ -65,7 +82,7 @@ export function useHybridAds(): UseHybridAdsReturn {
       setIsLoading(false);
       checkInProgressRef.current = false;
     }
-  }, [showAd, isLoading]);
+  }, [showAd, isLoading, currentScreen]);
 
   const dismissAd = useCallback(() => {
     setShowAd(false);
@@ -94,7 +111,7 @@ export function useHybridAds(): UseHybridAdsReturn {
   useEffect(() => {
     const initialCheck = setTimeout(() => {
       checkAndShowAd();
-    }, 1000);
+    }, AD_INITIAL_DELAY_MS);
 
     const intervalCheck = setInterval(() => {
       checkAndShowAd();

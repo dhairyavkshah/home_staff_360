@@ -3,7 +3,7 @@ import type { Advertisement, InsertAdImpression } from "@shared/schema";
 const AD_LAST_SHOWN_KEY = "hm_ad_last_shown";
 const AD_SESSION_ID_KEY = "hm_ad_session_id";
 const AD_DEVICE_ID_KEY = "hm_ad_device_id";
-const AD_INTERVAL_MS = 300 * 1000;
+const AD_INTERVAL_MS = 120 * 1000;
 
 function generateSessionId(): string {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
