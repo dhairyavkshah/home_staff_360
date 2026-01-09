@@ -74,8 +74,8 @@ export function AddAttendanceScreen() {
     if (!date) newErrors.date = t("dueDateRequired");
 
     // Prevent marking attendance for future dates
-    const currentToday = getTodayString();
-    if (date > currentToday) {
+    const today = getTodayString();
+    if (date > today) {
       newErrors.date = t("cannotMarkFutureAttendance");
     }
 
@@ -87,14 +87,6 @@ export function AddAttendanceScreen() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  // Handler for date changes - clamp to today if future date selected
-  const handleDateChange = (newDate: string) => {
-    const currentToday = getTodayString();
-    const clampedDate = newDate > currentToday ? currentToday : newDate;
-    setDate(clampedDate);
-    markDirty();
   };
 
   const handleSubmit = () => {
@@ -170,7 +162,7 @@ export function AddAttendanceScreen() {
               type="date"
               value={date}
               max={getTodayString()}
-              onChange={(e) => handleDateChange(e.target.value)}
+              onChange={(e) => { setDate(e.target.value); markDirty(); }}
               data-testid="input-date"
             />
             {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}

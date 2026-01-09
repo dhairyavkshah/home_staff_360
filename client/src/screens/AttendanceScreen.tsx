@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle, MinusCircle, XCircle, Users, CheckCheck, Link2, Clock } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Calendar, ChevronLeft, ChevronRight, CheckCircle, MinusCircle, XCircle, Users, CheckCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,8 +12,6 @@ import { storage } from "@/lib/storage";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { getTodayString } from "@/lib/calculations";
 import { useActiveContext } from "@/hooks/use-active-context";
-import { collaborationService, type CollaborationBinding, type SharedAttendanceRecord } from "@/lib/collaboration-service";
-import { realtimeService } from "@/lib/realtime-service";
 import type { Person, AttendanceEntry } from "@shared/schema";
 
 export function AttendanceScreen() {
@@ -29,63 +27,7 @@ export function AttendanceScreen() {
   const [selectedDate, setSelectedDate] = useState(getTodayString());
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [bindings, setBindings] = useState<CollaborationBinding[]>([]);
-  const [sharedAttendance, setSharedAttendance] = useState<Map<string, SharedAttendanceRecord[]>>(new Map());
-  const [syncingPersonIds, setSyncingPersonIds] = useState<Set<string>>(new Set());
-
   const accountId = storage.getActiveAccountId();
-  const isAuthenticated = collaborationService.isAuthenticated();
-
-  const getPersonBinding = useCallback((personId: string): CollaborationBinding | undefined => {
-    return bindings.find(b => b.homePersonId === personId && b.isActive);
-  }, [bindings]);
-
-  const getSharedAttendanceForPerson = useCallback((personId: string, date: string): SharedAttendanceRecord | undefined => {
-    const binding = getPersonBinding(personId);
-    if (!binding) return undefined;
-    const records = sharedAttendance.get(binding.id) || [];
-    return records.find(r => r.date === date);
-  }, [getPersonBinding, sharedAttendance]);
-
-  const fetchBindings = useCallback(async () => {
-    if (!isAuthenticated) return;
-    try {
-      const { bindings: fetchedBindings } = await collaborationService.getBindings();
-      setBindings(fetchedBindings || []);
-      
-      const newSharedAttendance = new Map<string, SharedAttendanceRecord[]>();
-      for (const binding of (fetchedBindings || [])) {
-        if (binding.isActive) {
-          try {
-            const { attendance } = await collaborationService.getSharedAttendance(binding.id);
-            newSharedAttendance.set(binding.id, attendance || []);
-          } catch (err) {
-            console.error(`Failed to fetch shared attendance for binding ${binding.id}:`, err);
-          }
-        }
-      }
-      setSharedAttendance(newSharedAttendance);
-    } catch (err) {
-      console.error("Failed to fetch bindings:", err);
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    fetchBindings();
-  }, [fetchBindings]);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    
-    const unsubscribe = realtimeService.on("collab:attendance-update", () => {
-      fetchBindings();
-      setRefreshKey(prev => prev + 1);
-    });
-    
-    return () => {
-      unsubscribe();
-    };
-  }, [isAuthenticated, fetchBindings]);
   
   const people = useMemo(() => {
     return accountId ? storage.getPeopleByAccount(accountId).filter(p => p.isActive !== false) : [];
@@ -135,42 +77,8 @@ export function AttendanceScreen() {
     }
   }, [selectedDate]);
 
-  const syncAttendanceForLinkedPerson = useCallback(async (
-    person: Person, 
-    date: string, 
-    status: "FULL" | "HALF" | "ABSENT",
-    hoursWorked?: number,
-    note?: string
-  ): Promise<boolean> => {
-    const binding = getPersonBinding(person.id);
-    if (!binding) return false;
-
-    setSyncingPersonIds(prev => new Set(Array.from(prev).concat(person.id)));
-    try {
-      await collaborationService.submitAttendance({
-        bindingId: binding.id,
-        date,
-        status,
-        hoursWorked,
-        note,
-        recordSalaryType: person.salaryType,
-        recordRate: person.baseRate,
-        recordCurrency: person.currency,
-      });
-      return true;
-    } catch (err) {
-      console.error(`Failed to sync attendance for ${person.name}:`, err);
-      return false;
-    } finally {
-      setSyncingPersonIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(person.id);
-        return newSet;
-      });
-    }
-  }, [getPersonBinding]);
-
-  const handleMarkAllPresent = async () => {
+  const handleMarkAllPresent = () => {
+    // Defensive check: prevent marking for future dates
     const today = getTodayString();
     if (selectedDate > today) {
       toast({ title: t("cannotMarkFutureAttendance"), variant: "destructive" });
@@ -184,41 +92,19 @@ export function AttendanceScreen() {
       return;
     }
     
-    let syncedCount = 0;
-    const syncPromises: Promise<void>[] = [];
-
     unmarkedPeople.forEach(person => {
       storage.addAttendance({
         personId: person.id,
         date: selectedDate,
         status: "FULL",
       });
-
-      const binding = getPersonBinding(person.id);
-      if (binding && isAuthenticated) {
-        syncPromises.push(
-          syncAttendanceForLinkedPerson(person, selectedDate, "FULL").then(success => {
-            if (success) syncedCount++;
-          })
-        );
-      }
     });
-
-    await Promise.all(syncPromises);
     
     setRefreshKey(prev => prev + 1);
-    
-    const syncMessage = syncedCount > 0 
-      ? ` (${syncedCount} synced with linked accounts)` 
-      : "";
     toast({ 
       title: "Attendance marked", 
-      description: `${unmarkedPeople.length} staff marked as full day present.${syncMessage}` 
+      description: `${unmarkedPeople.length} staff marked as full day present.` 
     });
-
-    if (syncedCount > 0) {
-      fetchBindings();
-    }
   };
 
   const monthName = new Date(year, month).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
@@ -318,24 +204,24 @@ export function AttendanceScreen() {
 
       <ScrollContent>
         <div className="flex items-center justify-between gap-2">
-          <Button size="icon" variant="ghost" onClick={prevMonth} data-testid="button-prev-month" aria-label="Previous month">
+          <Button size="icon" variant="ghost" onClick={prevMonth} data-testid="button-prev-month">
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <span className="font-semibold text-lg">{monthName}</span>
-          <Button size="icon" variant="ghost" onClick={nextMonth} data-testid="button-next-month" aria-label="Next month">
+          <Button size="icon" variant="ghost" onClick={nextMonth} data-testid="button-next-month">
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
 
         <Card className="p-4 rounded-lg">
           <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground mb-2">
-            <span className="text-destructive/70">Sun</span>
+            <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
             <span>Wed</span>
             <span>Thu</span>
             <span>Fri</span>
-            <span className="text-destructive/70">Sat</span>
+            <span>Sat</span>
           </div>
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((day, idx) => {
@@ -347,8 +233,6 @@ export function AttendanceScreen() {
               const isToday = dateStr === getTodayString();
               const status = getDayStatus(day);
               const isFuture = isFutureDate(day);
-              const dayOfWeek = new Date(year, month, day).getDay();
-              const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
               
               return (
                 <button
@@ -360,7 +244,6 @@ export function AttendanceScreen() {
                     ${isFuture ? 'text-muted-foreground/40 cursor-not-allowed' : ''}
                     ${isSelected && !isFuture ? 'bg-primary text-primary-foreground' : !isFuture ? 'hover-elevate' : ''}
                     ${isToday && !isSelected ? 'ring-2 ring-primary ring-offset-2' : ''}
-                    ${isWeekend && !isSelected && !isFuture ? 'text-destructive/70' : ''}
                   `}
                   data-testid={`calendar-day-${day}`}
                 >
@@ -445,65 +328,35 @@ export function AttendanceScreen() {
                 <div className="flex flex-col gap-3" data-testid="list-attendance-staff">
                   {filteredPeople.map((person) => {
                     const record = todayAttendance.get(person.id);
-                    const binding = getPersonBinding(person.id);
-                    const sharedRecord = getSharedAttendanceForPerson(person.id, selectedDate);
-                    const isSyncing = syncingPersonIds.has(person.id);
-                    const isPending = sharedRecord?.approvalStatus === "pending";
-                    
                     return (
                       <div 
                         key={person.id} 
                         className="flex items-center gap-3 p-4 rounded-lg border bg-card hover-elevate cursor-pointer"
                         onClick={() => handlePersonClick(person.id)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePersonClick(person.id); } }}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`Mark attendance for ${person.name}, ${person.role}${record ? `, current status: ${record.status === 'FULL' ? 'Full day' : record.status === 'HALF' ? 'Half day' : 'Absent'}` : ', not marked'}`}
                         data-testid={`staff-attendance-${person.id}`}
                       >
-                        <div className="icon-halo-primary w-9 h-9 shrink-0 relative">
+                        <div className="icon-halo-primary w-9 h-9 shrink-0">
                           <span className="text-sm font-semibold text-primary">
                             {person.name.charAt(0).toUpperCase()}
                           </span>
-                          {binding && (
-                            <div 
-                              className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center"
-                              title="Linked account"
-                            >
-                              <Link2 className="w-2.5 h-2.5 text-primary-foreground" />
-                            </div>
-                          )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p className="font-medium text-sm truncate">{person.name}</p>
-                            {isSyncing && (
-                              <span className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate">{person.role}</p>
+                          <p className="font-medium text-sm truncate">{person.name}</p>
+                          <p className="text-xs text-muted-foreground">{person.role}</p>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {isPending && (
-                            <Badge variant="secondary" className="text-xs gap-1">
-                              <Clock className="w-3 h-3" />
-                              Pending
+                        {record ? (
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {getStatusIcon(record.status, true)}
+                            <Badge 
+                              variant={record.status === 'FULL' ? 'default' : record.status === 'HALF' ? 'secondary' : 'outline'}
+                              className="text-xs"
+                            >
+                              {record.status === 'FULL' ? t("fullDay") : record.status === 'HALF' ? t("halfDay") : t("absent")}
                             </Badge>
-                          )}
-                          {record ? (
-                            <>
-                              {getStatusIcon(record.status, true)}
-                              <Badge 
-                                variant={record.status === 'FULL' ? 'default' : record.status === 'HALF' ? 'secondary' : 'outline'}
-                                className="text-xs"
-                              >
-                                {record.status === 'FULL' ? t("fullDay") : record.status === 'HALF' ? t("halfDay") : t("absent")}
-                              </Badge>
-                            </>
-                          ) : (
-                            <Badge variant="outline" className="text-xs">Not Marked</Badge>
-                          )}
-                        </div>
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="text-xs shrink-0">Not Marked</Badge>
+                        )}
                       </div>
                     );
                   })}

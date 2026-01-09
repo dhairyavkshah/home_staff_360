@@ -143,13 +143,9 @@ export function AddExpenseScreen() {
     const newErrors: Record<string, string> = {};
 
     if (!title.trim()) newErrors.title = "Title is required";
-    
-    // Validate amount is present and greater than 0
-    const parsedAmount = amount ? parseFloat(amount) : 0;
-    if (!amount || amount.trim() === "" || isNaN(parsedAmount) || parsedAmount <= 0) {
+    if (!amount || parseInt(amount, 10) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
     }
-    
     if (!dueDate) newErrors.dueDate = "Due date is required";
 
     setErrors(newErrors);

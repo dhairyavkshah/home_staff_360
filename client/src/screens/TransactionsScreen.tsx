@@ -345,18 +345,8 @@ export function TransactionsScreen() {
               </div>
               <div className="text-center">
                 <h3 className="font-semibold text-sm">{tLabel('noTransactions', 'No transactions yet')}</h3>
-                <p className="text-xs text-muted-foreground">
-                  {searchQuery 
-                    ? tLabel('noResultsFound', 'No results found') 
-                    : tLabel('addFirstTransaction', 'Add your first transaction to get started')}
-                </p>
+                <p className="text-xs text-muted-foreground">{tLabel('addFirstTransaction', 'Add your first transaction to get started')}</p>
               </div>
-              {!searchQuery && (
-                <Button onClick={() => { resetForm(); setShowAddForm(true); }} data-testid="button-add-first-transaction">
-                  <Plus className="w-4 h-4 mr-2" />
-                  {tLabel('addTransaction', 'Add Transaction')}
-                </Button>
-              )}
             </Card>
           ) : (
             <div className="flex flex-col gap-3">

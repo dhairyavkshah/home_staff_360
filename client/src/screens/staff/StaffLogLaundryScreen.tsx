@@ -228,7 +228,6 @@ export function StaffLogLaundryScreen() {
       pickupDelivery,
       pickupDeliveryCharge: deliveryCharge,
       note: provider.trim() || undefined,
-      recordCurrencySymbol: symbol,
     });
     toast({ title: t("laundryJobLogged") });
 

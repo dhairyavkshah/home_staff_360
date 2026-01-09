@@ -39,7 +39,6 @@ import { useActiveContext } from "@/hooks/use-active-context";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getTodayString, formatCurrency } from "@/lib/calculations";
 import { QuickAddClothModal } from "@/components/laundry/QuickAddClothModal";
-import { collaborationService, type CollaborationBinding } from "@/lib/collaboration-service";
 import { LAUNDRY_SERVICE_TYPES, type LaundryItem, type LaundryServiceType, currencySymbols } from "@shared/schema";
 import type { Person } from "@shared/schema";
 
@@ -131,58 +130,32 @@ export function AddLaundryScreen() {
   };
 
   const handleAddItem = (newItem: { type: string; quantity: number; rate: number; details?: string }) => {
-    // Validate quantity and rate are greater than 0
-    if (!newItem.quantity || newItem.quantity < 1) {
-      toast({
-        title: "Invalid Quantity",
-        description: "Quantity must be at least 1",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!newItem.rate || newItem.rate <= 0) {
-      toast({
-        title: "Invalid Rate",
-        description: "Rate must be greater than 0",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     const existingIndex = items.findIndex(i => i.type === newItem.type && i.rate === newItem.rate);
-    const clampedQuantity = Math.max(1, Math.floor(newItem.quantity));
     
     if (existingIndex >= 0) {
       const updated = [...items];
-      const newTotalQuantity = updated[existingIndex].quantity + clampedQuantity;
       updated[existingIndex] = {
         ...updated[existingIndex],
-        quantity: newTotalQuantity,
-        subtotal: newTotalQuantity * newItem.rate,
+        quantity: updated[existingIndex].quantity + newItem.quantity,
+        subtotal: (updated[existingIndex].quantity + newItem.quantity) * newItem.rate,
       };
       setItems(updated);
-      markDirty();
-      toast({
-        title: "Item Updated",
-        description: `${newTotalQuantity}x ${newItem.type} (total)`,
-      });
     } else {
       const item: LaundryItem = {
         id: generateItemId(),
         type: newItem.type,
-        quantity: clampedQuantity,
+        quantity: newItem.quantity,
         rate: newItem.rate,
-        subtotal: clampedQuantity * newItem.rate,
+        subtotal: newItem.quantity * newItem.rate,
         details: newItem.details,
       };
       setItems([...items, item]);
-      markDirty();
-      toast({
-        title: "Item Added",
-        description: `${clampedQuantity}x ${newItem.type}`,
-      });
     }
+    
+    toast({
+      title: "Item Added",
+      description: `${newItem.quantity}x ${newItem.type}`,
+    });
   };
 
   const handleRemoveItem = (itemId: string) => {
@@ -226,7 +199,7 @@ export function AddLaundryScreen() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (isViewMode) return;
     if (!validate()) return;
 
@@ -254,39 +227,6 @@ export function AddLaundryScreen() {
 
     storage.addLaundry(laundryData);
     toast({ title: "Laundry batch added successfully" });
-
-    // Sync with collaboration service if staff has an active binding
-    if (selectedStaffId && collaborationService.isAuthenticated()) {
-      try {
-        const { bindings } = await collaborationService.getBindings();
-        const activeBinding = (bindings as CollaborationBinding[]).find(
-          (b: CollaborationBinding) => b.homePersonId === selectedStaffId && b.isActive
-        );
-
-        if (activeBinding) {
-          await collaborationService.submitLaundry({
-            bindingId: activeBinding.id,
-            date,
-            items,
-            itemsTotal,
-            pickupDelivery,
-            pickupDeliveryCharge: pickupDelivery ? deliveryCharge : undefined,
-            total,
-            serviceType,
-            recordCurrency: settings.currency,
-          });
-          
-          toast({ 
-            title: "Laundry synced", 
-            description: "Laundry batch shared with linked staff member" 
-          });
-        }
-      } catch (err) {
-        console.error("[AddLaundryScreen] Failed to sync laundry:", err);
-        // Don't fail the operation if sync fails - local save already succeeded
-      }
-    }
-
     markClean();
     navigate("laundry-view");
   };

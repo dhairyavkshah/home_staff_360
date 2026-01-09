@@ -308,12 +308,6 @@
     @apply min-h-[44px] min-w-[44px];
   }
   
-  /* Accessibility - Focus indicators for custom clickable elements */
-  [role="button"]:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
-  }
-  
   /* Safe area utilities - uses native env() values which the plugin automatically patches */
   .safe-area-top {
     padding-top: env(safe-area-inset-top, 0px);
@@ -676,20 +670,4 @@
   html.keyboard-open [data-radix-popover-content] {
     max-height: calc(var(--available-height, 100vh) - var(--app-safe-area-top, 48px) - 100px);
   }
-}
-
-/* Hide Replit dev banner in production/mobile builds */
-[data-replit-dev-banner],
-#replit-dev-banner,
-.replit-dev-banner,
-[data-replit-runtime-error-modal],
-#replit-runtime-error-modal,
-.__replit_dev_banner__,
-body > div[style*="position: fixed"][style*="top: 0"][style*="z-index"]:first-of-type:not([id]):not([class]) {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  height: 0 !important;
-  overflow: hidden !important;
 }

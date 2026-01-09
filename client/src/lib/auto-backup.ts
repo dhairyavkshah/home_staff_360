@@ -156,8 +156,8 @@ export async function listLocalBackups(): Promise<Array<{ name: string; date: Da
           backups.push({ name: file.name, date });
         }
       }
-    } catch {
-      // No backup directory found or empty
+    } catch (error) {
+      console.log("No backup directory found or empty");
     }
   } else {
     const existingBackups = localStorage.getItem("hm_local_backups");
@@ -232,8 +232,11 @@ export function initializeAutoBackup(): void {
 
   const checkAndBackup = async () => {
     if (shouldPerformAutoBackup()) {
+      console.log("Performing scheduled auto-backup...");
       const result = await performAutoBackup();
-      if (!result.success) {
+      if (result.success) {
+        console.log("Auto-backup completed:", result.filename);
+      } else {
         console.error("Auto-backup failed:", result.error);
       }
     }

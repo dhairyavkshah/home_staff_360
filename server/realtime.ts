@@ -257,12 +257,6 @@ export function emitExpenseUpdate(toUserIds: string[], action: 'created' | 'upda
   });
 }
 
-export function emitPaymentUpdate(toUserIds: string[], action: 'created' | 'updated' | 'deleted', data: any) {
-  toUserIds.forEach((userId) => {
-    emitToUser(userId, "collab:payment-update", { action, data });
-  });
-}
-
 export function emitHouseholdUpdate(toUserIds: string[], action: 'member-added' | 'member-removed' | 'updated', data: any) {
   toUserIds.forEach((userId) => {
     emitToUser(userId, "collab:household-update", { action, data });

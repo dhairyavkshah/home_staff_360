@@ -17,7 +17,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { useNavigation } from "@/lib/navigation";
 import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency, formatRecordCurrency, formatDate, groupTotalsByCurrency, formatCurrencyTotals } from "@/lib/calculations";
+import { formatCurrency, formatRecordCurrency, formatShortDate, groupTotalsByCurrency, formatCurrencyTotals } from "@/lib/calculations";
 import { getCurrencySymbol } from "@shared/schema";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
@@ -230,7 +230,7 @@ export function ExpensesScreen() {
                       </div>
                       <div className="flex items-center justify-between gap-2 mt-0.5">
                         <p className="text-xs text-muted-foreground truncate">
-                          {expense.vendor || expense.category} • {t("due")} {formatDate(expense.dueDate)}
+                          {expense.vendor || expense.category} • {t("due")} {formatShortDate(expense.dueDate)}
                         </p>
                         <Badge 
                           variant={status === "overdue" ? "destructive" : "secondary"} 

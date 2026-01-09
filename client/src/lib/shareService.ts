@@ -22,6 +22,8 @@ export async function downloadAsFile(content: string, filename: string): Promise
         encoding: Encoding.UTF8,
       });
 
+      console.log('File saved to Documents:', writeResult.uri);
+
       // Get the URI for sharing
       const uriResult = await Filesystem.getUri({
         directory: Directory.Documents,
@@ -47,6 +49,7 @@ export async function downloadAsFile(content: string, filename: string): Promise
           errorMessage.includes('Cancel') ||
           errorMessage.includes('dismissed') ||
           errorMessage.includes('aborted')) {
+        console.log('Share was cancelled by user (file is still saved)');
         return true;
       }
       
@@ -114,6 +117,8 @@ export async function shareReport(options: {
         path: options.filename,
       });
 
+      console.log('File ready for sharing:', uriResult.uri);
+
       const canShare = await Share.canShare();
       if (!canShare.value) {
         console.error('Share is not available on this device');
@@ -134,6 +139,7 @@ export async function shareReport(options: {
           errorMessage.includes('Cancel') ||
           errorMessage.includes('dismissed') ||
           errorMessage.includes('aborted')) {
+        console.log('Share was cancelled by user');
         return false;
       }
       
@@ -156,6 +162,7 @@ export async function shareReport(options: {
         }
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
+          console.log('Web share was cancelled by user');
           return false;
         }
         console.error('Web Share API failed:', error);
@@ -163,6 +170,7 @@ export async function shareReport(options: {
     }
     
     // Fallback: download the file
+    console.log('Web Share API not available, falling back to download');
     return await downloadAsFile(options.text, options.filename);
   }
 }

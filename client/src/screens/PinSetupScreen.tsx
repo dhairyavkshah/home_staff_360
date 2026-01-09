@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Lock, X, Fingerprint } from "lucide-react";
 import { NumericKeypad } from "@/components/ui/numeric-keypad";
 import { useTranslation } from "@/lib/i18n/i18n-context";
-import { getErrorMessage, TIMING } from "@/lib/utils";
 
 type Step = "enter" | "confirm" | "biometric";
 
@@ -57,7 +56,7 @@ export function PinSetupScreen() {
         setTimeout(() => {
           setStep("confirm");
           setConfirmPin("");
-        }, TIMING.UI_FEEDBACK_MS);
+        }, 200);
       } else if (step === "confirm") {
         setTimeout(async () => {
           if (updatedPin === pin) {
@@ -75,7 +74,7 @@ export function PinSetupScreen() {
             setError(t("pinsDontMatch"));
             setConfirmPin("");
           }
-        }, TIMING.UI_FEEDBACK_MS);
+        }, 200);
       }
     }
   };
@@ -118,8 +117,8 @@ export function PinSetupScreen() {
       } else {
         setError(result.error || t("biometricAuthFailed"));
       }
-    } catch (error: unknown) {
-      setError(getErrorMessage(error));
+    } catch (e: any) {
+      setError(e.message || t("biometricAuthFailed"));
     } finally {
       setEnrollingBiometric(false);
     }

@@ -244,13 +244,6 @@ class CollaborationService {
     });
   }
 
-  async verifyResetOtp(phone: string, otp: string): Promise<{ success: boolean; message?: string }> {
-    return this.apiRequest<{ success: boolean; message?: string }>("/auth/verify-reset-otp", {
-      method: "POST",
-      body: JSON.stringify({ phone, otp }),
-    });
-  }
-
   async resetPassword(phone: string, otp: string, newPassword: string): Promise<{
     success: boolean;
     message?: string;
@@ -725,118 +718,6 @@ class CollaborationService {
 
     return response;
   }
-
-  // ============ SHARED PAYMENTS API ============
-
-  async getSharedPayments(params?: {
-    bindingId?: string;
-    status?: string;
-    limit?: number;
-  }): Promise<{ payments: SharedPaymentRecord[] }> {
-    const query = new URLSearchParams();
-    if (params?.bindingId) query.set("bindingId", params.bindingId);
-    if (params?.status) query.set("status", params.status);
-    if (params?.limit) query.set("limit", params.limit.toString());
-    return this.apiRequest(`/shared-payments?${query.toString()}`);
-  }
-
-  async submitSharedPayment(data: {
-    bindingId: string;
-    date: string;
-    amount: number;
-    category: string;
-    paymentMethod?: string;
-    note?: string;
-    recordCurrency?: string;
-  }): Promise<{ success: boolean; paymentId: string }> {
-    return this.apiRequest("/shared-payments", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async actionSharedPayment(
-    id: string,
-    action: "approve" | "reject",
-    remarks?: string
-  ): Promise<{ success: boolean; action: string }> {
-    return this.apiRequest(`/shared-payments/${id}/action`, {
-      method: "PATCH",
-      body: JSON.stringify({ action, remarks }),
-    });
-  }
-}
-
-// Type definitions for collaboration data
-export interface CollaborationBinding {
-  id: string;
-  linkId: string;
-  homePersonId: string;
-  homePersonName?: string;
-  staffClientId: string;
-  staffClientName?: string;
-  isActive: boolean;
-  createdAt: string;
-}
-
-export interface SharedAttendanceRecord {
-  id: string;
-  bindingId: string;
-  date: string;
-  status: string;
-  hoursWorked?: number;
-  note?: string;
-  approvalStatus: "pending" | "approved" | "rejected" | "revised";
-  submittedBy: string;
-  submittedByRole: "HOME" | "STAFF";
-  actionRequiredBy?: string;
-  needsAction?: boolean;
-  homePersonName?: string;
-  staffClientName?: string;
-  counterpartyName?: string;
-  createdAt: string;
-}
-
-export interface SharedPaymentRecord {
-  id: string;
-  bindingId: string;
-  date: string;
-  amount: number;
-  category: string;
-  paymentMethod?: string;
-  note?: string;
-  approvalStatus: "pending" | "approved" | "rejected";
-  submittedBy: string;
-  submittedByRole: "HOME" | "STAFF";
-  actionRequiredBy?: string;
-  needsAction?: boolean;
-  recordCurrency?: string;
-  homePersonName?: string;
-  staffClientName?: string;
-  counterpartyName?: string;
-  createdAt: string;
-}
-
-export interface SharedLaundryRecord {
-  id: string;
-  bindingId: string;
-  date: string;
-  items: Array<{ type: string; quantity: number; rate: number }>;
-  itemsTotal: number;
-  pickupDelivery?: boolean;
-  pickupDeliveryCharge?: number;
-  total: number;
-  serviceType?: string;
-  approvalStatus: "pending" | "approved" | "rejected";
-  submittedBy: string;
-  submittedByRole: "HOME" | "STAFF";
-  actionRequiredBy?: string;
-  needsAction?: boolean;
-  recordCurrency?: string;
-  homePersonName?: string;
-  staffClientName?: string;
-  counterpartyName?: string;
-  createdAt: string;
 }
 
 export const collaborationService = new CollaborationService();

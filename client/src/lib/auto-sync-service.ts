@@ -120,6 +120,8 @@ class AutoSyncService {
     realtimeService.on("sync:user-online", this.boundHandlers.userOnline);
     realtimeService.on("sync:user-offline", this.boundHandlers.userOffline);
     realtimeService.on("sync:request-sync", this.boundHandlers.syncRequest);
+
+    console.log("[AutoSync] Started listening for sync events");
   }
 
   stopListening(): void {
@@ -138,6 +140,8 @@ class AutoSyncService {
     if (this.boundHandlers.syncRequest) {
       realtimeService.off("sync:request-sync", this.boundHandlers.syncRequest);
     }
+
+    console.log("[AutoSync] Stopped listening for sync events");
   }
 
   private handleIncomingSync(payload: SyncPayload): void {
@@ -146,8 +150,11 @@ class AutoSyncService {
     // Skip our own sync events
     const profile = storage.getProfile();
     if (profile?.id && profile.id === payload.senderId) {
+      console.log("[AutoSync] Ignoring own sync event");
       return;
     }
+
+    console.log("[AutoSync] Received sync data:", payload.type, payload.action);
 
     const handlers = this.syncHandlers.get(payload.type);
     if (handlers) {
@@ -166,6 +173,7 @@ class AutoSyncService {
 
   private handleUserOnline(data: { userId: string }): void {
     this.connectedUserIds.add(data.userId);
+    console.log("[AutoSync] User came online:", data.userId);
 
     if (this.pendingChanges.length > 0) {
       this.flushPendingChanges();
@@ -174,10 +182,11 @@ class AutoSyncService {
 
   private handleUserOffline(data: { userId: string }): void {
     this.connectedUserIds.delete(data.userId);
+    console.log("[AutoSync] User went offline:", data.userId);
   }
 
-  private handleSyncRequest(_data: { requesterId: string; dataTypes: SyncDataType[] }): void {
-    // Handle sync request - currently just tracks the event
+  private handleSyncRequest(data: { requesterId: string; dataTypes: SyncDataType[] }): void {
+    console.log("[AutoSync] Sync request from:", data.requesterId);
   }
 
   onDataChange(type: SyncDataType, handler: SyncEventHandler): () => void {
@@ -212,6 +221,7 @@ class AutoSyncService {
     if (!realtimeService.isConnected()) {
       this.pendingChanges.push(payload);
       this.savePendingChanges();
+      console.log("[AutoSync] Queued change for later sync:", type);
       return false;
     }
 
@@ -221,6 +231,7 @@ class AutoSyncService {
         body: JSON.stringify(payload),
       });
 
+      console.log("[AutoSync] Pushed change:", type, action);
       return true;
     } catch (error) {
       console.error("[AutoSync] Failed to push change:", error);
@@ -264,6 +275,7 @@ class AutoSyncService {
 
       this.savePendingChanges();
       this.lastSyncAt = new Date();
+      console.log("[AutoSync] Flushed", syncedCount, "pending changes");
     } finally {
       this.isSyncing = false;
     }

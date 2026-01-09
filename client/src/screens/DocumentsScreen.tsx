@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { FolderOpen, FileText, Image, File, Trash2, Eye, Link2, Download } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { compressImage } from "@/lib/imageCompression";
-import { formatFileSize } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -166,6 +165,11 @@ export function DocumentsScreen() {
     return File;
   };
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   return (
     <div className="h-screen flex flex-col bg-background" data-testid="screen-documents">

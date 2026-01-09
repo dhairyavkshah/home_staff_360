@@ -21,22 +21,15 @@ interface PricingInfo {
   symbol: string;
 }
 
-// Valid pricing tiers
-const VALID_TIERS: PricingTier[] = ["free", "low", "mid", "high"];
-
 // Prices displayed in local currency - actual prices come from Google Play Store at runtime
 function getPriceForCountry(countryCode: string): PricingInfo {
   const pricing = getCountryPricing(countryCode?.toUpperCase() || "US");
   const currencyConfig = CURRENCIES[pricing.currency as Currency];
-  
-  // Validate tier and default to "free" if invalid
-  const validTier = VALID_TIERS.includes(pricing.tier) ? pricing.tier : "free";
-  
   return {
-    monthly: pricing.monthly || 0,
-    annual: pricing.annual || 0,
-    tier: validTier,
-    currency: pricing.currency || "USD",
+    monthly: pricing.monthly,
+    annual: pricing.annual,
+    tier: pricing.tier,
+    currency: pricing.currency,
     symbol: currencyConfig?.symbol || pricing.currency + ' ',
   };
 }

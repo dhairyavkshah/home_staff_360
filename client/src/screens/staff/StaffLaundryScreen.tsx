@@ -1,5 +1,5 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
-import { Shirt, ChevronLeft, ChevronRight, Eye, Trash2, Calendar, Building2, Link2, Check, X, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Shirt, ChevronLeft, ChevronRight, Eye, Trash2, Calendar, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
@@ -11,8 +11,6 @@ import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { currencySymbols } from "@shared/schema";
-import { collaborationService, type CollaborationBinding, type SharedLaundryRecord } from "@/lib/collaboration-service";
-import { realtimeService } from "@/lib/realtime-service";
 import {
   format,
   addMonths,
@@ -37,85 +35,10 @@ export function StaffLaundryScreen() {
   const [deleteTarget, setDeleteTarget] = useState<StaffLaundryJob | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const [bindings, setBindings] = useState<CollaborationBinding[]>([]);
-  const [sharedLaundry, setSharedLaundry] = useState<SharedLaundryRecord[]>([]);
-  const [actioningLaundryId, setActioningLaundryId] = useState<string | null>(null);
-
-  const isAuthenticated = collaborationService.isAuthenticated();
-
-  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
-
-  const fetchBindings = useCallback(async () => {
-    if (!isAuthenticated) return;
-    try {
-      const { bindings: fetchedBindings } = await collaborationService.getBindings();
-      setBindings(fetchedBindings || []);
-
-      const activeBindings = (fetchedBindings || []).filter(b => b.isActive);
-      
-      const results = await Promise.all(
-        activeBindings.map(async (binding) => {
-          try {
-            const { laundry } = await collaborationService.getSharedLaundry(binding.id);
-            return laundry || [];
-          } catch (err) {
-            console.error(`Failed to fetch shared laundry for binding ${binding.id}:`, err);
-            return [];
-          }
-        })
-      );
-      
-      const allLaundry = results.flat();
-      setSharedLaundry(allLaundry);
-    } catch (err) {
-      console.error("Failed to fetch bindings:", err);
-      toast({
-        title: t("error") || "Error",
-        description: t("failedToSyncData") || "Failed to sync laundry data",
-        variant: "destructive"
-      });
-    }
-  }, [isAuthenticated, toast, t]);
-
-  useEffect(() => {
-    fetchBindings();
-  }, [fetchBindings]);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const unsubscribe = realtimeService.on("collab:laundry-update", () => {
-      fetchBindings();
-      refresh();
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [isAuthenticated, fetchBindings, refresh]);
-
-  const handleLaundryAction = useCallback(async (laundryId: string, action: "approve" | "reject") => {
-    setActioningLaundryId(laundryId);
-    try {
-      await collaborationService.actionLaundry(laundryId, action);
-      toast({
-        title: action === "approve" ? "Laundry approved" : "Laundry rejected",
-      });
-      fetchBindings();
-    } catch (err) {
-      toast({
-        title: t("error") || "Error",
-        description: String(err),
-        variant: "destructive",
-      });
-    } finally {
-      setActioningLaundryId(null);
-    }
-  }, [fetchBindings, toast, t]);
-
   const activeAccountId = useMemo(() => storage.getActiveAccountId(), [refreshKey]);
   const showAllContexts = useMemo(() => storage.getShowAllContexts(), [refreshKey]);
   
+  // Check if current context allows laundry (active account is Laundry Service, or showAllContexts and any laundry business exists)
   const activeAccount = useMemo(() => {
     if (!activeAccountId) return null;
     return storage.getAccounts().find(a => a.id === activeAccountId) || null;
@@ -126,6 +49,7 @@ export function StaffLaundryScreen() {
     return accounts.filter(a => a.profession === 'Laundry Service');
   }, [refreshKey]);
   
+  // Only allow laundry logging if: active account is Laundry Service OR (showAllContexts AND at least one laundry business exists)
   const hasLaundryBusiness = showAllContexts 
     ? laundryBusinesses.length > 0 
     : activeAccount?.profession === 'Laundry Service';
@@ -180,13 +104,6 @@ export function StaffLaundryScreen() {
     return result;
   }, [laundryJobs, currentMonth, filters, searchQuery, clientHomes]);
 
-  const filteredSharedLaundry = useMemo(() => {
-    return sharedLaundry.filter((laundry) => {
-      const laundryDate = parseISO(laundry.date);
-      return isSameMonth(laundryDate, currentMonth);
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [sharedLaundry, currentMonth]);
-
   const monthTotal = useMemo(() => {
     return filteredJobs.reduce((sum, job) => sum + job.totalEarned, 0);
   }, [filteredJobs]);
@@ -222,19 +139,6 @@ export function StaffLaundryScreen() {
       return format(parseISO(dateStr), "EEE, MMM d");
     } catch {
       return dateStr;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Badge variant="secondary" className="text-xs shrink-0">{t("pending") || "Pending"}</Badge>;
-      case "approved":
-        return <Badge variant="default" className="text-xs shrink-0 bg-green-600">Approved</Badge>;
-      case "rejected":
-        return <Badge variant="destructive" className="text-xs shrink-0">Rejected</Badge>;
-      default:
-        return null;
     }
   };
 
@@ -314,7 +218,7 @@ export function StaffLaundryScreen() {
                 {t("manageAccounts") || "Manage Businesses"}
               </Button>
             </Card>
-          ) : filteredJobs.length === 0 && filteredSharedLaundry.length === 0 ? (
+          ) : filteredJobs.length === 0 ? (
             <Card className="p-4 flex flex-col items-center gap-2" data-testid="empty-state">
               <div className="icon-halo-muted w-10 h-10">
                 <Shirt className="w-5 h-5 text-muted-foreground" />
@@ -329,192 +233,81 @@ export function StaffLaundryScreen() {
               </Button>
             </Card>
           ) : (
-            <div className="flex flex-col gap-6">
-              {filteredJobs.length > 0 && (
-                <div className="flex flex-col gap-3">
-                  <h3 className="font-semibold text-sm">My Laundry Jobs ({filteredJobs.length})</h3>
-                  {filteredJobs.map((job) => (
-                    <Card
-                      key={job.id}
-                      className="p-4"
-                      data-testid={`card-laundry-${job.id}`}
-                    >
-                      <div className="flex items-start justify-between gap-2.5">
-                        <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                          <div className="icon-halo-destructive w-9 h-9 shrink-0 mt-0.5">
-                            <Shirt className="w-4 h-4 text-destructive" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium">
-                                {formatDateDisplay(job.date)}
-                              </span>
-                              {job.serviceType && (
-                                <Badge variant="secondary" className="text-xs">
-                                  {job.serviceType}
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            <p className="text-xs text-muted-foreground">
-                              {getClientName(job.clientHomeId)}
-                            </p>
-
-                            {job.items && job.items.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {job.items.slice(0, 3).map((item, idx) => (
-                                  <Badge
-                                    key={idx}
-                                    variant="outline"
-                                    className="text-xs"
-                                  >
-                                    {item.quantity}x {item.type}
-                                  </Badge>
-                                ))}
-                                {job.items.length > 3 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{job.items.length - 3} more
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                          <span className="font-semibold text-success" data-testid={`text-total-${job.id}`}>
-                            {symbol}{job.totalEarned}
-                          </span>
-                          <div className="flex items-center">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleView(job)}
-                              data-testid={`button-view-${job.id}`}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(job)}
-                              data-testid={`button-delete-${job.id}`}
-                            >
-                              <Trash2 className="w-4 h-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </div>
+            <div className="flex flex-col gap-3">
+              {filteredJobs.map((job) => (
+                <Card
+                  key={job.id}
+                  className="p-4"
+                  data-testid={`card-laundry-${job.id}`}
+                >
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                      <div className="icon-halo-destructive w-9 h-9 shrink-0 mt-0.5">
+                        <Shirt className="w-4 h-4 text-destructive" />
                       </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium">
+                            {formatDateDisplay(job.date)}
+                          </span>
+                          {job.serviceType && (
+                            <Badge variant="secondary" className="text-xs">
+                              {job.serviceType}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <p className="text-xs text-muted-foreground">
+                          {getClientName(job.clientHomeId)}
+                        </p>
 
-              {isAuthenticated && filteredSharedLaundry.length > 0 && (
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-2">
-                    <Link2 className="w-4 h-4 text-muted-foreground" />
-                    <h3 className="font-semibold text-sm">Laundry from Linked Homes ({filteredSharedLaundry.length})</h3>
-                  </div>
-                  {filteredSharedLaundry.map((laundry) => {
-                    const laundryCurrency = laundry.recordCurrency 
-                      ? (currencySymbols[laundry.recordCurrency as keyof typeof currencySymbols] || laundry.recordCurrency)
-                      : symbol;
-
-                    const itemCount = laundry.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
-
-                    return (
-                      <Card 
-                        key={laundry.id} 
-                        className="p-4"
-                        data-testid={`card-shared-laundry-${laundry.id}`}
-                      >
-                        <div className="flex items-start justify-between gap-2.5">
-                          <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                            <div className="icon-halo-primary w-9 h-9 shrink-0 mt-0.5">
-                              <Link2 className="w-4 h-4 text-primary" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-medium">
-                                  {formatDateDisplay(laundry.date)}
-                                </span>
-                                {laundry.serviceType && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    {laundry.serviceType}
-                                  </Badge>
-                                )}
-                                {getStatusBadge(laundry.approvalStatus)}
-                              </div>
-                              
-                              <p className="text-xs text-muted-foreground">
-                                {laundry.counterpartyName || laundry.homePersonName || "Linked Home"}
-                              </p>
-
-                              {laundry.items && laundry.items.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {laundry.items.slice(0, 3).map((item, idx) => (
-                                    <Badge
-                                      key={idx}
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {item.quantity}x {item.type}
-                                    </Badge>
-                                  ))}
-                                  {laundry.items.length > 3 && (
-                                    <Badge variant="outline" className="text-xs">
-                                      +{laundry.items.length - 3} more
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col items-end gap-1 shrink-0">
-                            <span className="font-semibold text-success" data-testid={`text-total-shared-${laundry.id}`}>
-                              {laundryCurrency}{laundry.total.toLocaleString()}
-                            </span>
-                            {laundry.approvalStatus === "pending" && laundry.needsAction && (
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-100"
-                                  onClick={() => handleLaundryAction(laundry.id, "approve")}
-                                  disabled={actioningLaundryId === laundry.id}
-                                  data-testid={`button-approve-laundry-${laundry.id}`}
-                                >
-                                  {actioningLaundryId === laundry.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <Check className="w-4 h-4" />
-                                  )}
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                  onClick={() => handleLaundryAction(laundry.id, "reject")}
-                                  disabled={actioningLaundryId === laundry.id}
-                                  data-testid={`button-reject-laundry-${laundry.id}`}
-                                >
-                                  {actioningLaundryId === laundry.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <X className="w-4 h-4" />
-                                  )}
-                                </Button>
-                              </div>
+                        {job.items && job.items.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {job.items.slice(0, 3).map((item, idx) => (
+                              <Badge
+                                key={idx}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {item.quantity}x {item.type}
+                              </Badge>
+                            ))}
+                            {job.items.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{job.items.length - 3} more
+                              </Badge>
                             )}
                           </div>
-                        </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="font-semibold text-success" data-testid={`text-total-${job.id}`}>
+                        {symbol}{job.totalEarned}
+                      </span>
+                      <div className="flex items-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleView(job)}
+                          data-testid={`button-view-${job.id}`}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(job)}
+                          data-testid={`button-delete-${job.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           )}
         </div>
