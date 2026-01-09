@@ -4,10 +4,12 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
 import { cn } from "@/lib/utils"
 
-const triggerHaptic = async () => {
+const triggerHaptic = () => {
   try {
     if ((window as any).Capacitor?.isNativePlatform?.()) {
-      await Haptics.impact({ style: ImpactStyle.Light });
+      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {
+        // Silently fail if haptics not available
+      });
     }
   } catch (e) {
     // Silently fail

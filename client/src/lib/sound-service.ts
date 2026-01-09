@@ -77,15 +77,20 @@ function playPopSound(): void {
   }
 }
 
-export async function playClickSound(): Promise<void> {
+export function playClickSound(): void {
   const now = Date.now();
   if (now - lastPlayTime < MIN_INTERVAL) return;
   lastPlayTime = now;
 
-  if (hapticEnabled && Capacitor.isNativePlatform()) {
+  if (hapticEnabled) {
     try {
-      await Haptics.impact({ style: ImpactStyle.Light });
+      if ((window as any).Capacitor?.isNativePlatform?.()) {
+        Haptics.impact({ style: ImpactStyle.Light }).catch(() => {
+          // Silently fail if haptics not available
+        });
+      }
     } catch {
+      // Silently fail
     }
   }
 
@@ -94,11 +99,16 @@ export async function playClickSound(): Promise<void> {
   }
 }
 
-export async function playSuccessSound(): Promise<void> {
-  if (hapticEnabled && Capacitor.isNativePlatform()) {
+export function playSuccessSound(): void {
+  if (hapticEnabled) {
     try {
-      await Haptics.impact({ style: ImpactStyle.Medium });
+      if ((window as any).Capacitor?.isNativePlatform?.()) {
+        Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {
+          // Silently fail if haptics not available
+        });
+      }
     } catch {
+      // Silently fail
     }
   }
 
