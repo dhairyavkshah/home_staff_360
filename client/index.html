@@ -19,9 +19,24 @@
   <body>
     <div id="root"></div>
     <script>
-      // Early error suppression for Capacitor plugins in web mode
-      // Must run before Vite's runtime-error-plugin loads
+      // Patch Vite's runtime error overlay to suppress non-Error exceptions
+      // This intercepts the sendError function before it shows the overlay
       (function() {
+        // Intercept WebSocket messages to block error overlay
+        var originalSend = WebSocket.prototype.send;
+        WebSocket.prototype.send = function(data) {
+          try {
+            if (typeof data === 'string' && data.includes('"type":"error"')) {
+              var parsed = JSON.parse(data);
+              if (parsed.type === 'error' && !parsed.err) {
+                return; // Suppress empty/non-Error errors
+              }
+            }
+          } catch (e) {}
+          return originalSend.apply(this, arguments);
+        };
+        
+        // Early error suppression for Capacitor plugins in web mode
         var originalOnError = window.onerror;
         window.onerror = function(msg, url, line, col, error) {
           // Suppress non-Error object errors (common from Capacitor)
