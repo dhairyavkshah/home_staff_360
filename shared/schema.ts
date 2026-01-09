@@ -13,6 +13,7 @@ export const STORAGE_KEYS = {
   TRANSACTIONS: 'hm_transactions',
   LAUNDRY: 'hm_laundry',
   EXPENSES: 'hm_expenses',
+  NOTES: 'hm_notes',
 } as const;
 
 export const userTypes = ['HOME', 'STAFF'] as const;
@@ -646,6 +647,28 @@ export type StaffInvoice = z.infer<typeof staffInvoiceSchema>;
 export const insertStaffInvoiceSchema = staffInvoiceSchema.omit({ id: true, createdAt: true });
 export type InsertStaffInvoice = z.infer<typeof insertStaffInvoiceSchema>;
 
+// ============ NOTES (Sticky Notes) ============
+
+export const noteColors = ['yellow', 'blue', 'green', 'pink', 'purple', 'orange'] as const;
+export type NoteColor = typeof noteColors[number];
+
+export const noteSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  userType: z.enum(userTypes),
+  title: z.string().max(100).optional(),
+  content: z.string().max(1000),
+  color: z.enum(noteColors).default('yellow'),
+  isPinned: z.boolean().default(false),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type Note = z.infer<typeof noteSchema>;
+
+export const insertNoteSchema = noteSchema.omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertNote = z.infer<typeof insertNoteSchema>;
+
 export const backupDataSchema = z.object({
   version: z.string(),
   exportDate: z.string(),
@@ -663,6 +686,7 @@ export const backupDataSchema = z.object({
   staffEarnings: z.array(staffEarningSchema).optional(),
   staffExpenses: z.array(staffExpenseSchema).optional(),
   staffInvoices: z.array(staffInvoiceSchema).optional(),
+  notes: z.array(noteSchema).optional(),
 });
 
 export type BackupData = z.infer<typeof backupDataSchema>;

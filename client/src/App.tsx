@@ -80,6 +80,7 @@ import { AuthScreen } from "@/screens/auth/AuthScreen";
 import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
 import { SubscriptionScreen } from "@/screens/SubscriptionScreen";
 import { PrivacyPolicyScreen } from "@/screens/PrivacyPolicyScreen";
+import { NotesScreen } from "@/screens/NotesScreen";
 import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { RealtimeProvider } from "@/lib/realtime-provider";
@@ -210,6 +211,8 @@ function MobileAppRouter() {
       return <SubscriptionScreen />;
     case "privacy-policy":
       return <PrivacyPolicyScreen />;
+    case "notes":
+      return <NotesScreen />;
     default:
       return <LauncherScreen />;
   }

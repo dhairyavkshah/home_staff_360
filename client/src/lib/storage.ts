@@ -42,6 +42,8 @@ import {
   type PlanType,
   type LinkedRecordType,
   type Currency,
+  type Note,
+  type InsertNote,
   defaultSettings,
   defaultHomeSettings,
   defaultStaffSettings,
@@ -694,6 +696,65 @@ export const storage = {
     this.deleteDocumentsByLinkedRecord('EXPENSE', id);
   },
 
+  // ============ NOTES (Sticky Notes) ============
+
+  getNotes(): Note[] {
+    return getItem(STORAGE_KEYS.NOTES, []);
+  },
+
+  getNotesByAccount(accountId: string, userType: UserType): Note[] {
+    return this.getNotes().filter((n) => n.accountId === accountId && n.userType === userType);
+  },
+
+  getNote(id: string): Note | undefined {
+    return this.getNotes().find((n) => n.id === id);
+  },
+
+  addNote(data: InsertNote): Note {
+    const notes = this.getNotes();
+    const now = new Date().toISOString();
+    const note: Note = {
+      ...data,
+      id: generateId(),
+      createdAt: now,
+      updatedAt: now,
+    };
+    notes.push(note);
+    setItem(STORAGE_KEYS.NOTES, notes);
+    return note;
+  },
+
+  updateNote(id: string, data: Partial<Omit<InsertNote, 'accountId' | 'userType'>>): Note | undefined {
+    const notes = this.getNotes();
+    const index = notes.findIndex((n) => n.id === id);
+    if (index === -1) return undefined;
+    notes[index] = { 
+      ...notes[index], 
+      ...data, 
+      updatedAt: new Date().toISOString() 
+    };
+    setItem(STORAGE_KEYS.NOTES, notes);
+    return notes[index];
+  },
+
+  deleteNote(id: string): void {
+    const notes = this.getNotes().filter((n) => n.id !== id);
+    setItem(STORAGE_KEYS.NOTES, notes);
+  },
+
+  toggleNotePin(id: string): Note | undefined {
+    const notes = this.getNotes();
+    const index = notes.findIndex((n) => n.id === id);
+    if (index === -1) return undefined;
+    notes[index] = { 
+      ...notes[index], 
+      isPinned: !notes[index].isPinned,
+      updatedAt: new Date().toISOString() 
+    };
+    setItem(STORAGE_KEYS.NOTES, notes);
+    return notes[index];
+  },
+
   exportBackup(): BackupData {
     const profile = this.getProfile();
     return {
@@ -713,6 +774,7 @@ export const storage = {
       staffEarnings: this.getStaffEarnings(),
       staffExpenses: this.getStaffExpenses(),
       staffInvoices: this.getStaffInvoices(),
+      notes: this.getNotes(),
     };
   },
 

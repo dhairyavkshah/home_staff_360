@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Settings, Users, Calendar, Shirt, FileText, Home, ChevronDown, Check, Building2, FolderOpen, Wallet, Receipt, ArrowRightLeft, Link2, Bell } from "lucide-react";
+import { Settings, Users, Calendar, Shirt, FileText, Home, ChevronDown, Check, Building2, FolderOpen, Wallet, Receipt, ArrowRightLeft, Link2, Bell, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -181,6 +181,14 @@ export function HomeScreen() {
       color: 'muted',
       screen: 'documents' as const,
       subtitle: tLabel('storeFiles', 'Store Files'),
+    },
+    {
+      id: 'notes',
+      title: tLabel('notes', 'Notes'),
+      icon: StickyNote,
+      color: 'warning',
+      screen: 'notes' as const,
+      subtitle: tLabel('stickyNotes', 'Sticky Notes'),
     },
   ];
 

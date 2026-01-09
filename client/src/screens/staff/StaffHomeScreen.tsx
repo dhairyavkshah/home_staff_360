@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Calendar, ClipboardList, Building2, Settings, Shirt, Briefcase, ChevronDown, Check, Users, FolderOpen, Receipt, FileText, Link2, Bell } from "lucide-react";
+import { Calendar, ClipboardList, Building2, Settings, Shirt, Briefcase, ChevronDown, Check, Users, FolderOpen, Receipt, FileText, Link2, Bell, StickyNote } from "lucide-react";
 import { getCurrencyIcon, groupTotalsByCurrency, formatCurrencyTotals, mergeCurrencyTotals } from "@/lib/calculations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -253,6 +253,14 @@ export function StaffHomeScreen() {
       color: 'primary',
       screen: 'staff-invoices' as const,
       subtitle: tLabel('billClients', 'Bill Clients'),
+    },
+    {
+      id: 'notes',
+      title: tLabel('notes', 'Notes'),
+      icon: StickyNote,
+      color: 'warning',
+      screen: 'notes' as const,
+      subtitle: tLabel('stickyNotes', 'Sticky Notes'),
     },
   ];
   

@@ -65,7 +65,8 @@ export type Screen =
   | "set-password"
   | "profile-settings"
   | "subscription"
-  | "privacy-policy";
+  | "privacy-policy"
+  | "notes";
 
 interface NavigationData {
   personId?: string;
