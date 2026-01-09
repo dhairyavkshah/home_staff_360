@@ -330,13 +330,13 @@ export function AttendanceScreen() {
 
         <Card className="p-4 rounded-lg">
           <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground mb-2">
-            <span>Sun</span>
+            <span className="text-destructive/70">Sun</span>
             <span>Mon</span>
             <span>Tue</span>
             <span>Wed</span>
             <span>Thu</span>
             <span>Fri</span>
-            <span>Sat</span>
+            <span className="text-destructive/70">Sat</span>
           </div>
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((day, idx) => {
@@ -348,6 +348,8 @@ export function AttendanceScreen() {
               const isToday = dateStr === getTodayString();
               const status = getDayStatus(day);
               const isFuture = isFutureDate(day);
+              const dayOfWeek = new Date(year, month, day).getDay();
+              const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
               
               return (
                 <button
@@ -359,6 +361,7 @@ export function AttendanceScreen() {
                     ${isFuture ? 'text-muted-foreground/40 cursor-not-allowed' : ''}
                     ${isSelected && !isFuture ? 'bg-primary text-primary-foreground' : !isFuture ? 'hover-elevate' : ''}
                     ${isToday && !isSelected ? 'ring-2 ring-primary ring-offset-2' : ''}
+                    ${isWeekend && !isSelected && !isFuture ? 'text-destructive/70' : ''}
                   `}
                   data-testid={`calendar-day-${day}`}
                 >

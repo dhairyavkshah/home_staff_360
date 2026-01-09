@@ -122,10 +122,10 @@ export function HomeScreen() {
       icon: Calendar,
       color: 'warning',
       screen: 'attendance' as const,
-      subtitle: stats.todayAttendance.unmarked > 0 
+      subtitle: stats?.todayAttendance?.unmarked > 0 
         ? `${stats.todayAttendance.unmarked} ${tLabel('unmarked', 'Unmarked')}`
-        : stats.activeStaff > 0 
-          ? `${stats.todayAttendance.present}P / ${stats.todayAttendance.halfDay}H / ${stats.todayAttendance.absent}A`
+        : stats?.activeStaff > 0 
+          ? `${stats.todayAttendance?.present || 0}P / ${stats.todayAttendance?.halfDay || 0}H / ${stats.todayAttendance?.absent || 0}A`
           : tLabel('markAttendance', 'Mark Today'),
     },
     {
@@ -134,7 +134,7 @@ export function HomeScreen() {
       icon: Shirt,
       color: 'info',
       screen: 'laundry-view' as const,
-      subtitle: stats.unpaidLaundryByCurrency.length > 0 
+      subtitle: stats?.unpaidLaundryByCurrency?.length > 0 
         ? `${formatCurrencyTotals(stats.unpaidLaundryByCurrency, symbol)} ${tLabel('unpaid', 'Unpaid')}`
         : tLabel('allPaid', 'All Paid'),
     },
@@ -144,7 +144,7 @@ export function HomeScreen() {
       icon: Wallet,
       color: 'warning',
       screen: 'payables' as const,
-      subtitle: stats.totalPayableByCurrency.length > 0 
+      subtitle: stats?.totalPayableByCurrency?.length > 0 
         ? formatCurrencyTotals(stats.totalPayableByCurrency, symbol)
         : formatCurrency(0, settings.currency, settings.customCurrencySymbol),
     },
@@ -154,7 +154,7 @@ export function HomeScreen() {
       icon: Receipt,
       color: 'destructive',
       screen: 'expenses' as const,
-      subtitle: stats.expensesByCurrency.length > 0 
+      subtitle: stats?.expensesByCurrency?.length > 0 
         ? formatCurrencyTotals(stats.expensesByCurrency, symbol)
         : formatCurrency(0, settings.currency, settings.customCurrencySymbol),
     },
@@ -346,7 +346,7 @@ export function HomeScreen() {
                 data-testid="card-overview-payable"
               >
                 <p className="text-xl font-bold text-warning">
-                  {stats.totalPayableByCurrency.length > 0 
+                  {stats?.totalPayableByCurrency?.length > 0 
                     ? formatCurrencyTotals(stats.totalPayableByCurrency, symbol)
                     : formatCurrency(0, settings.currency, settings.customCurrencySymbol)}
                 </p>
@@ -357,7 +357,7 @@ export function HomeScreen() {
                 onClick={() => handleModuleClick('expenses', 'expenses')}
                 data-testid="card-overview-bills-due"
               >
-                <p className="text-xl font-bold text-destructive">{stats.unpaidBills}</p>
+                <p className="text-xl font-bold text-destructive">{stats?.unpaidBills || 0}</p>
                 <p className="text-[10px] text-muted-foreground">{tLabel('billsDue', 'Bills Due')}</p>
               </Card>
             </div>

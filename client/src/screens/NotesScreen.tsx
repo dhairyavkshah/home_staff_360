@@ -139,7 +139,7 @@ export function NotesScreen() {
       });
       toast({ title: "Note updated" });
     } else {
-      storage.addNote({
+      const newNote = storage.addNote({
         accountId: targetAccountId,
         userType,
         title: formTitle.trim() || undefined,
@@ -147,6 +147,12 @@ export function NotesScreen() {
         color: formColor,
         isPinned: formPinned,
       });
+      
+      if (!newNote || !newNote.id) {
+        toast({ title: "Failed to create note", variant: "destructive" });
+        return;
+      }
+      
       toast({ title: "Note added" });
     }
 

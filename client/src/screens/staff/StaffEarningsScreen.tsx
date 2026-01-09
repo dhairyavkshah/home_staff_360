@@ -308,7 +308,7 @@ export function StaffEarningsScreen() {
                       {job.itemCount} {t("items")} - {new Date(job.date).toLocaleDateString()}
                     </p>
                   </div>
-                  <p className="font-semibold text-sm shrink-0">{symbol}{job.totalEarned}</p>
+                  <p className="font-semibold text-sm shrink-0">{job.recordCurrencySymbol || symbol}{job.totalEarned}</p>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="icon" variant="ghost" data-testid={`button-menu-laundry-${job.id}`}>
@@ -353,9 +353,10 @@ export function StaffEarningsScreen() {
                   }
                 };
 
-                const paymentCurrency = payment.recordCurrency 
-                  ? (currencySymbols[payment.recordCurrency as keyof typeof currencySymbols] || payment.recordCurrency)
-                  : symbol;
+                const paymentCurrency = payment.recordCurrencySymbol 
+                  || (payment.recordCurrency 
+                    ? (currencySymbols[payment.recordCurrency as keyof typeof currencySymbols] || payment.recordCurrency)
+                    : symbol);
 
                 return (
                   <div key={payment.id} className="flex items-center gap-3 p-4 rounded-lg border bg-card" data-testid={`card-payment-${payment.id}`}>

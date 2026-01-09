@@ -51,24 +51,31 @@ export function StaffLaundryScreen() {
       const { bindings: fetchedBindings } = await collaborationService.getBindings();
       setBindings(fetchedBindings || []);
 
-      const allLaundry: SharedLaundryRecord[] = [];
-      for (const binding of (fetchedBindings || [])) {
-        if (binding.isActive) {
+      const activeBindings = (fetchedBindings || []).filter(b => b.isActive);
+      
+      const results = await Promise.all(
+        activeBindings.map(async (binding) => {
           try {
             const { laundry } = await collaborationService.getSharedLaundry(binding.id);
-            if (laundry) {
-              allLaundry.push(...laundry);
-            }
+            return laundry || [];
           } catch (err) {
             console.error(`Failed to fetch shared laundry for binding ${binding.id}:`, err);
+            return [];
           }
-        }
-      }
+        })
+      );
+      
+      const allLaundry = results.flat();
       setSharedLaundry(allLaundry);
     } catch (err) {
       console.error("Failed to fetch bindings:", err);
+      toast({
+        title: t("error") || "Error",
+        description: t("failedToSyncData") || "Failed to sync laundry data",
+        variant: "destructive"
+      });
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, toast, t]);
 
   useEffect(() => {
     fetchBindings();

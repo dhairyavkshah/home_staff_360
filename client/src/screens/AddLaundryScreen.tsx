@@ -131,32 +131,58 @@ export function AddLaundryScreen() {
   };
 
   const handleAddItem = (newItem: { type: string; quantity: number; rate: number; details?: string }) => {
+    // Validate quantity and rate are greater than 0
+    if (!newItem.quantity || newItem.quantity < 1) {
+      toast({
+        title: "Invalid Quantity",
+        description: "Quantity must be at least 1",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!newItem.rate || newItem.rate <= 0) {
+      toast({
+        title: "Invalid Rate",
+        description: "Rate must be greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const existingIndex = items.findIndex(i => i.type === newItem.type && i.rate === newItem.rate);
+    const clampedQuantity = Math.max(1, Math.floor(newItem.quantity));
     
     if (existingIndex >= 0) {
       const updated = [...items];
+      const newTotalQuantity = updated[existingIndex].quantity + clampedQuantity;
       updated[existingIndex] = {
         ...updated[existingIndex],
-        quantity: updated[existingIndex].quantity + newItem.quantity,
-        subtotal: (updated[existingIndex].quantity + newItem.quantity) * newItem.rate,
+        quantity: newTotalQuantity,
+        subtotal: newTotalQuantity * newItem.rate,
       };
       setItems(updated);
+      markDirty();
+      toast({
+        title: "Item Updated",
+        description: `${newTotalQuantity}x ${newItem.type} (total)`,
+      });
     } else {
       const item: LaundryItem = {
         id: generateItemId(),
         type: newItem.type,
-        quantity: newItem.quantity,
+        quantity: clampedQuantity,
         rate: newItem.rate,
-        subtotal: newItem.quantity * newItem.rate,
+        subtotal: clampedQuantity * newItem.rate,
         details: newItem.details,
       };
       setItems([...items, item]);
+      markDirty();
+      toast({
+        title: "Item Added",
+        description: `${clampedQuantity}x ${newItem.type}`,
+      });
     }
-    
-    toast({
-      title: "Item Added",
-      description: `${newItem.quantity}x ${newItem.type}`,
-    });
   };
 
   const handleRemoveItem = (itemId: string) => {

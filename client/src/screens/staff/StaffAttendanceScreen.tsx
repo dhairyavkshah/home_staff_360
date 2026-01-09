@@ -49,21 +49,34 @@ export function StaffAttendanceScreen() {
       setBindings(fetchedBindings || []);
       
       const newSharedAttendance = new Map<string, SharedAttendanceRecord[]>();
-      for (const binding of (fetchedBindings || [])) {
-        if (binding.isActive) {
+      const activeBindings = (fetchedBindings || []).filter(b => b.isActive);
+      
+      const results = await Promise.all(
+        activeBindings.map(async (binding) => {
           try {
             const { attendance } = await collaborationService.getSharedAttendance(binding.id);
-            newSharedAttendance.set(binding.id, attendance || []);
+            return { bindingId: binding.id, attendance: attendance || [] };
           } catch (err) {
             console.error(`Failed to fetch shared attendance for binding ${binding.id}:`, err);
+            return { bindingId: binding.id, attendance: [] };
           }
-        }
-      }
+        })
+      );
+      
+      results.forEach(({ bindingId, attendance }) => {
+        newSharedAttendance.set(bindingId, attendance);
+      });
+      
       setSharedAttendance(newSharedAttendance);
     } catch (err) {
       console.error("Failed to fetch bindings:", err);
+      toast({
+        title: t("error") || "Error",
+        description: t("failedToSyncData") || "Failed to sync attendance data",
+        variant: "destructive"
+      });
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, toast, t]);
 
   useEffect(() => {
     fetchBindings();

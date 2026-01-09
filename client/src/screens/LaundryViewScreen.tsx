@@ -287,17 +287,29 @@ export function LaundryViewScreen() {
         />
 
         {filteredBatches.length === 0 ? (
-          <Card className="p-4 flex flex-col items-center gap-2" data-testid="empty-state">
+          <Card className="p-4 flex flex-col items-center gap-3" data-testid="empty-state">
             <div className="icon-halo-muted w-10 h-10">
               <Shirt className="w-5 h-5 text-muted-foreground" />
             </div>
             <div className="text-center">
-              <h3 className="font-semibold text-sm">{t("noLaundryEntries")}</h3>
-              <p className="text-xs text-muted-foreground">{t("noLaundryEntriesThisMonth")}</p>
+              <h3 className="font-semibold text-sm">
+                {laundryBatches.length === 0 
+                  ? t("noLaundryItems") || "No laundry items yet"
+                  : t("noLaundryEntries")}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {laundryBatches.length === 0
+                  ? t("addFirstLaundryDescription") || "Add your first laundry entry to get started"
+                  : searchQuery 
+                    ? t("noResultsFound") 
+                    : t("noLaundryEntriesThisMonth")}
+              </p>
             </div>
             <Button onClick={handleAddNew} data-testid="button-add-first-laundry">
-              <span className="mr-2">+</span>
-              {t("addLaundry")}
+              <Plus className="w-4 h-4 mr-2" />
+              {laundryBatches.length === 0 
+                ? t("addFirstLaundry") || "Add First Laundry"
+                : t("addLaundry")}
             </Button>
           </Card>
         ) : (
