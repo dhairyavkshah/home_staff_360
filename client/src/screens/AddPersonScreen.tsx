@@ -284,6 +284,8 @@ export function AddPersonScreen() {
           const duplicate = existingPeople.find((p) => {
             // Skip current person in edit mode
             if (editMode && data.personId && p.id === data.personId) return false;
+            // Skip if person has no phone
+            if (!p.phone) return false;
             // Normalize existing phone for comparison
             const existingNormalized = p.phone.replace(/\D/g, "");
             return existingNormalized === normalizedPhone;

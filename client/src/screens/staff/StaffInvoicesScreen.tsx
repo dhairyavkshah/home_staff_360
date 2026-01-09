@@ -27,7 +27,7 @@ export function StaffInvoicesScreen() {
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
   const [clientFilter, setClientFilter] = useState<string>("all");
 
-  const [refreshKey] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
   const settings = useMemo(() => storage.getSettings(), [refreshKey]);
   const profile = useMemo(() => storage.getProfile(), [refreshKey]);
   const activeAccountId = useMemo(() => storage.getActiveAccountId(), [refreshKey]);
@@ -54,7 +54,7 @@ export function StaffInvoicesScreen() {
     }
     
     return list.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime());
-  }, [statusFilter, clientFilter, activeAccountId, showAllContexts]);
+  }, [statusFilter, clientFilter, activeAccountId, showAllContexts, profile, refreshKey]);
 
   const getClientName = (clientHomeId: string) => {
     const client = clientHomes.find(c => c.id === clientHomeId);

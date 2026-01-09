@@ -431,6 +431,9 @@ export function ChatScreen() {
     }
 
     try {
+      const otherUser = chatInfo?.participants?.[0];
+      const exportChatName = chatInfo?.name || otherUser?.displayName || "Chat";
+      
       const chatExport = messages
         .filter((m) => !m.isDeleted)
         .map((m) => {
@@ -441,14 +444,14 @@ export function ChatScreen() {
         })
         .join("\n");
 
-      const header = `Chat History with ${chatName}\nExported on: ${new Date().toLocaleDateString()}\n${"=".repeat(50)}\n\n`;
+      const header = `Chat History with ${exportChatName}\nExported on: ${new Date().toLocaleDateString()}\n${"=".repeat(50)}\n\n`;
       const content = header + chatExport;
 
       const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `chat-${chatName.replace(/[^a-zA-Z0-9]/g, "_")}-${new Date().toISOString().split("T")[0]}.txt`;
+      link.download = `chat-${exportChatName.replace(/[^a-zA-Z0-9]/g, "_")}-${new Date().toISOString().split("T")[0]}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

@@ -244,6 +244,13 @@ class CollaborationService {
     });
   }
 
+  async verifyResetOtp(phone: string, otp: string): Promise<{ success: boolean; message?: string }> {
+    return this.apiRequest<{ success: boolean; message?: string }>("/auth/verify-reset-otp", {
+      method: "POST",
+      body: JSON.stringify({ phone, otp }),
+    });
+  }
+
   async resetPassword(phone: string, otp: string, newPassword: string): Promise<{
     success: boolean;
     message?: string;

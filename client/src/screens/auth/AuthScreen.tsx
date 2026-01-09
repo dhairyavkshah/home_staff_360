@@ -307,7 +307,28 @@ export function AuthScreen() {
       });
       return;
     }
-    setStep("reset-password");
+    
+    setIsLoading(true);
+    try {
+      const result = await collaborationService.verifyResetOtp(phone, otp);
+      if (result.success) {
+        setStep("reset-password");
+      } else {
+        toast({
+          title: "Invalid Code",
+          description: result.message || "The reset code is incorrect or expired",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Verification Failed",
+        description: error.message || "Failed to verify reset code",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResetPassword = async () => {

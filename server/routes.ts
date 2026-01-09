@@ -906,6 +906,41 @@ router.post("/api/auth/forgot-password", rateLimitMiddleware('forgot-password'),
   }
 });
 
+router.post("/api/auth/verify-reset-otp", async (req: Request, res: Response) => {
+  try {
+    const { phone, otp } = req.body;
+
+    if (!phone || !otp) {
+      return res.status(400).json({ success: false, message: "Phone and OTP are required" });
+    }
+
+    const user = await findUserByPhone(phone);
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired reset code" });
+    }
+
+    if (!user.otpHash || !user.otpExpiresAt) {
+      return res.status(400).json({ success: false, message: "Invalid or expired reset code" });
+    }
+
+    if (new Date() > user.otpExpiresAt) {
+      return res.status(400).json({ success: false, message: "Reset code has expired" });
+    }
+
+    const isValidOTP = await bcrypt.compare(otp, user.otpHash);
+    
+    if (!isValidOTP) {
+      return res.status(400).json({ success: false, message: "Invalid or expired reset code" });
+    }
+
+    res.json({ success: true, message: "OTP verified successfully" });
+  } catch (error) {
+    console.error("Verify reset OTP error:", error);
+    res.status(500).json({ success: false, message: "Failed to verify OTP" });
+  }
+});
+
 router.post("/api/auth/reset-password", async (req: Request, res: Response) => {
   try {
     const { phone, otp, newPassword } = req.body;
