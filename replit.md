@@ -278,3 +278,22 @@ home-staff-360/
 - Fixed "All contexts" mode for notes display
 - Fixed pin toggle synchronization in view mode
 - Fixed accessibility warnings in dialogs
+
+### Security Improvements
+- PIN codes now hashed with SHA-256 (was plain text in localStorage)
+- Automatic migration for existing users with plain text PINs
+- PIN validation and setting methods are now async
+
+### Icon & Branding Updates
+- Added Android notification icon (ic_stat_notification.xml) as vector drawable
+- Notification icon shows simplified house+person silhouette matching app logo
+- Web notifications now use favicon.png
+- Added PWA manifest.json with proper app icons
+- Added apple-touch-icon for iOS home screen
+
+### Android Rebuild Required
+After icon changes, rebuild the Android app:
+```bash
+npx cap sync android
+cd android && ./gradlew assembleRelease
+```
