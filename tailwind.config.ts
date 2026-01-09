@@ -6,12 +6,18 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        xl: "0.75rem",
-        lg: "0.5rem",
-        md: "0.375rem",
-        sm: "0.25rem",
-        "2xl": "1rem",
-        "3xl": "1.5rem",
+        none: "0",
+        sm: "var(--radius-sm)",
+        DEFAULT: "var(--radius)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
+        xl: "var(--radius-xl)",
+        "2xl": "2rem",
+        "3xl": "3rem",
+        full: "9999px",
+        card: "var(--radius-card)",
+        button: "var(--radius-button)",
+        input: "var(--radius-input)",
       },
       colors: {
         background: "hsl(var(--background) / <alpha-value>)",
