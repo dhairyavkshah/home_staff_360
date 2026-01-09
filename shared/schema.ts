@@ -1426,6 +1426,57 @@ export type InsertLaundryRevision = z.infer<typeof insertLaundryRevisionSchema>;
 export type LaundryRevision = typeof laundryRevisions.$inferSelect;
 
 // ============================================
+// Shared Payments - synced between Home and Staff users
+// ============================================
+
+export const sharedPayments = pgTable("shared_payments", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  bindingId: varchar("binding_id", { length: 255 }).references(() => collaborationBindings.id).notNull(),
+  date: varchar("date", { length: 10 }).notNull(),
+  amount: integer("amount").notNull(),
+  category: varchar("category", { length: 30 }).notNull(),
+  paymentMethod: varchar("payment_method", { length: 50 }),
+  note: text("note"),
+  approvalStatus: varchar("approval_status", { length: 20 }).default('pending').notNull(),
+  submittedBy: varchar("submitted_by", { length: 255 }).references(() => serverUsers.id).notNull(),
+  submittedByRole: varchar("submitted_by_role", { length: 10 }).notNull(),
+  actionRequiredBy: varchar("action_required_by", { length: 255 }).references(() => serverUsers.id),
+  recordCurrency: varchar("record_currency", { length: 10 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  approvedAt: timestamp("approved_at"),
+  rejectedAt: timestamp("rejected_at"),
+});
+
+export const sharedPaymentsRelations = relations(sharedPayments, ({ one }) => ({
+  binding: one(collaborationBindings, {
+    fields: [sharedPayments.bindingId],
+    references: [collaborationBindings.id],
+  }),
+  submitter: one(serverUsers, {
+    fields: [sharedPayments.submittedBy],
+    references: [serverUsers.id],
+  }),
+}));
+
+export const insertSharedPaymentSchema = z.object({
+  id: z.string().max(255),
+  bindingId: z.string().max(255),
+  date: z.string().max(10),
+  amount: z.number(),
+  category: z.string().max(30),
+  paymentMethod: z.string().max(50).optional(),
+  note: z.string().optional(),
+  approvalStatus: z.enum(approvalStatuses).optional(),
+  submittedBy: z.string().max(255),
+  submittedByRole: z.enum(userTypes),
+  actionRequiredBy: z.string().max(255).optional(),
+  recordCurrency: z.string().max(10).optional(),
+});
+export type InsertSharedPayment = z.infer<typeof insertSharedPaymentSchema>;
+export type SharedPayment = typeof sharedPayments.$inferSelect;
+
+// ============================================
 // Collab Connections (Facebook-style Friends List)
 // ============================================
 
