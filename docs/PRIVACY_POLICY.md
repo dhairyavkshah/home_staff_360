@@ -55,7 +55,7 @@ Home Staff 360 v1.0 operates as a **live, cloud-connected service**:
 ### 2.3 Data Retention
 
 - **Active Accounts**: Data is retained while your account is active
-- **Account Deletion**: Upon request, all data is permanently deleted within 30 days
+- **Account Deletion**: Upon request, all data is permanently deleted immediately
 - **Backups**: Encrypted backups are retained for disaster recovery (up to 90 days)
 - **Message History**: Chat messages are retained indefinitely unless deleted by users (within 5-minute window) or upon account deletion
 
@@ -124,7 +124,7 @@ You can export your data through the Backup feature in Settings, creating a down
 ### 5.3 Delete Your Data
 
 - **Account Deletion**: Request complete account deletion through Settings > Profile > Delete Account
-- **Complete Deletion**: Upon request, we will delete all server-stored data within 30 days
+- **Complete Deletion**: Upon request, we will delete all server-stored data immediately
 - **Message Deletion**: You can delete messages you sent within 5 minutes of sending
 
 ### 5.4 Opt-Out Options

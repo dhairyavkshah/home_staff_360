@@ -106,7 +106,7 @@ export default function PrivacyPolicy() {
               <h3 className="text-base font-medium">2.3 Data Retention</h3>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
                 <li><span className="font-medium text-foreground">Active Accounts</span>: Data is retained while your account is active</li>
-                <li><span className="font-medium text-foreground">Account Deletion</span>: Upon request, all data is permanently deleted within 30 days</li>
+                <li><span className="font-medium text-foreground">Account Deletion</span>: Upon request, all data is permanently deleted immediately</li>
                 <li><span className="font-medium text-foreground">Backups</span>: Encrypted backups are retained for disaster recovery (up to 90 days)</li>
                 <li><span className="font-medium text-foreground">Message History</span>: Chat messages are retained indefinitely unless deleted by users (within 5-minute window) or upon account deletion</li>
               </ul>
@@ -202,7 +202,7 @@ export default function PrivacyPolicy() {
               <h3 className="text-base font-medium">5.3 Delete Your Data</h3>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
                 <li><span className="font-medium text-foreground">Account Deletion</span>: Request complete account deletion through Settings &gt; Profile &gt; Delete Account</li>
-                <li><span className="font-medium text-foreground">Complete Deletion</span>: Upon request, we will delete all server-stored data within 30 days</li>
+                <li><span className="font-medium text-foreground">Complete Deletion</span>: Upon request, we will delete all server-stored data immediately</li>
                 <li><span className="font-medium text-foreground">Message Deletion</span>: You can delete messages you sent within 5 minutes of sending</li>
               </ul>
             </div>
