@@ -45,7 +45,6 @@ import {
   Settings,
   Loader2,
   ExternalLink,
-  Image as ImageIcon,
   Video,
   RefreshCw,
 } from "lucide-react";
@@ -54,13 +53,17 @@ interface Advertisement {
   id: string;
   title: string;
   description: string | null;
-  type: "IMAGE" | "VIDEO";
-  mediaUrl: string;
-  clickUrl: string | null;
+  videoUrl: string;
+  thumbnailUrl: string | null;
+  duration: number;
+  weight: number;
   isActive: boolean;
-  priority: number;
-  impressions: number;
-  clicks: number;
+  advertiser: string | null;
+  targetUrl: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  maxPlayCount: number | null;
+  orientation: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -71,22 +74,15 @@ interface AdSettings {
   adDurationSeconds: number;
 }
 
-interface Analytics {
+interface AdAnalytics {
+  adId: string;
+  title: string;
+  isActive: boolean;
   totalImpressions: number;
-  totalClicks: number;
-  averageCTR: number;
-  topAds: Array<{
-    id: string;
-    title: string;
-    impressions: number;
-    clicks: number;
-    ctr: number;
-  }>;
-  dailyStats: Array<{
-    date: string;
-    impressions: number;
-    clicks: number;
-  }>;
+  completionRate: string;
+  skipRate: string;
+  clickThroughRate: string;
+  avgWatchDuration: string;
 }
 
 export default function AdminAds() {
@@ -98,7 +94,7 @@ export default function AdminAds() {
     adIntervalSeconds: 120,
     adDurationSeconds: 15,
   });
-  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [analytics, setAnalytics] = useState<AdAnalytics[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
@@ -112,11 +108,14 @@ export default function AdminAds() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    type: "IMAGE" as "IMAGE" | "VIDEO",
-    mediaUrl: "",
-    clickUrl: "",
+    videoUrl: "",
+    thumbnailUrl: "",
+    duration: 30,
+    weight: 1,
     isActive: true,
-    priority: 1,
+    advertiser: "",
+    targetUrl: "",
+    orientation: "landscape",
   });
 
   const getAuthHeaders = () => {
@@ -129,12 +128,14 @@ export default function AdminAds() {
 
   const fetchAds = async () => {
     try {
-      const response = await fetch("/api/admin/ads", {
+      const response = await fetch("/api/admin/ads?limit=100", {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
         setAds(data.ads || []);
+      } else if (response.status === 503) {
+        setAds([]);
       }
     } catch (error) {
       console.error("Failed to fetch ads:", error);
@@ -167,7 +168,7 @@ export default function AdminAds() {
       });
       if (response.ok) {
         const data = await response.json();
-        setAnalytics(data);
+        setAnalytics(data.analytics || []);
       }
     } catch (error) {
       console.error("Failed to fetch analytics:", error);
@@ -216,17 +217,20 @@ export default function AdminAds() {
     setFormData({
       title: "",
       description: "",
-      type: "IMAGE",
-      mediaUrl: "",
-      clickUrl: "",
+      videoUrl: "",
+      thumbnailUrl: "",
+      duration: 30,
+      weight: 1,
       isActive: true,
-      priority: 1,
+      advertiser: "",
+      targetUrl: "",
+      orientation: "landscape",
     });
   };
 
   const handleCreateAd = async () => {
-    if (!formData.title || !formData.mediaUrl) {
-      toast({ title: "Title and Media URL are required", variant: "destructive" });
+    if (!formData.title || !formData.videoUrl) {
+      toast({ title: "Title and Video URL are required", variant: "destructive" });
       return;
     }
 
@@ -235,7 +239,18 @@ export default function AdminAds() {
       const response = await fetch("/api/admin/ads", {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description || null,
+          videoUrl: formData.videoUrl,
+          thumbnailUrl: formData.thumbnailUrl || null,
+          duration: formData.duration,
+          weight: formData.weight,
+          isActive: formData.isActive,
+          advertiser: formData.advertiser || null,
+          targetUrl: formData.targetUrl || null,
+          orientation: formData.orientation,
+        }),
       });
 
       if (response.ok) {
@@ -255,8 +270,8 @@ export default function AdminAds() {
   };
 
   const handleEditAd = async () => {
-    if (!selectedAd || !formData.title || !formData.mediaUrl) {
-      toast({ title: "Title and Media URL are required", variant: "destructive" });
+    if (!selectedAd || !formData.title || !formData.videoUrl) {
+      toast({ title: "Title and Video URL are required", variant: "destructive" });
       return;
     }
 
@@ -265,7 +280,18 @@ export default function AdminAds() {
       const response = await fetch(`/api/admin/ads/${selectedAd.id}`, {
         method: "PATCH",
         headers: getAuthHeaders(),
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description || null,
+          videoUrl: formData.videoUrl,
+          thumbnailUrl: formData.thumbnailUrl || null,
+          duration: formData.duration,
+          weight: formData.weight,
+          isActive: formData.isActive,
+          advertiser: formData.advertiser || null,
+          targetUrl: formData.targetUrl || null,
+          orientation: formData.orientation,
+        }),
       });
 
       if (response.ok) {
@@ -315,11 +341,14 @@ export default function AdminAds() {
     setFormData({
       title: ad.title,
       description: ad.description || "",
-      type: ad.type,
-      mediaUrl: ad.mediaUrl,
-      clickUrl: ad.clickUrl || "",
+      videoUrl: ad.videoUrl,
+      thumbnailUrl: ad.thumbnailUrl || "",
+      duration: ad.duration,
+      weight: ad.weight,
       isActive: ad.isActive,
-      priority: ad.priority,
+      advertiser: ad.advertiser || "",
+      targetUrl: ad.targetUrl || "",
+      orientation: ad.orientation,
     });
     setShowEditDialog(true);
   };
@@ -344,6 +373,15 @@ export default function AdminAds() {
     } catch (error) {
       toast({ title: "Failed to update ad status", variant: "destructive" });
     }
+  };
+
+  const getTotalStats = () => {
+    const totalImpressions = analytics.reduce((sum, a) => sum + a.totalImpressions, 0);
+    const totalWithClicks = analytics.filter(a => parseFloat(a.clickThroughRate) > 0);
+    const avgCTR = totalWithClicks.length > 0
+      ? totalWithClicks.reduce((sum, a) => sum + parseFloat(a.clickThroughRate), 0) / totalWithClicks.length
+      : 0;
+    return { totalImpressions, avgCTR };
   };
 
   if (isLoading) {
@@ -372,11 +410,11 @@ export default function AdminAds() {
         </TabsList>
 
         <TabsContent value="ads" className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h2 className="text-xl font-semibold">Manage Advertisements</h2>
               <p className="text-sm text-muted-foreground">
-                Create and manage ads shown to free tier users
+                Create and manage video ads shown to free tier users
               </p>
             </div>
             <Button onClick={() => { resetForm(); setShowCreateDialog(true); }} data-testid="button-create-ad">
@@ -389,12 +427,12 @@ export default function AdminAds() {
             <Card>
               <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
                 <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                  <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                  <Video className="w-6 h-6 text-muted-foreground" />
                 </div>
                 <div>
                   <h3 className="font-semibold">No Advertisements</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Create your first ad to start showing to free tier users
+                    Create your first video ad to start showing to free tier users
                   </p>
                 </div>
                 <Button onClick={() => { resetForm(); setShowCreateDialog(true); }}>
@@ -408,13 +446,11 @@ export default function AdminAds() {
               {ads.map((ad) => (
                 <Card key={ad.id} data-testid={`card-ad-${ad.id}`}>
                   <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-4 flex-wrap">
                       <div className="w-24 h-16 rounded-md bg-muted flex items-center justify-center overflow-hidden shrink-0">
-                        {ad.type === "VIDEO" ? (
-                          <Video className="w-8 h-8 text-muted-foreground" />
-                        ) : ad.mediaUrl ? (
+                        {ad.thumbnailUrl ? (
                           <img
-                            src={ad.mediaUrl}
+                            src={ad.thumbnailUrl}
                             alt={ad.title}
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -422,7 +458,7 @@ export default function AdminAds() {
                             }}
                           />
                         ) : (
-                          <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                          <Video className="w-8 h-8 text-muted-foreground" />
                         )}
                       </div>
 
@@ -432,31 +468,20 @@ export default function AdminAds() {
                           <Badge variant={ad.isActive ? "default" : "secondary"}>
                             {ad.isActive ? "Active" : "Inactive"}
                           </Badge>
-                          <Badge variant="outline">
-                            {ad.type === "VIDEO" ? "Video" : "Image"}
-                          </Badge>
-                          <Badge variant="outline">Priority: {ad.priority}</Badge>
+                          <Badge variant="outline">{ad.duration}s</Badge>
+                          <Badge variant="outline">Weight: {ad.weight}</Badge>
+                          <Badge variant="outline" className="capitalize">{ad.orientation}</Badge>
                         </div>
+                        {ad.advertiser && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            By {ad.advertiser}
+                          </p>
+                        )}
                         {ad.description && (
                           <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                             {ad.description}
                           </p>
                         )}
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Eye className="w-3.5 h-3.5" />
-                            {ad.impressions.toLocaleString()} views
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MousePointer className="w-3.5 h-3.5" />
-                            {ad.clicks.toLocaleString()} clicks
-                          </span>
-                          {ad.impressions > 0 && (
-                            <span>
-                              CTR: {((ad.clicks / ad.impressions) * 100).toFixed(2)}%
-                            </span>
-                          )}
-                        </div>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
@@ -481,11 +506,11 @@ export default function AdminAds() {
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
-                        {ad.clickUrl && (
+                        {ad.targetUrl && (
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() => window.open(ad.clickUrl!, "_blank")}
+                            onClick={() => window.open(ad.targetUrl!, "_blank")}
                             data-testid={`button-preview-ad-${ad.id}`}
                           >
                             <ExternalLink className="w-4 h-4" />
@@ -501,7 +526,7 @@ export default function AdminAds() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h2 className="text-xl font-semibold">Ad Analytics</h2>
               <p className="text-sm text-muted-foreground">
@@ -518,9 +543,9 @@ export default function AdminAds() {
             <div className="flex items-center justify-center h-64">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
-          ) : analytics ? (
+          ) : analytics.length > 0 ? (
             <>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -531,23 +556,7 @@ export default function AdminAds() {
                     <div className="flex items-center gap-2">
                       <Eye className="w-5 h-5 text-muted-foreground" />
                       <span className="text-2xl font-bold">
-                        {analytics.totalImpressions.toLocaleString()}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Total Clicks
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <MousePointer className="w-5 h-5 text-muted-foreground" />
-                      <span className="text-2xl font-bold">
-                        {analytics.totalClicks.toLocaleString()}
+                        {getTotalStats().totalImpressions.toLocaleString()}
                       </span>
                     </div>
                   </CardContent>
@@ -561,47 +570,51 @@ export default function AdminAds() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2">
-                      <BarChart3 className="w-5 h-5 text-muted-foreground" />
+                      <MousePointer className="w-5 h-5 text-muted-foreground" />
                       <span className="text-2xl font-bold">
-                        {analytics.averageCTR.toFixed(2)}%
+                        {getTotalStats().avgCTR.toFixed(2)}%
                       </span>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {analytics.topAds && analytics.topAds.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Top Performing Ads</CardTitle>
-                    <CardDescription>
-                      Ads with the highest engagement
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {analytics.topAds.map((ad, index) => (
-                        <div
-                          key={ad.id}
-                          className="flex items-center justify-between p-3 rounded-md bg-muted/50"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold">
-                              {index + 1}
-                            </div>
-                            <span className="font-medium">{ad.title}</span>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ad Performance</CardTitle>
+                  <CardDescription>
+                    Detailed metrics for each advertisement
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {analytics.map((ad, index) => (
+                      <div
+                        key={ad.adId}
+                        className="flex items-center justify-between p-3 rounded-md bg-muted/50 flex-wrap gap-2"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold">
+                            {index + 1}
                           </div>
-                          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                            <span>{ad.impressions.toLocaleString()} views</span>
-                            <span>{ad.clicks.toLocaleString()} clicks</span>
-                            <Badge variant="outline">{ad.ctr.toFixed(2)}% CTR</Badge>
+                          <div>
+                            <span className="font-medium">{ad.title}</span>
+                            <Badge variant={ad.isActive ? "default" : "secondary"} className="ml-2">
+                              {ad.isActive ? "Active" : "Inactive"}
+                            </Badge>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+                          <span>{ad.totalImpressions.toLocaleString()} views</span>
+                          <Badge variant="outline">CTR: {ad.clickThroughRate}</Badge>
+                          <Badge variant="outline">Completion: {ad.completionRate}</Badge>
+                          <Badge variant="outline">Skip: {ad.skipRate}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </>
           ) : (
             <Card>
@@ -666,7 +679,7 @@ export default function AdminAds() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="duration">Ad Duration (seconds)</Label>
+                <Label htmlFor="duration">Default Ad Duration (seconds)</Label>
                 <Input
                   id="duration"
                   type="number"
@@ -682,7 +695,7 @@ export default function AdminAds() {
                   data-testid="input-ad-duration"
                 />
                 <p className="text-xs text-muted-foreground">
-                  How long ads are shown (5-60 seconds)
+                  Default duration for ads (5-60 seconds)
                 </p>
               </div>
 
@@ -713,7 +726,7 @@ export default function AdminAds() {
           <DialogHeader>
             <DialogTitle>Create Advertisement</DialogTitle>
             <DialogDescription>
-              Add a new advertisement to show to free tier users
+              Add a new video advertisement to show to free tier users
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh]">
@@ -741,61 +754,96 @@ export default function AdminAds() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="create-type">Ad Type</Label>
+                <Label htmlFor="create-video-url">Video URL *</Label>
+                <Input
+                  id="create-video-url"
+                  value={formData.videoUrl}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, videoUrl: e.target.value }))}
+                  placeholder="https://example.com/ad-video.mp4"
+                  data-testid="input-create-video-url"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-thumbnail-url">Thumbnail URL</Label>
+                <Input
+                  id="create-thumbnail-url"
+                  value={formData.thumbnailUrl}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, thumbnailUrl: e.target.value }))}
+                  placeholder="https://example.com/thumbnail.jpg"
+                  data-testid="input-create-thumbnail-url"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-target-url">Target URL (opens on click)</Label>
+                <Input
+                  id="create-target-url"
+                  value={formData.targetUrl}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, targetUrl: e.target.value }))}
+                  placeholder="https://example.com/landing-page"
+                  data-testid="input-create-target-url"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-advertiser">Advertiser</Label>
+                <Input
+                  id="create-advertiser"
+                  value={formData.advertiser}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, advertiser: e.target.value }))}
+                  placeholder="Company name"
+                  data-testid="input-create-advertiser"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="create-duration">Duration (seconds)</Label>
+                  <Input
+                    id="create-duration"
+                    type="number"
+                    min={5}
+                    max={30}
+                    value={formData.duration}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, duration: parseInt(e.target.value) || 30 }))
+                    }
+                    data-testid="input-create-duration"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="create-weight">Weight (1-10)</Label>
+                  <Input
+                    id="create-weight"
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={formData.weight}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, weight: parseInt(e.target.value) || 1 }))
+                    }
+                    data-testid="input-create-weight"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-orientation">Orientation</Label>
                 <Select
-                  value={formData.type}
-                  onValueChange={(value: "IMAGE" | "VIDEO") =>
-                    setFormData((prev) => ({ ...prev, type: value }))
-                  }
+                  value={formData.orientation}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, orientation: value }))}
                 >
-                  <SelectTrigger id="create-type" data-testid="select-create-type">
+                  <SelectTrigger id="create-orientation" data-testid="select-create-orientation">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="IMAGE">Image</SelectItem>
-                    <SelectItem value="VIDEO">Video</SelectItem>
+                    <SelectItem value="landscape">Landscape</SelectItem>
+                    <SelectItem value="portrait">Portrait</SelectItem>
+                    <SelectItem value="any">Any</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="create-media-url">Media URL *</Label>
-                <Input
-                  id="create-media-url"
-                  value={formData.mediaUrl}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, mediaUrl: e.target.value }))}
-                  placeholder="https://example.com/ad-image.jpg"
-                  data-testid="input-create-media-url"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="create-click-url">Click URL</Label>
-                <Input
-                  id="create-click-url"
-                  value={formData.clickUrl}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, clickUrl: e.target.value }))}
-                  placeholder="https://example.com/landing-page"
-                  data-testid="input-create-click-url"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="create-priority">Priority (1-10)</Label>
-                <Input
-                  id="create-priority"
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={formData.priority}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, priority: parseInt(e.target.value) || 1 }))
-                  }
-                  data-testid="input-create-priority"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Higher priority ads are shown more often
-                </p>
               </div>
 
               <div className="flex items-center justify-between">
@@ -860,58 +908,96 @@ export default function AdminAds() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-type">Ad Type</Label>
+                <Label htmlFor="edit-video-url">Video URL *</Label>
+                <Input
+                  id="edit-video-url"
+                  value={formData.videoUrl}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, videoUrl: e.target.value }))}
+                  placeholder="https://example.com/ad-video.mp4"
+                  data-testid="input-edit-video-url"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-thumbnail-url">Thumbnail URL</Label>
+                <Input
+                  id="edit-thumbnail-url"
+                  value={formData.thumbnailUrl}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, thumbnailUrl: e.target.value }))}
+                  placeholder="https://example.com/thumbnail.jpg"
+                  data-testid="input-edit-thumbnail-url"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-target-url">Target URL (opens on click)</Label>
+                <Input
+                  id="edit-target-url"
+                  value={formData.targetUrl}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, targetUrl: e.target.value }))}
+                  placeholder="https://example.com/landing-page"
+                  data-testid="input-edit-target-url"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-advertiser">Advertiser</Label>
+                <Input
+                  id="edit-advertiser"
+                  value={formData.advertiser}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, advertiser: e.target.value }))}
+                  placeholder="Company name"
+                  data-testid="input-edit-advertiser"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-duration">Duration (seconds)</Label>
+                  <Input
+                    id="edit-duration"
+                    type="number"
+                    min={5}
+                    max={30}
+                    value={formData.duration}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, duration: parseInt(e.target.value) || 30 }))
+                    }
+                    data-testid="input-edit-duration"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-weight">Weight (1-10)</Label>
+                  <Input
+                    id="edit-weight"
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={formData.weight}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, weight: parseInt(e.target.value) || 1 }))
+                    }
+                    data-testid="input-edit-weight"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-orientation">Orientation</Label>
                 <Select
-                  value={formData.type}
-                  onValueChange={(value: "IMAGE" | "VIDEO") =>
-                    setFormData((prev) => ({ ...prev, type: value }))
-                  }
+                  value={formData.orientation}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, orientation: value }))}
                 >
-                  <SelectTrigger id="edit-type" data-testid="select-edit-type">
+                  <SelectTrigger id="edit-orientation" data-testid="select-edit-orientation">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="IMAGE">Image</SelectItem>
-                    <SelectItem value="VIDEO">Video</SelectItem>
+                    <SelectItem value="landscape">Landscape</SelectItem>
+                    <SelectItem value="portrait">Portrait</SelectItem>
+                    <SelectItem value="any">Any</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-media-url">Media URL *</Label>
-                <Input
-                  id="edit-media-url"
-                  value={formData.mediaUrl}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, mediaUrl: e.target.value }))}
-                  placeholder="https://example.com/ad-image.jpg"
-                  data-testid="input-edit-media-url"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-click-url">Click URL</Label>
-                <Input
-                  id="edit-click-url"
-                  value={formData.clickUrl}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, clickUrl: e.target.value }))}
-                  placeholder="https://example.com/landing-page"
-                  data-testid="input-edit-click-url"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-priority">Priority (1-10)</Label>
-                <Input
-                  id="edit-priority"
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={formData.priority}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, priority: parseInt(e.target.value) || 1 }))
-                  }
-                  data-testid="input-edit-priority"
-                />
               </div>
 
               <div className="flex items-center justify-between">
