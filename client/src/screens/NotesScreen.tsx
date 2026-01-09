@@ -169,8 +169,9 @@ export function NotesScreen() {
   const handleTogglePin = (note: Note) => {
     storage.toggleNotePin(note.id);
     refreshNotes();
-    if (viewingNote?.id === note.id) {
-      setViewingNote({ ...note, isPinned: !note.isPinned });
+    const updatedNote = storage.getNote(note.id);
+    if (updatedNote && viewingNote?.id === note.id) {
+      setViewingNote(updatedNote);
     }
   };
 
@@ -233,7 +234,7 @@ export function NotesScreen() {
         </ScrollContent>
 
         <ConfirmModal
-          open={!!deleteId}
+          open={!!deleteId && screenMode === "view"}
           onOpenChange={(open) => !open && setDeleteId(null)}
           title="Delete Note"
           description="Are you sure you want to delete this note? This action cannot be undone."
@@ -393,7 +394,7 @@ export function NotesScreen() {
       </ScrollContent>
 
       <ConfirmModal
-        open={!!deleteId}
+        open={!!deleteId && screenMode === "list"}
         onOpenChange={(open) => !open && setDeleteId(null)}
         title="Delete Note"
         description="Are you sure you want to delete this note? This action cannot be undone."

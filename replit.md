@@ -1,13 +1,11 @@
 # Home Staff 360 v1.0
 
 ## Overview
-Home Staff 360 is a live, real-time household staff management platform designed for managing household staff and service businesses. Version 1.0 features full online collaboration with phone+password authentication, real-time messaging, and live data synchronization across all connected users.
+Home Staff 360 is a hybrid mobile application (React + Capacitor) with a backend server for household staff management. It provides a comprehensive, real-time solution for managing household staff and service businesses with live data synchronization across all connected users.
 
 It operates in two core modes:
-- **Home User Mode**: For household managers to track domestic staff attendance, payments, expenses, and laundry batches with real-time collaboration.
-- **Staff User Mode**: For service professionals to manage client homes, log attendance, track earnings, handle expenses, and create invoices.
-
-The business vision is to provide a comprehensive, real-time solution for household and service staff management, enhancing efficiency and communication.
+- **Home User Mode**: For household managers to track domestic staff attendance, payments, expenses, laundry batches, and notes with real-time collaboration.
+- **Staff User Mode**: For service professionals to manage client homes, log attendance, track earnings, handle expenses, create invoices, and take notes.
 
 ## User Preferences
 - Simple language and clear explanations
@@ -17,124 +15,199 @@ The business vision is to provide a comprehensive, real-time solution for househ
 
 ## System Architecture
 
-### Live Real-Time Architecture
-Home Staff 360 v1.0 is a fully live, cloud-connected application using a client-server architecture with real-time capabilities:
-- **Client**: React with TanStack for UI and Socket.IO Client for live updates.
-- **Server**: Express.js for REST APIs and Socket.IO Server for real-time events.
-- **Database**: PostgreSQL as the primary data store.
-- **Authentication**: JWT-based authentication with 30-day tokens.
+### Project Structure
+```
+home-staff-360/
+├── android/                    # Capacitor Android project
+├── assets/                     # App icons and splash screens
+├── attached_assets/            # User-uploaded assets
+├── client/                     # React frontend
+│   └── src/
+│       ├── components/         # Reusable UI components
+│       │   ├── layout/         # AppLayout, Header, BottomNav
+│       │   └── ui/             # Shadcn/ui components
+│       ├── hooks/              # Custom React hooks
+│       ├── lib/                # Utilities and services
+│       │   ├── storage.ts      # LocalStorage management
+│       │   ├── navigation.tsx  # Screen navigation
+│       │   ├── i18n/           # 21-language translations
+│       │   └── realtime-provider.tsx  # Socket.IO context
+│       ├── screens/            # Application screens
+│       │   ├── auth/           # Authentication screens
+│       │   ├── collaboration/  # Chat, connections, notifications
+│       │   └── staff/          # Staff mode screens
+│       └── pages/              # Admin panel pages
+├── docs/                       # Privacy policy, documentation
+├── migrations/                 # Drizzle database migrations
+├── server/                     # Express.js backend
+│   ├── db.ts                   # Database connection
+│   ├── routes.ts               # REST API endpoints
+│   ├── realtime.ts             # Socket.IO events
+│   └── index.ts                # Server entry point
+├── shared/                     # Shared types and schema
+│   └── schema.ts               # Drizzle ORM schema + Zod validators
+└── tests/                      # Automated test suites
+```
+
+### Frontend Screens (55 total)
+
+**Core Screens:**
+- SplashScreen, LauncherScreen, OnboardingScreen, RoleSelectionScreen
+- HomeScreen (Home mode dashboard), StaffHomeScreen (Staff mode dashboard)
+- SettingsScreen, ProfileSettingsScreen, BackupScreen, FeedbackScreen
+- PrivacyPolicyScreen, SubscriptionScreen, PermissionsScreen
+- PinSetupScreen, PinEntryScreen
+
+**Home Mode Features:**
+- HouseholdsScreen, PeopleScreen, PersonDetailScreen, PersonCalendarScreen
+- AddPersonScreen (with duplicate phone validation)
+- AttendanceScreen, AddAttendanceScreen
+- PayablesScreen, TransactionsScreen, AddTransactionScreen
+- ExpensesScreen, ExpenseCalendarScreen, AddExpenseScreen
+- LaundryViewScreen, AddLaundryScreen
+- ReportsScreen, ReportPreviewScreen
+- DocumentsScreen, NotesScreen (20,000 char limit, full-screen mode)
+
+**Staff Mode Features:**
+- BusinessesScreen, StaffClientHomesScreen, StaffAddClientHomeScreen
+- StaffLogAttendanceScreen, StaffAttendanceScreen
+- StaffExpensesScreen, StaffAddExpenseScreen
+- StaffLaundryScreen, StaffLogLaundryScreen
+- StaffEarningsScreen, StaffReportsScreen
+- StaffDocumentsScreen, StaffInvoicesScreen
+- StaffAddInvoiceScreen, StaffInvoiceViewScreen
+
+**Collaboration Features:**
+- AuthScreen (phone+password login/register)
+- CollaborationHubScreen (tabs: Connections, Messages, Shared Spaces)
+- ConnectionsTab, MessagesTab, SharedSpacesTab
+- ChatScreen, LinkAccountScreen, PhoneVerificationScreen
+- NotificationCenterScreen, SyncActivityScreen, ApprovalDetailScreen
+
+### Backend Architecture
+- **Framework**: Express.js with TypeScript
+- **Database**: PostgreSQL with Drizzle ORM
+- **Real-time**: Socket.IO for live updates
+- **Authentication**: JWT tokens (30-day user, 8-hour admin)
+- **SMS/OTP**: Twilio integration
+
+### Storage System (Hybrid)
+- **Server-side (PostgreSQL)**: Users, collaboration links, messages, notifications, attendance, expenses, laundry, persons, approvals
+- **Client-side (localStorage)**: Settings, accounts, notes, documents, invoices, cached profile data
 
 ### Authentication Flow
-The system uses a phone+password authentication flow with OTP verification for phone ownership. Users can register or log in with their phone number and password. OTP is used for verification and password resets. Passwords require a minimum of 6 characters and are mandatory for all users.
+1. User enters phone number + password (min 6 chars)
+2. Server sends OTP via Twilio SMS
+3. User verifies OTP (10 min expiry, max 5 attempts)
+4. JWT token issued and stored in localStorage
+5. Auto-login on subsequent visits until logout
 
 ### Session Persistence
-- **Auto-Login**: JWT token stored in localStorage (`homestaff360_collab_token`) provides persistent auto-login until explicit logout
-- **Profile Sync**: After login on a new device (reinstall), `syncProfileToLocalStorage()` fetches server profile and syncs to local storage
-- **Returning Users**: If server shows `onboardingCompleted=true`, local settings are restored and onboarding is skipped
-- **Permissions Required**: Device permissions (notifications, camera) still required on new device even for returning users
-- **Logout Behavior**: Clears token but preserves phone number for quick re-login. User must re-enter password
-- **Account Deletion**: `localStorage.clear()` wipes all data. Returning users are treated as completely fresh
+- **Auto-Login**: JWT token stored in localStorage (`homestaff360_collab_token`)
+- **Profile Sync**: `syncProfileToLocalStorage()` fetches server profile on new device
+- **Returning Users**: Skip onboarding if `onboardingCompleted=true`
+- **Logout Behavior**: Clears token, preserves phone number for quick re-login
 
-### UI/UX Design
-The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "squircle" corners (24px radius) for a soft aesthetic. It supports both Light and Dark modes. The primary color is Google Blue (#0B57D0), and navigation is handled via a bottom navigation bar with 5 tabs.
+## Feature Specifications
 
-### Feature Specifications
-- **Multi-Language Support**: Supports 21 languages, including English, Hindi, Spanish, French, and more.
-- **Multi-Currency Support**: Supports 27 currencies, including INR, USD, EUR, GBP, AUD, and CAD.
-- **Real-Time Collaboration**: Includes a chat system with message edit/delete within a 5-minute window, real-time message delivery, and live events for attendance, laundry, and expense updates.
-- **Push Notifications**: Android push notifications enabled for new chat messages and connection invite events (received, accepted, rejected). Uses Capacitor LocalNotifications for native Android and Web Notifications API for browser. Notifications include sender name, message preview, and are displayed even when app is in background.
-- **Auto-Connection System**: Automatically creates connection invites based on phone numbers, resolving pending links upon user registration.
+### Notes Feature (NEW)
+- Full-screen view and edit modes (no popup dialogs)
+- 20,000 character limit per note
+- 6 color options: yellow, blue, green, pink, purple, orange
+- Pin notes to top of list
+- Supports "All contexts" mode showing notes from all accounts
+- Available in both Home and Staff dashboards
+
+### Multi-Language Support
+21 languages: English, Hindi, Spanish, French, Portuguese, Arabic, Bengali, Chinese (Simplified), German, Indonesian, Italian, Japanese, Korean, Malay, Russian, Tamil, Telugu, Thai, Turkish, Urdu, Vietnamese
+
+### Multi-Currency Support
+27 currencies: INR, USD, EUR, GBP, AUD, CAD, AED, BDT, BRL, CHF, CNY, EGP, IDR, JPY, KES, KRW, MXN, MYR, NGN, PHP, PKR, RUB, SAR, SGD, THB, TRY, ZAR
+
+### Real-Time Collaboration
+- Chat messaging with edit/delete (5-minute window)
+- Connection invites with auto-connect by phone number
+- Shared spaces for household-staff collaboration
+- Live sync events for attendance, laundry, expenses
+
+### Push Notifications
+- Android: Capacitor LocalNotifications
+- Web: Notifications API
+- Events: Chat messages, connection invites (received/accepted/rejected)
 
 ### Subscription Model
-- **Two Plan Options**: Monthly and Annual subscriptions available
-- **Google Play Billing**: All subscriptions managed through Google Play services - prices are fetched dynamically from Play Store at runtime via queryProductDetailsAsync()
-- **5-Tier Pricing System** (132 countries with local currency prices):
-  - **Tier 1** (~$1/mo, ~$11/yr - 27 countries): India (90 INR), Bangladesh (120 BDT), Pakistan (300 PKR), Nepal, Sri Lanka, Vietnam, Nigeria, Kenya, Tanzania, Uganda, Rwanda, Senegal, Cambodia, Laos, Myanmar, Haiti, Nicaragua, Bolivia, Paraguay, Mozambique, Zambia, Zimbabwe, and West African CFA countries
-  - **Tier 2** (~$1.8/mo, ~$20/yr - 26 countries): Indonesia (28,000 IDR), Philippines (100 PHP), Thailand (70 THB), Egypt, Morocco, Tunisia, Algeria, Armenia, Georgia, Ukraine, Moldova, Ghana, Cameroon, Angola, Honduras, Guatemala, El Salvador, Ecuador, Peru, Colombia, Uzbekistan, Kyrgyzstan, Tajikistan, Turkmenistan, Papua New Guinea, Cape Verde
-  - **Tier 3** (~$2.5/mo, ~$27/yr - 27 countries): Brazil (13 BRL), Mexico (45 MXN), Argentina, Chile, Costa Rica, Panama, Dominican Republic, Turkey, Kazakhstan, Azerbaijan, Malaysia, South Africa, Romania, Bulgaria, Serbia, Bosnia & Herzegovina, North Macedonia, Albania, Namibia, Mauritius, Jamaica, Uruguay, Trinidad & Tobago, Gabon, Botswana, Belize, Macau
-  - **Tier 4** (~$3/mo, ~$33/yr - 27 countries): US (3 USD), UK (2.50 GBP), Canada (4 CAD), Australia (4.50 AUD), New Zealand, Japan (450 JPY), South Korea (4,000 KRW), Israel, Taiwan, Spain, Italy, Portugal, Greece, Poland, Czechia, Slovakia, Slovenia, Croatia, Estonia, Latvia, Lithuania, Cyprus, Malta, Hungary, Aruba, Bahamas, Antigua & Barbuda
-  - **Tier 5** (~$4/mo, ~$44/yr - 25 countries): Switzerland (4 CHF), Norway (45 NOK), Denmark (30 DKK), Sweden (45 SEK), Finland, Iceland, Luxembourg, Netherlands, Belgium, Germany, France, Austria, Ireland, Monaco, Liechtenstein, San Marino, Singapore (5.50 SGD), Hong Kong (32 HKD), UAE (15 AED), Qatar, Kuwait, Bahrain, Saudi Arabia, Oman, Gibraltar
-- **Local Currency Pricing**: Each country has specific local currency prices stored in COUNTRY_PRICING (shared/schema.ts) with currency, monthly, and annual amounts
-- **Hybrid Pricing Model**: Google Play is source of truth for mobile (localized prices via Billing Library), app stores local currency fallback values for web/testing
-- **Subscription Endpoints**: /api/subscriptions/validate, /api/subscriptions/status, /api/subscriptions/check, /api/subscriptions/prices (returns tier, currency, fallback amounts)
-- **Country Auto-Detection**: Country is auto-detected from Google Play Store and displayed as read-only Badge in settings (not editable by users)
-- **Ad System**: Enabled for free tier users; premium subscribers see no ads. Uses AdMob for native apps and custom web ads. Ads display at 5-minute intervals for free users. Admin dashboard shows free vs paid user metrics via `/api/admin/subscription-stats`.
+- **Two Plans**: Monthly and Annual
+- **Two Tiers**: Free (ad-supported), Premium (ad-free)
+- **5-Tier Pricing** across 132 countries with local currency
+- **Google Play Billing** integration for mobile
 
-### Security Measures
-- **Authentication**: Passwords are hashed with bcrypt (10 rounds), JWT tokens are used (30-day user, 8-hour admin), and OTPs expire in 10 minutes with a max of 5 attempts.
-- **Rate Limiting**: IP-based rate limiting implemented for sensitive actions like OTP requests, authentication, and password resets. Socket.IO connections also have per-IP rate limiting (30 connections/minute).
-- **Data Security**: All data is transmitted over HTTPS/TLS, server-side data is encrypted at rest, and the system is designed to be GDPR and DPDP Act compliant.
-- **Transaction Safety**: 7 critical multi-table operations wrapped in database transactions for data integrity.
-- **Standardized Error Handling**: Consistent API error responses with error codes (see ERROR_CODES in server/routes.ts).
-- **Frontend Error Boundaries**: Global error boundary catches rendering errors with user-friendly recovery options.
+### UI/UX Design
+- Microsoft Fluent 2 + Samsung One UI inspired
+- "Squircle" corners (24px radius)
+- Light and Dark mode support
+- Primary color: Google Blue (#0B57D0)
+- Bottom navigation with 5 tabs
+- Safe area handling for Android notches
 
-### Testing (Development Only)
-- **Test Bypass Header**: In non-production environments, the header `x-test-bypass: rate-limit-skip` can be used to bypass rate limiting for automated testing.
-- **Total Automated Tests**: 151 tests across 3 test suites (module-tests.ts, e2e-scenario-tests.ts, extended-module-tests.ts).
-- **Run Tests**: `npx tsx tests/e2e/module-tests.ts && npx tsx tests/e2e/e2e-scenario-tests.ts && npx tsx tests/e2e/extended-module-tests.ts`
+## Security Measures
+
+### Authentication Security
+- Passwords hashed with bcrypt (10 rounds)
+- JWT tokens with configurable expiry
+- OTP expiry: 10 minutes, max 5 attempts
+- Phone number normalization for consistency
+
+### Rate Limiting
+- OTP requests: 10 per 15 minutes per IP
+- Authentication: 20 per 15 minutes per IP
+- Password reset: 5 per 15 minutes per IP
+- Socket.IO: 30 connections per minute per IP
+
+### Data Protection
+- HTTPS/TLS for all transmissions
+- GDPR and DPDP Act compliant design
+- 7 critical operations wrapped in database transactions
+- Standardized error codes (ERROR_CODES in server/routes.ts)
+
+### Duplicate Prevention
+- Phone number validation prevents adding duplicate staff/clients
+- Normalizes phone numbers by removing non-digits
+- Shows existing person's name in error message
 
 ## External Dependencies
 
-- **Database**: PostgreSQL
-- **SMS/OTP Service**: Twilio
-- **Frontend Framework**: React 18 with TypeScript
-- **Backend Framework**: Express.js with TypeScript
-- **ORM**: Drizzle ORM
-- **Real-time Communication**: Socket.IO (client and server)
-- **UI Components**: Tailwind CSS, Shadcn/ui
-- **Routing**: Wouter
-- **Data Fetching**: TanStack Query v5
-- **Animations**: Framer Motion
-- **Icons**: Lucide React, React Icons
-- **Mobile Packaging**: Capacitor (for Android)
-- **CI/CD**: GitHub Actions
+| Category | Technology |
+|----------|------------|
+| Frontend | React 18, TypeScript, Vite |
+| Backend | Express.js, TypeScript |
+| Database | PostgreSQL, Drizzle ORM |
+| Real-time | Socket.IO (client + server) |
+| UI | Tailwind CSS, Shadcn/ui, Radix UI |
+| Routing | Wouter |
+| State | TanStack Query v5 |
+| Animations | Framer Motion |
+| Icons | Lucide React, React Icons, Fluent UI |
+| Mobile | Capacitor (Android) |
+| SMS | Twilio |
+| Forms | React Hook Form, Zod |
 
-## UAT Testing Summary (January 2026)
+## Testing
 
-### Testing Status
-- **All 151 automated tests passing at 100%** (60 module + 43 e2e scenario + 48 extended module)
-- **Authentication**: Registration, login, OTP verification, password reset - all working
-- **Home Features**: Attendance, laundry, expenses, payments - all working
-- **Staff Features**: Client management, attendance logging - working via localStorage
-- **Collaboration**: Connection invites, messaging, shared spaces - all working
-- **Admin Panel**: Authorization properly enforced (401 for unauthenticated)
-- **Real-time**: Socket.IO events for attendance, laundry, expenses verified
+### Automated Tests
+- **Total**: 151 tests across 3 suites
+- **Run**: `npx tsx tests/e2e/module-tests.ts && npx tsx tests/e2e/e2e-scenario-tests.ts && npx tsx tests/e2e/extended-module-tests.ts`
+- **Bypass Rate Limiting**: Header `x-test-bypass: rate-limit-skip` (dev only)
 
-### Bugs Fixed During UAT
-1. **Onboarding data not persisting**: Fixed complete-onboarding endpoint to save displayName, userType, preferredLanguage
-2. **Collaboration link creation failing**: Fixed NULL constraint issue with staff_account_id
-3. **Auto-connect TypeScript errors**: Fixed schema mismatches (targetPhone, isResolved) and undefined personId
+### Test Coverage
+- Authentication (registration, login, OTP, password reset)
+- Home features (attendance, laundry, expenses, payments)
+- Staff features (client management, attendance logging)
+- Collaboration (connections, messaging, shared spaces)
+- Admin panel (authorization enforcement)
+- Real-time (Socket.IO events)
 
-### Known Limitations (Non-Critical)
-- Staff invoices/earnings use localStorage (no backend endpoints yet)
-- Minor TypeScript warnings in test files (tests run correctly)
-- google-libphonenumber types not installed (runtime works)
+## Environment Secrets
 
-### Deployment Readiness
-The application is **production-ready** for MVP deployment with:
-- Core authentication and user management
-- Real-time collaboration and messaging
-- Home user and staff user feature sets
-- Security measures (rate limiting, JWT, bcrypt)
-- Error handling and recovery flows
-
-## Production Deployment Guide
-
-### Replit Deployment Options
-1. **Autoscale Deployment** (Recommended): Ideal for this app with variable traffic, auto-scales based on demand
-2. **Reserved VM Deployment**: For consistent performance with always-on WebSocket connections
-3. **Static Deployment**: Not suitable (app has server-side logic)
-
-### Pre-Deployment Checklist
-- [ ] All 151 automated tests passing
-- [ ] Rate limiting configured (OTP: 10/15min, Auth: 20/15min, Password Reset: 5/15min)
-- [ ] Twilio credentials configured (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER)
-- [ ] JWT_SECRET set for production
-- [ ] ADMIN_DEFAULT_EMAIL and ADMIN_DEFAULT_PASSWORD configured
-- [ ] Privacy Policy at docs/PRIVACY_POLICY.md (GDPR/DPDP compliant)
-- [ ] PostgreSQL database connected via DATABASE_URL
-
-### Required Environment Secrets
 | Secret | Purpose |
 |--------|---------|
 | DATABASE_URL | PostgreSQL connection string |
@@ -142,10 +215,44 @@ The application is **production-ready** for MVP deployment with:
 | TWILIO_ACCOUNT_SID | SMS/OTP service |
 | TWILIO_AUTH_TOKEN | SMS/OTP service |
 | TWILIO_PHONE_NUMBER | SMS sender number |
-| ADMIN_DEFAULT_EMAIL | Admin login |
-| ADMIN_DEFAULT_PASSWORD | Admin login |
+| ADMIN_DEFAULT_EMAIL | Admin panel login |
+| ADMIN_DEFAULT_PASSWORD | Admin panel login |
 
-### Post-Deployment Notes
-- Use Replit's built-in PostgreSQL for persistent data (filesystem is ephemeral on Autoscale/Reserved VM)
-- Monitor Socket.IO connections for real-time feature health
+## Deployment
+
+### Replit Options
+1. **Autoscale** (Recommended): Variable traffic, auto-scales
+2. **Reserved VM**: Consistent performance, always-on WebSocket
+3. **Static**: Not suitable (has server-side logic)
+
+### Pre-Deployment Checklist
+- [ ] All 151 automated tests passing
+- [ ] Twilio credentials configured
+- [ ] JWT_SECRET set for production
+- [ ] Admin credentials configured
+- [ ] PostgreSQL database connected
+- [ ] Privacy Policy at docs/PRIVACY_POLICY.md
+
+### Post-Deployment
+- Use Replit's built-in PostgreSQL for persistent data
+- Monitor Socket.IO connections for real-time health
 - Subscription validation integrates with Google Play Billing
+
+## Recent Changes (January 2026)
+
+### Notes Feature
+- Added sticky notes with full-screen view/edit modes
+- 20,000 character limit (increased from 1,000)
+- 6 color options with pin functionality
+- Supports "All contexts" mode for cross-account notes
+- Added to both Home and Staff dashboards
+
+### Duplicate Phone Validation
+- Prevents adding staff/clients with duplicate phone numbers
+- Normalizes phone numbers for accurate comparison
+- Shows existing person's name in error message
+
+### Bug Fixes
+- Fixed "All contexts" mode for notes display
+- Fixed pin toggle synchronization in view mode
+- Fixed accessibility warnings in dialogs
