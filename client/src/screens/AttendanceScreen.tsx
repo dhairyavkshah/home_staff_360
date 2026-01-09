@@ -146,7 +146,7 @@ export function AttendanceScreen() {
     const binding = getPersonBinding(person.id);
     if (!binding) return false;
 
-    setSyncingPersonIds(prev => new Set([...prev, person.id]));
+    setSyncingPersonIds(prev => new Set(Array.from(prev).concat(person.id)));
     try {
       await collaborationService.submitAttendance({
         bindingId: binding.id,

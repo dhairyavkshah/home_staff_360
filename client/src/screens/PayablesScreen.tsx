@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { Receipt, ChevronRight, Clock, AlertTriangle, Wallet, Shirt } from "lucide-react";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import { Receipt, ChevronRight, Clock, AlertTriangle, Wallet, Shirt, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,19 +11,60 @@ import { calculatePersonBalanceWithCurrency, getUnpaidLaundryTotal, formatCurren
 import { getCurrencySymbol, currencySymbols } from "@shared/schema";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
+import { collaborationService, type CollaborationBinding, type SharedPaymentRecord } from "@/lib/collaboration-service";
+import { realtimeService } from "@/lib/realtime-service";
 
 export function PayablesScreen() {
   const { navigate, goBack } = useNavigation();
   const { t } = useTranslation();
   const { contextLabel, contextMode } = useActiveContext();
+  const [refreshKey, setRefreshKey] = useState(0);
   const settings = useMemo(() => storage.getSettings(), []);
+
+  const [bindings, setBindings] = useState<CollaborationBinding[]>([]);
+  const [syncingPersonIds, setSyncingPersonIds] = useState<Set<string>>(new Set());
+
+  const accountId = storage.getActiveAccountId();
+  const isAuthenticated = collaborationService.isAuthenticated();
+
+  const getPersonBinding = useCallback((personId: string): CollaborationBinding | undefined => {
+    return bindings.find(b => b.homePersonId === personId && b.isActive);
+  }, [bindings]);
+
+  const fetchBindings = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const { bindings: fetchedBindings } = await collaborationService.getBindings();
+      setBindings(fetchedBindings || []);
+    } catch (err) {
+      console.error("Failed to fetch bindings:", err);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchBindings();
+  }, [fetchBindings]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    const unsubscribe = realtimeService.on("collab:payment-update", (data) => {
+      console.log("[PayablesScreen] Received payment update:", data);
+      fetchBindings();
+      setRefreshKey(prev => prev + 1);
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [isAuthenticated, fetchBindings]);
   
   const fallbackSymbol = currencySymbols[settings.currency] || settings.customCurrencySymbol || '$';
   
   // Get account-level unpaid laundry (not linked to specific person)
   const { accountLevelUnpaidLaundry, accountLevelUnpaidLaundryByCurrency } = useMemo(() => {
-    const accountId = storage.getActiveAccountId();
-    const laundry = accountId ? storage.getLaundryByAccount(accountId) : storage.getLaundry();
+    const activeAccountId = storage.getActiveAccountId();
+    const laundry = activeAccountId ? storage.getLaundryByAccount(activeAccountId) : storage.getLaundry();
     // Get all unpaid laundry that doesn't have a personId
     const unpaidAccountLaundry = laundry.filter((l) => !l.isPaid && !l.personId);
     const total = unpaidAccountLaundry.reduce((sum, l) => sum + l.total, 0);
@@ -35,11 +76,11 @@ export function PayablesScreen() {
       (l) => l.recordCurrency
     );
     return { accountLevelUnpaidLaundry: total, accountLevelUnpaidLaundryByCurrency: byCurrency };
-  }, [fallbackSymbol]);
+  }, [fallbackSymbol, refreshKey]);
   
   const peopleWithBalances = useMemo(() => {
-    const accountId = storage.getActiveAccountId();
-    const all = accountId ? storage.getPeopleByAccount(accountId) : storage.getPeople();
+    const activeAccountId = storage.getActiveAccountId();
+    const all = activeAccountId ? storage.getPeopleByAccount(activeAccountId) : storage.getPeople();
     const now = new Date();
     
     return all
@@ -62,6 +103,9 @@ export function PayablesScreen() {
           ? Math.floor((now.getTime() - lastPaymentDate.getTime()) / (1000 * 60 * 60 * 24))
           : Infinity;
         
+        // Check if person has an active collaboration binding
+        const binding = bindings.find(b => b.homePersonId === p.id && b.isActive);
+        
         return {
           ...p,
           balance,
@@ -72,11 +116,13 @@ export function PayablesScreen() {
           isOverdue: balance > 0 && daysSincePayment > settings.salaryStartDay,
           hasMixedCurrencies: balanceResult.hasMixedCurrencies || payableByCurrency.length > 1,
           primaryCurrencySymbol: balanceResult.primaryCurrencySymbol,
+          isLinked: !!binding,
+          binding,
         };
       })
       .filter((p) => p.balance > 0 || p.payableByCurrency.length > 0)
       .sort((a, b) => b.balance - a.balance);
-  }, [settings.salaryStartDay, fallbackSymbol]);
+  }, [settings.salaryStartDay, fallbackSymbol, bindings, refreshKey]);
 
   // Total payable by currency (staff balances + account-level unpaid laundry)
   const totalPayableByCurrency = useMemo(() => {
@@ -251,6 +297,9 @@ export function PayablesScreen() {
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="font-medium text-sm">{person.name}</p>
+                            {person.isLinked && (
+                              <Link2 className="w-3.5 h-3.5 text-primary" />
+                            )}
                             {person.isOverdue && (
                               <Badge variant="destructive" className="text-xs">Overdue</Badge>
                             )}
@@ -281,6 +330,8 @@ export function PayablesScreen() {
                             defaultDescription: `Salary Payment for ${person.name}`,
                             defaultCategory: "payment",
                             source: "payables",
+                            bindingId: person.binding?.id,
+                            recordCurrency: person.currency,
                           });
                         }}
                         data-testid={`button-pay-${person.id}`}

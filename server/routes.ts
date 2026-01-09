@@ -2292,6 +2292,23 @@ router.patch("/api/shared-attendance/:id/action", authenticateToken, async (req:
       return res.status(404).json({ error: "Attendance record not found" });
     }
 
+    // Security: Verify user is part of this binding's collaboration link
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, record.bindingId)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link || (link.homeUserId !== userId && link.staffUserId !== userId)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
     if (record.actionRequiredBy !== userId) {
       return res.status(403).json({ error: "You are not authorized to take action on this record" });
     }
@@ -2894,6 +2911,23 @@ router.patch("/api/shared-payments/:id/action", authenticateToken, async (req: R
 
     if (!record) {
       return res.status(404).json({ error: "Payment record not found" });
+    }
+
+    // Security: Verify user is part of this binding's collaboration link
+    const binding = await db.query.collaborationBindings.findFirst({
+      where: eq(collaborationBindings.id, record.bindingId)
+    });
+
+    if (!binding) {
+      return res.status(404).json({ error: "Binding not found" });
+    }
+
+    const link = await db.query.collaborationLinks.findFirst({
+      where: eq(collaborationLinks.id, binding.linkId)
+    });
+
+    if (!link || (link.homeUserId !== userId && link.staffUserId !== userId)) {
+      return res.status(403).json({ error: "Access denied" });
     }
 
     if (record.actionRequiredBy !== userId) {

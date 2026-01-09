@@ -502,6 +502,7 @@ export const transactionSchema = z.object({
   amount: z.number(),
   date: z.string(),
   isPaid: z.boolean(),
+  paymentMethod: z.string().optional(),
   createdAt: z.string(),
   recordCurrency: z.string().optional(),
   recordCurrencySymbol: z.string().optional(),

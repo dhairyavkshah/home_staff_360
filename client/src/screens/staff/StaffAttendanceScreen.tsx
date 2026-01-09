@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from "react";
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle, MinusCircle, XCircle, Home, Eye, Trash2, MoreVertical } from "lucide-react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { Calendar, ChevronLeft, ChevronRight, CheckCircle, MinusCircle, XCircle, Home, Eye, Trash2, MoreVertical, Link2, Check, X, Clock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,8 @@ import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
+import { collaborationService, type CollaborationBinding, type SharedAttendanceRecord } from "@/lib/collaboration-service";
+import { realtimeService } from "@/lib/realtime-service";
 
 export function StaffAttendanceScreen() {
   const { navigate, goBack } = useNavigation();
@@ -32,7 +34,92 @@ export function StaffAttendanceScreen() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  const [bindings, setBindings] = useState<CollaborationBinding[]>([]);
+  const [sharedAttendance, setSharedAttendance] = useState<Map<string, SharedAttendanceRecord[]>>(new Map());
+  const [actioningId, setActioningId] = useState<string | null>(null);
+
+  const isAuthenticated = collaborationService.isAuthenticated();
+
   const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
+
+  const fetchBindings = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const { bindings: fetchedBindings } = await collaborationService.getBindings();
+      setBindings(fetchedBindings || []);
+      
+      const newSharedAttendance = new Map<string, SharedAttendanceRecord[]>();
+      for (const binding of (fetchedBindings || [])) {
+        if (binding.isActive) {
+          try {
+            const { attendance } = await collaborationService.getSharedAttendance(binding.id);
+            newSharedAttendance.set(binding.id, attendance || []);
+          } catch (err) {
+            console.error(`Failed to fetch shared attendance for binding ${binding.id}:`, err);
+          }
+        }
+      }
+      setSharedAttendance(newSharedAttendance);
+    } catch (err) {
+      console.error("Failed to fetch bindings:", err);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchBindings();
+  }, [fetchBindings]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    const unsubscribe = realtimeService.on("collab:attendance-update", (data) => {
+      console.log("[StaffAttendanceScreen] Received attendance update:", data);
+      fetchBindings();
+      refresh();
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [isAuthenticated, fetchBindings, refresh]);
+
+  const handleActionAttendance = async (attendanceId: string, action: "approve" | "reject") => {
+    setActioningId(attendanceId);
+    try {
+      await collaborationService.actionAttendance(attendanceId, action);
+      toast({ 
+        title: action === "approve" 
+          ? (t("attendanceApproved") || "Attendance approved") 
+          : (t("attendanceRejected") || "Attendance rejected") 
+      });
+      fetchBindings();
+    } catch (err) {
+      toast({ 
+        title: t("error") || "Error", 
+        description: err instanceof Error ? err.message : "Failed to update attendance",
+        variant: "destructive" 
+      });
+    } finally {
+      setActioningId(null);
+    }
+  };
+
+  const filteredSharedAttendance = useMemo(() => {
+    const monthStart = new Date(year, month, 1);
+    const monthEnd = new Date(year, month + 1, 0);
+    const allRecords: SharedAttendanceRecord[] = [];
+    
+    sharedAttendance.forEach((records) => {
+      records.forEach(record => {
+        const date = new Date(record.date);
+        if (date >= monthStart && date <= monthEnd) {
+          allRecords.push(record);
+        }
+      });
+    });
+    
+    return allRecords.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [sharedAttendance, year, month]);
 
   const activeAccountId = useMemo(() => storage.getActiveAccountId(), [refreshKey]);
   const showAllContexts = useMemo(() => storage.getShowAllContexts(), [refreshKey]);
@@ -241,6 +328,106 @@ export function StaffAttendanceScreen() {
             </div>
           )}
         </section>
+
+        {isAuthenticated && bindings.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <Link2 className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold">{t("linkedEmployerRecords") || "Linked Employer Records"} ({filteredSharedAttendance.length})</h3>
+            </div>
+            
+            {filteredSharedAttendance.length === 0 ? (
+              <Card className="p-4 text-center">
+                <Link2 className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">{t("noLinkedAttendanceThisMonth") || "No synced attendance records this month"}</p>
+              </Card>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {filteredSharedAttendance.map((record) => (
+                  <Card key={record.id} className="p-4" data-testid={`card-shared-attendance-${record.id}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1">
+                        {getStatusIcon(record.status)}
+                        <div className="flex-1">
+                          <p className="font-medium">{formatDate(record.date)}</p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Home className="w-3 h-3" />
+                            <span>{record.counterpartyName || record.homePersonName || t("linkedEmployer") || "Linked Employer"}</span>
+                          </div>
+                          {record.hoursWorked && (
+                            <p className="text-xs text-muted-foreground">{record.hoursWorked} {t("hoursWorked")}</p>
+                          )}
+                          {record.note && (
+                            <p className="text-xs text-muted-foreground mt-1">{record.note}</p>
+                          )}
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge 
+                              variant={
+                                record.approvalStatus === 'approved' ? 'default' : 
+                                record.approvalStatus === 'rejected' ? 'destructive' : 
+                                record.approvalStatus === 'revised' ? 'secondary' : 'outline'
+                              }
+                            >
+                              {record.approvalStatus === 'approved' && <Check className="w-3 h-3 mr-1" />}
+                              {record.approvalStatus === 'rejected' && <X className="w-3 h-3 mr-1" />}
+                              {record.approvalStatus === 'pending' && <Clock className="w-3 h-3 mr-1" />}
+                              {record.approvalStatus === 'approved' ? (t("approved") || "Approved") : 
+                               record.approvalStatus === 'rejected' ? (t("rejected") || "Rejected") : 
+                               record.approvalStatus === 'revised' ? (t("revised") || "Revised") : 
+                               (t("pending") || "Pending")}
+                            </Badge>
+                            {record.submittedByRole === 'HOME' && (
+                              <Badge variant="outline" className="text-xs">
+                                {t("fromEmployer") || "From Employer"}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Badge variant={record.status === 'FULL' ? 'default' : record.status === 'HALF' ? 'secondary' : 'outline'}>
+                          {record.status === 'FULL' ? t("fullDay") : record.status === 'HALF' ? t("halfDay") : t("absent")}
+                        </Badge>
+                        {record.needsAction && record.approvalStatus === 'pending' && (
+                          <div className="flex gap-1 mt-2">
+                            <Button 
+                              size="icon" 
+                              variant="ghost"
+                              className="h-8 w-8 text-success hover:text-success"
+                              onClick={() => handleActionAttendance(record.id, "approve")}
+                              disabled={actioningId === record.id}
+                              data-testid={`button-approve-${record.id}`}
+                            >
+                              {actioningId === record.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Check className="w-4 h-4" />
+                              )}
+                            </Button>
+                            <Button 
+                              size="icon" 
+                              variant="ghost"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => handleActionAttendance(record.id, "reject")}
+                              disabled={actioningId === record.id}
+                              data-testid={`button-reject-${record.id}`}
+                            >
+                              {actioningId === record.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <X className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         <Button 
           className="w-full" 

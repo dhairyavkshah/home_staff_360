@@ -35,7 +35,8 @@ import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getTodayString, calculatePersonBalance, formatCurrency } from "@/lib/calculations";
-import { HOME_DOCUMENT_CATEGORIES } from "@shared/schema";
+import { HOME_DOCUMENT_CATEGORIES, PAYMENT_METHODS } from "@shared/schema";
+import { collaborationService } from "@/lib/collaboration-service";
 
 interface PendingAttachment {
   file: File;
@@ -65,6 +66,8 @@ export function AddTransactionScreen() {
   const defaultDescription = data.defaultDescription as string | undefined;
   const defaultCategory = data.defaultCategory as string | undefined;
   const source = data.source as "attendance" | "payables" | "quick-pay" | "person-detail" | "transactions" | undefined;
+  const bindingId = data.bindingId as string | undefined;
+  const recordCurrency = data.recordCurrency as string | undefined;
 
   const [selectedPersonId, setSelectedPersonId] = useState<string | undefined>(initialPersonId);
   const person = useMemo(() => selectedPersonId ? storage.getPerson(selectedPersonId) : null, [selectedPersonId]);
@@ -97,6 +100,7 @@ export function AddTransactionScreen() {
   }, [person, defaultDescription, presetAmount, source, currentBalance]);
 
   const [category, setCategory] = useState(defaultCategory || "payment");
+  const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
   const [description, setDescription] = useState(getSmartDefaults.description);
   const [transactionNo, setTransactionNo] = useState("");
   const [amount, setAmount] = useState(getSmartDefaults.amount);
@@ -182,7 +186,7 @@ export function AddTransactionScreen() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isViewMode) return;
     if (!validate()) return;
 
@@ -194,6 +198,7 @@ export function AddTransactionScreen() {
       amount: parseInt(amount, 10),
       date,
       isPaid,
+      paymentMethod,
     });
 
     for (const attachment of pendingAttachments) {
@@ -216,6 +221,25 @@ export function AddTransactionScreen() {
         linkedRecordType: 'TRANSACTION',
         linkedRecordId: newTransaction.id,
       });
+    }
+
+    // Sync payment with linked staff member if binding exists
+    if (bindingId && collaborationService.isAuthenticated()) {
+      try {
+        await collaborationService.submitSharedPayment({
+          bindingId,
+          date,
+          amount: parseInt(amount, 10),
+          category,
+          paymentMethod,
+          note: description.trim(),
+          recordCurrency: recordCurrency || person?.currency || settings.currency,
+        });
+        console.log("[AddTransactionScreen] Payment synced with collaboration service");
+      } catch (err) {
+        console.error("[AddTransactionScreen] Failed to sync payment:", err);
+        // Don't block the transaction from being saved, just log the error
+      }
     }
 
     markClean();
@@ -316,6 +340,13 @@ export function AddTransactionScreen() {
                  existingTransaction.category === 'other' ? tLabel('other', 'Other') : existingTransaction.category}
               </p>
             </div>
+
+            {existingTransaction.paymentMethod && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-sm">{tLabel('paymentMethod', 'Payment Method')}</Label>
+                <p className="font-medium" data-testid="view-payment-method">{existingTransaction.paymentMethod}</p>
+              </div>
+            )}
 
             <div className="flex flex-col gap-1">
               <Label className="text-muted-foreground text-sm">{tLabel('description', 'Description')}</Label>
@@ -475,6 +506,19 @@ export function AddTransactionScreen() {
                 { value: "other", label: tLabel('other', 'Other') },
               ]}
               data-testid="select-category"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="paymentMethod">{tLabel('paymentMethod', 'Payment Method')}</Label>
+            <SearchableSelect
+              value={paymentMethod}
+              onValueChange={(v) => { setPaymentMethod(v || "Cash"); markDirty(); }}
+              placeholder={tLabel('selectPaymentMethod', 'Select payment method')}
+              searchPlaceholder={tLabel('searchPaymentMethods', 'Search payment methods...')}
+              emptyMessage={tLabel('noMethodsFound', 'No methods found')}
+              options={PAYMENT_METHODS.map(m => ({ value: m, label: m }))}
+              data-testid="select-payment-method"
             />
           </div>
 
