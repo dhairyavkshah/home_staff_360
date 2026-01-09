@@ -252,7 +252,7 @@ export function PermissionsScreen() {
                         ) : isDenied ? (
                           <>
                             <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                              {t("permissionDeniedSettings" as any) || "Denied. You can enable this later in device settings"}
+                              Permission denied. You can enable this later in device settings.
                             </p>
                             <div className="flex gap-3">
                               <Button
