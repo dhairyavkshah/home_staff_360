@@ -113,7 +113,10 @@ export function HouseholdsScreen() {
     storage.setShowAllContexts(false);
     notifyActiveContextChange();
     setRefreshKey(k => k + 1);
-    navigate("home");
+    toast({
+      title: tLabel('activeHouseholdChanged', 'Active Household Changed'),
+      description: accounts.find(a => a.id === id)?.name || '',
+    });
   };
 
   return (

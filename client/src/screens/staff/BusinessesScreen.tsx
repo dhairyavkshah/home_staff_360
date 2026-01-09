@@ -138,7 +138,10 @@ export function BusinessesScreen() {
     storage.setShowAllContexts(false);
     notifyActiveContextChange();
     setRefreshKey(k => k + 1);
-    navigate("staff-home");
+    toast({
+      title: tLabel('activeBusinessChanged', 'Active Business Changed'),
+      description: accounts.find(a => a.id === id)?.name || '',
+    });
   };
 
   return (
