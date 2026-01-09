@@ -8,32 +8,10 @@ import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { useNavigation } from "@/lib/navigation";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 import { storage } from "@/lib/storage";
 import { getCountryPricing, CURRENCIES, type SubscriptionPlan, type PricingTier, type Currency } from "@shared/schema";
 import { format } from "date-fns";
-
-const BENEFITS = [
-  {
-    icon: Users,
-    title: "Unlimited Staff & Homes",
-    description: "Manage unlimited staff members and households",
-  },
-  {
-    icon: Cloud,
-    title: "Cloud Sync",
-    description: "Keep your data synced across all your devices",
-  },
-  {
-    icon: RefreshCw,
-    title: "Real-time Collaboration",
-    description: "Share and collaborate with family members",
-  },
-  {
-    icon: Calendar,
-    title: "Advanced Reports",
-    description: "Generate detailed reports and analytics",
-  },
-];
 
 interface PricingInfo {
   monthly: number;
@@ -69,8 +47,40 @@ function formatPrice(amount: number, decimals: number = 2): string {
 export function SubscriptionScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
+  const { tLabel } = useTranslation();
   const { isLoading, isSubscribed, expiryDate, subscription } = useSubscription();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("annual");
+
+  const benefits = [
+    {
+      icon: Users,
+      titleKey: 'unlimitedStaffHomes',
+      titleFallback: "Unlimited Staff & Homes",
+      descKey: 'unlimitedStaffHomesDesc',
+      descFallback: "Manage unlimited staff members and households",
+    },
+    {
+      icon: Cloud,
+      titleKey: 'cloudSync',
+      titleFallback: "Cloud Sync",
+      descKey: 'cloudSyncDesc',
+      descFallback: "Keep your data synced across all your devices",
+    },
+    {
+      icon: RefreshCw,
+      titleKey: 'realtimeCollaboration',
+      titleFallback: "Real-time Collaboration",
+      descKey: 'realtimeCollaborationDesc',
+      descFallback: "Share and collaborate with family members",
+    },
+    {
+      icon: Calendar,
+      titleKey: 'advancedReports',
+      titleFallback: "Advanced Reports",
+      descKey: 'advancedReportsDesc',
+      descFallback: "Generate detailed reports and analytics",
+    },
+  ];
 
   const settings = useMemo(() => storage.getSettings(), []);
   const profile = useMemo(() => storage.getProfile(), []);
@@ -90,22 +100,22 @@ export function SubscriptionScreen() {
 
   const handleSubscribe = (plan: SubscriptionPlan) => {
     toast({
-      title: "Google Play Billing",
-      description: `${plan === "monthly" ? "Monthly" : "Annual"} subscription will be handled through Google Play Billing. This feature will be available soon.`,
+      title: tLabel('googlePlayBilling', 'Google Play Billing'),
+      description: `${plan === "monthly" ? tLabel('monthly', 'Monthly') : tLabel('annual', 'Annual')} ${tLabel('subscriptionBillingNote', 'subscription will be handled through Google Play Billing. This feature will be available soon.')}`,
     });
   };
 
   const handleManageSubscription = () => {
     toast({
-      title: "Manage Subscription",
-      description: "You can manage your subscription through Google Play Store.",
+      title: tLabel('manageSubscription', 'Manage Subscription'),
+      description: tLabel('manageSubscriptionDesc', 'You can manage your subscription through Google Play Store.'),
     });
   };
 
   return (
     <AppLayout>
       <Header
-        title="Subscription"
+        title={tLabel('subscription', 'Subscription')}
         subtitle=""
         onBack={goBack}
       />
@@ -120,11 +130,11 @@ export function SubscriptionScreen() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-lg font-semibold">Premium Active</h2>
-                    <Badge variant="default" className="text-xs">Active</Badge>
+                    <h2 className="text-lg font-semibold">{tLabel('premiumActive', 'Premium Active')}</h2>
+                    <Badge variant="default" className="text-xs">{tLabel('active', 'Active')}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    You have full access to all features
+                    {tLabel('fullAccessFeatures', 'You have full access to all features')}
                   </p>
                 </div>
               </div>
@@ -138,14 +148,14 @@ export function SubscriptionScreen() {
                       <Calendar className="w-4.5 h-4.5 text-info" />
                     </div>
                     <div>
-                      <p className="font-medium text-sm">Valid Until</p>
+                      <p className="font-medium text-sm">{tLabel('validUntil', 'Valid Until')}</p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(expiryDate), "MMMM dd, yyyy")}
                       </p>
                     </div>
                   </div>
                   {subscription?.autoRenewing && (
-                    <Badge variant="outline" className="text-xs">Auto-renew</Badge>
+                    <Badge variant="outline" className="text-xs">{tLabel('autoRenew', 'Auto-renew')}</Badge>
                   )}
                 </div>
               </Card>
@@ -153,17 +163,17 @@ export function SubscriptionScreen() {
 
             <section className="flex flex-col gap-3 mt-2">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                Your Benefits
+                {tLabel('yourBenefits', 'Your Benefits')}
               </h3>
               <Card className="divide-y">
-                {BENEFITS.map((benefit, index) => (
+                {benefits.map((benefit, index) => (
                   <div key={index} className="p-4 flex items-center gap-3">
                     <div className="icon-halo-success w-9 h-9">
                       <benefit.icon className="w-4.5 h-4.5 text-success" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-sm">{benefit.title}</p>
-                      <p className="text-xs text-muted-foreground">{benefit.description}</p>
+                      <p className="font-medium text-sm">{tLabel(benefit.titleKey, benefit.titleFallback)}</p>
+                      <p className="text-xs text-muted-foreground">{tLabel(benefit.descKey, benefit.descFallback)}</p>
                     </div>
                     <Check className="w-4 h-4 text-success" />
                   </div>
@@ -177,7 +187,7 @@ export function SubscriptionScreen() {
               onClick={handleManageSubscription}
               data-testid="button-manage-subscription"
             >
-              Manage Subscription
+              {tLabel('manageSubscription', 'Manage Subscription')}
             </Button>
           </section>
         ) : (
@@ -186,9 +196,9 @@ export function SubscriptionScreen() {
               <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-4">
                 <Shield className="w-10 h-10 text-primary" />
               </div>
-              <h2 className="text-xl font-bold mb-2">Unlock Premium</h2>
+              <h2 className="text-xl font-bold mb-2">{tLabel('unlockPremium', 'Unlock Premium')}</h2>
               <p className="text-sm text-muted-foreground px-4">
-                Get unlimited access to all features and take your household management to the next level
+                {tLabel('unlockPremiumDesc', 'Get unlimited access to all features and take your household management to the next level')}
               </p>
             </div>
 
@@ -205,15 +215,15 @@ export function SubscriptionScreen() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">Annual Plan</h3>
-                      <Badge variant="default" className="text-xs">Save {savingsPercent}%</Badge>
+                      <h3 className="font-semibold">{tLabel('annualPlan', 'Annual Plan')}</h3>
+                      <Badge variant="default" className="text-xs">{tLabel('save', 'Save')} {savingsPercent}%</Badge>
                     </div>
                     <div className="flex items-baseline gap-1">
                       <span className="text-2xl font-bold">{pricing.symbol}{formatPrice(pricing.annual)}</span>
-                      <span className="text-sm text-muted-foreground">/year</span>
+                      <span className="text-sm text-muted-foreground">/{tLabel('year', 'year')}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Only {pricing.symbol}{monthlyEquivalent}/month when billed annually
+                      {tLabel('onlyPerMonth', 'Only')} {pricing.symbol}{monthlyEquivalent}/{tLabel('month', 'month')} {tLabel('whenBilledAnnually', 'when billed annually')}
                     </p>
                   </div>
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
@@ -237,13 +247,13 @@ export function SubscriptionScreen() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
-                    <h3 className="font-semibold mb-1">Monthly Plan</h3>
+                    <h3 className="font-semibold mb-1">{tLabel('monthlyPlan', 'Monthly Plan')}</h3>
                     <div className="flex items-baseline gap-1">
                       <span className="text-2xl font-bold">{pricing.symbol}{formatPrice(pricing.monthly)}</span>
-                      <span className="text-sm text-muted-foreground">/month</span>
+                      <span className="text-sm text-muted-foreground">/{tLabel('month', 'month')}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Flexible monthly billing
+                      {tLabel('flexibleMonthlyBilling', 'Flexible monthly billing')}
                     </p>
                   </div>
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
@@ -259,17 +269,17 @@ export function SubscriptionScreen() {
 
             <section className="flex flex-col gap-3 mt-2">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                What You Get
+                {tLabel('whatYouGet', 'What You Get')}
               </h3>
               <Card className="divide-y">
-                {BENEFITS.map((benefit, index) => (
+                {benefits.map((benefit, index) => (
                   <div key={index} className="p-4 flex items-center gap-3">
                     <div className="icon-halo-primary w-9 h-9">
                       <benefit.icon className="w-4.5 h-4.5 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-sm">{benefit.title}</p>
-                      <p className="text-xs text-muted-foreground">{benefit.description}</p>
+                      <p className="font-medium text-sm">{tLabel(benefit.titleKey, benefit.titleFallback)}</p>
+                      <p className="text-xs text-muted-foreground">{tLabel(benefit.descKey, benefit.descFallback)}</p>
                     </div>
                   </div>
                 ))}
@@ -283,15 +293,15 @@ export function SubscriptionScreen() {
                 data-testid="button-subscribe"
               >
                 <Crown className="w-4 h-4 mr-2" />
-                Subscribe {selectedPlan === "monthly" ? "Monthly" : "Annually"} - {pricing.symbol}{formatPrice(selectedPlan === "monthly" ? pricing.monthly : pricing.annual)}/{selectedPlan === "monthly" ? "mo" : "yr"}
+                {tLabel('subscribe', 'Subscribe')} {selectedPlan === "monthly" ? tLabel('monthly', 'Monthly') : tLabel('annually', 'Annually')} - {pricing.symbol}{formatPrice(selectedPlan === "monthly" ? pricing.monthly : pricing.annual)}/{selectedPlan === "monthly" ? tLabel('mo', 'mo') : tLabel('yr', 'yr')}
               </Button>
               <p className="text-xs text-center text-muted-foreground px-4 mt-2">
-                Prices shown are reference values. Actual price will be displayed in Google Play checkout.
+                {tLabel('pricesReference', 'Prices shown are reference values. Actual price will be displayed in Google Play checkout.')}
               </p>
             </div>
 
             <p className="text-xs text-center text-muted-foreground px-4 mt-2">
-              Subscription will be processed through Google Play. You can cancel anytime from your Google Play subscriptions.
+              {tLabel('subscriptionGooglePlay', 'Subscription will be processed through Google Play. You can cancel anytime from your Google Play subscriptions.')}
             </p>
 
             <section className="flex flex-col gap-3 mt-6 pt-6 border-t">
@@ -302,15 +312,15 @@ export function SubscriptionScreen() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-sm">Free Plan</h3>
-                      <Badge variant="outline" className="text-xs">Current</Badge>
+                      <h3 className="font-semibold text-sm">{tLabel('freePlan', 'Free Plan')}</h3>
+                      <Badge variant="outline" className="text-xs">{tLabel('current', 'Current')}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mb-2">
-                      Continue using all features for free with occasional ads
+                      {tLabel('freePlanDesc', 'Continue using all features for free with occasional ads')}
                     </p>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Megaphone className="w-3.5 h-3.5" />
-                      <span>Includes ads to support development</span>
+                      <span>{tLabel('includesAds', 'Includes ads to support development')}</span>
                     </div>
                   </div>
                 </div>

@@ -74,16 +74,16 @@ export function StaffHomeScreen() {
   const handleModuleClick = (moduleId: string, screen: string) => {
     if (modulesRequiringBusiness.includes(moduleId) && !hasBusinesses) {
       toast({
-        title: "Business Required",
-        description: "Please add a Business first.",
+        title: tLabel('businessRequired', 'Business Required'),
+        description: tLabel('pleaseAddBusinessFirst', 'Please add a Business first.'),
         variant: "destructive",
       });
       return;
     }
     if (modulesRequiringClient.includes(moduleId) && !hasClients) {
       toast({
-        title: "Client Required",
-        description: "Please add a Client first.",
+        title: tLabel('clientRequired', 'Client Required'),
+        description: tLabel('pleaseAddClientFirst', 'Please add a Client first.'),
         variant: "destructive",
       });
       return;
