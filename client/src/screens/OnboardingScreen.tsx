@@ -15,6 +15,7 @@ import { getCurrencyForCountry, getUserCountry, detectCountryFromIP } from "@/li
 import { CountrySelector } from "@/components/ui/country-selector";
 import { CurrencySelector } from "@/components/ui/currency-selector";
 import { collaborationService } from "@/lib/collaboration-service";
+import { detectCountryFromPhoneNumber } from "@/lib/geolocation-service";
 
 export function OnboardingScreen() {
   const { navigate, data } = useNavigation();
@@ -29,6 +30,7 @@ export function OnboardingScreen() {
   const [displayName, setDisplayName] = useState("");
   const [accountName, setAccountName] = useState("");
   const [country, setCountry] = useState("");
+  const [countryLocked, setCountryLocked] = useState(false);
   const [currency, setCurrency] = useState<Currency>("USD");
   const [salaryStartDay, setSalaryStartDay] = useState("1");
   const [halfDayPercentage, setHalfDayPercentage] = useState("50");
@@ -44,6 +46,17 @@ export function OnboardingScreen() {
 
   useEffect(() => {
     async function detectCountry() {
+      const savedPhone = collaborationService.getSavedPhone();
+      if (savedPhone) {
+        const phoneCountry = detectCountryFromPhoneNumber(savedPhone);
+        if (phoneCountry) {
+          setCountry(phoneCountry);
+          setCurrency(getCurrencyForCountry(phoneCountry));
+          setCountryLocked(true);
+          return;
+        }
+      }
+      
       const existingCountry = getUserCountry();
       if (existingCountry) {
         setCountry(existingCountry);
@@ -254,8 +267,14 @@ export function OnboardingScreen() {
                   setCurrency(newCurrency);
                 }}
                 placeholder="Select your country"
+                disabled={countryLocked}
                 data-testid="select-country"
               />
+              {countryLocked && (
+                <p className="text-xs text-muted-foreground">
+                  Detected from your phone number
+                </p>
+              )}
               {errors.country && (
                 <p className="text-xs text-destructive" role="alert">{errors.country}</p>
               )}

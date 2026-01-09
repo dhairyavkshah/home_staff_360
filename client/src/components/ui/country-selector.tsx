@@ -16,6 +16,7 @@ interface CountrySelectorProps {
   onValueChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
   "data-testid"?: string;
 }
 
@@ -24,6 +25,7 @@ export function CountrySelector({
   onValueChange,
   placeholder = "Select country",
   className,
+  disabled = false,
   "data-testid": testId,
 }: CountrySelectorProps) {
   const [open, setOpen] = useState(false);
@@ -57,15 +59,17 @@ export function CountrySelector({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={disabled ? false : open} onOpenChange={disabled ? undefined : setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          disabled={disabled}
           className={cn(
             "w-full justify-between font-normal",
             !value && "text-muted-foreground",
+            disabled && "opacity-75 cursor-not-allowed",
             className
           )}
           data-testid={testId}

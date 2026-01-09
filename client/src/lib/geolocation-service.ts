@@ -1,5 +1,8 @@
 import { storage } from "./storage";
 import { type Currency } from "@shared/schema";
+// @ts-ignore - google-libphonenumber has no types but works correctly
+import libphonenumber from "google-libphonenumber";
+const PhoneNumberUtil = libphonenumber.PhoneNumberUtil;
 
 export interface CountryInfo {
   code: string;
@@ -347,4 +350,29 @@ export function getDetectedCountry(): string | undefined {
 export function getUserCountry(): string | undefined {
   const settings = storage.getSettings();
   return settings.country || settings.detectedCountry;
+}
+
+export function detectCountryFromPhoneNumber(phoneNumber: string): string | null {
+  if (!phoneNumber) return null;
+  
+  try {
+    const phoneUtil = PhoneNumberUtil.getInstance();
+    const cleanPhone = phoneNumber.replace(/\s+/g, "").replace(/-/g, "");
+    
+    const parsedNumber = phoneUtil.parse(cleanPhone);
+    
+    if (!phoneUtil.isValidNumber(parsedNumber)) {
+      return null;
+    }
+    
+    const regionCode = phoneUtil.getRegionCodeForNumber(parsedNumber);
+    
+    if (regionCode && COUNTRIES.some(c => c.code === regionCode)) {
+      return regionCode;
+    }
+    
+    return null;
+  } catch {
+    return null;
+  }
 }
