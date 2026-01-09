@@ -42,6 +42,7 @@ The UI is modern, inspired by Microsoft Fluent 2 and Samsung One UI, featuring "
 - **Multi-Language Support**: Supports 21 languages, including English, Hindi, Spanish, French, and more.
 - **Multi-Currency Support**: Supports 27 currencies, including INR, USD, EUR, GBP, AUD, and CAD.
 - **Real-Time Collaboration**: Includes a chat system with message edit/delete within a 5-minute window, real-time message delivery, and live events for attendance, laundry, and expense updates.
+- **Push Notifications**: Android push notifications enabled for new chat messages and connection invite events (received, accepted, rejected). Uses Capacitor LocalNotifications for native Android and Web Notifications API for browser. Notifications include sender name, message preview, and are displayed even when app is in background.
 - **Auto-Connection System**: Automatically creates connection invites based on phone numbers, resolving pending links upon user registration.
 
 ### Subscription Model

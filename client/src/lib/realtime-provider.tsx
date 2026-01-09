@@ -21,6 +21,16 @@ interface MessagePayload {
   senderName?: string;
 }
 
+interface ConnectionPayload {
+  id: number;
+  status: string;
+  homeUserId?: string;
+  staffUserId?: string;
+  homeUserName?: string;
+  staffUserName?: string;
+  personName?: string;
+}
+
 interface RealtimeContextValue {
   isConnected: boolean;
   unreadNotificationCount: number;
@@ -71,6 +81,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const connectionAttemptRef = useRef(false);
   const notificationHandlerRef = useRef<((data: NotificationPayload) => void) | null>(null);
   const messageHandlerRef = useRef<((data: MessagePayload) => void) | null>(null);
+  const inviteReceivedHandlerRef = useRef<((data: ConnectionPayload) => void) | null>(null);
+  const connectionStatusHandlerRef = useRef<((data: ConnectionPayload) => void) | null>(null);
 
   const handleNewNotification = useCallback((notification: NotificationPayload) => {
     setUnreadNotificationCount((prev) => prev + 1);
@@ -88,7 +100,72 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const handleNewMessage = useCallback((message: MessagePayload) => {
     setUnreadMessageCount((prev) => prev + 1);
     playNotificationSound();
+    
+    // Show push notification for new chat message
+    const senderName = message.senderName || "Someone";
+    const messagePreview = message.content.length > 50 
+      ? message.content.substring(0, 50) + "..." 
+      : message.content;
+    
+    notificationAlertService.showPushNotification({
+      id: `chat-message-${message.id}`,
+      title: `New message from ${senderName}`,
+      message: messagePreview,
+      type: "chat_message",
+    });
   }, []);
+
+  const handleInviteReceived = useCallback((connection: ConnectionPayload) => {
+    const senderName = connection.homeUserName || connection.staffUserName || "Someone";
+    
+    notificationAlertService.showPushNotification({
+      id: `invite-received-${connection.id}`,
+      title: "New Connection Invite",
+      message: `${senderName} wants to connect with you`,
+      type: "invite_received",
+    });
+    
+    toast({
+      title: "New Connection Invite",
+      description: `${senderName} wants to connect with you`,
+    });
+    
+    playNotificationSound();
+    setUnreadNotificationCount((prev) => prev + 1);
+  }, [toast]);
+
+  const handleConnectionStatusChanged = useCallback((connection: ConnectionPayload) => {
+    const personName = connection.personName || connection.homeUserName || connection.staffUserName || "Someone";
+    
+    if (connection.status === "accepted") {
+      notificationAlertService.showPushNotification({
+        id: `invite-accepted-${connection.id}`,
+        title: "Invite Accepted",
+        message: `${personName} accepted your connection invite`,
+        type: "invite_accepted",
+      });
+      
+      toast({
+        title: "Invite Accepted",
+        description: `${personName} accepted your connection invite`,
+      });
+    } else if (connection.status === "rejected") {
+      notificationAlertService.showPushNotification({
+        id: `invite-rejected-${connection.id}`,
+        title: "Invite Declined",
+        message: `${personName} declined your connection invite`,
+        type: "invite_rejected",
+      });
+      
+      toast({
+        title: "Invite Declined",
+        description: `${personName} declined your connection invite`,
+        variant: "destructive",
+      });
+    }
+    
+    playNotificationSound();
+  }, [toast]);
 
   const fetchInitialCounts = useCallback(async () => {
     try {
@@ -130,7 +207,9 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     notificationHandlerRef.current = handleNewNotification;
     messageHandlerRef.current = handleNewMessage;
-  }, [handleNewNotification, handleNewMessage]);
+    inviteReceivedHandlerRef.current = handleInviteReceived;
+    connectionStatusHandlerRef.current = handleConnectionStatusChanged;
+  }, [handleNewNotification, handleNewMessage, handleInviteReceived, handleConnectionStatusChanged]);
 
   useEffect(() => {
     const onNotification = (data: NotificationPayload) => {
@@ -147,12 +226,30 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
+    const onInviteReceived = (data: ConnectionPayload) => {
+      console.log("[RealtimeProvider] Received invite:", data);
+      if (inviteReceivedHandlerRef.current) {
+        inviteReceivedHandlerRef.current(data);
+      }
+    };
+
+    const onConnectionStatusChanged = (data: ConnectionPayload) => {
+      console.log("[RealtimeProvider] Connection status changed:", data);
+      if (connectionStatusHandlerRef.current) {
+        connectionStatusHandlerRef.current(data);
+      }
+    };
+
     const unsubNotification = realtimeService.on("notifications:created", onNotification);
     const unsubMessage = realtimeService.on("chat:new-message", onMessage);
+    const unsubInviteReceived = realtimeService.on("connections:invite-received", onInviteReceived);
+    const unsubConnectionStatus = realtimeService.on("connections:status-changed", onConnectionStatusChanged);
 
     return () => {
       unsubNotification();
       unsubMessage();
+      unsubInviteReceived();
+      unsubConnectionStatus();
     };
   }, []);
 
