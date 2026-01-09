@@ -59,11 +59,18 @@ const DEFAULT_SAFE_AREA_PADDING = { top: 80, bottom: 80, left: 16, right: 16 };
 
 function getSafeAreaPadding() {
   try {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return DEFAULT_SAFE_AREA_PADDING;
+    }
+    
     const safeAreas = getSafeAreaValues();
+    const style = getComputedStyle(document.documentElement);
+    const keyboardVisible = style.getPropertyValue('--keyboard-visible')?.trim() === '1';
+    const keyboardHeight = parseInt(style.getPropertyValue('--keyboard-height')?.replace('px', '') || '0', 10);
     
     return { 
-      top: safeAreas.top + 24, 
-      bottom: safeAreas.bottom + 80,
+      top: safeAreas.top + 32, 
+      bottom: keyboardVisible ? keyboardHeight + 16 : safeAreas.bottom + 80,
       left: 16, 
       right: 16 
     };
@@ -76,10 +83,12 @@ const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
 >(({ className, sideOffset = 4, collisionPadding, style, ...props }, ref) => {
-  const [safeAreaPadding, setSafeAreaPadding] = React.useState({ top: 80, bottom: 80, left: 16, right: 16 });
-  const [maxHeight, setMaxHeight] = React.useState<string | undefined>(undefined);
+  const [safeAreaPadding, setSafeAreaPadding] = React.useState(DEFAULT_SAFE_AREA_PADDING);
+  const [maxHeight, setMaxHeight] = React.useState<string>("300px");
   
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const updateSafeAreas = () => {
       try {
         const padding = getSafeAreaPadding();
@@ -87,21 +96,38 @@ const DropdownMenuContent = React.forwardRef<
         
         const availableHeight = getAvailableViewportHeight();
         const maxH = availableHeight - padding.top - padding.bottom;
-        setMaxHeight(`${Math.max(maxH, 200)}px`);
+        setMaxHeight(`${Math.max(maxH, 150)}px`);
       } catch {
         setSafeAreaPadding(DEFAULT_SAFE_AREA_PADDING);
+        setMaxHeight("300px");
       }
     };
     
     updateSafeAreas();
     
+    const intervalId = setInterval(updateSafeAreas, 100);
+    
+    const handleResize = () => {
+      updateSafeAreas();
+      setTimeout(updateSafeAreas, 50);
+      setTimeout(updateSafeAreas, 150);
+    };
+    
     try {
-      if (typeof window !== 'undefined' && window.visualViewport) {
-        window.visualViewport.addEventListener('resize', updateSafeAreas);
-        return () => window.visualViewport?.removeEventListener('resize', updateSafeAreas);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleResize);
       }
+      window.addEventListener('resize', handleResize);
+      
+      return () => {
+        clearInterval(intervalId);
+        if (window.visualViewport) {
+          window.visualViewport.removeEventListener('resize', handleResize);
+        }
+        window.removeEventListener('resize', handleResize);
+      };
     } catch {
-      // Ignore errors in SSR contexts
+      clearInterval(intervalId);
     }
   }, []);
 
