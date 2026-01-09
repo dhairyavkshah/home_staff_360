@@ -634,8 +634,9 @@ class CollaborationService {
       
       if (!localProfile) {
         // Create local profile from server data
+        // Only set type if server has it - don't default to HOME since user may not have selected role yet
         localProfile = storage.createProfile({
-          type: (serverProfile.userType as any) || "HOME",
+          type: serverProfile.userType as any,
           displayName: serverProfile.displayName || "",
         });
       }
