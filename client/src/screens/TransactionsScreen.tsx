@@ -303,15 +303,14 @@ export function TransactionsScreen() {
               />
               {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
             </div>
-
-            <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => { resetForm(); setShowAddForm(false); }} data-testid="button-cancel">
-                {tLabel('cancel', 'Cancel')}
-              </Button>
-              <Button className="flex-1" onClick={handleSubmit} data-testid="button-save">
-                {tLabel('save', 'Save')}
-              </Button>
-            </div>
+          </div>
+          <div className="flex gap-2 px-4 py-4 border-t shrink-0 safe-area-bottom">
+            <Button variant="outline" className="flex-1" onClick={() => { resetForm(); setShowAddForm(false); }} data-testid="button-cancel">
+              {tLabel('cancel', 'Cancel')}
+            </Button>
+            <Button className="flex-1" onClick={handleSubmit} data-testid="button-save">
+              {tLabel('save', 'Save')}
+            </Button>
           </div>
         </DrawerContent>
       </Drawer>
