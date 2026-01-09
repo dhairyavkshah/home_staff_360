@@ -437,7 +437,7 @@ export function SettingsScreen() {
                 <Home className="w-4.5 h-4.5 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-sm">{t("homeUserMode")} <span className="font-normal text-xs text-muted-foreground">[Use if you're home person]</span></p>
+                <p className="font-medium text-sm">{t("homeUserMode")}</p>
                 <p className="text-xs text-muted-foreground">{t("manageYourHouseholdStaff")}</p>
               </div>
               {appMode === "HOME" && <Check className="w-4 h-4 text-primary" />}
@@ -451,7 +451,7 @@ export function SettingsScreen() {
                 <Briefcase className="w-4.5 h-4.5 text-warning" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-sm">{t("staffVendorUserMode")} <span className="font-normal text-xs text-muted-foreground">[Use if you're staff/service person]</span></p>
+                <p className="font-medium text-sm">{t("staffVendorUserMode")}</p>
                 <p className="text-xs text-muted-foreground">{t("trackYourOwnWork")}</p>
               </div>
               {appMode === "STAFF" && <Check className="w-4 h-4 text-primary" />}
