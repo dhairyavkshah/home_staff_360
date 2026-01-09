@@ -1,11 +1,23 @@
 # Home Staff 360 v1.0
 
 ## Overview
-Home Staff 360 is a hybrid mobile application (React + Capacitor) with a backend server for household staff management. It provides a comprehensive, real-time solution for managing household staff and service businesses with live data synchronization across all connected users.
+Home Staff 360 is a professional staff management platform built as a hybrid mobile application (React + Capacitor) with a backend server. Originally designed for household staff management, this comprehensive solution is equally applicable to hospitality businesses, restaurants, and other staff-oriented operations. It provides real-time workforce management with live data synchronization across all connected users.
 
-It operates in two core modes:
-- **Home User Mode**: For household managers to track domestic staff attendance, payments, expenses, laundry batches, and notes with real-time collaboration.
-- **Staff User Mode**: For service professionals to manage client homes, log attendance, track earnings, handle expenses, create invoices, and take notes.
+### Industry Applications
+While designed with home staff management as the primary use case, Home Staff 360's architecture supports diverse industries:
+- **Households**: Domestic staff, housekeepers, cooks, drivers, nannies
+- **Hospitality**: Hotel housekeeping, room service, front desk staff
+- **Restaurants**: Kitchen staff, servers, bartenders, hosts
+- **Service Businesses**: Cleaning services, maintenance crews, field staff
+- **Property Management**: Building staff, security personnel, maintenance teams
+
+### Future Roadmap
+We are continuously enhancing Home Staff 360 to better serve diverse industries with upcoming features including industry-specific templates, advanced scheduling, shift management, department structures, and integration with popular business tools.
+
+### Operating Modes
+The platform operates in two core modes:
+- **Home User Mode**: For employers and managers to track staff attendance, payments, expenses, service batches, and notes with real-time collaboration.
+- **Staff User Mode**: For service professionals to manage multiple clients, log attendance, track earnings, handle expenses, create invoices, and take notes.
 
 ## User Preferences
 - Simple language and clear explanations

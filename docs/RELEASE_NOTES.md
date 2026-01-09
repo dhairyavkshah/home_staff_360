@@ -10,16 +10,21 @@
 
 ### What's New in Version 1.0
 
-Home Staff 360 is now a **fully live, real-time platform** for household and staff management. This major update transforms the app from a local tool to a connected collaboration platform.
+Home Staff 360 is now a **fully live, real-time platform** for professional staff management. Originally designed for household staff, this platform now serves a broader range of industries including hospitality, restaurants, and service-oriented businesses.
 
 ---
 
 ### Highlights
 
+**Professional Staff Management Platform**
+- Designed for household staff management with versatility for hospitality, restaurants, and service businesses
+- Scalable architecture supporting homes, hotels, restaurants, and multi-location operations
+- Industry-adaptable workflows for diverse staff management needs
+
 **Live Real-Time Collaboration**
-- Connect with household staff or clients in real-time
+- Connect with staff or clients in real-time
 - Instant messaging with message edit and delete (within 5 minutes)
-- Live updates for attendance, laundry, and expenses across all devices
+- Live updates for attendance, services, and expenses across all devices
 - Auto-connection system that creates links automatically when adding people
 
 **Enhanced Security**
@@ -31,7 +36,31 @@ Home Staff 360 is now a **fully live, real-time platform** for household and sta
 **Global Reach**
 - 21 languages supported
 - 27 currencies for international users
-- Works worldwide with SMS verification via Twilio
+- Works worldwide with SMS verification
+
+---
+
+### Industry Applications
+
+**Household Management**
+- Track domestic staff attendance and payments
+- Manage laundry services with batch tracking
+- Organize household expenses with approvals
+
+**Hospitality & Hotels**
+- Coordinate housekeeping and service staff
+- Track attendance across departments
+- Generate operational reports
+
+**Restaurants & Food Service**
+- Monitor kitchen and service personnel
+- Track shift-based work hours
+- Manage staff payments and tips
+
+**Service Businesses**
+- Manage field staff across client locations
+- Track earnings and create invoices
+- Handle expense reimbursements
 
 ---
 
@@ -49,7 +78,7 @@ Home Staff 360 is now a **fully live, real-time platform** for household and sta
 
 **Live Collaboration Events**
 - Real-time attendance updates between employers and staff
-- Instant laundry batch approvals and rejections
+- Instant batch approvals and rejections
 - Live expense sharing and approval workflows
 - Socket.IO-powered event broadcasting
 - Dual delivery pattern for reliability
@@ -67,15 +96,6 @@ Home Staff 360 is now a **fully live, real-time platform** for household and sta
 - Role-based access control (RBAC) for all admin functions
 - Admin dashboard with comprehensive analytics
 - User management interface with search and filtering
-
-**Advertising System**
-- Full-screen video ad overlay with Fluent 2 design
-- Skip button appears after 5 seconds of viewing
-- Maximum ad duration: 30 seconds
-- Equal weight distribution for fair ad rotation
-- Click-through tracking for advertisers
-- Admin interface for ad campaign management
-- Comprehensive ad analytics dashboard
 
 ---
 
@@ -98,11 +118,6 @@ Home Staff 360 is now a **fully live, real-time platform** for household and sta
 - Change password requires current password
 - Secure password reset via verified phone
 
-**Phone Number Changes**
-- Change phone with current password verification
-- OTP verification for new phone number
-- Rate limited: maximum 3 changes per hour
-
 **Session Security**
 - JWT tokens with 30-day expiry for users
 - 8-hour expiry for admin sessions
@@ -113,27 +128,7 @@ Home Staff 360 is now a **fully live, real-time platform** for household and sta
 #### Localization
 
 **21 Languages Supported**
-- English
-- Hindi
-- Gujarati
-- Kannada
-- Malayalam
-- Marathi
-- Punjabi
-- Telugu
-- Tamil
-- Urdu
-- Bengali
-- Odia
-- Assamese
-- Spanish
-- French
-- German
-- Arabic
-- Chinese
-- Japanese
-- Portuguese
-- Russian
+English, Hindi, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Telugu, Tamil, Urdu, Bengali, Odia, Assamese, Spanish, French, German, Arabic, Chinese, Japanese, Portuguese, Russian
 
 **27 Currencies Supported**
 INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, KRW, BRL, MXN, ZAR, RUB, TRY, CHF, SEK, NOK, DKK, NZD
@@ -156,11 +151,10 @@ INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, 
 
 - Fixed attendance calendar sync issues
 - Resolved payment calculation edge cases
-- Fixed laundry batch duplicate prevention
+- Fixed batch duplicate prevention
 - Improved data persistence reliability
 - Fixed currency formatting inconsistencies
 - Resolved notification delivery delays
-- Fixed branding consistency (Home Staff 360)
 
 ---
 
@@ -176,37 +170,51 @@ INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, 
 
 ---
 
+### Future Roadmap
+
+We are committed to expanding Home Staff 360's capabilities for diverse industries:
+
+**Upcoming Enhancements**
+- Industry-specific templates for hospitality and restaurants
+- Advanced scheduling and shift management features
+- Team hierarchy and department structures
+- Enhanced analytics and business intelligence
+- Integration with popular business tools
+- Multi-property management for hotel chains
+- Table and section management for restaurants
+
+---
+
 ### Google Play Console Format (500 characters max)
 
 ```
-Version 1.0 - Now Live & Real-Time!
+Version 1.0 - Professional Staff Management Platform
 
-MAJOR UPDATE:
-- Live real-time collaboration with staff and clients
+NOW LIVE:
+- Real-time collaboration for homes & businesses
 - Instant messaging with edit/delete support
 - Auto-connect when adding new people
 - Phone + password secure authentication
 
-FEATURES:
-- 21 languages supported
-- Enhanced biometric security
+VERSATILE:
+- Perfect for households, hotels, restaurants & service businesses
+- 21 languages, 27 currencies
 - Beautiful Fluent 2 design
-- Smoother dark mode
 
-Connect and collaborate with your household team instantly!
+Manage your team professionally, from anywhere!
 ```
 
-**Character Count: 438**
+**Character Count: 469**
 
 ---
 
 ### Short What's New (150 characters)
 
 ```
-v1.0: Live real-time collaboration! Instant messaging, auto-connections, 21 languages, enhanced security. Manage staff together!
+v1.0: Professional staff management for homes & businesses. Real-time collaboration, 21 languages, enhanced security. Hotels & restaurants welcome!
 ```
 
-**Character Count: 129**
+**Character Count: 149**
 
 ---
 
@@ -214,8 +222,8 @@ v1.0: Live real-time collaboration! Instant messaging, auto-connections, 21 lang
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| 1.0.0 | Jan 2026 | Live real-time platform, collaboration, messaging |
+| 1.0.0 | Jan 2026 | Live platform for homes, hospitality, restaurants & service businesses |
 
 ---
 
-*Last Updated: January 7, 2026*
+*Last Updated: January 9, 2026*

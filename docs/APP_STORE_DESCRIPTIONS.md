@@ -7,32 +7,58 @@
 ## Short Description (80 characters max)
 
 ```
-Live staff management app. Real-time attendance, chat, expenses & collaboration.
+Staff management for homes & businesses. Attendance, payments, chat & reports.
 ```
 
-**Character Count: 80**
+**Character Count: 79**
 
 ---
 
 ## Full Description (4000 characters max)
 
 ```
-Home Staff 360 - Live Household Staff Management Platform
+Home Staff 360 - Professional Staff Management Platform
 
-Transform how you manage household staff or run your service business with Home Staff 360 - the real-time collaboration platform that keeps everyone connected and organized.
+Transform how you manage staff operations with Home Staff 360 - the comprehensive real-time platform designed for household management and adaptable to hospitality, restaurant, and other staff-oriented businesses.
 
-Whether you're a homeowner managing domestic help or a service professional tracking your earnings, Home Staff 360 gives you powerful live collaboration tools in one beautifully designed app.
+Originally crafted for household staff management, Home Staff 360 delivers powerful workforce tools that scale seamlessly across industries. Whether you're managing domestic staff, coordinating hotel housekeeping teams, overseeing restaurant personnel, or running any staff-centric operation, this platform provides the professional-grade features you need.
+
+VERSATILE APPLICATIONS
+
+Household Management
+- Track attendance for maids, cooks, drivers, and domestic staff
+- Manage salary payments and advances
+- Monitor laundry services with detailed batch tracking
+- Organize household expenses with approval workflows
+
+Hospitality & Hotels
+- Coordinate housekeeping staff schedules
+- Track room service personnel attendance
+- Manage staff payments across departments
+- Generate operational reports
+
+Restaurants & Food Service
+- Monitor kitchen and service staff attendance
+- Track shift-based work hours
+- Manage tip pooling and payments
+- Handle staff expense reimbursements
+
+Service Businesses
+- Manage field staff across multiple client locations
+- Track earnings by job or client
+- Create professional invoices
+- Generate income reports
 
 LIVE REAL-TIME FEATURES
 
 Real-Time Collaboration
-- Connect instantly with staff or clients
+- Connect instantly with staff members or clients
 - See attendance updates as they happen
-- Approve laundry batches and expenses in real-time
+- Approve expenses and requests in real-time
 - Never miss an update with live notifications
 
 Instant Messaging
-- Direct messaging with your connections
+- Direct messaging with your team
 - Edit or delete messages within 5 minutes
 - Read receipts and timestamps
 - Push notifications for new messages
@@ -45,57 +71,49 @@ Auto-Connection System
 TWO POWERFUL MODES
 
 Home User Mode
-Perfect for households managing domestic staff:
-- Track attendance for maids, cooks, drivers, and household help
-- Record and manage salary payments instantly
-- Monitor laundry batches with detailed item tracking
-- Keep household expenses organized with approvals
+For employers and managers:
+- Track attendance with precision
+- Record and manage payments instantly
+- Monitor service batches with detailed tracking
+- Keep expenses organized with approvals
 - Generate comprehensive reports
 
 Staff User Mode
-Ideal for service professionals:
-- Manage multiple client homes efficiently
-- Log your daily attendance at each location
-- Track your earnings and payment history
-- Record business expenses with receipt capture
+For service professionals:
+- Manage multiple clients efficiently
+- Log daily attendance at each location
+- Track earnings and payment history
+- Record expenses with receipt capture
 - Create and share professional invoices
-- Generate income reports
 
 KEY FEATURES
 
 Attendance Tracking
-- Mark daily attendance with a single tap
+- Mark attendance with a single tap
 - Track full day, half day, and leave status
-- View attendance calendars and statistics
+- View calendars and statistics
 - Set weekly off days and holidays
 
 Payment Management
-- Record salary payments and advances
+- Record payments and advances
 - Track pending balances in real-time
 - Maintain complete transaction history
 - Support for multiple payment modes
 
-Laundry Batch Tracking
-- Create and manage laundry batches
-- Track individual items with categories
-- Record costs and payments
-- Share batch details for approval
-
 Expense Tracking
-- Categorize household or business expenses
+- Categorize expenses by type
 - Attach receipt images
-- Track expenses by person or category
+- Track by person or category
 - Monthly and yearly summaries
 
 Invoice Generation
 - Create professional invoices
-- Customize with your business details
+- Customize with your details
 - Share via any messaging app
-- Track paid and pending invoices
+- Track paid and pending status
 
 SECURE & PRIVATE
 
-Your data is protected:
 - Phone + password authentication with OTP
 - Encrypted data transmission (HTTPS/TLS)
 - Biometric lock and PIN security options
@@ -104,38 +122,37 @@ Your data is protected:
 
 GLOBAL ACCESSIBILITY
 
-Multi-Language Support - Available in 21 languages:
-English, Hindi, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Telugu, Tamil, Urdu, Bengali, Odia, Assamese, Spanish, French, German, Arabic, Chinese, Japanese, Portuguese, Russian
+21 Languages: English, Hindi, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Telugu, Tamil, Urdu, Bengali, Odia, Assamese, Spanish, French, German, Arabic, Chinese, Japanese, Portuguese, Russian
 
-Multi-Currency Support - 27 currencies:
-INR, USD, EUR, GBP, AUD, CAD, and many more
+27 Currencies: INR, USD, EUR, GBP, AUD, CAD, and more
 
-BEAUTIFUL & INTUITIVE
+FUTURE ROADMAP
 
-- Modern design inspired by Microsoft Fluent 2
-- Seamless light and dark mode
-- Clean, intuitive navigation
-- Smooth animations and transitions
-- Mobile-optimized real-time interactions
+We are continuously enhancing Home Staff 360 to better serve diverse industries:
+- Industry-specific templates for hospitality and restaurants
+- Advanced scheduling and shift management
+- Team hierarchy and department structures
+- Enhanced analytics for business operations
+- Integration with popular business tools
 
 FREE TO USE
 
-Home Staff 360 is free with all core features included. Support development through optional donations.
+Home Staff 360 is free with all core features included. Premium subscription available for ad-free experience.
 
-Download now and experience real-time household management!
+Download now and experience professional staff management!
 ```
 
-**Character Count: ~2,850**
+**Character Count: ~3,450**
 
 ---
 
 ## Keywords (100 characters max)
 
 ```
-household,staff,maid,attendance,salary,laundry,expenses,invoice,real-time,chat,collaboration,live
+staff,management,attendance,salary,hospitality,restaurant,household,maid,invoice,chat,collaboration
 ```
 
-**Character Count: 100**
+**Character Count: 99**
 
 ---
 
@@ -143,7 +160,7 @@ household,staff,maid,attendance,salary,laundry,expenses,invoice,real-time,chat,c
 
 ```
 Home Staff 360
-Live Collaboration. Instant Updates. Connected Teams.
+Professional Staff Management for Homes & Businesses
 ```
 
 ---
@@ -151,10 +168,10 @@ Live Collaboration. Instant Updates. Connected Teams.
 ## Promotional Text (170 characters max)
 
 ```
-The live household staff management platform. Real-time attendance, instant messaging, expense approvals & more. 21 languages. Connect with your team instantly!
+Professional staff management platform. Perfect for homes, hotels, restaurants & service businesses. Real-time attendance, messaging, payments & reports. 21 languages.
 ```
 
-**Character Count: 167**
+**Character Count: 168**
 
 ---
 
@@ -166,8 +183,8 @@ See RELEASE_NOTES.md for version-specific update descriptions.
 
 ## App Category
 
-**Primary**: Productivity  
-**Secondary**: Business
+**Primary**: Business  
+**Secondary**: Productivity
 
 ---
 
@@ -181,15 +198,19 @@ See RELEASE_NOTES.md for version-specific update descriptions.
 
 - Household managers and homeowners
 - Domestic staff and service professionals
+- Hotel and hospitality managers
+- Restaurant owners and managers
 - Small service businesses
 - Property managers
 - Family offices
+- Cleaning service operators
+- Catering companies
 
 ---
 
 ## Screenshots Suggestions
 
-1. Home Screen dashboard showing live staff overview
+1. Home Screen dashboard showing staff overview
 2. Real-time messaging conversation
 3. Attendance tracking with live updates
 4. Connection request and approval
@@ -203,9 +224,9 @@ See RELEASE_NOTES.md for version-specific update descriptions.
 ## Video Description (optional)
 
 ```
-See Home Staff 360 in action! Experience live real-time collaboration with your household staff. Instant messaging, attendance updates, expense approvals - all happening in real-time. Manage your team together, from anywhere.
+See Home Staff 360 in action! Professional staff management for homes, hotels, restaurants, and service businesses. Real-time collaboration, instant messaging, attendance tracking - all in one powerful platform. Manage your team together, from anywhere.
 ```
 
 ---
 
-*Last Updated: January 7, 2026*
+*Last Updated: January 9, 2026*
