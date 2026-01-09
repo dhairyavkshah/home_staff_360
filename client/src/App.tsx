@@ -22,6 +22,7 @@ import AdminTeamPage from "@/pages/admin/AdminTeamPage";
 import AdminMaintenance from "@/pages/admin/AdminMaintenance";
 import AdminAds from "@/pages/admin/AdminAds";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import DataDeletionRequest from "@/pages/DataDeletionRequest";
 
 import { SplashScreen } from "@/screens/SplashScreen";
 import { LauncherScreen } from "@/screens/LauncherScreen";
@@ -277,14 +278,33 @@ function PrivacyPolicyApp() {
   );
 }
 
+function DataDeletionApp() {
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="homestaff360-theme">
+      <TooltipProvider>
+        <DataDeletionRequest />
+      </TooltipProvider>
+    </ThemeProvider>
+  );
+}
+
 function App() {
   const isAdminRoute = window.location.pathname.startsWith("/admin");
   const isPrivacyRoute = window.location.pathname === "/privacypolicy";
+  const isDataDeletionRoute = window.location.pathname === "/delete-data";
 
   if (isPrivacyRoute) {
     return (
       <ErrorBoundary>
         <PrivacyPolicyApp />
+      </ErrorBoundary>
+    );
+  }
+
+  if (isDataDeletionRoute) {
+    return (
+      <ErrorBoundary>
+        <DataDeletionApp />
       </ErrorBoundary>
     );
   }
