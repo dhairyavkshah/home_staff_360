@@ -1,17 +1,34 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import { Capacitor } from "@capacitor/core";
-import { SafeArea, SystemBarsStyle } from "@capacitor-community/safe-area";
+import { SafeArea as SafeAreaCommunity, SystemBarsStyle } from "@capacitor-community/safe-area";
+import { SafeArea as SafeAreaPlugin } from "capacitor-plugin-safe-area";
 
-interface SafeAreaContextValue {
-  insets: { top: number; right: number; bottom: number; left: number };
-  isReady: boolean;
+interface SafeAreaInsets {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
 }
 
-const defaultInsets = { top: 0, right: 0, bottom: 0, left: 0 };
+interface SafeAreaContextValue {
+  insets: SafeAreaInsets;
+  isReady: boolean;
+  isKeyboardVisible: boolean;
+  keyboardHeight: number;
+  availableHeight: number;
+  effectiveBottomInset: number;
+}
+
+const defaultInsets: SafeAreaInsets = { top: 0, right: 0, bottom: 0, left: 0 };
+const androidFallbackInsets: SafeAreaInsets = { top: 48, right: 0, bottom: 48, left: 0 };
 
 const SafeAreaContext = createContext<SafeAreaContextValue>({
   insets: defaultInsets,
   isReady: false,
+  isKeyboardVisible: false,
+  keyboardHeight: 0,
+  availableHeight: 800,
+  effectiveBottomInset: 0,
 });
 
 export function useSafeArea() {
@@ -23,61 +40,185 @@ interface SafeAreaProviderProps {
 }
 
 export function SafeAreaProvider({ children }: SafeAreaProviderProps) {
-  const [insets, setInsets] = useState(defaultInsets);
+  const [insets, setInsets] = useState<SafeAreaInsets>(defaultInsets);
   const [isReady, setIsReady] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [availableHeight, setAvailableHeight] = useState(
+    typeof window !== 'undefined' ? window.innerHeight : 800
+  );
+  const [initialHeight, setInitialHeight] = useState(
+    typeof window !== 'undefined' ? window.innerHeight : 800
+  );
+
+  const updateCSSProperties = useCallback((safeInsets: SafeAreaInsets) => {
+    const root = document.documentElement;
+    root.style.setProperty('--app-safe-area-top', `${safeInsets.top}px`);
+    root.style.setProperty('--app-safe-area-bottom', `${safeInsets.bottom}px`);
+    root.style.setProperty('--app-safe-area-left', `${safeInsets.left}px`);
+    root.style.setProperty('--app-safe-area-right', `${safeInsets.right}px`);
+  }, []);
+
+  const updateKeyboardState = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const heightDiff = initialHeight - viewportHeight;
+      const isVisible = heightDiff > 100;
+      
+      setIsKeyboardVisible(isVisible);
+      setKeyboardHeight(isVisible ? heightDiff : 0);
+      setAvailableHeight(viewportHeight);
+      
+      const root = document.documentElement;
+      root.style.setProperty('--keyboard-visible', isVisible ? '1' : '0');
+      root.style.setProperty('--keyboard-height', `${isVisible ? heightDiff : 0}px`);
+      root.style.setProperty('--available-height', `${viewportHeight}px`);
+    } catch {
+      // Ignore errors
+    }
+  }, [initialHeight]);
 
   useEffect(() => {
     async function initializeSafeArea() {
-      if (Capacitor.isNativePlatform()) {
-        try {
-          const isDarkMode = document.documentElement.classList.contains('dark');
-          await SafeArea.setSystemBarsStyle({
-            style: isDarkMode ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
-          });
+      if (!Capacitor.isNativePlatform()) {
+        setIsReady(true);
+        return;
+      }
 
-          // Wait a bit for CSS env variables to be set by the plugin, then read them
-          setTimeout(() => {
-            const computedStyle = getComputedStyle(document.documentElement);
-            const top = parseInt(computedStyle.getPropertyValue('--safe-area-inset-top') || '0', 10) || 0;
-            const right = parseInt(computedStyle.getPropertyValue('--safe-area-inset-right') || '0', 10) || 0;
-            const bottom = parseInt(computedStyle.getPropertyValue('--safe-area-inset-bottom') || '0', 10) || 0;
-            const left = parseInt(computedStyle.getPropertyValue('--safe-area-inset-left') || '0', 10) || 0;
+      try {
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        await SafeAreaCommunity.setSystemBarsStyle({
+          style: isDarkMode ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
+        });
+      } catch {
+        // Ignore style errors
+      }
 
-            // Ensure minimum values for Android status bar (typically 24-48dp depending on device)
-            // Samsung S21FE has a taller status bar area, so use 48px minimum
-            const finalTop = Math.max(top, 48);
-            const finalBottom = Math.max(bottom, 0);
-            
-            setInsets({ top: finalTop, right, bottom: finalBottom, left });
+      try {
+        const result = await SafeAreaPlugin.getSafeAreaInsets();
+        const pluginInsets = result.insets;
+        
+        let finalInsets: SafeAreaInsets = {
+          top: Math.max(pluginInsets.top || 0, 0),
+          right: Math.max(pluginInsets.right || 0, 0),
+          bottom: Math.max(pluginInsets.bottom || 0, 0),
+          left: Math.max(pluginInsets.left || 0, 0),
+        };
 
-            document.documentElement.style.setProperty('--app-safe-area-top', `${finalTop}px`);
-            document.documentElement.style.setProperty('--app-safe-area-bottom', `${finalBottom}px`);
-            document.documentElement.style.setProperty('--app-safe-area-left', `${left}px`);
-            document.documentElement.style.setProperty('--app-safe-area-right', `${right}px`);
-
-            console.log('Safe area insets detected:', { top: finalTop, right, bottom: finalBottom, left });
-            setIsReady(true);
-          }, 200);
-        } catch (error) {
-          console.error('Failed to initialize safe area:', error);
-          // Set sensible defaults for Android
-          const defaultTop = 32;
-          const defaultBottom = 0;
-          setInsets({ top: defaultTop, right: 0, bottom: defaultBottom, left: 0 });
-          document.documentElement.style.setProperty('--app-safe-area-top', `${defaultTop}px`);
-          document.documentElement.style.setProperty('--app-safe-area-bottom', `${defaultBottom}px`);
-          setIsReady(true);
+        if (finalInsets.top === 0 && finalInsets.bottom === 0) {
+          finalInsets = androidFallbackInsets;
+        } else {
+          finalInsets.top = Math.max(finalInsets.top, 24);
         }
-      } else {
+
+        setInsets(finalInsets);
+        updateCSSProperties(finalInsets);
+        setIsReady(true);
+
+        try {
+          await SafeAreaPlugin.addListener('safeAreaChanged', (data) => {
+            const newInsets = data.insets;
+            let updatedInsets: SafeAreaInsets = {
+              top: Math.max(newInsets.top || 0, 0),
+              right: Math.max(newInsets.right || 0, 0),
+              bottom: Math.max(newInsets.bottom || 0, 0),
+              left: Math.max(newInsets.left || 0, 0),
+            };
+
+            if (updatedInsets.top === 0 && updatedInsets.bottom === 0) {
+              updatedInsets = androidFallbackInsets;
+            } else {
+              updatedInsets.top = Math.max(updatedInsets.top, 24);
+            }
+
+            setInsets(updatedInsets);
+            updateCSSProperties(updatedInsets);
+          });
+        } catch {
+          // Listener not supported, use polling
+          const interval = setInterval(async () => {
+            try {
+              const refreshResult = await SafeAreaPlugin.getSafeAreaInsets();
+              const refreshInsets = refreshResult.insets;
+              
+              let polledInsets: SafeAreaInsets = {
+                top: Math.max(refreshInsets.top || 0, 24),
+                right: Math.max(refreshInsets.right || 0, 0),
+                bottom: Math.max(refreshInsets.bottom || 0, 0),
+                left: Math.max(refreshInsets.left || 0, 0),
+              };
+
+              if (polledInsets.top === 0 && polledInsets.bottom === 0) {
+                polledInsets = androidFallbackInsets;
+              }
+
+              setInsets(polledInsets);
+              updateCSSProperties(polledInsets);
+            } catch {
+              // Ignore polling errors
+            }
+          }, 2000);
+
+          return () => clearInterval(interval);
+        }
+      } catch {
+        setInsets(androidFallbackInsets);
+        updateCSSProperties(androidFallbackInsets);
         setIsReady(true);
       }
     }
 
     initializeSafeArea();
-  }, []);
+  }, [updateCSSProperties]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    setInitialHeight(window.innerHeight);
+    updateKeyboardState();
+
+    const handleResize = () => {
+      updateKeyboardState();
+      setTimeout(updateKeyboardState, 50);
+      setTimeout(updateKeyboardState, 150);
+    };
+
+    try {
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleResize);
+        window.visualViewport.addEventListener('scroll', handleResize);
+      }
+      window.addEventListener('resize', handleResize);
+
+      return () => {
+        if (window.visualViewport) {
+          window.visualViewport.removeEventListener('resize', handleResize);
+          window.visualViewport.removeEventListener('scroll', handleResize);
+        }
+        window.removeEventListener('resize', handleResize);
+      };
+    } catch {
+      // Ignore errors
+    }
+  }, [updateKeyboardState]);
+
+  const effectiveBottomInset = isKeyboardVisible && keyboardHeight > 0 
+    ? keyboardHeight 
+    : insets.bottom;
+
+  const contextValue: SafeAreaContextValue = {
+    insets,
+    isReady,
+    isKeyboardVisible,
+    keyboardHeight,
+    availableHeight,
+    effectiveBottomInset,
+  };
 
   return (
-    <SafeAreaContext.Provider value={{ insets, isReady }}>
+    <SafeAreaContext.Provider value={contextValue}>
       {children}
     </SafeAreaContext.Provider>
   );

@@ -5,7 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { getSafeAreaValues } from "@/hooks/use-keyboard-safe-area"
+import { useSafeArea } from "@/lib/safe-area-provider"
 
 const Dialog = DialogPrimitive.Root
 
@@ -30,33 +30,17 @@ const DialogOverlay = React.forwardRef<
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-const DEFAULT_SAFE_AREAS = { top: 48, bottom: 0 };
-
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, style, ...props }, ref) => {
-  const [safeAreas, setSafeAreas] = React.useState(DEFAULT_SAFE_AREAS);
+  const { insets, effectiveBottomInset } = useSafeArea();
 
-  React.useEffect(() => {
-    const updateSafeAreas = () => {
-      try {
-        setSafeAreas(getSafeAreaValues());
-      } catch {
-        setSafeAreas(DEFAULT_SAFE_AREAS);
-      }
-    };
-    updateSafeAreas();
-    
-    try {
-      if (typeof window !== 'undefined' && window.visualViewport) {
-        window.visualViewport.addEventListener('resize', updateSafeAreas);
-        return () => window.visualViewport?.removeEventListener('resize', updateSafeAreas);
-      }
-    } catch {
-      // Ignore errors in SSR contexts
-    }
-  }, []);
+  const contentStyle: React.CSSProperties = {
+    top: `${insets.top + 16}px`,
+    maxHeight: `calc(100vh - ${insets.top + 32}px - ${effectiveBottomInset + 32}px)`,
+    ...style,
+  };
 
   return (
     <DialogPortal>
@@ -67,12 +51,7 @@ const DialogContent = React.forwardRef<
           "fixed left-[50%] z-50 grid w-full max-w-md translate-x-[-50%] gap-4 border bg-background p-4 shadow-soft-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-card overflow-hidden",
           className
         )}
-        style={{
-          top: `max(${safeAreas.top + 16}px, 50%)`,
-          maxHeight: `calc(100vh - ${safeAreas.top + 32}px - ${safeAreas.bottom + 32}px)`,
-          transform: 'translateX(-50%) translateY(-50%)',
-          ...style,
-        }}
+        style={contentStyle}
         {...props}
       >
         <div className="max-h-full overflow-y-auto">

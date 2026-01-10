@@ -4,7 +4,7 @@ import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "@/lib/utils"
-import { getSafeAreaValues } from "@/hooks/use-keyboard-safe-area"
+import { useSafeArea } from "@/lib/safe-area-provider"
 
 const Drawer = ({
   shouldScaleBackground = true,
@@ -35,33 +35,17 @@ const DrawerOverlay = React.forwardRef<
 ))
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
-const DEFAULT_SAFE_AREAS = { top: 48, bottom: 0 };
-
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
 >(({ className, children, style, ...props }, ref) => {
-  const [safeAreas, setSafeAreas] = React.useState(DEFAULT_SAFE_AREAS);
+  const { insets, effectiveBottomInset } = useSafeArea();
 
-  React.useEffect(() => {
-    const updateSafeAreas = () => {
-      try {
-        setSafeAreas(getSafeAreaValues());
-      } catch {
-        setSafeAreas(DEFAULT_SAFE_AREAS);
-      }
-    };
-    updateSafeAreas();
-    
-    try {
-      if (typeof window !== 'undefined' && window.visualViewport) {
-        window.visualViewport.addEventListener('resize', updateSafeAreas);
-        return () => window.visualViewport?.removeEventListener('resize', updateSafeAreas);
-      }
-    } catch {
-      // Ignore errors in SSR contexts
-    }
-  }, []);
+  const contentStyle: React.CSSProperties = {
+    maxHeight: `calc(100vh - ${insets.top + 16}px)`,
+    paddingBottom: `${Math.max(effectiveBottomInset, 16)}px`,
+    ...style,
+  };
 
   return (
     <DrawerPortal>
@@ -72,11 +56,7 @@ const DrawerContent = React.forwardRef<
           "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-xl border bg-background",
           className
         )}
-        style={{
-          maxHeight: `calc(100vh - ${safeAreas.top + 16}px)`,
-          paddingBottom: `${Math.max(safeAreas.bottom, 16)}px`,
-          ...style,
-        }}
+        style={contentStyle}
         {...props}
       >
         <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
@@ -103,12 +83,17 @@ DrawerHeader.displayName = "DrawerHeader"
 const DrawerFooter = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn("mt-auto flex flex-col gap-3 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]", className)}
-    {...props}
-  />
-)
+}: React.HTMLAttributes<HTMLDivElement>) => {
+  const { effectiveBottomInset } = useSafeArea();
+  
+  return (
+    <div
+      className={cn("mt-auto flex flex-col gap-3 p-4", className)}
+      style={{ paddingBottom: `${Math.max(effectiveBottomInset, 16)}px` }}
+      {...props}
+    />
+  );
+}
 DrawerFooter.displayName = "DrawerFooter"
 
 const DrawerTitle = React.forwardRef<

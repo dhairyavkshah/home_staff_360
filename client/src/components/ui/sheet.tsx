@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { getSafeAreaValues } from "@/hooks/use-keyboard-safe-area"
+import { useSafeArea } from "@/lib/safe-area-provider"
 
 const Sheet = SheetPrimitive.Root
 
@@ -54,51 +54,29 @@ interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
-const DEFAULT_SAFE_AREAS = { top: 48, bottom: 0 };
-
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
 >(({ side = "right", className, children, style, ...props }, ref) => {
-  const [safeAreas, setSafeAreas] = React.useState(DEFAULT_SAFE_AREAS);
-
-  React.useEffect(() => {
-    const updateSafeAreas = () => {
-      try {
-        setSafeAreas(getSafeAreaValues());
-      } catch {
-        setSafeAreas(DEFAULT_SAFE_AREAS);
-      }
-    };
-    updateSafeAreas();
-    
-    try {
-      if (typeof window !== 'undefined' && window.visualViewport) {
-        window.visualViewport.addEventListener('resize', updateSafeAreas);
-        return () => window.visualViewport?.removeEventListener('resize', updateSafeAreas);
-      }
-    } catch {
-      // Ignore errors in SSR contexts
-    }
-  }, []);
+  const { insets, effectiveBottomInset } = useSafeArea();
 
   const getSideStyles = (): React.CSSProperties => {
     switch (side) {
       case 'top':
         return {
-          top: `${safeAreas.top}px`,
-          maxHeight: `calc(100vh - ${safeAreas.top + safeAreas.bottom}px)`,
+          top: `${insets.top}px`,
+          maxHeight: `calc(100vh - ${insets.top + effectiveBottomInset}px)`,
         };
       case 'bottom':
         return {
-          paddingBottom: `${Math.max(safeAreas.bottom, 16)}px`,
-          maxHeight: `calc(100vh - ${safeAreas.top}px)`,
+          paddingBottom: `${Math.max(effectiveBottomInset, 16)}px`,
+          maxHeight: `calc(100vh - ${insets.top}px)`,
         };
       case 'left':
       case 'right':
         return {
-          top: `${safeAreas.top}px`,
-          height: `calc(100vh - ${safeAreas.top + safeAreas.bottom}px)`,
+          top: `${insets.top}px`,
+          height: `calc(100vh - ${insets.top + effectiveBottomInset}px)`,
         };
       default:
         return {};
