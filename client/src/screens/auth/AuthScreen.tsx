@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
@@ -40,6 +41,7 @@ export function AuthScreen() {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const getFullPhone = useCallback(() => {
     return combinePhoneNumber(countryCode, phoneNumber);
@@ -52,6 +54,7 @@ export function AuthScreen() {
       if (parsed) {
         setCountryCode(parsed.countryCode);
         setPhoneNumber(parsed.phoneNumber);
+        setRememberMe(true);
       }
     }
 
@@ -154,7 +157,7 @@ export function AuthScreen() {
 
     setIsLoading(true);
     try {
-      const result = await collaborationService.login(phone, password);
+      const result = await collaborationService.login(phone, password, rememberMe);
       
       if (result.success) {
         // Sync profile from server to local storage
@@ -452,6 +455,7 @@ export function AuthScreen() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10 h-8"
+                    autoComplete="current-password"
                     data-testid="input-password"
                   />
                   <button
@@ -466,6 +470,21 @@ export function AuthScreen() {
                     )}
                   </button>
                 </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  data-testid="checkbox-remember-me"
+                />
+                <Label 
+                  htmlFor="rememberMe" 
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Remember me
+                </Label>
               </div>
 
               <Button

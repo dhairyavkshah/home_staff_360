@@ -216,7 +216,7 @@ class CollaborationService {
     });
   }
 
-  async login(phone: string, password: string): Promise<LoginResponse> {
+  async login(phone: string, password: string, rememberMe: boolean = true): Promise<LoginResponse> {
     const response = await this.apiRequest<LoginResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ phone, password }),
@@ -224,7 +224,11 @@ class CollaborationService {
 
     if (response.success && response.token) {
       this.saveToken(response.token);
-      this.saveCredentials(phone);
+      if (rememberMe) {
+        this.saveCredentials(phone);
+      } else {
+        this.clearSavedCredentials();
+      }
     }
 
     return response;
