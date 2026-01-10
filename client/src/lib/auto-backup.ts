@@ -3,13 +3,31 @@ import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { storage } from "@/lib/storage";
 import { type BackupFrequency } from "@shared/schema";
+import { scheduleNativeBackup, cancelNativeBackup } from "@/lib/backup-scheduler";
 
 const BACKUP_STORAGE_KEYS = {
   FREQUENCY: "hm_backup_frequency",
   LAST_BACKUP_TIME: "hm_last_backup_time",
   NEXT_SCHEDULED_TIME: "hm_next_scheduled_time",
   SCHEDULED_NOTIFICATION_ID: "hm_scheduled_notification_id",
+  BACKGROUND_CONSENT: "hm_backup_background_consent",
 } as const;
+
+export function getBackupConsent(): boolean {
+  return localStorage.getItem(BACKUP_STORAGE_KEYS.BACKGROUND_CONSENT) === "true";
+}
+
+export function setBackupConsent(consent: boolean): void {
+  localStorage.setItem(BACKUP_STORAGE_KEYS.BACKGROUND_CONSENT, consent.toString());
+  
+  // Update native backup schedule based on consent
+  const frequency = getBackupFrequency();
+  if (consent && frequency !== "off") {
+    scheduleNativeBackup(frequency);
+  } else {
+    cancelNativeBackup();
+  }
+}
 
 const AUTO_BACKUP_FILENAME = "homestaff360-auto-backup.hs360";
 const BACKUP_NOTIFICATION_ID = 999;
@@ -28,12 +46,18 @@ export function getBackupFrequency(): BackupFrequency {
 
 export function setBackupFrequency(frequency: BackupFrequency): void {
   localStorage.setItem(BACKUP_STORAGE_KEYS.FREQUENCY, frequency);
+  const hasConsent = getBackupConsent();
   
   if (frequency === "off") {
     cancelScheduledBackup();
+    cancelNativeBackup();
     localStorage.removeItem(BACKUP_STORAGE_KEYS.NEXT_SCHEDULED_TIME);
   } else {
     scheduleNextBackup(frequency);
+    // Schedule native background backup if consent is given
+    if (hasConsent) {
+      scheduleNativeBackup(frequency);
+    }
   }
 }
 

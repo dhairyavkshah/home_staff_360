@@ -9,6 +9,8 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        registerPlugin(BackupSchedulerPlugin.class);
+        
         super.onCreate(savedInstanceState);
         
         // Enable edge-to-edge display - draw content behind system bars

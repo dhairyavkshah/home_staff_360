@@ -5,6 +5,7 @@ import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,6 +19,8 @@ import { backupDataSchema, type BackupData, type BackupFrequency } from "@shared
 import {
   getBackupFrequency,
   setBackupFrequency,
+  getBackupConsent,
+  setBackupConsent,
   formatLastBackupTime,
   formatNextBackupTime,
   performAutoBackup,
@@ -44,7 +47,9 @@ export function BackupScreen() {
   const [localBackups, setLocalBackups] = useState<Array<{ name: string; date: Date }>>([]);
   const [showLocalBackups, setShowLocalBackups] = useState(false);
   const [isLoadingBackups, setIsLoadingBackups] = useState(false);
-  const [showActiveStatus, setShowActiveStatus] = useState(getBackupFrequency() !== "off");
+  const [showActiveStatus, setShowActiveStatus] = useState(getBackupFrequency() !== "off" && getBackupConsent());
+  const [backgroundConsent, setBackgroundConsentState] = useState(getBackupConsent());
+  const [pendingConsent, setPendingConsent] = useState<boolean | null>(null);
 
   useEffect(() => {
     loadBackupsList();
@@ -63,11 +68,18 @@ export function BackupScreen() {
 
   const handleSaveSettings = () => {
     const frequencyToSave = pendingFrequency ?? backupFrequency;
+    const consentToSave = pendingConsent ?? backgroundConsent;
+    
     setBackupFrequency(frequencyToSave);
     setBackupFrequencyState(frequencyToSave);
     setPendingFrequency(null);
+    
+    setBackupConsent(consentToSave);
+    setBackgroundConsentState(consentToSave);
+    setPendingConsent(null);
+    
     setNextBackupTime(formatNextBackupTime());
-    setShowActiveStatus(frequencyToSave !== "off");
+    setShowActiveStatus(frequencyToSave !== "off" && consentToSave);
     
     toast({
       title: t("success"),
@@ -77,7 +89,12 @@ export function BackupScreen() {
     });
   };
 
-  const hasUnsavedChanges = pendingFrequency !== null && pendingFrequency !== backupFrequency;
+  const handleConsentChange = (checked: boolean) => {
+    setPendingConsent(checked);
+  };
+
+  const hasUnsavedChanges = (pendingFrequency !== null && pendingFrequency !== backupFrequency) ||
+    (pendingConsent !== null && pendingConsent !== backgroundConsent);
   const displayFrequency = pendingFrequency ?? backupFrequency;
 
   const getFrequencyLabel = (freq: BackupFrequency) => {
@@ -469,6 +486,28 @@ export function BackupScreen() {
               </SelectContent>
             </Select>
 
+            {displayFrequency !== "off" && (
+              <div className="flex items-start gap-3 p-3 rounded-md bg-muted/50">
+                <Checkbox
+                  id="backup-consent"
+                  checked={pendingConsent ?? backgroundConsent}
+                  onCheckedChange={handleConsentChange}
+                  data-testid="checkbox-backup-consent"
+                />
+                <div className="flex-1">
+                  <Label 
+                    htmlFor="backup-consent" 
+                    className="text-sm font-medium cursor-pointer leading-tight"
+                  >
+                    {t("autoBackupConsentLabel")}
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t("autoBackupConsentDescription")}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button 
                 onClick={handleSaveSettings}
@@ -489,7 +528,7 @@ export function BackupScreen() {
               </Button>
             </div>
 
-            {showActiveStatus && backupFrequency !== "off" && nextBackupTime && (
+            {showActiveStatus && backupFrequency !== "off" && backgroundConsent && nextBackupTime && (
               <div className="flex items-start gap-2 p-3 rounded-md bg-success/10 border border-success/20">
                 <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
                 <div className="flex-1">

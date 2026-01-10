@@ -1005,6 +1005,8 @@ const en = {
   autoBackupSettingsSaved: "Auto-backup settings saved successfully",
   autoBackupActiveMessage: "Auto-backup is active",
   autoBackupScheduledFor: "Next scheduled backup: {time} ({frequency})",
+  autoBackupConsentLabel: "I consent to automatic backup to local storage",
+  autoBackupConsentDescription: "Allow background backups with a notification when running",
   backupFrequency: "Backup Frequency",
   backupOff: "Off",
   backupDaily: "Daily",
