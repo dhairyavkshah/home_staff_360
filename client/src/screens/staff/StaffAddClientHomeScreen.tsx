@@ -278,8 +278,11 @@ export function StaffAddClientHomeScreen() {
     if (currency === "OTHER" && !customCurrencySymbol.trim()) {
       newErrors.customCurrencySymbol = "Custom symbol required";
     }
-    // Check for duplicate phone number among client homes
-    if (phoneNumber.trim() && phoneValid) {
+    // Validate phone number if provided
+    if (phoneNumber.trim() && !phoneValid) {
+      newErrors.contactPhone = "Please enter a valid phone number";
+    } else if (phoneNumber.trim() && phoneValid) {
+      // Check for duplicate phone number among client homes
       const fullPhone = getFullPhoneNumber();
       const normalizedPhone = fullPhone.replace(/\D/g, "");
       const existingHomes = storage.getClientHomes();

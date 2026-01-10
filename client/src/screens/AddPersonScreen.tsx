@@ -218,7 +218,7 @@ export function AddPersonScreen() {
           ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          phone: phone.trim(),
+          phone: getFullPhoneNumber(),
           inviterName: profile?.displayName || name || "User",
         }),
       });

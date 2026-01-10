@@ -73,15 +73,15 @@ export function AuthScreen() {
   }, [cooldown]);
 
   const handleCheckPhone = async () => {
-    const phone = getFullPhone();
-    if (!phoneNumber || phoneNumber.length < 6) {
+    if (!phoneNumber || phoneNumber.length < 4 || !phoneValid) {
       toast({
         title: "Invalid Phone",
-        description: "Please enter a valid phone number",
+        description: "Please enter a valid phone number with correct format",
         variant: "destructive",
       });
       return;
     }
+    const phone = getFullPhone();
 
     setIsLoading(true);
     try {

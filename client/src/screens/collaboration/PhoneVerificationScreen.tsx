@@ -68,7 +68,7 @@ export function PhoneVerificationScreen() {
   };
 
   const handleSendOtp = useCallback(async () => {
-    if (!phoneNumber.trim()) {
+    if (!phoneNumber.trim() || !phoneValid) {
       toast({
         title: t("error"),
         description: t("enterPhoneNumber"),
@@ -108,7 +108,7 @@ export function PhoneVerificationScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [phoneNumber, getFullPhoneNumber, toast, t]);
+  }, [phoneNumber, phoneValid, getFullPhoneNumber, toast, t]);
 
   const handleVerifyOtp = useCallback(async () => {
     if (!otp.trim() || otp.length !== 6) {
