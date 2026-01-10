@@ -26,6 +26,7 @@ export function ScrollContent({ children, className = "" }: ScrollContentProps) 
       <div className={`content-container px-4 pt-4 pb-6 flex flex-col gap-6 ${className}`}>
         {children}
       </div>
+      <div className="safe-area-bottom" />
     </div>
   );
 }
