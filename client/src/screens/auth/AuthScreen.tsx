@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
-  Phone,
   Lock,
   Eye,
   EyeOff,
@@ -18,6 +17,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
+import { PhoneNumberInput } from "@/components/ui/phone-number-input";
+import { combinePhoneNumber, parseFullPhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
 
 type AuthStep = "phone" | "password" | "otp" | "set-password" | "reset-otp" | "reset-password";
 
@@ -26,7 +27,9 @@ export function AuthScreen() {
   const { toast } = useToast();
 
   const [step, setStep] = useState<AuthStep>("phone");
-  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState(getDefaultCountryCode());
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneValid, setPhoneValid] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -38,16 +41,28 @@ export function AuthScreen() {
   const [cooldown, setCooldown] = useState(0);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
+  const getFullPhone = useCallback(() => {
+    return combinePhoneNumber(countryCode, phoneNumber);
+  }, [countryCode, phoneNumber]);
+
   useEffect(() => {
     const savedPhone = collaborationService.getSavedPhone();
     if (savedPhone) {
-      setPhone(savedPhone);
+      const parsed = parseFullPhoneNumber(savedPhone);
+      if (parsed) {
+        setCountryCode(parsed.countryCode);
+        setPhoneNumber(parsed.phoneNumber);
+      }
     }
 
     if (collaborationService.isAuthenticated()) {
       navigate("launcher");
     }
   }, [navigate]);
+
+  const handlePhoneValidationChange = useCallback((isValid: boolean) => {
+    setPhoneValid(isValid);
+  }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -58,10 +73,11 @@ export function AuthScreen() {
   }, [cooldown]);
 
   const handleCheckPhone = async () => {
-    if (!phone || phone.length < 10) {
+    const phone = getFullPhone();
+    if (!phoneNumber || phoneNumber.length < 6) {
       toast({
         title: "Invalid Phone",
-        description: "Please enter a valid phone number with country code",
+        description: "Please enter a valid phone number",
         variant: "destructive",
       });
       return;
@@ -93,6 +109,7 @@ export function AuthScreen() {
 
   const handleRequestOtp = async () => {
     if (cooldown > 0) return;
+    const phone = getFullPhone();
 
     setIsLoading(true);
     try {
@@ -133,6 +150,7 @@ export function AuthScreen() {
       });
       return;
     }
+    const phone = getFullPhone();
 
     setIsLoading(true);
     try {
@@ -172,6 +190,7 @@ export function AuthScreen() {
       });
       return;
     }
+    const phone = getFullPhone();
 
     setIsLoading(true);
     try {
@@ -249,6 +268,7 @@ export function AuthScreen() {
   };
 
   const handleForgotPassword = async () => {
+    const phone = getFullPhone();
     setIsLoading(true);
     try {
       const result = await collaborationService.forgotPassword(phone);
@@ -276,6 +296,7 @@ export function AuthScreen() {
 
   const handleResendResetOtp = async () => {
     if (cooldown > 0) return;
+    const phone = getFullPhone();
 
     setIsLoading(true);
     try {
@@ -328,6 +349,7 @@ export function AuthScreen() {
       });
       return;
     }
+    const phone = getFullPhone();
 
     setIsLoading(true);
     try {
@@ -382,33 +404,22 @@ export function AuthScreen() {
           <Card className="p-4">
           {step === "phone" && (
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+91 98765 43210"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="pl-10 h-8"
-                    data-testid="input-phone"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Include country code (e.g., +91 for India, +1 for USA)
-                </p>
-                {phone && !phone.trim().startsWith('+') && (
-                  <p className="text-xs text-destructive">Phone number must start with + and country code</p>
-                )}
-              </div>
+              <PhoneNumberInput
+                countryCode={countryCode}
+                phoneNumber={phoneNumber}
+                onCountryCodeChange={setCountryCode}
+                onPhoneNumberChange={setPhoneNumber}
+                onValidationChange={handlePhoneValidationChange}
+                label="Phone Number"
+                required
+                testIdPrefix="auth-phone"
+              />
 
               <Button
                 size="lg"
                 className="w-full"
                 onClick={handleCheckPhone}
-                disabled={isLoading}
+                disabled={isLoading || !phoneValid}
                 data-testid="button-continue"
               >
                 {isLoading ? (
@@ -427,7 +438,7 @@ export function AuthScreen() {
             <div className="flex flex-col gap-4">
               <div className="text-center flex flex-col gap-1">
                 <p className="text-base font-semibold">Welcome back{displayName ? `, ${displayName}` : ""}!</p>
-                <p className="text-sm text-muted-foreground">{phone}</p>
+                <p className="text-sm text-muted-foreground">{getFullPhone()}</p>
               </div>
 
               <div className="flex flex-col gap-1">
@@ -500,7 +511,7 @@ export function AuthScreen() {
                 <div className="flex flex-col gap-1">
                   <p className="text-base font-semibold">Verify Your Phone</p>
                   <p className="text-sm text-muted-foreground">
-                    Enter the code sent to {phone}
+                    Enter the code sent to {getFullPhone()}
                   </p>
                 </div>
               </div>
@@ -569,7 +580,7 @@ export function AuthScreen() {
                 <div className="flex flex-col gap-1">
                   <p className="text-base font-semibold">Reset Your Password</p>
                   <p className="text-sm text-muted-foreground">
-                    Enter the reset code sent to {phone}
+                    Enter the reset code sent to {getFullPhone()}
                   </p>
                 </div>
               </div>
