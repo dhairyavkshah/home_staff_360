@@ -78,8 +78,6 @@ function calculateNextMidnight(): Date {
 
 function calculateNextBackupTime(frequency: BackupFrequency): Date {
   const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(0, 0, 0, 0);
   
   switch (frequency) {
     case "daily": {
@@ -87,9 +85,11 @@ function calculateNextBackupTime(frequency: BackupFrequency): Date {
       return next;
     }
     case "weekly": {
-      const next = calculateNextMidnight();
-      const daysUntilNextWeek = 7 - now.getDay();
-      next.setDate(next.getDate() + (daysUntilNextWeek === 0 ? 7 : daysUntilNextWeek));
+      const next = new Date(now);
+      next.setHours(0, 0, 0, 0);
+      const currentDay = now.getDay();
+      const daysUntilSunday = currentDay === 0 ? 7 : 7 - currentDay;
+      next.setDate(next.getDate() + daysUntilSunday);
       return next;
     }
     case "monthly": {
