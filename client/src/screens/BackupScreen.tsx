@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from "react";
-import { Download, Upload, Share2, Clock, Trash2, FolderOpen, Check, Save } from "lucide-react";
+import { Download, Upload, Share2, Trash2, FolderOpen, Check, Save } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
@@ -450,22 +450,11 @@ export function BackupScreen() {
       <ScrollContent>
         <section className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("autoBackup")}</h2>
-          <Card className="p-4 flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <div className="icon-halo-primary w-9 h-9">
-                <Clock className="w-4.5 h-4.5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-sm">{t("backupFrequency")}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t("lastBackup")}: {lastBackupTime}
-                </p>
-                {backupFrequency !== "off" && nextBackupTime && (
-                  <p className="text-xs text-primary">
-                    Next backup: {nextBackupTime}
-                  </p>
-                )}
-              </div>
+          <Card className="p-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                {t("lastBackup")}: {lastBackupTime}
+              </p>
             </div>
             
             <Select value={displayFrequency} onValueChange={handleFrequencyChange}>
@@ -570,19 +559,11 @@ export function BackupScreen() {
         )}
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("exportData")}</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("downloadBackup")}</h2>
           <Card className="p-4 flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className="icon-halo-primary w-9 h-9">
-                <Download className="w-4.5 h-4.5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">{t("createBackupFile")}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t("backupIncludesAllData")}
-                </p>
-              </div>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("backupIncludesAllData")}
+            </p>
             <div className="flex gap-2">
               <Button 
                 onClick={handleExport} 
@@ -606,19 +587,11 @@ export function BackupScreen() {
         </section>
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("importData")}</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("restoreFromBackup")}</h2>
           <Card className="p-4 flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className="icon-halo-muted w-9 h-9">
-                <Upload className="w-4.5 h-4.5 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">{t("restoreFromBackup")}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t("selectPreviouslyExportedBackup")}
-                </p>
-              </div>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("selectPreviouslyExportedBackup")}
+            </p>
 
             <input
               ref={fileInputRef}
