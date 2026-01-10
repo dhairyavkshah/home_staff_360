@@ -1026,6 +1026,8 @@ const en = {
   backupImported: "Backup imported successfully",
   backupRestored: "Backup restored successfully",
   backupDeleted: "Backup deleted",
+  deleteBackupConfirmTitle: "Delete Backup?",
+  deleteBackupConfirmDescription: "This backup file will be permanently deleted. This action cannot be undone. If you need to restore your data later, make sure you have another backup available.",
   backupFileReady: "Backup file ready",
   backupFileCreated: "Backup file created",
   backupFileNotFound: "Backup file not found",

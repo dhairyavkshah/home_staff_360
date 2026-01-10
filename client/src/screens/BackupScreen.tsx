@@ -1,13 +1,22 @@
-import { useState, useRef, useMemo, useEffect } from "react";
-import { Download, Upload, Share2, Trash2, FolderOpen, Check, Save } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Download, Share2, Trash2, FolderOpen, Check, Save } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
@@ -33,13 +42,12 @@ export function BackupScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const profile = useMemo(() => storage.getProfile(), []);
   const isNative = Capacitor.isNativePlatform();
 
-  const [importMode, setImportMode] = useState<"replace" | "merge" | "keep">("replace");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [backupToDelete, setBackupToDelete] = useState<string | null>(null);
   const [backupFrequency, setBackupFrequencyState] = useState<BackupFrequency>(getBackupFrequency());
   const [pendingFrequency, setPendingFrequency] = useState<BackupFrequency | null>(null);
   const [lastBackupTime, setLastBackupTime] = useState(formatLastBackupTime());
@@ -307,13 +315,6 @@ export function BackupScreen() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
-
   const processBackupData = (text: string): BackupData => {
     let data: unknown;
     
@@ -396,28 +397,6 @@ export function BackupScreen() {
     return result.data;
   };
 
-  const handleImport = async () => {
-    if (!selectedFile) return;
-
-    try {
-      const text = await selectedFile.text();
-      const validatedData = processBackupData(text);
-
-      const importResult = storage.importBackup(validatedData, importMode);
-      if (!importResult.success) {
-        throw new Error(importResult.error || t("importValidationFailed"));
-      }
-      toast({ title: t("backupImported") });
-      navigate(profile?.type === "STAFF" ? "staff-home" : "home");
-    } catch (error) {
-      toast({
-        title: t("importFailed"),
-        description: error instanceof Error ? error.message : t("unknownError"),
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleRestoreLocalBackup = async (filename: string) => {
     try {
       const backupContent = await loadLocalBackup(filename);
@@ -442,8 +421,15 @@ export function BackupScreen() {
     }
   };
 
-  const handleDeleteLocalBackup = async (filename: string) => {
-    const success = await deleteLocalBackup(filename);
+  const handleDeleteClick = (filename: string) => {
+    setBackupToDelete(filename);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!backupToDelete) return;
+    
+    const success = await deleteLocalBackup(backupToDelete);
     if (success) {
       toast({ title: t("backupDeleted") });
       await loadBackupsList();
@@ -454,6 +440,8 @@ export function BackupScreen() {
         variant: "destructive",
       });
     }
+    setDeleteConfirmOpen(false);
+    setBackupToDelete(null);
   };
 
   return (
@@ -584,7 +572,7 @@ export function BackupScreen() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => handleDeleteLocalBackup(backup.name)}
+                        onClick={() => handleDeleteClick(backup.name)}
                         data-testid={`button-delete-${backup.name}`}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
@@ -625,83 +613,30 @@ export function BackupScreen() {
           </Card>
         </section>
 
-        <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("restoreFromBackup")}</h2>
-          <Card className="p-4 flex flex-col gap-3">
-            <p className="text-xs text-muted-foreground">
-              {t("selectPreviouslyExportedBackup")}
-            </p>
+        </ScrollContent>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".hs360,.json"
-              onChange={handleFileChange}
-              className="hidden"
-              data-testid="input-file"
-            />
-
-            <Button
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              data-testid="button-choose-file"
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("deleteBackupConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("deleteBackupConfirmDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete">
+              {t("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete"
             >
-              {selectedFile ? selectedFile.name : t("chooseFile")}
-            </Button>
-
-            {selectedFile && (
-              <>
-                <div className="flex flex-col gap-3">
-                  <Label>{t("importMode")}</Label>
-                  <RadioGroup
-                    value={importMode}
-                    onValueChange={(v) => setImportMode(v as typeof importMode)}
-                  >
-                    <div className="flex items-center space-x-3 p-3 rounded-lg border hover-elevate cursor-pointer">
-                      <RadioGroupItem value="replace" id="replace" data-testid="radio-replace" />
-                      <div>
-                        <Label htmlFor="replace" className="cursor-pointer font-medium">
-                          {t("replaceAll")}
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          {t("replaceAllDescription")}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3 p-3 rounded-lg border hover-elevate cursor-pointer">
-                      <RadioGroupItem value="merge" id="merge" data-testid="radio-merge" />
-                      <div>
-                        <Label htmlFor="merge" className="cursor-pointer font-medium">
-                          {t("merge")}
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          {t("mergeDescription")}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3 p-3 rounded-lg border hover-elevate cursor-pointer">
-                      <RadioGroupItem value="keep" id="keep" data-testid="radio-keep" />
-                      <div>
-                        <Label htmlFor="keep" className="cursor-pointer font-medium">
-                          {t("keepBoth")}
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          {t("keepBothDescription")}
-                        </p>
-                      </div>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <Button onClick={handleImport} data-testid="button-import">
-                  <Upload className="w-4 h-4 mr-2" />
-                  {t("importBackup")}
-                </Button>
-              </>
-            )}
-          </Card>
-        </section>
-      </ScrollContent>
+              {t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
