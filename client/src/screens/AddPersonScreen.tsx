@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { PhoneNumberInput } from "@/components/ui/phone-number-input";
+import { combinePhoneNumber, parseFullPhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
 import {
   Dialog,
   DialogContent,
@@ -47,7 +49,9 @@ export function AddPersonScreen() {
   
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
-  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState(getDefaultCountryCode());
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneValid, setPhoneValid] = useState(false);
   const [salaryType, setSalaryType] = useState<SalaryType>("DAILY");
   const [baseRate, setBaseRate] = useState("");
   const [halfDayPercentage, setHalfDayPercentage] = useState("");
@@ -84,7 +88,9 @@ export function AddPersonScreen() {
       if (person) {
         setName(person.name);
         setRole(person.role);
-        setPhone(person.phone);
+        const parsedPhone = parseFullPhoneNumber(person.phone);
+        setCountryCode(parsedPhone.countryCode);
+        setPhoneNumber(parsedPhone.phoneNumber);
         setSalaryType(person.salaryType);
         setBaseRate(person.baseRate.toString());
         setHalfDayPercentage(person.halfDayPercentage?.toString() || "");
@@ -98,9 +104,17 @@ export function AddPersonScreen() {
     }
   }, [editMode, data.personId]);
 
+  const getFullPhoneNumber = useCallback(() => {
+    return combinePhoneNumber(countryCode, phoneNumber);
+  }, [countryCode, phoneNumber]);
+
+  const handlePhoneValidationChange = useCallback((isValid: boolean) => {
+    setPhoneValid(isValid);
+  }, []);
+
   // Phone check with debounce
-  const checkPhoneNumber = useCallback(async (phoneNumber: string) => {
-    const digitsOnly = phoneNumber.replace(/\D/g, "");
+  const checkPhoneNumber = useCallback(async (fullPhone: string) => {
+    const digitsOnly = fullPhone.replace(/\D/g, "");
     if (digitsOnly.length < 10) {
       setPhoneCheckResult(null);
       return;
@@ -109,7 +123,7 @@ export function AddPersonScreen() {
     setIsCheckingPhone(true);
     try {
       const token = collaborationService.getToken();
-      const response = await fetch(`/api/phone/check?phone=${encodeURIComponent(phoneNumber)}`, {
+      const response = await fetch(`/api/phone/check?phone=${encodeURIComponent(fullPhone)}`, {
         headers: {
           "Content-Type": "application/json",
           ...(token ? { "Authorization": `Bearer ${token}` } : {}),
@@ -135,10 +149,10 @@ export function AddPersonScreen() {
       clearTimeout(phoneCheckTimeoutRef.current);
     }
 
-    const digitsOnly = phone.replace(/\D/g, "");
-    if (digitsOnly.length >= 10) {
+    const digitsOnly = phoneNumber.replace(/\D/g, "");
+    if (digitsOnly.length >= 4 && phoneValid) {
       phoneCheckTimeoutRef.current = setTimeout(() => {
-        checkPhoneNumber(phone);
+        checkPhoneNumber(getFullPhoneNumber());
       }, 1000);
     } else {
       setPhoneCheckResult(null);
@@ -149,7 +163,7 @@ export function AddPersonScreen() {
         clearTimeout(phoneCheckTimeoutRef.current);
       }
     };
-  }, [phone, checkPhoneNumber]);
+  }, [phoneNumber, countryCode, phoneValid, checkPhoneNumber, getFullPhoneNumber]);
 
   // Handle send connect request
   const handleSendConnectRequest = async () => {
@@ -235,11 +249,12 @@ export function AddPersonScreen() {
 
     if (!name.trim()) newErrors.name = "Name is required";
     if (!role.trim()) newErrors.role = "Role is required";
-    if (!phone.trim() || phone.replace(/\D/g, "").length < 10) {
-      newErrors.phone = "Valid phone number required (10+ digits)";
+    if (!phoneNumber.trim() || !phoneValid) {
+      newErrors.phone = "Valid phone number required";
     } else {
       // Check for duplicate phone number
-      const normalizedPhone = phone.trim().replace(/\D/g, "");
+      const fullPhone = getFullPhoneNumber();
+      const normalizedPhone = fullPhone.replace(/\D/g, "");
       const existingPeople = storage.getPeople();
       const duplicate = existingPeople.find((p) => {
         // Skip current person in edit mode
@@ -273,7 +288,7 @@ export function AddPersonScreen() {
     const updateData = {
       name: name.trim(),
       role: role.trim(),
-      phone: phone.trim(),
+      phone: getFullPhoneNumber(),
       salaryType,
       baseRate: parseInt(baseRate, 10),
       halfDayPercentage: halfDayPercentage ? parseFloat(halfDayPercentage) : undefined,
@@ -454,21 +469,16 @@ export function AddPersonScreen() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label htmlFor="phone">Phone Number <span className="text-destructive">*</span></Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => { setPhone(e.target.value); markDirty(); }}
-              placeholder="+91 98765 43210"
-              data-testid="input-phone"
+            <PhoneNumberInput
+              countryCode={countryCode}
+              phoneNumber={phoneNumber}
+              onCountryCodeChange={(code) => { setCountryCode(code); markDirty(); }}
+              onPhoneNumberChange={(num) => { setPhoneNumber(num); markDirty(); }}
+              onValidationChange={handlePhoneValidationChange}
+              label="Phone Number"
+              required
+              testIdPrefix="staff-phone"
             />
-            <p className="text-xs text-muted-foreground">
-              Include country code (e.g., +91 for India, +1 for USA)
-            </p>
-            {phone && !phone.trim().startsWith('+') && (
-              <p className="text-xs text-destructive">Phone number must start with + and country code</p>
-            )}
             {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
             
             {/* Phone verification status */}
