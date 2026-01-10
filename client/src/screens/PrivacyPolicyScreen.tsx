@@ -26,7 +26,7 @@ export function PrivacyPolicyScreen() {
           <div className="text-center space-y-1">
             <h1 className="text-2xl font-bold">Privacy Policy</h1>
             <p className="text-base font-semibold">Home Staff 360</p>
-            <p className="text-sm text-muted-foreground">Last Updated: January 8, 2026</p>
+            <p className="text-sm text-muted-foreground">Last Updated: January 10, 2026</p>
           </div>
 
           <hr className="border-border" />
@@ -105,6 +105,18 @@ export function PrivacyPolicyScreen() {
                 <li><span className="font-medium text-foreground">Account Deletion</span>: Upon request, all data is permanently deleted immediately</li>
                 <li><span className="font-medium text-foreground">Backups</span>: Encrypted backups are retained for disaster recovery (up to 90 days)</li>
                 <li><span className="font-medium text-foreground">Message History</span>: Chat messages are retained indefinitely unless deleted by users (within 5-minute window) or upon account deletion</li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-base font-medium">2.4 Local Auto-Backup (Optional)</h3>
+              <p className="text-sm text-muted-foreground">Home Staff 360 offers an optional automatic backup feature:</p>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
+                <li><span className="font-medium text-foreground">User Consent Required</span>: Auto-backup only activates when you explicitly consent by checking the consent checkbox in Settings</li>
+                <li><span className="font-medium text-foreground">Local Storage Only</span>: Backup files are stored in app-specific storage on your device, not uploaded to external servers</li>
+                <li><span className="font-medium text-foreground">Background Processing</span>: When enabled, backups run in the background at your chosen frequency (daily, weekly, or monthly) with a visible notification</li>
+                <li><span className="font-medium text-foreground">Your Control</span>: You can disable auto-backup, change frequency, or delete local backup files at any time</li>
+                <li><span className="font-medium text-foreground">No Third-Party Access</span>: Local backups remain on your device and are not accessible by us or any third parties</li>
               </ul>
             </div>
           </section>
@@ -320,7 +332,7 @@ export function PrivacyPolicyScreen() {
           <hr className="border-border" />
 
           <div className="text-center space-y-2 py-4">
-            <p className="text-sm text-muted-foreground italic">This Privacy Policy is effective as of January 8, 2026.</p>
+            <p className="text-sm text-muted-foreground italic">This Privacy Policy is effective as of January 10, 2026.</p>
             <p className="text-sm font-medium">Home Staff 360 - Your Data, Securely Connected</p>
           </div>
         </div>

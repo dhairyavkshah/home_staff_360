@@ -42,6 +42,7 @@ Home Staff 360 is a professional staff management platform designed as a hybrid 
 - **Real-Time Collaboration**: Chat messaging, connection invites, shared spaces, and live sync for operational data.
 - **Push Notifications**: Implemented for Android (Capacitor LocalNotifications) and Web (Notifications API) for events like chat messages and connection updates.
 - **Subscription Model**: Two plans (Monthly/Annual), two tiers (Free/Premium), and 5-tier pricing across 173 countries via Google Play Billing.
+- **Auto-Backup**: WhatsApp-style background backup system with user consent, configurable frequency (daily/weekly/monthly), Android WorkManager integration, foreground service notifications during backup execution, and local device storage using scoped storage compliance.
 
 **Security Measures:**
 - **Authentication**: JWT tokens with configurable expiry, OTP expiry (10 mins, max 5 attempts), bcrypt hashing for passwords, SHA-256 for PINs.
