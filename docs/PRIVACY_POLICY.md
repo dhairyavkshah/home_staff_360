@@ -1,205 +1,218 @@
 # Privacy Policy
 
 **Home Staff 360**  
-**Last Updated: January 8, 2026**
+**Last Updated: January 10, 2026**
+
+---
+
+> **Your Data, Your Device, Your Control**
+>
+> Home Staff 360 uses a hybrid privacy-first architecture
 
 ---
 
 ## Introduction
 
-Home Staff 360 ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your information when you use our mobile application and cloud-based services.
+Home Staff 360 ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your information when you use our mobile application.
+
+**Our Hybrid Privacy Model:** Home Staff 360 operates with a **hybrid storage architecture** that prioritizes your privacy. Your business and operational data is stored **exclusively on your local device**. Our servers only store the minimal data necessary for user authentication and enabling collaboration between users. We never store, access, or process your business data on our servers.
 
 ---
 
-## 1. Data Collection
+## 1. Hybrid Storage Architecture
 
-### 1.1 Information You Provide
+Home Staff 360 uses a **hybrid storage model** with two distinct storage locations, each serving a specific purpose:
+
+### Storage Location Summary
+
+| Storage Location | What Is Stored | Purpose |
+|-----------------|----------------|---------|
+| **Your Device (Primary)** | Staff records, attendance, payments, expenses, laundry, invoices, documents, clients, households, notes, settings | All your business/operational data |
+| **Our Server (Minimal)** | Phone number, password hash, user connections, chat messages, approval requests, notifications | Authentication & collaboration only |
+
+### 1.1 Local Device Storage (Your Primary Data)
+
+The following data is stored **exclusively on your device** and never leaves your device:
+
+- Staff records and profiles
+- Attendance logs and check-in/check-out data
+- Payment transactions and salary records
+- Expense entries and receipts
+- Laundry batches and tracking
+- Invoices and billing information
+- Documents and attachments
+- Client and household information
+- Personal notes and memos
+- App settings and preferences
+
+**We do NOT have access to this data. It exists only on your device.**
+
+### 1.2 Server Storage (Authentication & Collaboration Only)
+
+Our servers store **only the minimum data required** for:
+
+- **User Authentication**: Phone number and encrypted password hash for login
+- **User Connections**: Links between users who choose to connect (e.g., employer to staff)
+- **Chat Messages**: Messages sent between connected users
+- **Approval Workflows**: Items shared between users requiring approval
+- **Notifications**: System notifications for collaboration features
+
+This server data is encrypted, transmitted securely via HTTPS/TLS, and is not shared with third parties.
+
+### 1.3 Why This Hybrid Approach?
+
+- **Maximum Privacy**: Your sensitive business data never touches our servers
+- **You Own Your Data**: Complete control over your information on your device
+- **Collaboration Enabled**: Server enables real-time messaging and connections between users
+- **No Data Mining**: We cannot analyze, monetize, or share your business data because we don't have it
+
+---
+
+## 2. Data Collection
+
+### 2.1 Information You Provide (Stored on Server)
 
 - **Phone Number**: Required for account authentication and verification
-- **Password**: Required for secure account access (stored as encrypted hash)
+- **Password**: Required for secure account access (stored as encrypted hash only)
 - **Display Name**: Optional profile name for personalization
-- **Household/Business Data**: Staff details, attendance records, payment information, expenses, laundry batches, and invoices you create within the app
 
-### 1.2 Automatically Collected Information
+### 2.2 Business Data You Create (Stored on Your Device Only)
 
-- **Device Information**: Device type and operating system for app compatibility
-- **Usage Data**: Anonymous analytics to improve app performance
-- **Connection Data**: When using real-time features, we maintain WebSocket connections for live updates
-- **Ad Interaction Data**: When ads are displayed, we track impressions, completion rates, and clicks (not tied to personal profiles)
+- Staff details, attendance records, payment information
+- Expenses, laundry batches, invoices, documents
+- Client/household information, notes, and settings
 
-### 1.3 Information NOT Collected
+**This data never leaves your device and is not accessible by us.**
 
+### 2.3 Automatically Collected Information
+
+- **Device Information**: Device type and OS for app compatibility
+- **Usage Analytics**: Anonymous, aggregate metrics to improve app performance
+- **Ad Interaction Data**: Impressions and clicks (not tied to personal profiles)
+
+### 2.4 Information NOT Collected
+
+- We do NOT collect or access your business/operational data
 - We do NOT access your contacts, photos, or files without explicit permission
 - We do NOT track your browsing history outside the app
 - We do NOT sell or share your data with advertisers for targeting
 
 ---
 
-## 2. Data Storage
+## 3. Data Retention
 
-### 2.1 Live Cloud Architecture
-
-Home Staff 360 v2.0 operates as a **live, cloud-connected service**:
-
-- **Primary Storage**: All your data is securely stored on our cloud servers
-- **Real-Time Sync**: Data syncs instantly across all your connected devices
-- **Secure Transmission**: All data is transmitted over encrypted HTTPS/TLS connections
-- **Server Encryption**: Data at rest is encrypted using industry-standard encryption
-
-### 2.2 Data Processing Locations
-
-- Our servers are hosted on secure, compliant cloud infrastructure
-- Data may be processed in multiple regions to ensure low latency and high availability
-- We adhere to international data protection standards
-
-### 2.3 Data Retention
-
-- **Active Accounts**: Data is retained while your account is active
-- **Account Deletion**: Upon request, all data is permanently deleted immediately
-- **Backups**: Encrypted backups are retained for disaster recovery (up to 90 days)
-- **Message History**: Chat messages are retained indefinitely unless deleted by users (within 5-minute window) or upon account deletion
+- **Local Data**: Remains on your device until you delete it or uninstall the app
+- **Server Account Data**: Retained while your account is active
+- **Account Deletion**: Upon request, all server-stored data is permanently deleted immediately
+- **Chat Messages**: Retained unless deleted by users or upon account deletion
 
 ---
 
-## 3. Data Sharing
+## 4. Local Auto-Backup (Optional)
 
-### 3.1 We Do NOT Sell Your Data
+Home Staff 360 offers an optional automatic backup feature:
+
+- **User Consent Required**: Auto-backup only activates when you explicitly consent
+- **Local Storage Only**: Backup files are stored on your device, NOT uploaded to our servers
+- **Your Control**: You can disable auto-backup or delete backup files at any time
+- **No Third-Party Access**: Local backups remain on your device and are not accessible by us
+
+---
+
+## 5. Data Sharing
+
+### 5.1 We Do NOT Sell Your Data
 
 We will **never** sell, rent, or trade your personal information to third parties.
 
-### 3.2 Collaboration Features
+### 5.2 Collaboration Features
 
-When you use collaboration features:
+When you use collaboration features, you may share data with users you explicitly connect with. Messages are visible only to conversation participants.
 
-- **Connected Users**: You may share data (attendance, laundry batches, expenses) with users you explicitly connect with
-- **Real-Time Messaging**: Messages are visible only to participants in the conversation
-- **Approval Workflows**: Shared items require explicit approval from recipients
-
-### 3.3 Limited Exceptions
+### 5.3 Limited Exceptions
 
 We may share information only in these circumstances:
 
-- **With Your Consent**: When you explicitly share data with connected users through our collaboration features
-- **Service Providers**: With trusted providers who assist in delivering our services (e.g., SMS verification via Twilio), bound by strict confidentiality agreements
-- **Legal Requirements**: If required by law, court order, or government request
-- **Safety**: To protect the rights, safety, or property of our users or the public
+- **Service Providers**: Trusted providers (e.g., Twilio for SMS) bound by confidentiality
+- **Legal Requirements**: If required by law or court order
+- **Safety**: To protect users or the public
 
 ---
 
-## 4. Advertising
+## 6. Advertising
 
-### 4.1 Ad Display
-
-Home Staff 360 may display advertisements to support free access to the app.
-
-### 4.2 No Personalized Targeting
-
-- Ads are **not targeted** based on your personal data, household information, or financial details
+- Ads may be displayed to support free access to the app
+- Ads are **NOT targeted** based on your personal or business data
 - We do NOT build advertising profiles from your app usage
-- Ad selection is based on random rotation, not personal preferences
-
-### 4.3 Ad Interaction Tracking
-
-We track anonymous, aggregate metrics for ads:
-
-- Impression counts
-- Completion rates
-- Skip rates
-- Click-through rates
-
-This data is used solely to measure ad performance and is not linked to individual user profiles.
+- We track only anonymous, aggregate ad metrics (impressions, clicks)
 
 ---
 
-## 5. Your Rights
+## 7. Your Rights
 
-### 5.1 Access Your Data
-
-You can view all your data within the app at any time.
-
-### 5.2 Export Your Data
-
-You can export your data through the Backup feature in Settings, creating a downloadable file you control.
-
-### 5.3 Delete Your Data
-
-- **Account Deletion**: Request complete account deletion through Settings > Profile > Delete Account
-- **Complete Deletion**: Upon request, we will delete all server-stored data immediately
-- **Message Deletion**: You can delete messages you sent within 5 minutes of sending
-
-### 5.4 Opt-Out Options
-
-- **Collaboration**: Collaboration features are optional and connections can be removed
-- **Notifications**: Manage notification preferences in app settings
-- **Location**: Deny location permission if you don't want location-tagged attendance
-
-### 5.5 Data Portability
-
-Your data belongs to you. Use the export feature to obtain a copy of all your information in a standard format.
+- **Access**: View all your data within the app at any time
+- **Export**: Export your data through the Backup feature
+- **Delete**: Request complete account deletion through Settings
+- **Portability**: Your data belongs to you - export it in standard format
 
 ---
 
-## 6. Security Measures
+## 8. Security Measures
 
 We implement industry-standard security measures:
 
-- **Password Security**: Bcrypt hashing with salt (10 rounds)
-- **Authentication**: Secure JWT tokens with 30-day expiry
-- **OTP Verification**: Phone verification with 10-minute code expiry
+- **Password Security**: Bcrypt hashing with salt
+- **Authentication**: Secure JWT tokens with expiry
+- **OTP Verification**: Phone verification with limited attempts
 - **Rate Limiting**: Protection against brute-force attacks
-- **Local Security**: Optional PIN lock and biometric authentication
 - **Secure Connections**: All server communication uses HTTPS/TLS encryption
-- **Real-Time Security**: WebSocket connections are authenticated and encrypted
-- **Data Encryption**: Server-side encryption for data at rest
+- **Local Security**: Optional PIN lock and biometric authentication
 
 ---
 
-## 7. Permissions Explained
+## 9. Permissions Explained
 
 Our app requests the following permissions for specific features:
 
 | Permission | Purpose |
 |------------|---------|
-| Internet | Required for cloud sync and real-time collaboration |
-| Camera | Capture photos for receipts and profile pictures |
-| Microphone | Voice messages (optional feature) |
-| Location | Optional geolocation for attendance verification |
-| Phone State | Auto-detect phone number for registration |
-| Storage/Media | Save backups, import documents and photos |
-| Notifications | Receive alerts for messages and approvals |
-| Vibration | Haptic feedback for interactions |
+| Internet | Authentication and collaboration features |
+| Camera | Capture photos for receipts and profiles |
+| Location | Optional geolocation for attendance |
+| Storage/Media | Save backups, import documents |
+| Notifications | Receive alerts for messages |
 
 All permissions are optional except Internet access, which is required for the app to function.
 
 ---
 
-## 8. Children's Privacy
+## 10. Children's Privacy
 
-Home Staff 360 is not intended for children under 13 years of age. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us immediately.
-
----
-
-## 9. Changes to This Policy
-
-We may update this Privacy Policy from time to time. We will notify you of significant changes through:
-
-- Updated "Last Updated" date at the top of this policy
-
-Your continued use of the app after changes constitutes acceptance of the updated policy.
+Home Staff 360 is not intended for children under 13 years of age. We do not knowingly collect personal information from children.
 
 ---
 
-## 10. Contact Us
+## 11. Administrative Access
 
-If you have questions, concerns, or requests regarding your privacy:
+### 11.1 Admin Panel Privacy
 
-**Email**: privacy@homestaff360.com
+- **No Personal Data Display**: User names and phone numbers are not displayed on admin panels
+- **No Business Data Access**: Admin cannot view your business data (it's on your device, not our server)
+- **System Management Only**: Admin access is limited to platform infrastructure
 
-We will respond to privacy-related inquiries within 30 days.
+### 11.2 Limited Access Circumstances
+
+We may access server-stored account data only when:
+
+- User requests help with a system issue
+- Investigating a technical problem reported by user
+- Required by law enforcement with proper documentation
+
+**Access is always limited to server-stored data and never includes your local business data.**
 
 ---
 
-## 11. Regional Compliance
+## 12. Regional Compliance
 
 ### For Users in India
 This app complies with the Digital Personal Data Protection Act, 2023 (DPDP Act). You have the right to access, correct, and erase your personal data.
@@ -212,6 +225,22 @@ California residents have rights under CCPA. We do not sell personal information
 
 ---
 
-*This Privacy Policy is effective as of January 8, 2026.*
+## 13. Changes to This Policy
 
-*Home Staff 360 - Your Data, Securely Connected*
+We may update this Privacy Policy from time to time. Changes will be indicated by updating the "Last Updated" date. Your continued use constitutes acceptance of the updated policy.
+
+---
+
+## 14. Contact Us
+
+If you have questions regarding your privacy:
+
+**Email**: privacy@homestaff360.com
+
+We will respond within 30 days.
+
+---
+
+*This Privacy Policy is effective as of January 10, 2026.*
+
+*Home Staff 360 - Your Data, Your Device, Your Control*
