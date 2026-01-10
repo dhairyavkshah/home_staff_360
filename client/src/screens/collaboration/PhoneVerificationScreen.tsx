@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Phone, Shield, RefreshCw } from "lucide-react";
+import { Shield, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,52 +10,20 @@ import { useNavigation } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { collaborationService } from "@/lib/collaboration-service";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { PhoneNumberInput } from "@/components/ui/phone-number-input";
+import { combinePhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
 
 const OTP_EXPIRY_SECONDS = 1800;
 const RESEND_COOLDOWN_SECONDS = 60;
-
-const COUNTRY_CODES = [
-  { code: "+1", country: "US/CA", flag: "US" },
-  { code: "+44", country: "UK", flag: "GB" },
-  { code: "+91", country: "India", flag: "IN" },
-  { code: "+61", country: "Australia", flag: "AU" },
-  { code: "+49", country: "Germany", flag: "DE" },
-  { code: "+33", country: "France", flag: "FR" },
-  { code: "+81", country: "Japan", flag: "JP" },
-  { code: "+86", country: "China", flag: "CN" },
-  { code: "+55", country: "Brazil", flag: "BR" },
-  { code: "+52", country: "Mexico", flag: "MX" },
-  { code: "+34", country: "Spain", flag: "ES" },
-  { code: "+39", country: "Italy", flag: "IT" },
-  { code: "+7", country: "Russia", flag: "RU" },
-  { code: "+82", country: "S. Korea", flag: "KR" },
-  { code: "+65", country: "Singapore", flag: "SG" },
-  { code: "+971", country: "UAE", flag: "AE" },
-  { code: "+966", country: "Saudi Arabia", flag: "SA" },
-  { code: "+27", country: "South Africa", flag: "ZA" },
-  { code: "+234", country: "Nigeria", flag: "NG" },
-  { code: "+254", country: "Kenya", flag: "KE" },
-  { code: "+63", country: "Philippines", flag: "PH" },
-  { code: "+62", country: "Indonesia", flag: "ID" },
-  { code: "+60", country: "Malaysia", flag: "MY" },
-  { code: "+66", country: "Thailand", flag: "TH" },
-  { code: "+84", country: "Vietnam", flag: "VN" },
-];
 
 export function PhoneVerificationScreen() {
   const { navigate, goBack, data } = useNavigation();
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const [countryCode, setCountryCode] = useState("+91");
+  const [countryCode, setCountryCode] = useState(getDefaultCountryCode());
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneValid, setPhoneValid] = useState(false);
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +31,10 @@ export function PhoneVerificationScreen() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
 
-  const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+  const getFullPhoneNumber = useCallback(() => {
+    return combinePhoneNumber(countryCode, phoneNumber);
+  }, [countryCode, phoneNumber]);
+
   const canResend = resendCooldown === 0 && step === "otp";
 
   useEffect(() => {
@@ -86,6 +57,10 @@ export function PhoneVerificationScreen() {
     return () => clearInterval(cooldownTimer);
   }, [resendCooldown]);
 
+  const handlePhoneValidationChange = useCallback((isValid: boolean) => {
+    setPhoneValid(isValid);
+  }, []);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -102,6 +77,7 @@ export function PhoneVerificationScreen() {
       return;
     }
 
+    const fullPhoneNumber = getFullPhoneNumber();
     setIsLoading(true);
     try {
       const response = await collaborationService.requestOtp(fullPhoneNumber);
@@ -132,7 +108,7 @@ export function PhoneVerificationScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [phoneNumber, fullPhoneNumber, toast, t]);
+  }, [phoneNumber, getFullPhoneNumber, toast, t]);
 
   const handleVerifyOtp = useCallback(async () => {
     if (!otp.trim() || otp.length !== 6) {
@@ -144,6 +120,7 @@ export function PhoneVerificationScreen() {
       return;
     }
 
+    const fullPhoneNumber = getFullPhoneNumber();
     setIsLoading(true);
     try {
       const response = await collaborationService.verifyOtp(fullPhoneNumber, otp);
@@ -173,7 +150,7 @@ export function PhoneVerificationScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [fullPhoneNumber, otp, toast, t, navigate, data.isOnboarding]);
+  }, [getFullPhoneNumber, otp, toast, t, navigate, data.isOnboarding]);
 
   const handleResendOtp = useCallback(async () => {
     if (!canResend) return;
@@ -212,49 +189,27 @@ export function PhoneVerificationScreen() {
             </h2>
             <p className="text-muted-foreground text-sm">
               {step === "phone"
-                ? "Enter your phone number with country code to receive a verification code"
-                : `We've sent a 6-digit code to ${fullPhoneNumber}`}
+                ? "Enter your phone number to receive a verification code"
+                : `We've sent a 6-digit code to ${getFullPhoneNumber()}`}
             </p>
           </div>
 
           <Card className="p-4 flex flex-col gap-4">
             {step === "phone" ? (
               <>
-                <div className="flex flex-col gap-4">
-                  <Label>{t("enterPhoneNumber")}</Label>
-                  <div className="flex gap-2">
-                    <Select value={countryCode} onValueChange={setCountryCode}>
-                      <SelectTrigger className="w-[120px]" data-testid="select-country-code">
-                        <SelectValue placeholder="Code" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {COUNTRY_CODES.map((cc) => (
-                          <SelectItem key={cc.code} value={cc.code}>
-                            {cc.code} {cc.country}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="1234567890"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
-                        className="pl-10"
-                        data-testid="input-phone"
-                      />
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Enter phone number without country code (it's selected above)
-                  </p>
-                </div>
+                <PhoneNumberInput
+                  countryCode={countryCode}
+                  phoneNumber={phoneNumber}
+                  onCountryCodeChange={setCountryCode}
+                  onPhoneNumberChange={setPhoneNumber}
+                  onValidationChange={handlePhoneValidationChange}
+                  label={t("enterPhoneNumber")}
+                  required
+                  testIdPrefix="verify-phone"
+                />
                 <Button
                   onClick={handleSendOtp}
-                  disabled={isLoading || !phoneNumber.trim()}
+                  disabled={isLoading || !phoneValid}
                   className="w-full"
                   data-testid="button-send-otp"
                 >
