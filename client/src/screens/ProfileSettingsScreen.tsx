@@ -25,6 +25,8 @@ import { collaborationService } from "@/lib/collaboration-service";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { storage } from "@/lib/storage";
 import { useDirtyForm } from "@/lib/dirty-tracking";
+import { PhoneNumberInput } from "@/components/ui/phone-number-input";
+import { combinePhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
 
 type ProfileStep = "view" | "edit-name" | "change-password" | "change-phone" | "verify-phone" | "clear-all-data" | "delete-account";
 
@@ -55,10 +57,20 @@ export function ProfileSettingsScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Change phone form
-  const [newPhone, setNewPhone] = useState("");
+  const [newPhoneCountryCode, setNewPhoneCountryCode] = useState(getDefaultCountryCode());
+  const [newPhoneNumber, setNewPhoneNumber] = useState("");
+  const [newPhoneValid, setNewPhoneValid] = useState(false);
   const [phonePassword, setPhonePassword] = useState("");
   const [otp, setOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
+
+  const getFullNewPhone = useCallback(() => {
+    return combinePhoneNumber(newPhoneCountryCode, newPhoneNumber);
+  }, [newPhoneCountryCode, newPhoneNumber]);
+
+  const handleNewPhoneValidationChange = useCallback((isValid: boolean) => {
+    setNewPhoneValid(isValid);
+  }, []);
 
   // Delete account form
   const [deletePassword, setDeletePassword] = useState("");
@@ -73,7 +85,7 @@ export function ProfileSettingsScreen() {
       case "change-password":
         return currentPassword.length > 0 || newPassword.length > 0 || confirmPassword.length > 0;
       case "change-phone":
-        return newPhone.length > 0 || phonePassword.length > 0;
+        return newPhoneNumber.length > 0 || phonePassword.length > 0;
       case "verify-phone":
         return otp.length > 0;
       case "delete-account":
@@ -83,7 +95,7 @@ export function ProfileSettingsScreen() {
       default:
         return false;
     }
-  }, [step, displayName, profile?.displayName, currentPassword, newPassword, confirmPassword, newPhone, phonePassword, otp, deletePassword, clearDataPassword]);
+  }, [step, displayName, profile?.displayName, currentPassword, newPassword, confirmPassword, newPhoneNumber, phonePassword, otp, deletePassword, clearDataPassword]);
 
   useDirtyForm(isFormDirty);
 
@@ -129,7 +141,9 @@ export function ProfileSettingsScreen() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setNewPhone("");
+      setNewPhoneCountryCode(getDefaultCountryCode());
+      setNewPhoneNumber("");
+      setNewPhoneValid(false);
       setPhonePassword("");
       setOtp("");
       setDeletePassword("");
@@ -219,10 +233,10 @@ export function ProfileSettingsScreen() {
   };
 
   const handleRequestPhoneChange = async () => {
-    if (!newPhone || newPhone.length < 10) {
+    if (!newPhoneNumber || newPhoneNumber.length < 4 || !newPhoneValid) {
       toast({
         title: "Invalid Phone",
-        description: "Please enter a valid phone number with country code",
+        description: "Please enter a valid phone number",
         variant: "destructive",
       });
       return;
@@ -237,9 +251,10 @@ export function ProfileSettingsScreen() {
       return;
     }
 
+    const fullPhone = getFullNewPhone();
     setIsLoading(true);
     try {
-      const result = await collaborationService.requestPhoneChange(newPhone, phonePassword);
+      const result = await collaborationService.requestPhoneChange(fullPhone, phonePassword);
       if (result.success) {
         toast({ title: "Code Sent", description: "Check your new phone for the verification code" });
         setCooldown(result.expiresIn ? Math.min(result.expiresIn, 60) : 60);
@@ -266,14 +281,17 @@ export function ProfileSettingsScreen() {
       return;
     }
 
+    const fullPhone = getFullNewPhone();
     setIsLoading(true);
     try {
-      const result = await collaborationService.confirmPhoneChange(newPhone, otp);
+      const result = await collaborationService.confirmPhoneChange(fullPhone, otp);
       if (result.success) {
         toast({ title: "Phone Updated", description: "Your phone number has been changed" });
-        setProfile(prev => prev ? { ...prev, phone: newPhone } : null);
+        setProfile(prev => prev ? { ...prev, phone: fullPhone } : null);
         setStep("view");
-        setNewPhone("");
+        setNewPhoneCountryCode(getDefaultCountryCode());
+        setNewPhoneNumber("");
+        setNewPhoneValid(false);
         setPhonePassword("");
         setOtp("");
       }
@@ -616,36 +634,28 @@ export function ProfileSettingsScreen() {
         {step === "change-phone" && (
           <section className="flex flex-col gap-6">
             <Card className="p-4 flex flex-col gap-4">
-              <div className="text-center mb-4">
+              <div className="text-center mb-2">
                 <p className="text-sm text-muted-foreground">
                   Your current phone: <strong>{profile?.phone}</strong>
                 </p>
               </div>
 
-              <div className="flex flex-col gap-4">
-                <Label htmlFor="newPhone">New Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="newPhone"
-                    type="tel"
-                    value={newPhone}
-                    onChange={(e) => setNewPhone(e.target.value)}
-                    placeholder="+1234567890"
-                    className="pl-10"
-                    data-testid="input-new-phone"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Include country code (e.g., +1 for USA, +91 for India)
-                </p>
-              </div>
+              <PhoneNumberInput
+                countryCode={newPhoneCountryCode}
+                phoneNumber={newPhoneNumber}
+                onCountryCodeChange={setNewPhoneCountryCode}
+                onPhoneNumberChange={setNewPhoneNumber}
+                onValidationChange={handleNewPhoneValidationChange}
+                label="New Phone Number"
+                required
+                testIdPrefix="new-phone"
+              />
 
               {profile?.hasPassword ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
                   <Label htmlFor="phonePassword">Confirm with Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <div className="relative flex items-center">
+                    <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="phonePassword"
                       type={showPassword ? "text" : "password"}
@@ -655,15 +665,13 @@ export function ProfileSettingsScreen() {
                       className="pl-10 pr-10"
                       data-testid="input-phone-password"
                     />
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                      className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </Button>
+                    </button>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Required for security verification
@@ -678,7 +686,7 @@ export function ProfileSettingsScreen() {
               <Button
                 className="w-full"
                 onClick={handleRequestPhoneChange}
-                disabled={isLoading || !profile?.hasPassword}
+                disabled={isLoading || !profile?.hasPassword || !newPhoneValid}
                 data-testid="button-request-phone-change"
               >
                 {isLoading ? (
@@ -698,7 +706,7 @@ export function ProfileSettingsScreen() {
                 <Shield className="w-12 h-12 text-primary mx-auto mb-2" />
                 <p className="font-medium">Verify New Phone</p>
                 <p className="text-sm text-muted-foreground">
-                  Enter the code sent to {newPhone}
+                  Enter the code sent to {getFullNewPhone()}
                 </p>
               </div>
 
