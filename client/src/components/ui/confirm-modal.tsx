@@ -72,39 +72,43 @@ export function ConfirmModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md page-enter" data-testid="modal-confirm">
-        <DialogHeader className="flex flex-col items-center text-center gap-4">
-          <div className={`w-14 h-14 rounded-full flex items-center justify-center ${iconClass}`}>
-            <Icon className="w-7 h-7" />
+      <DialogContent 
+        className="sm:max-w-sm page-enter" 
+        data-testid="modal-confirm"
+        style={{ top: '50%', transform: 'translate(-50%, -50%)' }}
+      >
+        <DialogHeader className="flex flex-col items-center text-center gap-3 pt-2">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${iconClass}`}>
+            <Icon className="w-6 h-6" />
           </div>
-          <div className="flex flex-col gap-1">
-            <DialogTitle className="text-xl" data-testid="modal-title">{title}</DialogTitle>
+          <div className="flex flex-col gap-2">
+            <DialogTitle className="text-lg font-semibold" data-testid="modal-title">{title}</DialogTitle>
             {description && (
-              <DialogDescription className="text-center" data-testid="modal-description">
+              <DialogDescription className="text-center text-sm" data-testid="modal-description">
                 {description}
               </DialogDescription>
             )}
           </div>
         </DialogHeader>
 
-        {children && <div className="py-4">{children}</div>}
+        {children && <div className="py-3">{children}</div>}
 
-        <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3">
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            className="w-full sm:w-auto"
-            data-testid="button-modal-cancel"
-          >
-            {cancelText}
-          </Button>
+        <DialogFooter className="flex flex-col gap-2 mt-2">
           <Button
             variant={buttonVariant}
             onClick={handleConfirm}
-            className="w-full sm:w-auto"
+            className="w-full"
             data-testid="button-modal-confirm"
           >
             {confirmText}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            className="w-full"
+            data-testid="button-modal-cancel"
+          >
+            {cancelText}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -131,21 +135,25 @@ export function AlertModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md page-enter" data-testid="modal-alert">
-        <DialogHeader className="flex flex-col items-center text-center gap-4">
-          <div className={`w-14 h-14 rounded-full flex items-center justify-center ${iconClass}`}>
-            <Icon className="w-7 h-7" />
+      <DialogContent 
+        className="sm:max-w-sm page-enter" 
+        data-testid="modal-alert"
+        style={{ top: '50%', transform: 'translate(-50%, -50%)' }}
+      >
+        <DialogHeader className="flex flex-col items-center text-center gap-3 pt-2">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${iconClass}`}>
+            <Icon className="w-6 h-6" />
           </div>
-          <div className="flex flex-col gap-1">
-            <DialogTitle className="text-xl">{title}</DialogTitle>
+          <div className="flex flex-col gap-2">
+            <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
             {description && (
-              <DialogDescription className="text-center">
+              <DialogDescription className="text-center text-sm">
                 {description}
               </DialogDescription>
             )}
           </div>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className="mt-2">
           <Button
             className="w-full"
             onClick={() => onOpenChange(false)}
