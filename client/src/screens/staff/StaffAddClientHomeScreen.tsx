@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
@@ -15,6 +16,7 @@ import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
 import { useDirtyForm } from "@/lib/dirty-tracking";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { collaborationService } from "@/lib/collaboration-service";
+import { combinePhoneNumber, parseFullPhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
 import { UserCheck, UserPlus, Send, Loader2, CheckCircle } from "lucide-react";
 import { 
   type SalaryType, 
@@ -59,7 +61,9 @@ export function StaffAddClientHomeScreen() {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
+  const [countryCode, setCountryCode] = useState(getDefaultCountryCode());
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneValid, setPhoneValid] = useState(false);
   const [role, setRole] = useState(isLaundryBusiness ? "Laundry" : "");
   const [salaryType, setSalaryType] = useState<SalaryType>("DAILY");
   const [rate, setRate] = useState("");
@@ -79,12 +83,16 @@ export function StaffAddClientHomeScreen() {
   const phoneCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastCheckedPhoneRef = useRef<string>("");
 
-  const cleanPhoneNumber = (phone: string): string => {
-    return phone.replace(/\D/g, "");
-  };
+  const getFullPhoneNumber = useCallback(() => {
+    return combinePhoneNumber(countryCode, phoneNumber);
+  }, [countryCode, phoneNumber]);
 
-  const checkPhoneNumber = useCallback(async (phone: string) => {
-    const cleanedPhone = cleanPhoneNumber(phone);
+  const handlePhoneValidationChange = useCallback((isValid: boolean) => {
+    setPhoneValid(isValid);
+  }, []);
+
+  const checkPhoneNumber = useCallback(async (fullPhone: string) => {
+    const cleanedPhone = fullPhone.replace(/\D/g, "");
     if (cleanedPhone.length < 10) {
       setPhoneCheckResult(null);
       return;
@@ -100,7 +108,7 @@ export function StaffAddClientHomeScreen() {
 
     try {
       const token = collaborationService.getToken();
-      const response = await fetch(`/api/phone/check?phone=${encodeURIComponent(phone)}`, {
+      const response = await fetch(`/api/phone/check?phone=${encodeURIComponent(fullPhone)}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
@@ -123,34 +131,27 @@ export function StaffAddClientHomeScreen() {
     }
   }, []);
 
-  const handlePhoneChange = (value: string) => {
-    setContactPhone(value);
-    markDirty();
-    
+  useEffect(() => {
     if (phoneCheckTimeoutRef.current) {
       clearTimeout(phoneCheckTimeoutRef.current);
     }
 
-    const cleanedPhone = cleanPhoneNumber(value);
-    if (cleanedPhone.length >= 10) {
+    const digitsOnly = phoneNumber.replace(/\D/g, "");
+    if (digitsOnly.length >= 4 && phoneValid) {
       phoneCheckTimeoutRef.current = setTimeout(() => {
-        checkPhoneNumber(value);
+        checkPhoneNumber(getFullPhoneNumber());
       }, 1000);
     } else {
       setPhoneCheckResult(null);
       lastCheckedPhoneRef.current = "";
     }
-  };
 
-  const handlePhoneBlur = () => {
-    if (phoneCheckTimeoutRef.current) {
-      clearTimeout(phoneCheckTimeoutRef.current);
-    }
-    const cleanedPhone = cleanPhoneNumber(contactPhone);
-    if (cleanedPhone.length >= 10) {
-      checkPhoneNumber(contactPhone);
-    }
-  };
+    return () => {
+      if (phoneCheckTimeoutRef.current) {
+        clearTimeout(phoneCheckTimeoutRef.current);
+      }
+    };
+  }, [phoneNumber, countryCode, phoneValid, checkPhoneNumber, getFullPhoneNumber]);
 
   const handleSendConnectRequest = async () => {
     if (!phoneCheckResult?.userId || !profile?.displayName) return;
@@ -201,7 +202,7 @@ export function StaffAddClientHomeScreen() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          phone: contactPhone,
+          phone: getFullPhoneNumber(),
           inviterName: profile.displayName,
         }),
       });
@@ -236,7 +237,11 @@ export function StaffAddClientHomeScreen() {
       setName(existingHome.name);
       setAddress(existingHome.address || "");
       setContactName(existingHome.contactName || "");
-      setContactPhone(existingHome.contactPhone || "");
+      if (existingHome.contactPhone) {
+        const parsedPhone = parseFullPhoneNumber(existingHome.contactPhone);
+        setCountryCode(parsedPhone.countryCode);
+        setPhoneNumber(parsedPhone.phoneNumber);
+      }
       setRole(existingHome.role);
       setSalaryType(existingHome.salaryType);
       setRate(existingHome.rate.toString());
@@ -274,20 +279,19 @@ export function StaffAddClientHomeScreen() {
       newErrors.customCurrencySymbol = "Custom symbol required";
     }
     // Check for duplicate phone number among client homes
-    if (contactPhone.trim()) {
-      const normalizedPhone = contactPhone.trim().replace(/\D/g, "");
-      if (normalizedPhone.length >= 10) {
-        const existingHomes = storage.getClientHomes();
-        const duplicate = existingHomes.find((h) => {
-          // Skip current client in edit mode
-          if (editMode && data.clientHomeId && h.id === data.clientHomeId) return false;
-          // Normalize existing phone for comparison
-          const existingNormalized = (h.contactPhone || "").replace(/\D/g, "");
-          return existingNormalized === normalizedPhone;
-        });
-        if (duplicate) {
-          newErrors.contactPhone = `A client with this phone number already exists (${duplicate.name})`;
-        }
+    if (phoneNumber.trim() && phoneValid) {
+      const fullPhone = getFullPhoneNumber();
+      const normalizedPhone = fullPhone.replace(/\D/g, "");
+      const existingHomes = storage.getClientHomes();
+      const duplicate = existingHomes.find((h) => {
+        // Skip current client in edit mode
+        if (editMode && data.clientHomeId && h.id === data.clientHomeId) return false;
+        // Normalize existing phone for comparison
+        const existingNormalized = (h.contactPhone || "").replace(/\D/g, "");
+        return existingNormalized === normalizedPhone;
+      });
+      if (duplicate) {
+        newErrors.contactPhone = `A client with this phone number already exists (${duplicate.name})`;
       }
     }
     setErrors(newErrors);
@@ -313,12 +317,14 @@ export function StaffAddClientHomeScreen() {
 
     const finalContactName = sameAsClientName ? name.trim() : contactName.trim();
 
+    const fullPhoneValue = phoneNumber.trim() ? getFullPhoneNumber() : undefined;
+    
     if (editMode && data.clientHomeId) {
       storage.updateClientHome(data.clientHomeId, {
         name: name.trim(),
         address: address.trim() || undefined,
         contactName: finalContactName || undefined,
-        contactPhone: contactPhone.trim() || undefined,
+        contactPhone: fullPhoneValue,
         role: role.trim(),
         salaryType,
         rate: parseInt(rate, 10),
@@ -334,7 +340,7 @@ export function StaffAddClientHomeScreen() {
         name: name.trim(),
         address: address.trim() || undefined,
         contactName: finalContactName || undefined,
-        contactPhone: contactPhone.trim() || undefined,
+        contactPhone: fullPhoneValue,
         role: role.trim(),
         salaryType,
         rate: parseInt(rate, 10),
@@ -408,21 +414,16 @@ export function StaffAddClientHomeScreen() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <Label htmlFor="contactPhone">{t("contactPhone")}</Label>
-          <Input
-            id="contactPhone"
-            value={contactPhone}
-            onChange={(e) => handlePhoneChange(e.target.value)}
-            onBlur={handlePhoneBlur}
-            placeholder="+91 98765 43210"
-            data-testid="input-contact-phone"
+          <PhoneNumberInput
+            countryCode={countryCode}
+            phoneNumber={phoneNumber}
+            onCountryCodeChange={(code) => { setCountryCode(code); markDirty(); }}
+            onPhoneNumberChange={(num) => { setPhoneNumber(num); markDirty(); }}
+            onValidationChange={handlePhoneValidationChange}
+            label={t("contactPhone")}
+            testIdPrefix="client-phone"
           />
-          <p className="text-xs text-muted-foreground">
-            Include country code (e.g., +91 for India, +1 for USA)
-          </p>
-          {contactPhone && !contactPhone.trim().startsWith('+') && (
-            <p className="text-xs text-destructive">Phone number must start with + and country code</p>
-          )}
+          {errors.contactPhone && <p className="text-xs text-destructive">{errors.contactPhone}</p>}
           
           {isCheckingPhone && (
             <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg" data-testid="status-phone-checking">
