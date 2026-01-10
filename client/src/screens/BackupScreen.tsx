@@ -19,6 +19,7 @@ import {
   getBackupFrequency,
   setBackupFrequency,
   formatLastBackupTime,
+  formatNextBackupTime,
   performAutoBackup,
   listLocalBackups,
   loadLocalBackup,
@@ -38,6 +39,7 @@ export function BackupScreen() {
   const [isExporting, setIsExporting] = useState(false);
   const [backupFrequency, setBackupFrequencyState] = useState<BackupFrequency>(getBackupFrequency());
   const [lastBackupTime, setLastBackupTime] = useState(formatLastBackupTime());
+  const [nextBackupTime, setNextBackupTime] = useState(formatNextBackupTime());
   const [localBackups, setLocalBackups] = useState<Array<{ name: string; date: Date }>>([]);
   const [showLocalBackups, setShowLocalBackups] = useState(false);
   const [isLoadingBackups, setIsLoadingBackups] = useState(false);
@@ -56,6 +58,7 @@ export function BackupScreen() {
   const handleFrequencyChange = (value: BackupFrequency) => {
     setBackupFrequency(value);
     setBackupFrequencyState(value);
+    setNextBackupTime(formatNextBackupTime());
     toast({
       title: t("success"),
       description: value === "off" 
@@ -70,6 +73,7 @@ export function BackupScreen() {
       const result = await performAutoBackup();
       if (result.success) {
         setLastBackupTime(formatLastBackupTime());
+        setNextBackupTime(formatNextBackupTime());
         await loadBackupsList();
         
         const backup = storage.exportBackup();
@@ -434,6 +438,11 @@ export function BackupScreen() {
                 <p className="text-xs text-muted-foreground">
                   {t("lastBackup")}: {lastBackupTime}
                 </p>
+                {backupFrequency !== "off" && nextBackupTime && (
+                  <p className="text-xs text-primary">
+                    Next backup: {nextBackupTime}
+                  </p>
+                )}
               </div>
             </div>
             

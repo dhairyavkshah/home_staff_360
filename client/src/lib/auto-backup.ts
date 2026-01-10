@@ -1,13 +1,18 @@
 import { Capacitor } from "@capacitor/core";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import { storage } from "@/lib/storage";
 import { type BackupFrequency } from "@shared/schema";
 
 const BACKUP_STORAGE_KEYS = {
   FREQUENCY: "hm_backup_frequency",
   LAST_BACKUP_TIME: "hm_last_backup_time",
-  LAST_BACKUP_FILE: "hm_last_backup_file",
+  NEXT_SCHEDULED_TIME: "hm_next_scheduled_time",
+  SCHEDULED_NOTIFICATION_ID: "hm_scheduled_notification_id",
 } as const;
+
+const AUTO_BACKUP_FILENAME = "homestaff360-auto-backup.hs360";
+const BACKUP_NOTIFICATION_ID = 999;
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const ONE_WEEK_MS = 7 * ONE_DAY_MS;
@@ -23,6 +28,13 @@ export function getBackupFrequency(): BackupFrequency {
 
 export function setBackupFrequency(frequency: BackupFrequency): void {
   localStorage.setItem(BACKUP_STORAGE_KEYS.FREQUENCY, frequency);
+  
+  if (frequency === "off") {
+    cancelScheduledBackup();
+    localStorage.removeItem(BACKUP_STORAGE_KEYS.NEXT_SCHEDULED_TIME);
+  } else {
+    scheduleNextBackup(frequency);
+  }
 }
 
 export function getLastBackupTime(): number | null {
@@ -34,12 +46,13 @@ function setLastBackupTime(timestamp: number): void {
   localStorage.setItem(BACKUP_STORAGE_KEYS.LAST_BACKUP_TIME, timestamp.toString());
 }
 
-export function getLastBackupFilename(): string | null {
-  return localStorage.getItem(BACKUP_STORAGE_KEYS.LAST_BACKUP_FILE);
+export function getNextScheduledTime(): number | null {
+  const value = localStorage.getItem(BACKUP_STORAGE_KEYS.NEXT_SCHEDULED_TIME);
+  return value ? parseInt(value, 10) : null;
 }
 
-function setLastBackupFilename(filename: string): void {
-  localStorage.setItem(BACKUP_STORAGE_KEYS.LAST_BACKUP_FILE, filename);
+function setNextScheduledTime(timestamp: number): void {
+  localStorage.setItem(BACKUP_STORAGE_KEYS.NEXT_SCHEDULED_TIME, timestamp.toString());
 }
 
 function getFrequencyInterval(frequency: BackupFrequency): number {
@@ -55,20 +68,52 @@ function getFrequencyInterval(frequency: BackupFrequency): number {
   }
 }
 
+function calculateNextMidnight(): Date {
+  const now = new Date();
+  const next = new Date(now);
+  next.setDate(next.getDate() + 1);
+  next.setHours(0, 0, 0, 0);
+  return next;
+}
+
+function calculateNextBackupTime(frequency: BackupFrequency): Date {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(0, 0, 0, 0);
+  
+  switch (frequency) {
+    case "daily": {
+      const next = calculateNextMidnight();
+      return next;
+    }
+    case "weekly": {
+      const next = calculateNextMidnight();
+      const daysUntilNextWeek = 7 - now.getDay();
+      next.setDate(next.getDate() + (daysUntilNextWeek === 0 ? 7 : daysUntilNextWeek));
+      return next;
+    }
+    case "monthly": {
+      const next = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0);
+      return next;
+    }
+    default:
+      return new Date(now.getTime() + ONE_DAY_MS);
+  }
+}
+
 export function shouldPerformAutoBackup(): boolean {
   const frequency = getBackupFrequency();
   if (frequency === "off") {
     return false;
   }
 
-  const lastBackup = getLastBackupTime();
-  if (!lastBackup) {
+  const nextScheduled = getNextScheduledTime();
+  if (!nextScheduled) {
     return true;
   }
 
-  const interval = getFrequencyInterval(frequency);
   const now = Date.now();
-  return (now - lastBackup) >= interval;
+  return now >= nextScheduled;
 }
 
 export function getNextBackupTime(): Date | null {
@@ -77,13 +122,12 @@ export function getNextBackupTime(): Date | null {
     return null;
   }
 
-  const lastBackup = getLastBackupTime();
-  if (!lastBackup) {
-    return new Date();
+  const nextScheduled = getNextScheduledTime();
+  if (nextScheduled) {
+    return new Date(nextScheduled);
   }
 
-  const interval = getFrequencyInterval(frequency);
-  return new Date(lastBackup + interval);
+  return calculateNextBackupTime(frequency);
 }
 
 export function formatLastBackupTime(): string {
@@ -100,16 +144,50 @@ export function formatLastBackupTime(): string {
   });
 }
 
+export function formatNextBackupTime(): string {
+  const nextBackup = getNextBackupTime();
+  if (!nextBackup) {
+    return "";
+  }
+  return nextBackup.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+async function deleteExistingAutoBackup(): Promise<void> {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await Filesystem.deleteFile({
+        path: `HomeStaff360Backups/${AUTO_BACKUP_FILENAME}`,
+        directory: Directory.Documents,
+      });
+    } catch {
+      // File doesn't exist, that's fine
+    }
+  } else {
+    const existingBackups = localStorage.getItem("hm_local_backups");
+    if (existingBackups) {
+      const backups: Record<string, string> = JSON.parse(existingBackups);
+      delete backups[AUTO_BACKUP_FILENAME];
+      localStorage.setItem("hm_local_backups", JSON.stringify(backups));
+    }
+  }
+}
+
 export async function performAutoBackup(): Promise<{ success: boolean; filename?: string; error?: string }> {
   try {
     const backup = storage.exportBackup();
     const json = JSON.stringify(backup, null, 2);
-    const dateStr = new Date().toISOString().split("T")[0];
-    const filename = `homestaff360-auto-backup-${dateStr}.hs360`;
+
+    await deleteExistingAutoBackup();
 
     if (Capacitor.isNativePlatform()) {
       await Filesystem.writeFile({
-        path: `HomeStaff360Backups/${filename}`,
+        path: `HomeStaff360Backups/${AUTO_BACKUP_FILENAME}`,
         data: json,
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
@@ -118,24 +196,66 @@ export async function performAutoBackup(): Promise<{ success: boolean; filename?
     } else {
       const existingBackups = localStorage.getItem("hm_local_backups");
       const backups: Record<string, string> = existingBackups ? JSON.parse(existingBackups) : {};
-      const sortedKeys = Object.keys(backups).sort();
-      while (sortedKeys.length >= 5) {
-        const oldestKey = sortedKeys.shift();
-        if (oldestKey) {
-          delete backups[oldestKey];
-        }
-      }
-      backups[filename] = json;
+      backups[AUTO_BACKUP_FILENAME] = json;
       localStorage.setItem("hm_local_backups", JSON.stringify(backups));
     }
 
-    setLastBackupTime(Date.now());
-    setLastBackupFilename(filename);
+    const now = Date.now();
+    setLastBackupTime(now);
+    
+    const frequency = getBackupFrequency();
+    if (frequency !== "off") {
+      scheduleNextBackup(frequency);
+    }
 
-    return { success: true, filename };
+    return { success: true, filename: AUTO_BACKUP_FILENAME };
   } catch (error) {
     console.error("Auto-backup failed:", error);
     return { success: false, error: (error as Error).message };
+  }
+}
+
+async function scheduleNextBackup(frequency: BackupFrequency): Promise<void> {
+  const nextTime = calculateNextBackupTime(frequency);
+  setNextScheduledTime(nextTime.getTime());
+
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const permissions = await LocalNotifications.checkPermissions();
+      if (permissions.display !== 'granted') {
+        await LocalNotifications.requestPermissions();
+      }
+
+      await LocalNotifications.cancel({ notifications: [{ id: BACKUP_NOTIFICATION_ID }] });
+
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: BACKUP_NOTIFICATION_ID,
+            title: "Auto Backup Scheduled",
+            body: "Your data backup is ready to be created",
+            schedule: { at: nextTime },
+            sound: undefined,
+            actionTypeId: "",
+            extra: { action: "auto_backup" },
+          },
+        ],
+      });
+      
+      console.log("Scheduled backup notification for:", nextTime.toLocaleString());
+    } catch (error) {
+      console.error("Failed to schedule backup notification:", error);
+    }
+  }
+}
+
+async function cancelScheduledBackup(): Promise<void> {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await LocalNotifications.cancel({ notifications: [{ id: BACKUP_NOTIFICATION_ID }] });
+    } catch (error) {
+      console.error("Failed to cancel backup notification:", error);
+    }
   }
 }
 
@@ -151,8 +271,10 @@ export async function listLocalBackups(): Promise<Array<{ name: string; date: Da
 
       for (const file of result.files) {
         if (file.name.endsWith(".hs360")) {
-          const match = file.name.match(/auto-backup-(\d{4}-\d{2}-\d{2})/);
-          const date = match ? new Date(match[1]) : new Date();
+          const lastBackup = getLastBackupTime();
+          const date = file.name === AUTO_BACKUP_FILENAME && lastBackup 
+            ? new Date(lastBackup) 
+            : new Date();
           backups.push({ name: file.name, date });
         }
       }
@@ -164,8 +286,10 @@ export async function listLocalBackups(): Promise<Array<{ name: string; date: Da
     if (existingBackups) {
       const backupData = JSON.parse(existingBackups) as Record<string, string>;
       for (const filename of Object.keys(backupData)) {
-        const match = filename.match(/auto-backup-(\d{4}-\d{2}-\d{2})/);
-        const date = match ? new Date(match[1]) : new Date();
+        const lastBackup = getLastBackupTime();
+        const date = filename === AUTO_BACKUP_FILENAME && lastBackup 
+          ? new Date(lastBackup) 
+          : new Date();
         backups.push({ name: filename, date });
       }
     }
@@ -245,6 +369,22 @@ export function initializeAutoBackup(): void {
   checkAndBackup();
 
   autoBackupInterval = setInterval(checkAndBackup, 60 * 60 * 1000);
+
+  if (Capacitor.isNativePlatform()) {
+    LocalNotifications.addListener('localNotificationReceived', async (notification) => {
+      if (notification.extra?.action === 'auto_backup') {
+        console.log("Backup notification received, performing backup...");
+        await performAutoBackup();
+      }
+    });
+
+    LocalNotifications.addListener('localNotificationActionPerformed', async (notification) => {
+      if (notification.notification.extra?.action === 'auto_backup') {
+        console.log("Backup notification action performed, performing backup...");
+        await performAutoBackup();
+      }
+    });
+  }
 }
 
 export function stopAutoBackup(): void {
