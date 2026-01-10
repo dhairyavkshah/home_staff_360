@@ -59,24 +59,53 @@ const SheetContent = React.forwardRef<
   SheetContentProps
 >(({ side = "right", className, children, style, ...props }, ref) => {
   const { insets, effectiveBottomInset } = useSafeArea();
+  const [viewportHeight, setViewportHeight] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    const updateViewportHeight = () => {
+      if (window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+      } else {
+        setViewportHeight(window.innerHeight);
+      }
+    };
+
+    updateViewportHeight();
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateViewportHeight);
+      window.visualViewport.addEventListener('scroll', updateViewportHeight);
+    }
+    window.addEventListener('resize', updateViewportHeight);
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateViewportHeight);
+        window.visualViewport.removeEventListener('scroll', updateViewportHeight);
+      }
+      window.removeEventListener('resize', updateViewportHeight);
+    };
+  }, []);
+
+  const effectiveHeight = viewportHeight || window.innerHeight;
 
   const getSideStyles = (): React.CSSProperties => {
     switch (side) {
       case 'top':
         return {
           top: `${insets.top}px`,
-          maxHeight: `calc(100vh - ${insets.top + effectiveBottomInset}px)`,
+          maxHeight: `${effectiveHeight - insets.top - effectiveBottomInset}px`,
         };
       case 'bottom':
         return {
           paddingBottom: `${Math.max(effectiveBottomInset, 16)}px`,
-          maxHeight: `calc(100vh - ${insets.top}px)`,
+          maxHeight: `${effectiveHeight - insets.top}px`,
         };
       case 'left':
       case 'right':
         return {
           top: `${insets.top}px`,
-          height: `calc(100vh - ${insets.top + effectiveBottomInset}px)`,
+          height: `${effectiveHeight - insets.top - effectiveBottomInset}px`,
         };
       default:
         return {};

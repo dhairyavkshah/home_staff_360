@@ -34,11 +34,46 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, style, ...props }, ref) => {
-  const { insets, effectiveBottomInset } = useSafeArea();
+  const { insets } = useSafeArea();
+  const [viewportHeight, setViewportHeight] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    const updateViewportHeight = () => {
+      if (window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+      } else {
+        setViewportHeight(window.innerHeight);
+      }
+    };
+
+    updateViewportHeight();
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateViewportHeight);
+      window.visualViewport.addEventListener('scroll', updateViewportHeight);
+    }
+    window.addEventListener('resize', updateViewportHeight);
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateViewportHeight);
+        window.visualViewport.removeEventListener('scroll', updateViewportHeight);
+      }
+      window.removeEventListener('resize', updateViewportHeight);
+    };
+  }, []);
+
+  const effectiveHeight = viewportHeight || window.innerHeight;
+  const topOffset = insets.top + 16;
+  const bottomOffset = 16;
+  const maxDialogHeight = effectiveHeight - topOffset - bottomOffset;
 
   const contentStyle: React.CSSProperties = {
-    top: `${insets.top + 16}px`,
-    maxHeight: `calc(100vh - ${insets.top + 32}px - ${effectiveBottomInset + 32}px)`,
+    position: 'fixed',
+    top: `${topOffset}px`,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    maxHeight: `${Math.max(maxDialogHeight, 200)}px`,
     ...style,
   };
 
@@ -48,7 +83,7 @@ const DialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed left-[50%] z-50 grid w-full max-w-md translate-x-[-50%] gap-4 border bg-background p-4 shadow-soft-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-card overflow-hidden",
+          "z-50 grid w-full max-w-md gap-4 border bg-background p-4 shadow-soft-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-card overflow-hidden",
           className
         )}
         style={contentStyle}
