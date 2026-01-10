@@ -16,6 +16,9 @@ Home Staff 360 is a professional staff management platform designed as a hybrid 
 - Ask before major architectural decisions
 - Privacy and security remain priorities with live data
 
+## Important Documents
+- **MIGRATION_CHECKLIST.md**: Formal procedures for safely managing database schema changes when the app has live users and production data. Must be followed for all database migrations.
+
 ## System Architecture
 
 **UI/UX Design:**
