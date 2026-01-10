@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from "react";
-import { Download, Upload, Share2, Clock, Trash2, FolderOpen } from "lucide-react";
+import { Download, Upload, Share2, Clock, Trash2, FolderOpen, Check, Save } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
@@ -38,11 +38,13 @@ export function BackupScreen() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [backupFrequency, setBackupFrequencyState] = useState<BackupFrequency>(getBackupFrequency());
+  const [pendingFrequency, setPendingFrequency] = useState<BackupFrequency | null>(null);
   const [lastBackupTime, setLastBackupTime] = useState(formatLastBackupTime());
   const [nextBackupTime, setNextBackupTime] = useState(formatNextBackupTime());
   const [localBackups, setLocalBackups] = useState<Array<{ name: string; date: Date }>>([]);
   const [showLocalBackups, setShowLocalBackups] = useState(false);
   const [isLoadingBackups, setIsLoadingBackups] = useState(false);
+  const [showActiveStatus, setShowActiveStatus] = useState(getBackupFrequency() !== "off");
 
   useEffect(() => {
     loadBackupsList();
@@ -56,15 +58,35 @@ export function BackupScreen() {
   };
 
   const handleFrequencyChange = (value: BackupFrequency) => {
-    setBackupFrequency(value);
-    setBackupFrequencyState(value);
+    setPendingFrequency(value);
+  };
+
+  const handleSaveSettings = () => {
+    const frequencyToSave = pendingFrequency ?? backupFrequency;
+    setBackupFrequency(frequencyToSave);
+    setBackupFrequencyState(frequencyToSave);
+    setPendingFrequency(null);
     setNextBackupTime(formatNextBackupTime());
+    setShowActiveStatus(frequencyToSave !== "off");
+    
     toast({
       title: t("success"),
-      description: value === "off" 
+      description: frequencyToSave === "off" 
         ? t("autoBackupDisabled") 
-        : t("autoBackupEnabled").replace("{frequency}", value),
+        : t("autoBackupSettingsSaved"),
     });
+  };
+
+  const hasUnsavedChanges = pendingFrequency !== null && pendingFrequency !== backupFrequency;
+  const displayFrequency = pendingFrequency ?? backupFrequency;
+
+  const getFrequencyLabel = (freq: BackupFrequency) => {
+    switch (freq) {
+      case "daily": return t("backupDaily");
+      case "weekly": return t("backupWeekly");
+      case "monthly": return t("backupMonthly");
+      default: return "";
+    }
   };
 
   const handleManualBackup = async () => {
@@ -446,7 +468,7 @@ export function BackupScreen() {
               </div>
             </div>
             
-            <Select value={backupFrequency} onValueChange={handleFrequencyChange}>
+            <Select value={displayFrequency} onValueChange={handleFrequencyChange}>
               <SelectTrigger data-testid="select-backup-frequency">
                 <SelectValue placeholder={t("selectFrequency")} />
               </SelectTrigger>
@@ -458,14 +480,39 @@ export function BackupScreen() {
               </SelectContent>
             </Select>
 
-            <Button 
-              variant="outline" 
-              onClick={handleManualBackup}
-              disabled={isExporting}
-              data-testid="button-backup-now"
-            >
-              {t("backupNow")}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleSaveSettings}
+                disabled={!hasUnsavedChanges}
+                className="flex-1"
+                data-testid="button-save-settings"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {t("saveSettings")}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleManualBackup}
+                disabled={isExporting}
+                data-testid="button-backup-now"
+              >
+                {t("backupNow")}
+              </Button>
+            </div>
+
+            {showActiveStatus && backupFrequency !== "off" && nextBackupTime && (
+              <div className="flex items-start gap-2 p-3 rounded-md bg-success/10 border border-success/20">
+                <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-success">{t("autoBackupActiveMessage")}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t("autoBackupScheduledFor")
+                      .replace("{time}", nextBackupTime)
+                      .replace("{frequency}", getFrequencyLabel(backupFrequency))}
+                  </p>
+                </div>
+              </div>
+            )}
           </Card>
         </section>
 
