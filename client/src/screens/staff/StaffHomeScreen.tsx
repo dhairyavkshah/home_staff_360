@@ -451,6 +451,7 @@ export function StaffHomeScreen() {
             </div>
           </section>
         </div>
+        <div className="safe-area-bottom" />
       </div>
     </div>
   );
