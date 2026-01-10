@@ -1267,12 +1267,18 @@ export const storage = {
     const clientHomes = accountId 
       ? this.getClientHomesByAccount(accountId)
       : this.getClientHomes();
-    const homeRates = new Map(clientHomes.map(h => [h.id, { rate: h.rate, salaryType: h.salaryType }]));
+    // Build map with role info to check for Laundry role (task-based, no attendance wages)
+    const homeInfo = new Map(clientHomes.map(h => [h.id, { rate: h.rate, salaryType: h.salaryType, role: h.role }]));
     
     let fromAttendance = 0;
     attendance.forEach(a => {
-      const rate = a.recordRate ?? homeRates.get(a.clientHomeId)?.rate ?? 0;
-      fromAttendance += a.status === 'FULL' ? rate : rate * 0.5;
+      const info = homeInfo.get(a.clientHomeId);
+      // Laundry role is task-based (rate per item) - no attendance wages
+      const isLaundryRole = info?.role?.toLowerCase() === "laundry";
+      if (!isLaundryRole) {
+        const rate = a.recordRate ?? info?.rate ?? 0;
+        fromAttendance += a.status === 'FULL' ? rate : rate * 0.5;
+      }
     });
     
     const fromLaundry = laundryJobs.reduce((sum, j) => sum + j.totalEarned, 0);

@@ -42,6 +42,11 @@ export function calculateWages(
   attendanceEntries: AttendanceEntry[],
   settings: AppSettings
 ): number {
+  // Laundry role is task-based (rate per item), not time-based - no attendance wages
+  if (person.role?.toLowerCase() === "laundry") {
+    return 0;
+  }
+
   let totalWages = 0;
 
   for (const entry of attendanceEntries) {
@@ -167,6 +172,9 @@ export function calculatePersonBalanceByCurrency(personId: string, fallbackSymbo
   const laundry = storage.getLaundryByPerson(personId);
   const defaultCurrency = person.currency || settings.currency;
 
+  // Laundry role is task-based (rate per item), not time-based - no attendance wages
+  const isLaundryRole = person.role?.toLowerCase() === "laundry";
+
   // Helper to create unique key from code and symbol
   const makeCurrencyKey = (code: string | undefined, symbol: string): string => {
     return code ? `${code}:${symbol}` : symbol;
@@ -183,23 +191,26 @@ export function calculatePersonBalanceByCurrency(personId: string, fallbackSymbo
     const baseRate = entry.recordBaseRate ?? person.baseRate;
     const halfDayPercentage = entry.recordHalfDayPercentage ?? person.halfDayPercentage ?? settings.halfDayPercentage;
     
+    // Laundry role gets 0 wages for attendance (task-based business)
     let wage = 0;
-    if (entry.status === "FULL") {
-      if (salaryType === "HOURLY" && entry.hours) {
-        wage = baseRate * entry.hours;
-      } else if (salaryType === "DAILY") {
-        wage = baseRate;
-      } else if (salaryType === "MONTHLY") {
-        wage = baseRate / 30;
-      }
-    } else if (entry.status === "HALF") {
-      const multiplier = halfDayPercentage / 100;
-      if (salaryType === "HOURLY" && entry.hours) {
-        wage = baseRate * entry.hours * multiplier;
-      } else if (salaryType === "DAILY") {
-        wage = baseRate * multiplier;
-      } else if (salaryType === "MONTHLY") {
-        wage = (baseRate / 30) * multiplier;
+    if (!isLaundryRole) {
+      if (entry.status === "FULL") {
+        if (salaryType === "HOURLY" && entry.hours) {
+          wage = baseRate * entry.hours;
+        } else if (salaryType === "DAILY") {
+          wage = baseRate;
+        } else if (salaryType === "MONTHLY") {
+          wage = baseRate / 30;
+        }
+      } else if (entry.status === "HALF") {
+        const multiplier = halfDayPercentage / 100;
+        if (salaryType === "HOURLY" && entry.hours) {
+          wage = baseRate * entry.hours * multiplier;
+        } else if (salaryType === "DAILY") {
+          wage = baseRate * multiplier;
+        } else if (salaryType === "MONTHLY") {
+          wage = (baseRate / 30) * multiplier;
+        }
       }
     }
     const existing = earningsMap.get(key);
