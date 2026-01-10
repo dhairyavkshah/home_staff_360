@@ -34,7 +34,10 @@ export function PrivacyPolicyScreen() {
           <section className="space-y-3">
             <h2 className="text-xl font-semibold">Introduction</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Home Staff 360 ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your information when you use our mobile application and cloud-based services.
+              Home Staff 360 ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your information when you use our mobile application.
+            </p>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              <span className="font-medium text-foreground">Important</span>: Home Staff 360 is designed with a privacy-first architecture. Your business and operational data (staff records, attendance, payments, expenses, laundry data, invoices, documents, and client information) remains <span className="font-medium text-foreground">exclusively on your local device</span>. We do not store, access, or process this data on our servers. Our platform only helps you keep your data handy and secure on your own device.
             </p>
           </section>
 
@@ -76,40 +79,56 @@ export function PrivacyPolicyScreen() {
           <hr className="border-border" />
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold">2. Data Storage</h2>
+            <h2 className="text-xl font-semibold">2. Data Storage Architecture</h2>
 
             <div className="space-y-3">
-              <h3 className="text-base font-medium">2.1 Live Cloud Architecture</h3>
-              <p className="text-sm text-muted-foreground">Home Staff 360 v2.0 operates as a <span className="font-medium text-foreground">live, cloud-connected service</span>:</p>
+              <h3 className="text-base font-medium">2.1 Local-First Architecture</h3>
+              <p className="text-sm text-muted-foreground">Home Staff 360 operates with a <span className="font-medium text-foreground">privacy-first, local-storage design</span>:</p>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
-                <li><span className="font-medium text-foreground">Primary Storage</span>: All your data is securely stored on our cloud servers</li>
-                <li><span className="font-medium text-foreground">Real-Time Sync</span>: Data syncs instantly across all your connected devices</li>
-                <li><span className="font-medium text-foreground">Secure Transmission</span>: All data is transmitted over encrypted HTTPS/TLS connections</li>
-                <li><span className="font-medium text-foreground">Server Encryption</span>: Data at rest is encrypted using industry-standard encryption</li>
+                <li><span className="font-medium text-foreground">Your Business Data Stays Local</span>: All operational data including staff records, attendance logs, payment transactions, expenses, laundry batches, invoices, documents, client information, and household data remains <span className="font-medium text-foreground">exclusively on your device</span></li>
+                <li><span className="font-medium text-foreground">No Server Storage of Business Data</span>: We do NOT store, access, or process your business/operational data on our servers</li>
+                <li><span className="font-medium text-foreground">You Own Your Data</span>: Your data is under your complete control on your local device</li>
+                <li><span className="font-medium text-foreground">Platform Purpose</span>: Our platform helps you keep your data handy, organized, and secure on your own device</li>
               </ul>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-base font-medium">2.2 Data Processing Locations</h3>
+              <h3 className="text-base font-medium">2.2 Server-Side Data (Collaboration Only)</h3>
+              <p className="text-sm text-muted-foreground">We only store minimal data required for account management and user-to-user communication:</p>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
-                <li>Our servers are hosted on secure, compliant cloud infrastructure</li>
-                <li>Data may be processed in multiple regions to ensure low latency and high availability</li>
-                <li>We adhere to international data protection standards</li>
+                <li><span className="font-medium text-foreground">User Accounts</span>: Phone number (for authentication) and encrypted password hash</li>
+                <li><span className="font-medium text-foreground">User Connections</span>: Links between users who choose to connect (e.g., home user to staff user)</li>
+                <li><span className="font-medium text-foreground">Chat Messages</span>: Messages sent between connected users for real-time communication</li>
+                <li><span className="font-medium text-foreground">Approval Requests</span>: Workflow items shared between connected users requiring approval</li>
+                <li><span className="font-medium text-foreground">Notifications</span>: System notifications for collaboration features</li>
+              </ul>
+              <p className="text-sm text-muted-foreground">All server-stored data is transmitted securely via HTTPS/TLS encryption and is not shared with third parties.</p>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-base font-medium">2.3 Collaboration Purpose</h3>
+              <p className="text-sm text-muted-foreground">Our server infrastructure exists solely to enable communication between users:</p>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
+                <li>Home users connecting with staff users</li>
+                <li>Staff users connecting with home users</li>
+                <li>Home-to-home or staff-to-staff connections</li>
+                <li>Real-time messaging and approval workflows between connected users</li>
+              </ul>
+              <p className="text-sm text-muted-foreground">We do NOT have access to your business operations data, financial records, or personal staff/client information stored on your device.</p>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-base font-medium">2.4 Data Retention</h3>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
+                <li><span className="font-medium text-foreground">Local Data</span>: Remains on your device until you delete it or uninstall the app</li>
+                <li><span className="font-medium text-foreground">Account Data</span>: Server-side account data is retained while your account is active</li>
+                <li><span className="font-medium text-foreground">Account Deletion</span>: Upon request, all server-stored data is permanently deleted immediately</li>
+                <li><span className="font-medium text-foreground">Message History</span>: Chat messages are retained unless deleted by users (within 5-minute window) or upon account deletion</li>
               </ul>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-base font-medium">2.3 Data Retention</h3>
-              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
-                <li><span className="font-medium text-foreground">Active Accounts</span>: Data is retained while your account is active</li>
-                <li><span className="font-medium text-foreground">Account Deletion</span>: Upon request, all data is permanently deleted immediately</li>
-                <li><span className="font-medium text-foreground">Backups</span>: Encrypted backups are retained for disaster recovery (up to 90 days)</li>
-                <li><span className="font-medium text-foreground">Message History</span>: Chat messages are retained indefinitely unless deleted by users (within 5-minute window) or upon account deletion</li>
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-base font-medium">2.4 Local Auto-Backup (Optional)</h3>
+              <h3 className="text-base font-medium">2.5 Local Auto-Backup (Optional)</h3>
               <p className="text-sm text-muted-foreground">Home Staff 360 offers an optional automatic backup feature:</p>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
                 <li><span className="font-medium text-foreground">User Consent Required</span>: Auto-backup only activates when you explicitly consent by checking the consent checkbox in Settings</li>
@@ -259,7 +278,7 @@ export function PrivacyPolicyScreen() {
                   </tr>
                 </thead>
                 <tbody className="text-muted-foreground">
-                  <tr className="border-t border-border"><td className="px-3 py-2">Internet</td><td className="px-3 py-2">Required for cloud sync and real-time collaboration</td></tr>
+                  <tr className="border-t border-border"><td className="px-3 py-2">Internet</td><td className="px-3 py-2">Required for user authentication and real-time collaboration features</td></tr>
                   <tr className="border-t border-border"><td className="px-3 py-2">Camera</td><td className="px-3 py-2">Capture photos for receipts and profile pictures</td></tr>
                   <tr className="border-t border-border"><td className="px-3 py-2">Microphone</td><td className="px-3 py-2">Voice messages (optional feature)</td></tr>
                   <tr className="border-t border-border"><td className="px-3 py-2">Location</td><td className="px-3 py-2">Optional geolocation for attendance verification</td></tr>
@@ -311,7 +330,34 @@ export function PrivacyPolicyScreen() {
           <hr className="border-border" />
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold">11. Regional Compliance</h2>
+            <h2 className="text-xl font-semibold">11. Administrative Access</h2>
+            
+            <div className="space-y-3">
+              <h3 className="text-base font-medium">11.1 Admin Panel Privacy</h3>
+              <p className="text-sm text-muted-foreground">Our administrative systems are designed with privacy protection:</p>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
+                <li><span className="font-medium text-foreground">No Personal Data Display</span>: User names and phone numbers are not displayed on our admin panels</li>
+                <li><span className="font-medium text-foreground">Limited Access</span>: Admin staff cannot browse or view user business data (as it is stored locally on devices)</li>
+                <li><span className="font-medium text-foreground">System Management Only</span>: We only manage the platform infrastructure and user account registrations</li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-base font-medium">11.2 When We May Access Data</h3>
+              <p className="text-sm text-muted-foreground">We may search for specific user information only in these limited circumstances:</p>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
+                <li>When a user requests help with a system issue affecting their account</li>
+                <li>When investigating a technical problem reported by the user</li>
+                <li>When required by law enforcement with proper legal documentation</li>
+              </ul>
+              <p className="text-sm text-muted-foreground">In all cases, access is limited to server-stored data (account info, connections) and never includes your local business data.</p>
+            </div>
+          </section>
+
+          <hr className="border-border" />
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold">12. Regional Compliance</h2>
             
             <div className="space-y-2">
               <h3 className="text-base font-medium">For Users in India</h3>
@@ -333,7 +379,7 @@ export function PrivacyPolicyScreen() {
 
           <div className="text-center space-y-2 py-4">
             <p className="text-sm text-muted-foreground italic">This Privacy Policy is effective as of January 10, 2026.</p>
-            <p className="text-sm font-medium">Home Staff 360 - Your Data, Securely Connected</p>
+            <p className="text-sm font-medium">Home Staff 360 - Your Data, Your Device, Your Control</p>
           </div>
         </div>
       </ScrollArea>

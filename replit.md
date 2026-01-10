@@ -33,7 +33,10 @@ Home Staff 360 is a professional staff management platform designed as a hybrid 
 - **Database**: PostgreSQL with Drizzle ORM for schema definition and migrations.
 - **Real-time Communication**: Socket.IO for live data updates and collaboration features.
 - **Authentication**: JWT tokens for session management, supported by Twilio for SMS/OTP verification. Passwords are hashed with bcrypt.
-- **Hybrid Storage**: PostgreSQL for core data (users, collaboration, attendance, expenses) and client-side (localStorage) for settings, notes, and cached data.
+- **Privacy-First Storage Architecture**: 
+  - **Local Device Storage (localStorage)**: All business/operational data stays exclusively on user devices - staff records, attendance, transactions, payments, expenses, laundry batches, invoices, documents, client/household data, settings, and notes.
+  - **Server Storage (PostgreSQL)**: Only stores minimal data for user accounts (phone/password), user connections, chat messages, approval workflows, and notifications - strictly for authentication and user-to-user collaboration features.
+  - **No Business Data on Servers**: We do not store, access, or process user operational/business data on our servers.
 
 **Feature Specifications:**
 - **Notes Feature**: Full-screen view/edit, 20,000 character limit, 6 color options, pin functionality, and "All contexts" mode.
@@ -49,6 +52,7 @@ Home Staff 360 is a professional staff management platform designed as a hybrid 
 - **Rate Limiting**: Implemented for OTP requests, authentication attempts, password resets, and Socket.IO connections.
 - **Data Protection**: HTTPS/TLS, GDPR and DPDP Act compliance, database transactions for critical operations.
 - **Duplicate Prevention**: Phone number validation to prevent duplicate staff/clients, with normalization.
+- **Admin Panel Privacy**: User names and phone numbers are not displayed on admin panels; admin access limited to system management only; user business data is inaccessible as it's stored locally on devices.
 
 ## External Dependencies
 
