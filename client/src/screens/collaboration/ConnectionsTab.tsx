@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Search,
   UserPlus,
-  Users,
   MessageCircle,
   Check,
   X,
@@ -20,6 +19,8 @@ import { collaborationService } from "@/lib/collaboration-service";
 import { storage } from "@/lib/storage";
 import { combinePhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
 import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
+import { UserAvatar } from "@/components/UserAvatar";
+import { prefetchAvatars } from "@/hooks/use-user-avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -125,9 +126,18 @@ export function ConnectionsTab() {
         collaborationService.fetchWithAuth("/connections/invites/sent"),
       ]);
 
-      setConnections(connectionsRes.connections || []);
-      setReceivedInvites(receivedRes.invites || []);
+      const loadedConnections = connectionsRes.connections || [];
+      const loadedReceivedInvites = receivedRes.invites || [];
+      
+      setConnections(loadedConnections);
+      setReceivedInvites(loadedReceivedInvites);
       setSentInvites(sentRes.invites || []);
+      
+      const userIds = [
+        ...loadedConnections.map((c: Connection) => c.otherUser?.id),
+        ...loadedReceivedInvites.map((i: ConnectionInvite) => i.senderId),
+      ];
+      prefetchAvatars(userIds);
     } catch (error) {
       console.error("Failed to load connections:", error);
     } finally {
@@ -354,9 +364,11 @@ export function ConnectionsTab() {
           <div className="mt-4 p-4 bg-muted rounded-md">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
+                <UserAvatar
+                  userId={searchResult.user.id}
+                  displayName={searchResult.user.displayName}
+                  size="md"
+                />
                 <div>
                   <p className="font-medium">{searchResult.user.displayName || "User"}</p>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -401,9 +413,11 @@ export function ConnectionsTab() {
               <Card key={invite.id} className="p-4" data-testid={`card-invite-${invite.id}`}>
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                      <UserPlus className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-                    </div>
+                    <UserAvatar
+                      userId={invite.senderId}
+                      displayName={invite.senderName}
+                      size="md"
+                    />
                     <div>
                       <p className="font-medium">{invite.senderName || "Someone"}</p>
                       <p className="text-sm text-muted-foreground">
@@ -481,9 +495,11 @@ export function ConnectionsTab() {
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
-                    </div>
+                    <UserAvatar
+                      userId={conn.otherUser.id}
+                      displayName={conn.nickname || conn.otherUser.displayName}
+                      size="md"
+                    />
                     <div>
                       <p className="font-medium">
                         {conn.nickname || conn.otherUser.displayName || "User"}

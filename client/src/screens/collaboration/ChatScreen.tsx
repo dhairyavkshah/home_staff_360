@@ -22,6 +22,8 @@ import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
 import { formatDistanceToNow } from "date-fns";
 import { useRealtime, useRealtimeChat, useRealtimeConnection } from "@/hooks/use-realtime";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { getInitials } from "@/lib/image-utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,6 +104,9 @@ export function ChatScreen() {
   // Clear chat confirmation state
   const [isClearChatDialogOpen, setIsClearChatDialogOpen] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  
+  // Participant avatars cache
+  const [participantAvatars, setParticipantAvatars] = useState<Map<string, string | null>>(new Map());
 
   useRealtimeConnection();
   useRealtimeChat(chatId || null);
@@ -197,6 +202,31 @@ export function ChatScreen() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const fetchParticipantAvatars = async (participants: Array<{ userId: string; displayName?: string }>) => {
+    const avatarMap = new Map<string, string | null>();
+    
+    await Promise.all(
+      participants.map(async (participant) => {
+        try {
+          const response = await fetch(`/api/user/avatar/${participant.userId}`, {
+            credentials: "include",
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            avatarMap.set(participant.userId, data.avatarData || null);
+          } else {
+            avatarMap.set(participant.userId, null);
+          }
+        } catch {
+          avatarMap.set(participant.userId, null);
+        }
+      })
+    );
+    
+    setParticipantAvatars(avatarMap);
+  };
+
   const loadChatData = async () => {
     if (!chatId) return;
     
@@ -212,6 +242,11 @@ export function ChatScreen() {
       );
       setMessages(sortedMessages);
       setChatInfo(chatRes.chat || null);
+      
+      // Fetch avatars for participants
+      if (chatRes.chat?.participants?.length > 0) {
+        fetchParticipantAvatars(chatRes.chat.participants);
+      }
       
       await collaborationService.fetchWithAuth(`/chats/${chatId}/read`, {
         method: "POST",
@@ -554,6 +589,17 @@ export function ChatScreen() {
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
+        {otherParticipant && (
+          <Avatar className="h-10 w-10" data-testid="avatar-header">
+            <AvatarImage 
+              src={participantAvatars.get(otherParticipant.userId) || undefined} 
+              alt={otherParticipant.displayName || "Participant"} 
+            />
+            <AvatarFallback className="text-sm">
+              {getInitials(otherParticipant.displayName)}
+            </AvatarFallback>
+          </Avatar>
+        )}
         <div className="flex-1 min-w-0">
           <p className="font-medium truncate">{chatName}</p>
           {otherParticipant?.mode && (
@@ -618,6 +664,17 @@ export function ChatScreen() {
                 key={message.id}
                 className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}
               >
+                {!message.isOwn && (
+                  <Avatar className="h-7 w-7 mr-2 flex-shrink-0 mt-1" data-testid={`avatar-message-${message.id}`}>
+                    <AvatarImage 
+                      src={participantAvatars.get(message.senderId) || undefined} 
+                      alt={message.senderName || "Participant"} 
+                    />
+                    <AvatarFallback className="text-xs">
+                      {getInitials(message.senderName)}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
                 <div className="relative group max-w-[80%]">
                   <div
                     className={`rounded-2xl px-4 py-2 cursor-pointer ${

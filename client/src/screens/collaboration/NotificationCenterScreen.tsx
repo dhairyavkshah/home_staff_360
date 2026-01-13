@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Bell, CheckCheck, ChevronRight, Calendar, Shirt, Link2, AlertCircle, ArrowLeft, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,6 +11,28 @@ import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
 import { useRealtimeContext } from "@/lib/realtime-provider";
+import { UserAvatar } from "@/components/UserAvatar";
+import { prefetchAvatars } from "@/hooks/use-user-avatar";
+
+function getNotificationUserId(notification: AppNotification): string | null {
+  if (!notification.payload) return null;
+  try {
+    const payload = JSON.parse(notification.payload);
+    return payload.fromUserId || payload.senderId || payload.userId || null;
+  } catch {
+    return null;
+  }
+}
+
+function getNotificationUserName(notification: AppNotification): string | null {
+  if (!notification.payload) return null;
+  try {
+    const payload = JSON.parse(notification.payload);
+    return payload.fromUserName || payload.senderName || payload.userName || null;
+  } catch {
+    return null;
+  }
+}
 
 export function NotificationCenterScreen() {
   const { navigate, goBack } = useNavigation();
@@ -61,6 +83,11 @@ export function NotificationCenterScreen() {
       setNotifications(result.notifications);
       setUnreadCount(result.unreadCount);
       setNotificationCount(result.unreadCount);
+      
+      const userIds = result.notifications
+        .map((n: AppNotification) => getNotificationUserId(n))
+        .filter((id: string | null): id is string => !!id);
+      prefetchAvatars(userIds);
     } catch (err) {
       console.error("Failed to load notifications:", err);
       setError("Failed to load notifications");
@@ -316,9 +343,17 @@ export function NotificationCenterScreen() {
                 onKeyDown={(e) => e.key === 'Enter' && handleNotificationClick(notification)}
                 data-testid={`notification-${notification.id}`}
               >
-                <div className={`p-2 rounded-full flex-shrink-0 ${getNotificationColor(notification.type)}`}>
-                  {getNotificationIcon(notification.type)}
-                </div>
+                {getNotificationUserId(notification) ? (
+                  <UserAvatar
+                    userId={getNotificationUserId(notification)}
+                    displayName={getNotificationUserName(notification)}
+                    size="md"
+                  />
+                ) : (
+                  <div className={`p-2 rounded-full flex-shrink-0 ${getNotificationColor(notification.type)}`}>
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start gap-2">
                     <p className={`font-medium text-sm flex-1 min-w-0 ${!notification.isRead ? "text-foreground" : "text-muted-foreground"}`}>

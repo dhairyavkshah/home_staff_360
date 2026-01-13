@@ -27,6 +27,7 @@ import { CurrencySelector } from "@/components/ui/currency-selector";
 import { notifyCurrencyChange } from "@/hooks/useCurrency";
 import { collaborationService } from "@/lib/collaboration-service";
 import { useSubscription } from "@/hooks/useSubscription";
+import { unregisterPushToken } from "@/lib/push-notification-service";
 import { format } from "date-fns";
 
 export function SettingsScreen() {
@@ -210,6 +211,12 @@ export function SettingsScreen() {
   };
 
   const handleLogout = async () => {
+    try {
+      await unregisterPushToken();
+    } catch (error) {
+      console.error("Failed to unregister push token:", error);
+    }
+    
     await collaborationService.logout();
     toast({ title: t("loggedOut") });
     navigate("auth");

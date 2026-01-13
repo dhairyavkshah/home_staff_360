@@ -96,6 +96,7 @@ import { v4 as uuidv4 } from "uuid";
 import libphonenumber from "google-libphonenumber";
 const PhoneNumberUtil = libphonenumber.PhoneNumberUtil;
 const PhoneNumberFormat = libphonenumber.PhoneNumberFormat;
+import { sendPushNotification, isPushServiceEnabled } from "./push-service";
 
 const router = Router();
 
@@ -1555,6 +1556,88 @@ router.post("/api/devices/register", authenticateToken, async (req: Request, res
   }
 });
 
+router.post("/api/user/push-token", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { token, deviceId, platform } = req.body;
+
+    if (!token) {
+      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, "Push token is required");
+    }
+
+    if (!deviceId) {
+      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, "Device ID is required");
+    }
+
+    const existingDevice = await db.query.devices.findFirst({
+      where: and(
+        eq(devices.userId, userId),
+        eq(devices.deviceId, deviceId)
+      )
+    });
+
+    if (existingDevice) {
+      await db.update(devices)
+        .set({ 
+          pushToken: token,
+          platform: platform || existingDevice.platform,
+          lastSyncAt: new Date()
+        })
+        .where(eq(devices.id, existingDevice.id));
+
+      return apiSuccess(res, { 
+        success: true, 
+        message: "Push token updated",
+        deviceId: existingDevice.id 
+      });
+    }
+
+    const id = uuidv4();
+    await db.insert(devices).values({
+      id,
+      userId,
+      deviceId,
+      platform: platform || 'android',
+      pushToken: token,
+      lastSyncAt: new Date()
+    });
+
+    apiSuccess(res, { 
+      success: true, 
+      message: "Push token registered",
+      deviceId: id 
+    });
+  } catch (error) {
+    console.error("Register push token error:", error);
+    apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to register push token");
+  }
+});
+
+router.delete("/api/user/push-token", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { deviceId } = req.body;
+
+    if (deviceId) {
+      await db.update(devices)
+        .set({ pushToken: null })
+        .where(and(
+          eq(devices.userId, userId),
+          eq(devices.deviceId, deviceId)
+        ));
+    } else {
+      await db.update(devices)
+        .set({ pushToken: null })
+        .where(eq(devices.userId, userId));
+    }
+
+    apiSuccess(res, { success: true, message: "Push token removed" });
+  } catch (error) {
+    console.error("Remove push token error:", error);
+    apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to remove push token");
+  }
+});
+
 router.post("/api/collaboration/create-link", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
@@ -2950,6 +3033,19 @@ async function createNotification(
         isRead: false,
         createdAt
       });
+      
+      // Send push notification (non-blocking)
+      if (isPushServiceEnabled()) {
+        sendPushNotification(userId, title, message, {
+          type,
+          category: derivedCategory,
+          entityType: entityType || undefined,
+          entityId: entityId || undefined,
+          notificationId
+        }).catch(err => {
+          console.error("[PushNotification] Failed to send push:", err);
+        });
+      }
     }
   } catch (error) {
     console.error("Failed to create notification:", error);
