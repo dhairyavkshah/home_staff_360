@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from "react";
-import { FolderOpen, FileText, Image, File, Trash2, Eye, Download } from "lucide-react";
+import { FolderOpen, FileText, Image, File, Trash2, Eye, Download, Loader2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { compressImage, formatBytes, MAX_FILE_SIZE } from "@/lib/imageCompression";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { STAFF_DOCUMENT_CATEGORIES, type Document, type StaffDocumentCategory } 
 import { useToast } from "@/hooks/use-toast";
 import { usePlanStatus } from "@/hooks/use-plan-status";
 import { useActiveContext } from "@/hooks/use-active-context";
+import { downloadBase64File } from "@/lib/shareService";
 
 export function StaffDocumentsScreen() {
   const { navigate } = useNavigation();
@@ -40,6 +41,23 @@ export function StaffDocumentsScreen() {
   const [newDocDescription, setNewDocDescription] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownload = async (doc: { id: string; fileData: string; fileName: string; fileType: string }) => {
+    setDownloadingId(doc.id);
+    try {
+      const success = await downloadBase64File(doc.fileData, doc.fileName, doc.fileType);
+      if (!success) {
+        toast({
+          title: tLabel('error', 'Error'),
+          description: tLabel('downloadFailed', 'Failed to download file'),
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const activeAccountId = useMemo(() => storage.getActiveAccountId(), [refreshKey]);
   const showAllContexts = useMemo(() => storage.getShowAllContexts(), [refreshKey]);
@@ -233,12 +251,15 @@ export function StaffDocumentsScreen() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      asChild
+                      onClick={() => handleDownload(doc)}
+                      disabled={downloadingId === doc.id}
                       data-testid={`button-download-${doc.id}`}
                     >
-                      <a href={doc.fileData} download={doc.fileName}>
+                      {downloadingId === doc.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
                         <Download className="w-4 h-4" />
-                      </a>
+                      )}
                     </Button>
                     <Button
                       variant="ghost"
@@ -300,30 +321,34 @@ export function StaffDocumentsScreen() {
 
       <Dialog open={!!showPreview} onOpenChange={() => setShowPreview(null)}>
         <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{showPreview?.fileName}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            {showPreview?.fileType.startsWith('image/') ? (
-              <img
-                src={showPreview.fileData}
-                alt={showPreview.fileName}
-                className="w-full max-h-96 object-contain rounded-md"
-              />
-            ) : (
-              <div className="flex flex-col items-center gap-4 p-8 bg-muted rounded-md">
-                <FileText className="w-16 h-16 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  {tLabel('previewNotAvailable', 'Preview not available for this file type')}
-                </p>
-                <Button asChild>
-                  <a href={showPreview?.fileData} download={showPreview?.fileName}>
-                    {tLabel('download', 'Download')}
-                  </a>
-                </Button>
+          {showPreview && (
+            <>
+              <DialogHeader className="pr-8">
+                <DialogTitle className="truncate">{showPreview.fileName}</DialogTitle>
+              </DialogHeader>
+              <div className="py-4">
+                {showPreview.fileType.startsWith('image/') ? (
+                  <img
+                    src={showPreview.fileData}
+                    alt={showPreview.fileName}
+                    className="w-full max-h-96 object-contain rounded-md"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-4 p-8 bg-muted rounded-md">
+                    <FileText className="w-16 h-16 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      {tLabel('previewNotAvailable', 'Preview not available for this file type')}
+                    </p>
+                    <Button asChild>
+                      <a href={showPreview.fileData} download={showPreview.fileName}>
+                        {tLabel('download', 'Download')}
+                      </a>
+                    </Button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 

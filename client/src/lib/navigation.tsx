@@ -107,6 +107,7 @@ interface NavigationContextType {
   navigate: (screen: Screen, data?: NavigationData) => void;
   goBack: () => void;
   canGoBack: boolean;
+  clearHistory: () => void;
 }
 
 const NavigationContext = createContext<NavigationContextType | null>(null);
@@ -118,12 +119,28 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     history: [],
   });
 
+  const screensToExcludeFromHistory: Screen[] = [
+    "launcher", "auth", "role-selection", "permissions", "onboarding", "pin-setup", "pin-entry", "set-password"
+  ];
+
+  const homeScreens: Screen[] = ["home", "staff-home"];
+
   const navigate = useCallback((screen: Screen, data: NavigationData = {}) => {
-    setState((prev) => ({
-      screen,
-      data,
-      history: [...prev.history, { screen: prev.screen, data: prev.data }],
-    }));
+    setState((prev) => {
+      if (homeScreens.includes(screen)) {
+        return { screen, data, history: [] };
+      }
+      
+      if (screensToExcludeFromHistory.includes(prev.screen)) {
+        return { screen, data, history: prev.history };
+      }
+      
+      return {
+        screen,
+        data,
+        history: [...prev.history, { screen: prev.screen, data: prev.data }],
+      };
+    });
   }, []);
 
   const goBack = useCallback(() => {
@@ -141,6 +158,10 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const clearHistory = useCallback(() => {
+    setState((prev) => ({ ...prev, history: [] }));
+  }, []);
+
   return (
     <NavigationContext.Provider
       value={{
@@ -149,6 +170,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
         navigate,
         goBack,
         canGoBack: state.history.length > 0,
+        clearHistory,
       }}
     >
       {children}

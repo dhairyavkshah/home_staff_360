@@ -187,7 +187,25 @@ export function StaffLogLaundryScreen() {
     if (!selectedBusinessId) newErrors.selectedBusinessId = "Business is required";
     if (!selectedHome) newErrors.selectedHome = t("selectClientHome") || "Client Home is required";
     if (!serviceType) newErrors.serviceType = "Service Type is required";
-    if (!date) newErrors.date = "Date is required";
+    if (!date) {
+      newErrors.date = "Date is required";
+    } else {
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+      
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      const selectedMonth = selectedDate.getMonth();
+      const selectedYear = selectedDate.getFullYear();
+      
+      if (selectedYear < currentYear || (selectedYear === currentYear && selectedMonth < currentMonth)) {
+        newErrors.date = t("cannotLogPreviousMonths") || "Cannot log laundry for previous months";
+      } else if (selectedDate > today) {
+        newErrors.date = t("cannotLogFutureDates") || "Cannot log laundry for future dates";
+      }
+    }
     if (items.length === 0) newErrors.items = "Add at least one item";
     if (pickupDelivery && (!pickupDeliveryCharge || parseFloat(pickupDeliveryCharge) <= 0)) {
       newErrors.pickupDeliveryCharge = "Enter a valid pickup/delivery charge";

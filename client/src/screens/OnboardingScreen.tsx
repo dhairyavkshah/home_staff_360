@@ -16,15 +16,18 @@ import { CountrySelector } from "@/components/ui/country-selector";
 import { CurrencySelector } from "@/components/ui/currency-selector";
 import { collaborationService } from "@/lib/collaboration-service";
 import { detectCountryFromPhoneNumber } from "@/lib/geolocation-service";
+import { App } from "@capacitor/app";
+import { useTranslation } from "@/lib/i18n/i18n-context";
 
 export function OnboardingScreen() {
   const { navigate, data } = useNavigation();
   const { toast } = useToast();
   const { startTour } = useTour();
+  const { t, language } = useTranslation();
   
   const userType = (data.userType as UserType) || "HOME";
   const isHome = userType === "HOME";
-  const accountLabel = isHome ? "Household" : "Business";
+  const accountLabel = isHome ? t("household") : t("business");
   const Icon = isHome ? Home : Briefcase;
 
   const [displayName, setDisplayName] = useState("");
@@ -43,6 +46,15 @@ export function OnboardingScreen() {
       return;
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const backHandler = App.addListener("backButton", () => {
+    });
+
+    return () => {
+      backHandler.then(handle => handle.remove());
+    };
+  }, []);
 
   useEffect(() => {
     async function detectCountry() {
@@ -77,25 +89,25 @@ export function OnboardingScreen() {
     const newErrors: Record<string, string> = {};
 
     if (!displayName.trim()) {
-      newErrors.displayName = "Please enter your name";
+      newErrors.displayName = t("pleaseEnterYourName");
     }
 
     if (!accountName.trim()) {
-      newErrors.accountName = `Please enter a ${accountLabel.toLowerCase()} name`;
+      newErrors.accountName = t("pleaseEnterAccountName");
     }
 
     if (!country) {
-      newErrors.country = "Please select your country";
+      newErrors.country = t("pleaseSelectCountry");
     }
 
     const day = parseInt(salaryStartDay);
     if (isNaN(day) || day < 1 || day > 31) {
-      newErrors.salaryStartDay = "Enter a day between 1 and 31";
+      newErrors.salaryStartDay = t("enterDayBetween1And31");
     }
 
     const percentage = parseInt(halfDayPercentage);
     if (isNaN(percentage) || percentage < 1 || percentage > 100) {
-      newErrors.halfDayPercentage = "Enter a percentage between 1 and 100";
+      newErrors.halfDayPercentage = t("enterPercentageBetween1And100");
     }
 
     setErrors(newErrors);
@@ -141,13 +153,13 @@ export function OnboardingScreen() {
         currency,
         salaryStartDay: parseInt(salaryStartDay),
         halfDayPercentage: parseInt(halfDayPercentage),
-        language: 'en',
+        language: language,
       });
     } else {
       storage.saveStaffSettings({
         vendorName: accountName.trim(),
         currency,
-        language: 'en',
+        language: language,
       });
     }
 
@@ -167,8 +179,8 @@ export function OnboardingScreen() {
     }
 
     toast({
-      title: "Welcome to Home Staff 360!",
-      description: "Your settings have been saved.",
+      title: t("welcomeToApp"),
+      description: t("settingsSaved"),
     });
 
     if (enableAppLock) {
@@ -191,10 +203,10 @@ export function OnboardingScreen() {
             </div>
             <div className="flex flex-col gap-1">
               <h1 className="text-xl font-semibold" data-testid="text-welcome-title">
-                {isHome ? "Home User Setup" : "Professional Setup"}
+                {isHome ? t("homeUserSetup") : t("professionalSetup")}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {isHome ? "Let's set up your household staff manager" : "Let's set up your business management"}
+                {isHome ? t("letsSetupHousehold") : t("letsSetupBusiness")}
               </p>
             </div>
           </div>
@@ -204,17 +216,17 @@ export function OnboardingScreen() {
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <User className="w-4 h-4 text-primary" />
               </div>
-              Your Profile
+              {t("yourProfile")}
             </h2>
 
             <div className="flex flex-col gap-1">
-              <Label htmlFor="displayName">Your Name <span className="text-destructive">*</span></Label>
+              <Label htmlFor="displayName">{t("yourName")} <span className="text-destructive">*</span></Label>
               <Input
                 id="displayName"
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Enter your name"
+                placeholder={t("enterYourName")}
                 className="h-8"
                 data-testid="input-display-name"
               />
@@ -226,14 +238,14 @@ export function OnboardingScreen() {
             <div className="flex flex-col gap-1">
               <Label htmlFor="accountName" className="flex items-center gap-1.5">
                 <Icon className="w-3.5 h-3.5" />
-                {accountLabel} Name <span className="text-destructive">*</span>
+                {isHome ? t("householdName") : t("businessName")} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="accountName"
                 type="text"
                 value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
-                placeholder={isHome ? "My Home" : "My Business"}
+                placeholder={isHome ? t("myHome") : t("myBusiness")}
                 className="h-8"
                 data-testid="input-account-name"
               />
@@ -241,7 +253,7 @@ export function OnboardingScreen() {
                 <p className="text-xs text-destructive" role="alert">{errors.accountName}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                You can add more {accountLabel.toLowerCase()}s later
+                {t("canAddMoreLater")}
               </p>
             </div>
           </Card>
@@ -251,13 +263,13 @@ export function OnboardingScreen() {
               <div className="w-8 h-8 rounded-lg bg-info/10 flex items-center justify-center">
                 <Globe className="w-4 h-4 text-info" />
               </div>
-              Regional Settings
+              {t("regionalSettings")}
             </h2>
 
             <div className="flex flex-col gap-1">
               <Label htmlFor="country" className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
-                Country <span className="text-destructive">*</span>
+                {t("country")} <span className="text-destructive">*</span>
               </Label>
               <CountrySelector
                 value={country}
@@ -266,13 +278,13 @@ export function OnboardingScreen() {
                   const newCurrency = getCurrencyForCountry(v);
                   setCurrency(newCurrency);
                 }}
-                placeholder="Select your country"
+                placeholder={t("selectCountry")}
                 disabled={countryLocked}
                 data-testid="select-country"
               />
               {countryLocked && (
                 <p className="text-xs text-muted-foreground">
-                  Detected from your phone number
+                  {t("detectedFromPhone")}
                 </p>
               )}
               {errors.country && (
@@ -281,21 +293,21 @@ export function OnboardingScreen() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label htmlFor="currency">Currency</Label>
+              <Label htmlFor="currency">{t("currency")}</Label>
               <CurrencySelector
                 value={currency}
                 onValueChange={(v) => setCurrency(v)}
                 data-testid="select-currency"
               />
               <p className="text-xs text-muted-foreground">
-                Auto-set based on country, but you can change it
+                {t("currencyAutoSetDesc")}
               </p>
             </div>
 
             <div className="flex flex-col gap-1">
               <Label htmlFor="salaryDay" className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
-                Salary Cycle Start Day (1-31) <span className="text-destructive">*</span>
+                {t("salaryCycleStartDay")} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="salaryDay"
@@ -311,14 +323,14 @@ export function OnboardingScreen() {
                 <p className="text-xs text-destructive" role="alert">{errors.salaryStartDay}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                Day of month when salary calculations begin
+                {t("salaryStartDayDesc")}
               </p>
             </div>
 
             <div className="flex flex-col gap-1">
               <Label htmlFor="halfDay" className="flex items-center gap-1.5">
                 <Percent className="w-3.5 h-3.5" />
-                Half-Day Percentage <span className="text-destructive">*</span>
+                {t("halfDayPercentage")} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="halfDay"
@@ -334,7 +346,7 @@ export function OnboardingScreen() {
                 <p className="text-xs text-destructive" role="alert">{errors.halfDayPercentage}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                Percentage of daily wage for half-day work
+                {t("halfDayPercentageDesc")}
               </p>
             </div>
           </Card>
@@ -344,17 +356,17 @@ export function OnboardingScreen() {
               <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
                 <Lock className="w-4 h-4 text-success" />
               </div>
-              Security
+              {t("security")}
             </h2>
 
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-col gap-1">
                 <Label htmlFor="appLock" className="flex items-center gap-1.5">
                   <Fingerprint className="w-3.5 h-3.5" />
-                  Enable App Lock
+                  {t("enableAppLock")}
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Protect your data with a 4-digit PIN
+                  {t("protectWith4DigitPin")}
                 </p>
               </div>
               <Switch
@@ -366,7 +378,7 @@ export function OnboardingScreen() {
             </div>
             {enableAppLock && (
               <p className="text-xs text-primary fade-in-up">
-                You'll set up your PIN after completing setup
+                {t("pinSetupAfterComplete")}
               </p>
             )}
           </Card>
@@ -377,9 +389,9 @@ export function OnboardingScreen() {
                 <Shield className="w-5 h-5 text-primary" />
               </div>
               <div className="flex flex-col gap-1">
-                <h3 className="text-sm font-semibold">100% Private</h3>
+                <h3 className="text-sm font-semibold">{t("hundredPercentPrivate")}</h3>
                 <p className="text-xs text-muted-foreground">
-                  Your data is securely encrypted and synced across devices.
+                  {t("dataSecurelyEncrypted")}
                 </p>
               </div>
             </div>
@@ -391,7 +403,7 @@ export function OnboardingScreen() {
             onClick={handleSubmit}
             data-testid="button-get-started"
           >
-            Get Started
+            {t("getStarted")}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

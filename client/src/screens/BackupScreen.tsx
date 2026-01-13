@@ -36,6 +36,8 @@ import {
   listLocalBackups,
   loadLocalBackup,
   deleteLocalBackup,
+  deleteExistingBackup,
+  BACKUP_FILENAME,
 } from "@/lib/auto-backup";
 
 export function BackupScreen() {
@@ -125,7 +127,7 @@ export function BackupScreen() {
         
         const backup = storage.exportBackup();
         const json = JSON.stringify(backup, null, 2);
-        const filename = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
+        const filename = BACKUP_FILENAME;
 
         if (isNative) {
           await Filesystem.writeFile({
@@ -184,9 +186,14 @@ export function BackupScreen() {
   const handleExport = async () => {
     setIsExporting(true);
     try {
+      await deleteExistingBackup();
+      await performAutoBackup();
+      setLastBackupTime(formatLastBackupTime());
+      await loadBackupsList();
+      
       const backup = storage.exportBackup();
       const json = JSON.stringify(backup, null, 2);
-      const filename = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
+      const filename = BACKUP_FILENAME;
 
       if (isNative) {
         await Filesystem.writeFile({
@@ -247,9 +254,14 @@ export function BackupScreen() {
   const handleShareBackup = async () => {
     setIsExporting(true);
     try {
+      await deleteExistingBackup();
+      await performAutoBackup();
+      setLastBackupTime(formatLastBackupTime());
+      await loadBackupsList();
+      
       const backup = storage.exportBackup();
       const json = JSON.stringify(backup, null, 2);
-      const filename = `homestaff360-backup-${new Date().toISOString().split("T")[0]}.hs360`;
+      const filename = BACKUP_FILENAME;
 
       if (isNative) {
         await Filesystem.writeFile({

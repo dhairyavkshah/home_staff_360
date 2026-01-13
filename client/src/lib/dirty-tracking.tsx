@@ -27,6 +27,17 @@ export function DirtyTrackingProvider({ children }: { children: ReactNode }) {
 
   const homeScreens = ["home", "staff-home"];
   const isOnHomeScreen = homeScreens.includes(currentScreen);
+  
+  const screensBlockingBackButton = [
+    "auth",
+    "role-selection", 
+    "onboarding",
+    "permissions",
+    "pin-setup",
+    "set-password",
+    "launcher"
+  ];
+  const shouldBlockBackButton = screensBlockingBackButton.includes(currentScreen);
 
   useEffect(() => {
     registerDirtyTrackingContext({ setDirty: setIsDirty });
@@ -43,24 +54,30 @@ export function DirtyTrackingProvider({ children }: { children: ReactNode }) {
   }, [isDirty]);
 
   const handleBackPress = useCallback((): boolean => {
+    if (shouldBlockBackButton) {
+      return true;
+    }
+
     if (isDirty) {
       setPendingBackNavigation(true);
       setShowUnsavedDialog(true);
       return true;
     }
 
-    if (isOnHomeScreen && !canGoBack) {
-      setShowExitDialog(true);
-      return true;
-    }
-
+    // Allow normal back navigation if there's history
     if (canGoBack) {
       goBack();
       return true;
     }
 
+    // Only show exit dialog when on home screen AND no back history
+    if (isOnHomeScreen) {
+      setShowExitDialog(true);
+      return true;
+    }
+
     return false;
-  }, [isDirty, isOnHomeScreen, canGoBack, goBack]);
+  }, [isDirty, isOnHomeScreen, canGoBack, goBack, shouldBlockBackButton]);
 
   const handleDiscardChanges = useCallback(() => {
     setShowUnsavedDialog(false);
@@ -71,7 +88,7 @@ export function DirtyTrackingProvider({ children }: { children: ReactNode }) {
       setPendingCallback(null);
     } else if (pendingBackNavigation) {
       setPendingBackNavigation(false);
-      if (isOnHomeScreen && !canGoBack) {
+      if (isOnHomeScreen) {
         setShowExitDialog(true);
       } else if (canGoBack) {
         goBack();

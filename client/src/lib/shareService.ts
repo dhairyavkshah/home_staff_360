@@ -1,4 +1,4 @@
-import { type Currency } from "@shared/schema";
+import { type Currency, currencySymbols } from "@shared/schema";
 import { Share } from "@capacitor/share";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Capacitor } from "@capacitor/core";
@@ -267,36 +267,161 @@ export function generateAttendanceCSV(
   return csv;
 }
 
+/**
+ * Downloads or opens a base64-encoded file
+ * - On web: Creates a blob and triggers browser download
+ * - On native: Saves to cache directory, then opens share sheet
+ */
+export async function downloadBase64File(
+  base64Data: string,
+  filename: string,
+  mimeType: string
+): Promise<boolean> {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      // Extract pure base64 if it's a data URL
+      let pureBase64 = base64Data;
+      if (base64Data.includes(',')) {
+        pureBase64 = base64Data.split(',')[1];
+      }
+
+      // Write to cache directory
+      await Filesystem.writeFile({
+        path: filename,
+        data: pureBase64,
+        directory: Directory.Cache,
+      });
+
+      const uriResult = await Filesystem.getUri({
+        directory: Directory.Cache,
+        path: filename,
+      });
+
+      console.log('File ready for sharing:', uriResult.uri);
+
+      // Open share sheet so user can save/open the file
+      const canShare = await Share.canShare();
+      if (canShare.value) {
+        await Share.share({
+          title: filename,
+          files: [uriResult.uri],
+          dialogTitle: 'Save or Open File',
+        });
+      }
+      
+      return true;
+    } catch (error) {
+      const errorMessage = (error as Error).message || String(error);
+      
+      // User cancelled - still consider it handled
+      if (errorMessage.includes('cancel') || 
+          errorMessage.includes('Cancel') ||
+          errorMessage.includes('dismissed') ||
+          errorMessage.includes('aborted')) {
+        console.log('Share was cancelled by user');
+        return true;
+      }
+      
+      console.error('Failed to save/share file on native:', error);
+      return false;
+    }
+  } else {
+    // Web: Create blob and trigger download
+    try {
+      // Convert base64 to blob
+      let base64Content = base64Data;
+      if (base64Data.includes(',')) {
+        base64Content = base64Data.split(',')[1];
+      }
+      
+      const byteCharacters = atob(base64Content);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: mimeType });
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      
+      await new Promise<void>((resolve) => {
+        setTimeout(() => {
+          link.click();
+          resolve();
+        }, 100);
+      });
+      
+      // Cleanup after a delay
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 1000);
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to download file on web:', error);
+      return false;
+    }
+  }
+}
+
+/**
+ * Opens a base64-encoded file for viewing
+ * - On web: Opens in new tab or triggers download for non-viewable types
+ * - On native: Uses share sheet to open with appropriate app
+ */
+export async function openBase64File(
+  base64Data: string,
+  filename: string,
+  mimeType: string
+): Promise<boolean> {
+  if (Capacitor.isNativePlatform()) {
+    // On native, use the share functionality which allows opening with apps
+    return downloadBase64File(base64Data, filename, mimeType);
+  } else {
+    // Web: Try to open in new tab for viewable types
+    try {
+      if (mimeType.startsWith('image/') || mimeType === 'application/pdf') {
+        // Open viewable files in new tab
+        const newWindow = window.open();
+        if (newWindow) {
+          newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>${filename}</title>
+                <style>
+                  body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #1a1a1a; }
+                  img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+                  iframe { width: 100vw; height: 100vh; border: none; }
+                </style>
+              </head>
+              <body>
+                ${mimeType.startsWith('image/') 
+                  ? `<img src="${base64Data}" alt="${filename}" />`
+                  : `<iframe src="${base64Data}"></iframe>`
+                }
+              </body>
+            </html>
+          `);
+          newWindow.document.close();
+          return true;
+        }
+      }
+      // For other types, download
+      return downloadBase64File(base64Data, filename, mimeType);
+    } catch (error) {
+      console.error('Failed to open file:', error);
+      return downloadBase64File(base64Data, filename, mimeType);
+    }
+  }
+}
+
 function getCurrencySymbol(currency: Currency): string {
-  const symbols: Record<Currency, string> = {
-    INR: '₹',
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    AUD: 'A$',
-    CAD: 'C$',
-    CHF: 'CHF',
-    CZK: 'Kč',
-    DKK: 'kr',
-    HKD: 'HK$',
-    HUF: 'Ft',
-    ILS: '₪',
-    JPY: '¥',
-    MXN: 'MX$',
-    NOK: 'kr',
-    NZD: 'NZ$',
-    PHP: '₱',
-    PLN: 'zł',
-    RUB: '₽',
-    SEK: 'kr',
-    SGD: 'S$',
-    THB: '฿',
-    TWD: 'NT$',
-    AED: 'د.إ',
-    CNY: '¥',
-    BRL: 'R$',
-    ZAR: 'R',
-    OTHER: '$',
-  };
-  return symbols[currency] || '$';
+  return currencySymbols[currency] || '$';
 }

@@ -190,7 +190,7 @@ export function StaffAddClientHomeScreen() {
   };
 
   const handleSendSmsInvite = async () => {
-    if (!contactPhone || !profile?.displayName) return;
+    if (!phoneNumber || !profile?.displayName) return;
 
     setIsSendingInvite(true);
     try {
@@ -207,9 +207,9 @@ export function StaffAddClientHomeScreen() {
         }),
       });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.message || "Failed to send SMS invite");
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.details || result.message || "Failed to send SMS invite");
       }
 
       toast({ title: "SMS invitation sent successfully" });
@@ -239,8 +239,10 @@ export function StaffAddClientHomeScreen() {
       setContactName(existingHome.contactName || "");
       if (existingHome.contactPhone) {
         const parsedPhone = parseFullPhoneNumber(existingHome.contactPhone);
-        setCountryCode(parsedPhone.countryCode);
-        setPhoneNumber(parsedPhone.phoneNumber);
+        if (parsedPhone) {
+          setCountryCode(parsedPhone.countryCode);
+          setPhoneNumber(parsedPhone.phoneNumber);
+        }
       }
       setRole(existingHome.role);
       setSalaryType(existingHome.salaryType);

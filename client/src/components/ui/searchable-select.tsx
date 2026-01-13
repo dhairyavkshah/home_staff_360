@@ -102,9 +102,9 @@ export function SearchableSelect({
           )}
           data-testid={testId}
         >
-          <span className="flex items-center gap-2 truncate">
-            {icon && <span className="opacity-50">{icon}</span>}
-            {selectedOption?.icon}
+          <span className="flex items-center gap-2 flex-1 min-w-0">
+            {icon && <span className="flex-shrink-0 opacity-50">{icon}</span>}
+            {selectedOption?.icon && <span className="flex-shrink-0">{selectedOption.icon}</span>}
             <span className="truncate">
               {selectedOption ? selectedOption.label : placeholder}
             </span>

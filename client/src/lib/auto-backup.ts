@@ -29,7 +29,8 @@ export function setBackupConsent(consent: boolean): void {
   }
 }
 
-const AUTO_BACKUP_FILENAME = "homestaff360-auto-backup.hs360";
+export const BACKUP_FILENAME = "homestaff360-backup.hs360";
+const AUTO_BACKUP_FILENAME = BACKUP_FILENAME;
 const BACKUP_NOTIFICATION_ID = 999;
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -182,21 +183,20 @@ export function formatNextBackupTime(): string {
   });
 }
 
-async function deleteExistingAutoBackup(): Promise<void> {
+export async function deleteExistingBackup(): Promise<void> {
   if (Capacitor.isNativePlatform()) {
     try {
       await Filesystem.deleteFile({
-        path: `HomeStaff360Backups/${AUTO_BACKUP_FILENAME}`,
+        path: `HomeStaff360Backups/${BACKUP_FILENAME}`,
         directory: Directory.Documents,
       });
     } catch {
-      // File doesn't exist, that's fine
     }
   } else {
     const existingBackups = localStorage.getItem("hm_local_backups");
     if (existingBackups) {
       const backups: Record<string, string> = JSON.parse(existingBackups);
-      delete backups[AUTO_BACKUP_FILENAME];
+      delete backups[BACKUP_FILENAME];
       localStorage.setItem("hm_local_backups", JSON.stringify(backups));
     }
   }
@@ -207,7 +207,7 @@ export async function performAutoBackup(): Promise<{ success: boolean; filename?
     const backup = storage.exportBackup();
     const json = JSON.stringify(backup, null, 2);
 
-    await deleteExistingAutoBackup();
+    await deleteExistingBackup();
 
     if (Capacitor.isNativePlatform()) {
       await Filesystem.writeFile({

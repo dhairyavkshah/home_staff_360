@@ -20,12 +20,15 @@ import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
 import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import { combinePhoneNumber, parseFullPhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
+import { useTranslation } from "@/lib/i18n/i18n-context";
+import { App } from "@capacitor/app";
 
 type AuthStep = "phone" | "password" | "otp" | "set-password" | "reset-otp" | "reset-password";
 
 export function AuthScreen() {
   const { navigate } = useNavigation();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [step, setStep] = useState<AuthStep>("phone");
   const [countryCode, setCountryCode] = useState(getDefaultCountryCode());
@@ -35,6 +38,8 @@ export function AuthScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userExists, setUserExists] = useState(false);
   const [hasPassword, setHasPassword] = useState(false);
@@ -62,6 +67,23 @@ export function AuthScreen() {
       navigate("launcher");
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const backHandler = App.addListener("backButton", () => {
+      if (step === "phone") {
+        App.exitApp();
+      } else {
+        setStep("phone");
+        setOtp("");
+        setPassword("");
+        setConfirmPassword("");
+      }
+    });
+
+    return () => {
+      backHandler.then(handle => handle.remove());
+    };
+  }, [step]);
 
   const handlePhoneValidationChange = useCallback((isValid: boolean) => {
     setPhoneValid(isValid);
@@ -100,9 +122,17 @@ export function AuthScreen() {
         setStep("otp");
       }
     } catch (error: any) {
+      let errorTitle = t("error");
+      let errorMessage = error.message || t("verificationFailed");
+      
+      if (error.message === "NETWORK_ERROR") {
+        errorTitle = t("networkError");
+        errorMessage = t("noInternetConnection");
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to check phone number",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -134,9 +164,17 @@ export function AuthScreen() {
         }
       }
     } catch (error: any) {
+      let errorTitle = t("error");
+      let errorMessage = error.message || t("verificationFailed");
+      
+      if (error.message === "NETWORK_ERROR") {
+        errorTitle = t("networkError");
+        errorMessage = t("noInternetConnection");
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to send OTP",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -174,9 +212,17 @@ export function AuthScreen() {
         setStep("otp");
       }
     } catch (error: any) {
+      let errorTitle = "Login Failed";
+      let errorMessage = error.message || "Invalid credentials";
+      
+      if (error.message === "NETWORK_ERROR") {
+        errorTitle = t("networkError");
+        errorMessage = t("noInternetConnection");
+      }
+      
       toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -210,9 +256,19 @@ export function AuthScreen() {
         }
       }
     } catch (error: any) {
+      let errorTitle = t("error");
+      let errorMessage = t("invalidOtp");
+      
+      if (error.message === "NETWORK_ERROR") {
+        errorTitle = t("networkError");
+        errorMessage = t("noInternetConnection");
+      } else if (error.message?.toLowerCase().includes("expired")) {
+        errorMessage = t("otpExpired");
+      }
+      
       toast({
-        title: "Verification Failed",
-        description: error.message || "Invalid OTP",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -260,9 +316,17 @@ export function AuthScreen() {
         }
       }
     } catch (error: any) {
+      let errorTitle = t("error");
+      let errorMessage = error.message || "Failed to set password";
+      
+      if (error.message === "NETWORK_ERROR") {
+        errorTitle = t("networkError");
+        errorMessage = t("noInternetConnection");
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to set password",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -287,9 +351,17 @@ export function AuthScreen() {
         });
       }
     } catch (error: any) {
+      let errorTitle = t("error");
+      let errorMessage = error.message || "Failed to send reset code";
+      
+      if (error.message === "NETWORK_ERROR") {
+        errorTitle = t("networkError");
+        errorMessage = t("noInternetConnection");
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to send reset code",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -312,9 +384,17 @@ export function AuthScreen() {
         });
       }
     } catch (error: any) {
+      let errorTitle = t("error");
+      let errorMessage = error.message || "Failed to send reset code";
+      
+      if (error.message === "NETWORK_ERROR") {
+        errorTitle = t("networkError");
+        errorMessage = t("noInternetConnection");
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to send reset code",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -370,9 +450,19 @@ export function AuthScreen() {
         navigate("launcher");
       }
     } catch (error: any) {
+      let errorTitle = t("error");
+      let errorMessage = error.message || "Failed to reset password";
+      
+      if (error.message === "NETWORK_ERROR") {
+        errorTitle = t("networkError");
+        errorMessage = t("noInternetConnection");
+      } else if (error.message?.toLowerCase().includes("invalid") || error.message?.toLowerCase().includes("otp")) {
+        errorMessage = t("invalidOtp");
+      }
+      
       toast({
-        title: "Reset Failed",
-        description: error.message || "Failed to reset password",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -676,7 +766,7 @@ export function AuthScreen() {
                   <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="new-reset-password"
-                    type={showPassword ? "text" : "password"}
+                    type={showNewPassword ? "text" : "password"}
                     placeholder="At least 6 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -686,9 +776,10 @@ export function AuthScreen() {
                   <button
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    data-testid="button-toggle-new-reset-password"
                   >
-                    {showPassword ? (
+                    {showNewPassword ? (
                       <EyeOff className="w-4 h-4" />
                     ) : (
                       <Eye className="w-4 h-4" />
@@ -703,7 +794,7 @@ export function AuthScreen() {
                   <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="confirm-reset-password"
-                    type={showPassword ? "text" : "password"}
+                    type={showConfirmPassword ? "text" : "password"}
                     placeholder="Re-enter password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -713,9 +804,10 @@ export function AuthScreen() {
                   <button
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    data-testid="button-toggle-confirm-reset-password"
                   >
-                    {showPassword ? (
+                    {showConfirmPassword ? (
                       <EyeOff className="w-4 h-4" />
                     ) : (
                       <Eye className="w-4 h-4" />
@@ -768,7 +860,7 @@ export function AuthScreen() {
                   <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="new-password"
-                    type={showPassword ? "text" : "password"}
+                    type={showNewPassword ? "text" : "password"}
                     placeholder="At least 6 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -778,9 +870,10 @@ export function AuthScreen() {
                   <button
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    data-testid="button-toggle-new-password"
                   >
-                    {showPassword ? (
+                    {showNewPassword ? (
                       <EyeOff className="w-4 h-4" />
                     ) : (
                       <Eye className="w-4 h-4" />
@@ -795,7 +888,7 @@ export function AuthScreen() {
                   <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="confirm-password"
-                    type={showPassword ? "text" : "password"}
+                    type={showConfirmPassword ? "text" : "password"}
                     placeholder="Re-enter password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -805,9 +898,10 @@ export function AuthScreen() {
                   <button
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    data-testid="button-toggle-confirm-password"
                   >
-                    {showPassword ? (
+                    {showConfirmPassword ? (
                       <EyeOff className="w-4 h-4" />
                     ) : (
                       <Eye className="w-4 h-4" />

@@ -54,7 +54,9 @@ export function ProfileSettingsScreen() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Change phone form
   const [newPhoneCountryCode, setNewPhoneCountryCode] = useState(getDefaultCountryCode());
@@ -222,9 +224,25 @@ export function ProfileSettingsScreen() {
         setConfirmPassword("");
       }
     } catch (error: any) {
+      let errorTitle = t("error");
+      let errorMessage = error.message || "Failed to change password";
+      const lowerMessage = error.message?.toLowerCase() || "";
+      
+      if (error.message === "NETWORK_ERROR") {
+        errorTitle = t("networkError");
+        errorMessage = t("noInternetConnection");
+      } else if (
+        lowerMessage.includes("incorrect") || 
+        lowerMessage.includes("wrong") || 
+        lowerMessage.includes("invalid") ||
+        lowerMessage.includes("current password")
+      ) {
+        errorMessage = t("currentPasswordIncorrect");
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to change password",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -551,7 +569,7 @@ export function ProfileSettingsScreen() {
                 <div className="relative flex items-center">
                   <Input
                     id="currentPassword"
-                    type={showPassword ? "text" : "password"}
+                    type={showCurrentPassword ? "text" : "password"}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter current password"
@@ -561,9 +579,10 @@ export function ProfileSettingsScreen() {
                   <button
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    data-testid="button-toggle-current-password"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -573,7 +592,7 @@ export function ProfileSettingsScreen() {
                 <div className="relative flex items-center">
                   <Input
                     id="newPassword"
-                    type={showPassword ? "text" : "password"}
+                    type={showNewPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="At least 6 characters"
@@ -583,9 +602,10 @@ export function ProfileSettingsScreen() {
                   <button
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    data-testid="button-toggle-new-password"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -595,7 +615,7 @@ export function ProfileSettingsScreen() {
                 <div className="relative flex items-center">
                   <Input
                     id="confirmPassword"
-                    type={showPassword ? "text" : "password"}
+                    type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter new password"
@@ -605,9 +625,10 @@ export function ProfileSettingsScreen() {
                   <button
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    data-testid="button-toggle-confirm-password"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>

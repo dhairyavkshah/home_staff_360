@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Info, Paperclip, X, Image as ImageIcon, FileText, Trash2, AlertCircle } from "lucide-react";
+import { Info, Paperclip, X, Image as ImageIcon, FileText, Trash2, AlertCircle, Eye, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +40,7 @@ import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useActiveContext } from "@/hooks/use-active-context";
 import { getTodayString } from "@/lib/calculations";
 import { useCurrency } from "@/hooks/useCurrency";
+import { openBase64File, downloadBase64File } from "@/lib/shareService";
 import { 
   type RecurrenceType, 
   expenseCategories, 
@@ -339,6 +340,34 @@ export function AddExpenseScreen() {
                       <FileText className="w-5 h-5 text-primary" />
                     )}
                     <span className="flex-1 text-sm truncate">{doc.fileName}</span>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          const success = await openBase64File(doc.fileData, doc.fileName, doc.fileType);
+                          if (!success) {
+                            toast({ title: tLabel('error', 'Error'), description: tLabel('failedToOpenFile', 'Failed to open file'), variant: 'destructive' });
+                          }
+                        }}
+                        data-testid={`button-view-attachment-${doc.id}`}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          const success = await downloadBase64File(doc.fileData, doc.fileName, doc.fileType);
+                          if (!success) {
+                            toast({ title: tLabel('error', 'Error'), description: tLabel('failedToDownloadFile', 'Failed to download file'), variant: 'destructive' });
+                          }
+                        }}
+                        data-testid={`button-download-attachment-${doc.id}`}
+                      >
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </Card>
                 ))}
               </div>

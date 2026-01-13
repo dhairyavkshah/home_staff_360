@@ -19,9 +19,11 @@ import { useTour, shouldShowTour } from "@/lib/guided-tour";
 import { useToast } from "@/hooks/use-toast";
 import { StorageWarningBanner } from "@/components/StorageWarningBanner";
 import { useRealtimeContext } from "@/lib/realtime-provider";
+import { App } from "@capacitor/app";
+import { ExitAppDialog } from "@/components/ExitAppDialog";
 
 export function StaffHomeScreen() {
-  const { navigate, data } = useNavigation();
+  const { navigate, data, goBack, canGoBack } = useNavigation();
   const { tLabel } = useTranslation();
   const { toast } = useToast();
   const [refreshKey, setRefreshKey] = useState(0);
@@ -29,6 +31,21 @@ export function StaffHomeScreen() {
   const { startTour } = useTour();
   const tourStartedRef = useRef(false);
   const { unreadNotificationCount } = useRealtimeContext();
+  const [showExitDialog, setShowExitDialog] = useState(false);
+
+  useEffect(() => {
+    const backHandler = App.addListener("backButton", () => {
+      if (canGoBack) {
+        goBack();
+      } else {
+        setShowExitDialog(true);
+      }
+    });
+
+    return () => {
+      backHandler.then(handle => handle.remove());
+    };
+  }, [canGoBack, goBack]);
 
   useEffect(() => {
     if (tourStartedRef.current) return;
@@ -453,6 +470,13 @@ export function StaffHomeScreen() {
         </div>
         <div className="safe-area-bottom" />
       </div>
+
+      <ExitAppDialog
+        open={showExitDialog}
+        onOpenChange={setShowExitDialog}
+        onExit={() => App.exitApp()}
+        onStay={() => setShowExitDialog(false)}
+      />
     </div>
   );
 }

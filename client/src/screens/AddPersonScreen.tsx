@@ -89,8 +89,10 @@ export function AddPersonScreen() {
         setName(person.name);
         setRole(person.role);
         const parsedPhone = parseFullPhoneNumber(person.phone);
-        setCountryCode(parsedPhone.countryCode);
-        setPhoneNumber(parsedPhone.phoneNumber);
+        if (parsedPhone) {
+          setCountryCode(parsedPhone.countryCode);
+          setPhoneNumber(parsedPhone.phoneNumber);
+        }
         setSalaryType(person.salaryType);
         setBaseRate(person.baseRate.toString());
         setHalfDayPercentage(person.halfDayPercentage?.toString() || "");
@@ -223,20 +225,20 @@ export function AddPersonScreen() {
         }),
       });
 
-      if (response.ok) {
+      const result = await response.json().catch(() => ({}));
+      if (response.ok && result.success) {
         toast({ title: "SMS invite sent successfully" });
       } else {
-        const error = await response.json().catch(() => ({}));
         toast({ 
           title: "Failed to send SMS invite", 
-          description: error.message || "Please try again",
+          description: result.error || result.details || result.message || "Please try again",
           variant: "destructive" 
         });
       }
     } catch (error) {
       toast({ 
         title: "Failed to send SMS invite", 
-        description: "Please check your connection and try again",
+        description: error instanceof Error ? error.message : "Please check your connection and try again",
         variant: "destructive" 
       });
     } finally {

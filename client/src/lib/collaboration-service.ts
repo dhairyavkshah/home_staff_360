@@ -167,10 +167,21 @@ class CollaborationService {
       headers["Authorization"] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    // Check for network connectivity
+    if (!navigator.onLine) {
+      throw new Error("NETWORK_ERROR");
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers,
+      });
+    } catch (fetchError) {
+      // Network error - fetch failed
+      throw new Error("NETWORK_ERROR");
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: "Request failed" }));

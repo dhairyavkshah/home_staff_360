@@ -239,10 +239,26 @@ export default function AdminDashboard() {
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
+    workbook.Props = {
+      Author: "Home Staff 360",
+      CreatedDate: new Date(),
+    };
     XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
 
     const date = new Date().toISOString().split("T")[0];
-    XLSX.writeFile(workbook, `users-export-${date}.xlsx`);
+    const wbout = XLSX.write(workbook, { 
+      bookType: 'xlsx',
+      type: 'array',
+      compression: true
+    });
+    
+    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `users-export-${date}.xlsx`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleFilterChange = (setter: (value: string) => void) => (value: string) => {

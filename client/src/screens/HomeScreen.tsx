@@ -19,9 +19,11 @@ import { useTour, shouldShowTour } from "@/lib/guided-tour";
 import { useToast } from "@/hooks/use-toast";
 import { StorageWarningBanner } from "@/components/StorageWarningBanner";
 import { useRealtimeContext } from "@/lib/realtime-provider";
+import { App } from "@capacitor/app";
+import { ExitAppDialog } from "@/components/ExitAppDialog";
 
 export function HomeScreen() {
-  const { navigate, data } = useNavigation();
+  const { navigate, data, goBack, canGoBack } = useNavigation();
   const { tLabel } = useTranslation();
   const { toast } = useToast();
   const [refreshKey, setRefreshKey] = useState(0);
@@ -29,6 +31,21 @@ export function HomeScreen() {
   const { startTour } = useTour();
   const tourStartedRef = useRef(false);
   const { unreadNotificationCount } = useRealtimeContext();
+  const [showExitDialog, setShowExitDialog] = useState(false);
+
+  useEffect(() => {
+    const backHandler = App.addListener("backButton", () => {
+      if (canGoBack) {
+        goBack();
+      } else {
+        setShowExitDialog(true);
+      }
+    });
+
+    return () => {
+      backHandler.then(handle => handle.remove());
+    };
+  }, [canGoBack, goBack]);
 
   useEffect(() => {
     if (tourStartedRef.current) return;
@@ -220,7 +237,7 @@ export function HomeScreen() {
     <div className="h-screen flex flex-col bg-background" data-testid="screen-home" data-tour-id="tour-dashboard">
       <div className="safe-area-top" />
 
-      <header className="px-4 py-3 min-h-14 flex-shrink-0">
+      <header className="px-4 py-3 min-h-14 flex-shrink-0 relative z-20">
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-semibold truncate" data-testid="text-welcome">
@@ -229,31 +246,41 @@ export function HomeScreen() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="group flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
                   data-testid="button-account-switcher"
                 >
                   <Home className="w-3.5 h-3.5" />
                   <span className="truncate max-w-[180px]">
                     {activeAccount?.name || tLabel('selectHousehold', 'Select')}
                   </span>
-                  <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />
+                  <ChevronDown className="w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {accounts.map((account) => (
+              <DropdownMenuContent align="start" className="min-w-[200px]">
+                {accounts.length === 0 ? (
                   <DropdownMenuItem
-                    key={account.id}
-                    onClick={() => handleSwitchAccount(account.id)}
-                    className="flex items-center gap-2"
-                    data-testid={`menu-item-account-${account.id}`}
+                    onClick={() => navigate('households')}
+                    className="flex items-center gap-2 text-muted-foreground"
                   >
                     <Home className="w-4 h-4" />
-                    <span className="flex-1">{account.name}</span>
-                    {account.id === activeAccountId && (
-                      <Check className="w-4 h-4 text-primary" />
-                    )}
+                    <span>{tLabel('addFirstHousehold', 'Add your first household')}</span>
                   </DropdownMenuItem>
-                ))}
+                ) : (
+                  accounts.map((account) => (
+                    <DropdownMenuItem
+                      key={account.id}
+                      onClick={() => handleSwitchAccount(account.id)}
+                      className="flex items-center gap-2"
+                      data-testid={`menu-item-account-${account.id}`}
+                    >
+                      <Home className="w-4 h-4" />
+                      <span className="flex-1">{account.name}</span>
+                      {account.id === activeAccountId && (
+                        <Check className="w-4 h-4 text-primary" />
+                      )}
+                    </DropdownMenuItem>
+                  ))
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -364,6 +391,13 @@ export function HomeScreen() {
           </section>
         </div>
       </div>
+
+      <ExitAppDialog
+        open={showExitDialog}
+        onOpenChange={setShowExitDialog}
+        onExit={() => App.exitApp()}
+        onStay={() => setShowExitDialog(false)}
+      />
     </div>
   );
 }
