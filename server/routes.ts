@@ -17,8 +17,7 @@ import {
   emitLaundryUpdate,
   emitHouseholdUpdate,
   isUserOnline,
-  getOnlineUserIds,
-  getIO
+  getOnlineUserIds
 } from "./realtime";
 import { 
   serverUsers, 
@@ -96,7 +95,6 @@ import { v4 as uuidv4 } from "uuid";
 import libphonenumber from "google-libphonenumber";
 const PhoneNumberUtil = libphonenumber.PhoneNumberUtil;
 const PhoneNumberFormat = libphonenumber.PhoneNumberFormat;
-import { sendPushNotification, isPushServiceEnabled } from "./push-service";
 
 const router = Router();
 
@@ -231,11 +229,11 @@ function checkRateLimit(ip: string, action: string): { allowed: boolean; retryAf
 // Cleanup old entries every 5 minutes
 setInterval(() => {
   const now = Date.now();
-  rateLimitStore.forEach((entry, key) => {
+  for (const [key, entry] of rateLimitStore.entries()) {
     if (now > entry.resetAt) {
       rateLimitStore.delete(key);
     }
-  });
+  }
 }, 5 * 60 * 1000);
 
 // Rate limiting middleware factory
@@ -1115,95 +1113,6 @@ router.patch("/api/user/profile", authenticateToken, async (req: Request, res: R
   }
 });
 
-// ============ AVATAR API ============
-
-// Upload avatar
-router.post("/api/user/avatar", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.userId;
-    const { avatarData } = req.body;
-
-    if (!avatarData || typeof avatarData !== 'string') {
-      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, "Avatar data is required");
-    }
-
-    // Validate base64 image format (JPEG or PNG)
-    const base64Pattern = /^data:image\/(jpeg|png|jpg);base64,[A-Za-z0-9+/=]+$/;
-    if (!base64Pattern.test(avatarData)) {
-      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, 
-        "Invalid image format. Only JPEG and PNG base64 images are supported.");
-    }
-
-    // Check size limit (max 2MB after base64 encoding)
-    const base64Data = avatarData.split(',')[1];
-    const sizeInBytes = (base64Data.length * 3) / 4;
-    const maxSize = 2 * 1024 * 1024; // 2MB
-    if (sizeInBytes > maxSize) {
-      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, 
-        "Image size exceeds 2MB limit. Please use a smaller image.");
-    }
-
-    await db.update(serverUsers)
-      .set({ 
-        avatarData: avatarData,
-        avatarUpdatedAt: new Date()
-      })
-      .where(eq(serverUsers.id, userId));
-
-    res.json({ success: true, message: "Avatar uploaded successfully" });
-  } catch (error) {
-    console.error("Upload avatar error:", error);
-    res.status(500).json({ error: "Failed to upload avatar" });
-  }
-});
-
-// Get avatar by userId
-router.get("/api/user/avatar/:userId", async (req: Request, res: Response) => {
-  try {
-    const { userId } = req.params;
-
-    const user = await db.query.serverUsers.findFirst({
-      where: eq(serverUsers.id, userId),
-      columns: {
-        avatarData: true,
-        avatarUpdatedAt: true
-      }
-    });
-
-    if (!user || !user.avatarData) {
-      return apiError(res, 404, ERROR_CODES.RESOURCE_NOT_FOUND, "Avatar not found");
-    }
-
-    res.json({ 
-      success: true, 
-      avatarData: user.avatarData,
-      avatarUpdatedAt: user.avatarUpdatedAt
-    });
-  } catch (error) {
-    console.error("Get avatar error:", error);
-    res.status(500).json({ error: "Failed to get avatar" });
-  }
-});
-
-// Delete avatar
-router.delete("/api/user/avatar", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.userId;
-
-    await db.update(serverUsers)
-      .set({ 
-        avatarData: null,
-        avatarUpdatedAt: null
-      })
-      .where(eq(serverUsers.id, userId));
-
-    res.json({ success: true, message: "Avatar deleted successfully" });
-  } catch (error) {
-    console.error("Delete avatar error:", error);
-    res.status(500).json({ error: "Failed to delete avatar" });
-  }
-});
-
 // Change password
 router.put("/api/user/password", authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -1553,88 +1462,6 @@ router.post("/api/devices/register", authenticateToken, async (req: Request, res
   } catch (error) {
     console.error("Register device error:", error);
     res.status(500).json({ error: "Failed to register device" });
-  }
-});
-
-router.post("/api/user/push-token", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.userId;
-    const { token, deviceId, platform } = req.body;
-
-    if (!token) {
-      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, "Push token is required");
-    }
-
-    if (!deviceId) {
-      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, "Device ID is required");
-    }
-
-    const existingDevice = await db.query.devices.findFirst({
-      where: and(
-        eq(devices.userId, userId),
-        eq(devices.deviceId, deviceId)
-      )
-    });
-
-    if (existingDevice) {
-      await db.update(devices)
-        .set({ 
-          pushToken: token,
-          platform: platform || existingDevice.platform,
-          lastSyncAt: new Date()
-        })
-        .where(eq(devices.id, existingDevice.id));
-
-      return apiSuccess(res, { 
-        success: true, 
-        message: "Push token updated",
-        deviceId: existingDevice.id 
-      });
-    }
-
-    const id = uuidv4();
-    await db.insert(devices).values({
-      id,
-      userId,
-      deviceId,
-      platform: platform || 'android',
-      pushToken: token,
-      lastSyncAt: new Date()
-    });
-
-    apiSuccess(res, { 
-      success: true, 
-      message: "Push token registered",
-      deviceId: id 
-    });
-  } catch (error) {
-    console.error("Register push token error:", error);
-    apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to register push token");
-  }
-});
-
-router.delete("/api/user/push-token", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.userId;
-    const { deviceId } = req.body;
-
-    if (deviceId) {
-      await db.update(devices)
-        .set({ pushToken: null })
-        .where(and(
-          eq(devices.userId, userId),
-          eq(devices.deviceId, deviceId)
-        ));
-    } else {
-      await db.update(devices)
-        .set({ pushToken: null })
-        .where(eq(devices.userId, userId));
-    }
-
-    apiSuccess(res, { success: true, message: "Push token removed" });
-  } catch (error) {
-    console.error("Remove push token error:", error);
-    apiError(res, 500, ERROR_CODES.INTERNAL_ERROR, "Failed to remove push token");
   }
 });
 
@@ -3033,19 +2860,6 @@ async function createNotification(
         isRead: false,
         createdAt
       });
-      
-      // Send push notification (non-blocking)
-      if (isPushServiceEnabled()) {
-        sendPushNotification(userId, title, message, {
-          type,
-          category: derivedCategory,
-          entityType: entityType || undefined,
-          entityId: entityId || undefined,
-          notificationId
-        }).catch(err => {
-          console.error("[PushNotification] Failed to send push:", err);
-        });
-      }
     }
   } catch (error) {
     console.error("Failed to create notification:", error);
@@ -3443,8 +3257,8 @@ router.delete("/api/connections/:id", authenticateToken, async (req: Request, re
 
     // Emit real-time connection removed event (outside transaction, non-critical)
     if (!isNaN(userAId) && !isNaN(userBId)) {
-      const connectionIdStr = String(id);
-      emitConnectionRemoved(String(userAId), String(userBId), connectionIdStr);
+      const connectionNumId = typeof id === 'string' ? parseInt(id, 10) : id;
+      emitConnectionRemoved(userAId, userBId, connectionNumId);
     }
 
     res.json({ success: true });
@@ -4074,7 +3888,8 @@ router.delete("/api/chats/:chatId/clear", authenticateToken, async (req: Request
     await db.update(chatMessages)
       .set({ 
         isDeleted: true, 
-        content: "[This message was deleted]"
+        content: "[This message was deleted]",
+        updatedAt: new Date()
       })
       .where(eq(chatMessages.chatId, chatId));
 

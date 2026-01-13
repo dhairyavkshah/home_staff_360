@@ -21,7 +21,6 @@ import { StorageWarningBanner } from "@/components/StorageWarningBanner";
 import { useRealtimeContext } from "@/lib/realtime-provider";
 import { App } from "@capacitor/app";
 import { ExitAppDialog } from "@/components/ExitAppDialog";
-import { initPushNotifications } from "@/lib/push-notification-service";
 
 export function HomeScreen() {
   const { navigate, data, goBack, canGoBack } = useNavigation();
@@ -31,7 +30,6 @@ export function HomeScreen() {
   const { planType } = usePlanStatus();
   const { startTour } = useTour();
   const tourStartedRef = useRef(false);
-  const pushNotificationsInitializedRef = useRef(false);
   const { unreadNotificationCount } = useRealtimeContext();
   const [showExitDialog, setShowExitDialog] = useState(false);
 
@@ -59,15 +57,6 @@ export function HomeScreen() {
       setTimeout(() => startTour("HOME"), 500);
     }
   }, [data.startTour, data.tourMode, startTour]);
-
-  useEffect(() => {
-    if (pushNotificationsInitializedRef.current) return;
-    pushNotificationsInitializedRef.current = true;
-
-    initPushNotifications().catch((error) => {
-      console.error("Failed to initialize push notifications:", error);
-    });
-  }, []);
 
   const profile = useMemo(() => storage.getProfile(), [refreshKey]);
   const accounts = useMemo(() => storage.getAccounts().filter(a => a.ownerType === 'HOME'), [refreshKey]);

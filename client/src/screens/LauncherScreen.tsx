@@ -18,13 +18,6 @@ export function LauncherScreen() {
         return;
       }
       
-      // Security check: Require re-authentication for new browser tabs/windows
-      // This prevents unauthorized access if someone opens the app in a new tab
-      if (collaborationService.needsSessionVerification()) {
-        navigate("auth", { requireSessionVerification: true });
-        return;
-      }
-      
       // Sync profile from server if local profile is missing
       let currentProfile = storage.getProfile();
       if (!currentProfile) {

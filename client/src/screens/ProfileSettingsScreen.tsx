@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   User,
   Phone,
@@ -12,7 +12,6 @@ import {
   RefreshCw,
   Trash2,
   AlertTriangle,
-  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,9 +27,6 @@ import { storage } from "@/lib/storage";
 import { useDirtyForm } from "@/lib/dirty-tracking";
 import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import { combinePhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { compressImage, isValidImageType, getInitials } from "@/lib/image-utils";
-import { invalidateAvatarCache } from "@/hooks/use-user-avatar";
 
 type ProfileStep = "view" | "edit-name" | "change-password" | "change-phone" | "verify-phone" | "clear-all-data" | "delete-account";
 
@@ -42,8 +38,6 @@ export function ProfileSettingsScreen() {
   const [step, setStep] = useState<ProfileStep>("view");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profile data
   const [profile, setProfile] = useState<{
@@ -52,9 +46,6 @@ export function ProfileSettingsScreen() {
     displayName?: string;
     hasPassword: boolean;
   } | null>(null);
-
-  // Avatar data (stored separately to avoid heavy payload in profile)
-  const [avatarData, setAvatarData] = useState<string | null>(null);
 
   // Edit name form
   const [displayName, setDisplayName] = useState("");
@@ -125,19 +116,6 @@ export function ProfileSettingsScreen() {
           hasPassword: data.hasPassword,
         });
         setDisplayName(data.displayName || "");
-
-        // Fetch avatar data separately
-        try {
-          const avatarResponse = await collaborationService.fetchWithAuth<{
-            success: boolean;
-            avatarData?: string;
-          }>(`/user/avatar/${data.id}`);
-          if (avatarResponse.success && avatarResponse.avatarData) {
-            setAvatarData(avatarResponse.avatarData);
-          }
-        } catch {
-          // Avatar not found is not an error
-        }
       }
     } catch (error: any) {
       toast({
@@ -194,7 +172,6 @@ export function ProfileSettingsScreen() {
     try {
       const result = await collaborationService.updateProfile({ displayName: displayName.trim() });
       if (result.success) {
-        storage.updateProfile({ displayName: displayName.trim() });
         toast({ title: "Profile Updated", description: "Your name has been updated" });
         setProfile(prev => prev ? { ...prev, displayName: displayName.trim() } : null);
         setStep("view");
@@ -420,94 +397,6 @@ export function ProfileSettingsScreen() {
     }
   };
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Reset input so the same file can be selected again
-    event.target.value = "";
-
-    if (!isValidImageType(file)) {
-      toast({
-        title: "Invalid File Type",
-        description: "Please select a JPEG or PNG image",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploadingAvatar(true);
-    try {
-      // Compress image to 512x512
-      const compressedData = await compressImage(file);
-
-      // Upload to server
-      const response = await collaborationService.fetchWithAuth<{
-        success: boolean;
-        message?: string;
-      }>("/user/avatar", {
-        method: "POST",
-        body: JSON.stringify({ avatarData: compressedData }),
-      });
-
-      if (response.success) {
-        setAvatarData(compressedData);
-        // Invalidate cache so other screens see the new avatar
-        if (profile?.id) {
-          invalidateAvatarCache(profile.id);
-        }
-        toast({
-          title: "Photo Updated",
-          description: "Your profile photo has been updated",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload photo",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploadingAvatar(false);
-    }
-  };
-
-  const handleRemoveAvatar = async () => {
-    setIsUploadingAvatar(true);
-    try {
-      const response = await collaborationService.fetchWithAuth<{
-        success: boolean;
-        message?: string;
-      }>("/user/avatar", {
-        method: "DELETE",
-      });
-
-      if (response.success) {
-        setAvatarData(null);
-        // Invalidate cache so other screens see the removal
-        if (profile?.id) {
-          invalidateAvatarCache(profile.id);
-        }
-        toast({
-          title: "Photo Removed",
-          description: "Your profile photo has been removed",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to remove photo",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploadingAvatar(false);
-    }
-  };
-
   const getTitle = () => {
     switch (step) {
       case "edit-name": return "Edit Name";
@@ -536,64 +425,8 @@ export function ProfileSettingsScreen() {
       <Header title={getTitle()} onBack={handleBack} />
 
       <ScrollContent>
-        {/* Hidden file input for avatar upload */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/jpg"
-          className="hidden"
-          onChange={handleFileSelect}
-          data-testid="input-avatar-file"
-        />
-
         {step === "view" && (
           <section className="flex flex-col gap-4">
-            {/* Avatar Section */}
-            <div className="flex flex-col items-center gap-3 py-4">
-              <div className="relative">
-                <Avatar className="w-24 h-24">
-                  <AvatarImage src={avatarData || undefined} alt="Profile" />
-                  <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-                    {getInitials(profile?.displayName)}
-                  </AvatarFallback>
-                </Avatar>
-                <button
-                  type="button"
-                  className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover-elevate"
-                  onClick={handleAvatarClick}
-                  disabled={isUploadingAvatar}
-                  data-testid="button-change-avatar"
-                >
-                  {isUploadingAvatar ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Camera className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-              <div className="text-center">
-                <p className="font-semibold">{profile?.displayName || "No Name Set"}</p>
-                <p className="text-sm text-muted-foreground">{profile?.phone}</p>
-              </div>
-              {avatarData && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive"
-                  onClick={handleRemoveAvatar}
-                  disabled={isUploadingAvatar}
-                  data-testid="button-remove-avatar"
-                >
-                  {isUploadingAvatar ? (
-                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                  ) : (
-                    <Trash2 className="w-3 h-3 mr-1" />
-                  )}
-                  Remove Photo
-                </Button>
-              )}
-            </div>
-
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Account Information
             </h2>

@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigation, useNavigationData } from "@/lib/navigation";
+import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
 import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import { combinePhoneNumber, parseFullPhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
@@ -25,18 +25,10 @@ import { App } from "@capacitor/app";
 
 type AuthStep = "phone" | "password" | "otp" | "set-password" | "reset-otp" | "reset-password";
 
-interface AuthNavigationData {
-  requireSessionVerification?: boolean;
-}
-
 export function AuthScreen() {
   const { navigate } = useNavigation();
-  const navigationData = useNavigationData<AuthNavigationData>();
   const { toast } = useToast();
   const { t } = useTranslation();
-  
-  // Track if we're in session verification mode (new tab opened)
-  const isSessionVerification = navigationData?.requireSessionVerification === true;
 
   const [step, setStep] = useState<AuthStep>("phone");
   const [countryCode, setCountryCode] = useState(getDefaultCountryCode());
@@ -71,22 +63,10 @@ export function AuthScreen() {
       }
     }
 
-    // If this is session verification for a new tab, stay on auth screen
-    // and skip directly to password entry for re-authentication
-    if (isSessionVerification && collaborationService.isAuthenticated()) {
-      // User is authenticated but needs to verify session for this tab
-      // Skip to password step for re-authentication
-      setUserExists(true);
-      setHasPassword(true);
-      setStep("password");
-      return;
-    }
-
-    // Normal flow: if already authenticated and not session verification, go to launcher
     if (collaborationService.isAuthenticated()) {
       navigate("launcher");
     }
-  }, [navigate, isSessionVerification]);
+  }, [navigate]);
 
   useEffect(() => {
     const backHandler = App.addListener("backButton", () => {
@@ -218,9 +198,6 @@ export function AuthScreen() {
       const result = await collaborationService.login(phone, password, rememberMe);
       
       if (result.success) {
-        // Mark session as verified for new tab security
-        collaborationService.markSessionVerified();
-        
         // Sync profile from server to local storage
         await collaborationService.syncProfileToLocalStorage();
         
@@ -269,9 +246,6 @@ export function AuthScreen() {
       const result = await collaborationService.verifyOtp(phone, otp);
       
       if (result.success) {
-        // Mark session as verified for new tab security
-        collaborationService.markSessionVerified();
-        
         if (result.user?.isNewUser || !result.user?.hasPassword) {
           setNeedsOnboarding(result.user?.needsOnboarding ?? true);
           setStep("set-password");
@@ -326,9 +300,6 @@ export function AuthScreen() {
       const result = await collaborationService.setPassword(password);
       
       if (result.success) {
-        // Mark session as verified for new tab security
-        collaborationService.markSessionVerified();
-        
         // Sync profile from server to local storage
         await collaborationService.syncProfileToLocalStorage();
         

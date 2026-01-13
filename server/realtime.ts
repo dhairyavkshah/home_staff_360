@@ -60,13 +60,11 @@ function checkSocketRateLimit(ip: string): boolean {
 // Cleanup socket rate limit entries every minute
 setInterval(() => {
   const now = Date.now();
-  const keysToDelete: string[] = [];
-  socketRateLimitStore.forEach((entry, key) => {
+  for (const [key, entry] of socketRateLimitStore.entries()) {
     if (now > entry.resetAt) {
-      keysToDelete.push(key);
+      socketRateLimitStore.delete(key);
     }
-  });
-  keysToDelete.forEach(key => socketRateLimitStore.delete(key));
+  }
 }, 60 * 1000);
 // ============================================
 
@@ -164,12 +162,7 @@ export function getIO(): SocketIOServer | null {
 
 export function emitToUser(userId: string, event: string, data: any) {
   if (io) {
-    const userSocketSet = userSockets.get(userId);
-    const socketCount = userSocketSet?.size || 0;
-    console.log(`[Realtime] Emitting ${event} to user:${userId} (${socketCount} sockets connected)`);
     io.to(`user:${userId}`).emit(event, data);
-  } else {
-    console.log(`[Realtime] Cannot emit ${event} to user:${userId} - io not initialized`);
   }
 }
 

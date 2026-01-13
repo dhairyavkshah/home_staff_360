@@ -4,6 +4,7 @@ import {
   RefreshCw,
   Bell,
   BellOff,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,8 +14,6 @@ import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
 import { formatDistanceToNow } from "date-fns";
 import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
-import { UserAvatar } from "@/components/UserAvatar";
-import { prefetchAvatars } from "@/hooks/use-user-avatar";
 
 interface ChatParticipant {
   id: string;
@@ -80,9 +79,6 @@ export function MessagesTab() {
         otherParticipant: chat.participants?.[0] || null,
       }));
       setChats(transformedChats);
-      
-      const userIds = transformedChats.map((chat: Chat) => chat.otherParticipant?.userId);
-      prefetchAvatars(userIds);
     } catch (error) {
       console.error("Failed to load chats:", error);
     } finally {
@@ -170,11 +166,9 @@ export function MessagesTab() {
         >
           <div className="flex items-center gap-3">
             <div className="relative">
-              <UserAvatar
-                userId={chat.otherParticipant?.userId}
-                displayName={chat.otherParticipant?.displayName}
-                size="lg"
-              />
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Users className="w-6 h-6 text-primary" />
+              </div>
               {chat.unreadCount > 0 && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                   <span className="text-xs text-primary-foreground font-medium">

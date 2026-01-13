@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigation } from "@/lib/navigation";
 import { pinService } from "@/lib/pin-service";
 import { storage } from "@/lib/storage";
-import { collaborationService } from "@/lib/collaboration-service";
 import { Card } from "@/components/ui/card";
 import { Lock, X, Fingerprint, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -81,9 +80,6 @@ export function PinEntryScreen({
       setTimeout(async () => {
         const isValid = await pinService.validatePin(updatedPin);
         if (isValid) {
-          // Mark session as verified for new tab security
-          collaborationService.markSessionVerified();
-          
           if (onSuccess) {
             onSuccess();
           } else {
@@ -117,9 +113,6 @@ export function PinEntryScreen({
       const result = await pinService.authenticateWithBiometric();
       
       if (result.success) {
-        // Mark session as verified for new tab security
-        collaborationService.markSessionVerified();
-        
         if (onSuccess) {
           onSuccess();
         } else {

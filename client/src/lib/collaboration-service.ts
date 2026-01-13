@@ -1,6 +1,5 @@
 const API_BASE = "/api";
 const TOKEN_KEY = "homestaff360_collab_token";
-const SESSION_KEY = "homestaff360_session_verified";
 
 export interface CollaborationUser {
   id: string;
@@ -153,37 +152,6 @@ class CollaborationService {
 
   getToken(): string | null {
     return this.token;
-  }
-
-  // Session verification for new tab security
-  // Uses sessionStorage which is tab-specific (cleared when tab closes)
-  isSessionVerified(): boolean {
-    try {
-      return sessionStorage.getItem(SESSION_KEY) === "true";
-    } catch {
-      return false;
-    }
-  }
-
-  markSessionVerified() {
-    try {
-      sessionStorage.setItem(SESSION_KEY, "true");
-    } catch {
-      console.error("Failed to mark session as verified");
-    }
-  }
-
-  clearSessionVerification() {
-    try {
-      sessionStorage.removeItem(SESSION_KEY);
-    } catch {
-      console.error("Failed to clear session verification");
-    }
-  }
-
-  // Check if user needs to re-authenticate (has token but new tab/session)
-  needsSessionVerification(): boolean {
-    return this.isAuthenticated() && !this.isSessionVerified();
   }
 
   private async apiRequest<T>(
@@ -590,7 +558,6 @@ class CollaborationService {
     
     this.clearToken();
     this.clearSavedCredentials();
-    this.clearSessionVerification();
     
     return { success: true };
   }
