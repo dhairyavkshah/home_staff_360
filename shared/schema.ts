@@ -23,6 +23,7 @@ export const userProfileSchema = z.object({
   id: z.string(),
   type: z.enum(userTypes).optional(),
   displayName: z.string().min(1),
+  profileImage: z.string().optional(),
   createdAt: z.string(),
   activeAccountId: z.string().optional(),
 });

@@ -122,6 +122,22 @@ export function AddPersonScreen() {
       return;
     }
 
+    // Check if user is trying to add themselves
+    const savedPhone = collaborationService.getSavedPhone();
+    if (savedPhone) {
+      const normalizedSavedPhone = savedPhone.replace(/\D/g, '');
+      if (normalizedSavedPhone === digitsOnly) {
+        setPhoneCheckResult(null);
+        setErrors(prev => ({ ...prev, phone: "You cannot add yourself as staff" }));
+        return;
+      } else {
+        setErrors(prev => {
+          const { phone, ...rest } = prev;
+          return rest;
+        });
+      }
+    }
+
     setIsCheckingPhone(true);
     try {
       const token = collaborationService.getToken();

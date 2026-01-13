@@ -1,5 +1,8 @@
 # Home Staff 360
 
+**Version:** 3.0  
+**Last Updated:** January 13, 2026
+
 ## Overview
 Home Staff 360 is a professional staff management platform designed as a hybrid mobile application (React + Capacitor) with a backend server. It provides real-time workforce management with live data synchronization, suitable for household staff, hospitality businesses, restaurants, and other service-oriented operations. The platform supports two main operating modes: Home User Mode for employers and managers to track staff activities, and Staff User Mode for service professionals to manage clients, earnings, and expenses.
 
@@ -86,6 +89,7 @@ Our PostgreSQL server stores **only the minimum data required** for:
 - **Multi-Language Support**: 21 languages available.
 - **Multi-Currency Support**: 120+ national/regional currencies supporting all 173 countries, with automatic currency detection based on setup location.
 - **Real-Time Collaboration**: Chat messaging, connection invites, shared spaces, and live sync for operational data.
+- **Profile Images**: 512x512 JPEG compression, displayed in chat messages, connections list, and message previews. Upload/delete via Profile Settings.
 - **Push Notifications**: Implemented for Android (Capacitor LocalNotifications) and Web (Notifications API) for events like chat messages and connection updates.
 - **Subscription Model**: Two plans (Monthly/Annual), two tiers (Free/Premium), and 5-tier pricing across 173 countries via Google Play Billing.
 - **Auto-Backup**: WhatsApp-style background backup system with user consent, configurable frequency (daily/weekly/monthly), Android WorkManager integration, foreground service notifications during backup execution, and **local device storage only** (not uploaded to servers).
@@ -95,6 +99,7 @@ Our PostgreSQL server stores **only the minimum data required** for:
 - **Rate Limiting**: Implemented for OTP requests, authentication attempts, password resets, and Socket.IO connections.
 - **Data Protection**: HTTPS/TLS, GDPR and DPDP Act compliance, database transactions for critical operations.
 - **Duplicate Prevention**: Phone number validation to prevent duplicate staff/clients, with normalization.
+- **Self-Connection Prevention**: Users cannot connect to themselves or add themselves as staff/clients via phone number validation.
 
 ## External Dependencies
 

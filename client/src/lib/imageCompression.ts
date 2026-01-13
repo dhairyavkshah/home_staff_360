@@ -41,6 +41,71 @@ export async function compressImage(file: File): Promise<CompressionResult> {
   });
 }
 
+/**
+ * Compress and resize an image for profile pictures.
+ * Output is 512x512 pixels maximum, JPEG format with 0.85 quality.
+ */
+export async function compressProfileImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      img.src = reader.result as string;
+    };
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+
+      // Calculate dimensions to fit within 512x512 while maintaining aspect ratio
+      const maxSize = 512;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxSize) {
+          height = Math.round((height * maxSize) / width);
+          width = maxSize;
+        }
+      } else {
+        if (height > maxSize) {
+          width = Math.round((width * maxSize) / height);
+          height = maxSize;
+        }
+      }
+
+      // For profile pictures, make them square by cropping to center
+      const cropSize = Math.min(img.width, img.height);
+      const cropX = (img.width - cropSize) / 2;
+      const cropY = (img.height - cropSize) / 2;
+
+      canvas.width = maxSize;
+      canvas.height = maxSize;
+
+      // Draw cropped and resized image
+      ctx.drawImage(
+        img,
+        cropX, cropY, cropSize, cropSize,
+        0, 0, maxSize, maxSize
+      );
+
+      // Convert to JPEG with quality 0.85
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      resolve(dataUrl);
+    };
+
+    img.onerror = () => reject(new Error('Failed to load image'));
+    reader.onerror = () => reject(new Error('Failed to read file'));
+
+    reader.readAsDataURL(file);
+  });
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;

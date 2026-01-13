@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   User,
   Phone,
@@ -12,6 +12,8 @@ import {
   RefreshCw,
   Trash2,
   AlertTriangle,
+  Camera,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,6 +21,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/layout/Header";
 import { AppLayout, ScrollContent } from "@/components/layout/AppLayout";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useNavigation } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
@@ -27,6 +36,7 @@ import { storage } from "@/lib/storage";
 import { useDirtyForm } from "@/lib/dirty-tracking";
 import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import { combinePhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
+import { compressProfileImage } from "@/lib/imageCompression";
 
 type ProfileStep = "view" | "edit-name" | "change-password" | "change-phone" | "verify-phone" | "clear-all-data" | "delete-account";
 
@@ -38,6 +48,10 @@ export function ProfileSettingsScreen() {
   const [step, setStep] = useState<ProfileStep>("view");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [showPhotoDialog, setShowPhotoDialog] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Profile data
   const [profile, setProfile] = useState<{
@@ -45,6 +59,7 @@ export function ProfileSettingsScreen() {
     phone: string;
     displayName?: string;
     hasPassword: boolean;
+    avatarData?: string;
   } | null>(null);
 
   // Edit name form
@@ -114,6 +129,7 @@ export function ProfileSettingsScreen() {
           phone: data.phone,
           displayName: data.displayName,
           hasPassword: data.hasPassword,
+          avatarData: data.avatarData,
         });
         setDisplayName(data.displayName || "");
       }
@@ -172,6 +188,8 @@ export function ProfileSettingsScreen() {
     try {
       const result = await collaborationService.updateProfile({ displayName: displayName.trim() });
       if (result.success) {
+        // Update local storage profile as well
+        storage.updateProfile({ displayName: displayName.trim() });
         toast({ title: "Profile Updated", description: "Your name has been updated" });
         setProfile(prev => prev ? { ...prev, displayName: displayName.trim() } : null);
         setStep("view");
@@ -397,6 +415,49 @@ export function ProfileSettingsScreen() {
     }
   };
 
+  const handlePhotoUpload = async (file: File) => {
+    setIsUploadingPhoto(true);
+    try {
+      const compressedImage = await compressProfileImage(file);
+      
+      const result = await collaborationService.updateProfile({ avatarData: compressedImage });
+      if (result.success) {
+        storage.updateProfile({ profileImage: compressedImage });
+        setProfile(prev => prev ? { ...prev, avatarData: compressedImage } : null);
+        toast({ title: "Profile Photo Updated", description: "Your profile photo has been saved" });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload photo",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+      setShowPhotoDialog(false);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    setIsUploadingPhoto(true);
+    try {
+      const result = await collaborationService.updateProfile({ avatarData: "" });
+      if (result.success) {
+        storage.updateProfile({ profileImage: undefined });
+        setProfile(prev => prev ? { ...prev, avatarData: undefined } : null);
+        toast({ title: "Profile Photo Removed", description: "Your profile photo has been removed" });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove photo",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
   const getTitle = () => {
     switch (step) {
       case "edit-name": return "Edit Name";
@@ -427,6 +488,98 @@ export function ProfileSettingsScreen() {
       <ScrollContent>
         {step === "view" && (
           <section className="flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-4 mb-4">
+              <div 
+                className="relative w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover-elevate overflow-hidden border-2 border-dashed border-muted-foreground/30"
+                onClick={() => setShowPhotoDialog(true)}
+                data-testid="button-profile-photo-upload"
+              >
+                {isUploadingPhoto ? (
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                ) : profile?.avatarData ? (
+                  <img src={profile.avatarData} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center gap-1">
+                    <Camera className="w-6 h-6 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Add Photo</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
+                  <Camera className="w-5 h-5 text-white drop-shadow" />
+                </div>
+              </div>
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handlePhotoUpload(file);
+                  }
+                  e.target.value = "";
+                }}
+                data-testid="input-profile-camera"
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handlePhotoUpload(file);
+                  }
+                  e.target.value = "";
+                }}
+                data-testid="input-profile-file"
+              />
+              {profile?.avatarData && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleRemovePhoto}
+                  disabled={isUploadingPhoto}
+                  data-testid="button-remove-profile-photo"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Remove Photo
+                </Button>
+              )}
+            </div>
+
+            <Dialog open={showPhotoDialog} onOpenChange={setShowPhotoDialog}>
+              <DialogContent className="max-w-xs">
+                <DialogHeader>
+                  <DialogTitle>Profile Photo</DialogTitle>
+                  <DialogDescription>Choose how to add your profile photo</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-3">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3"
+                    onClick={() => cameraInputRef.current?.click()}
+                    data-testid="button-profile-capture-image"
+                  >
+                    <Camera className="w-5 h-5" />
+                    Capture Image
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3"
+                    onClick={() => fileInputRef.current?.click()}
+                    data-testid="button-profile-select-image"
+                  >
+                    <ImageIcon className="w-5 h-5" />
+                    Select from Device
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Account Information
             </h2>

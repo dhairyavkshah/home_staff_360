@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigation, useNavigationData } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
@@ -52,6 +53,7 @@ interface Message {
   chatId: string;
   senderId: string;
   senderName?: string;
+  senderAvatarData?: string;
   messageType: string;
   content: string;
   isOwn: boolean;
@@ -72,6 +74,7 @@ interface ChatInfo {
     userId: string;
     displayName?: string;
     mode: string;
+    avatarData?: string;
   }>;
 }
 
@@ -618,39 +621,49 @@ export function ChatScreen() {
                 key={message.id}
                 className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}
               >
-                <div className="relative group max-w-[80%]">
-                  <div
-                    className={`rounded-2xl px-4 py-2 cursor-pointer ${
-                      message.isDeleted
-                        ? "bg-muted/50 italic"
-                        : message.isOwn
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    }`}
-                    data-testid={`message-${message.id}`}
-                    onClick={() => {
-                      if (isEditable(message)) {
-                        setSelectedMessageId(selectedMessageId === message.id ? null : message.id);
-                      }
-                    }}
-                  >
-                    {!message.isOwn && message.senderName && !message.isDeleted && (
-                      <p className="text-xs font-medium mb-1 opacity-70">
-                        {message.senderName}
-                      </p>
-                    )}
-                    <p className="text-sm whitespace-pre-wrap break-words">
-                      {message.content}
-                    </p>
-                    <div className={`flex items-center gap-2 mt-1 ${
-                      message.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
-                    }`}>
-                      <span className="text-xs">{formatTime(message.createdAt)}</span>
-                      {message.isEdited && !message.isDeleted && (
-                        <span className="text-xs italic">edited</span>
+                <div className={`flex items-end gap-2 max-w-[80%] ${message.isOwn ? "flex-row-reverse" : ""}`}>
+                  {!message.isOwn && (
+                    <Avatar className="h-8 w-8 flex-shrink-0">
+                      {message.senderAvatarData ? (
+                        <img src={message.senderAvatarData} alt={message.senderName || "User"} className="h-full w-full object-cover" />
+                      ) : (
+                        <AvatarFallback>{message.senderName?.charAt(0) || 'U'}</AvatarFallback>
                       )}
+                    </Avatar>
+                  )}
+                  <div className="relative group">
+                    <div
+                      className={`rounded-2xl px-4 py-2 cursor-pointer ${
+                        message.isDeleted
+                          ? "bg-muted/50 italic"
+                          : message.isOwn
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      }`}
+                      data-testid={`message-${message.id}`}
+                      onClick={() => {
+                        if (isEditable(message)) {
+                          setSelectedMessageId(selectedMessageId === message.id ? null : message.id);
+                        }
+                      }}
+                    >
+                      {!message.isOwn && message.senderName && !message.isDeleted && (
+                        <p className="text-xs font-medium mb-1 opacity-70">
+                          {message.senderName}
+                        </p>
+                      )}
+                      <p className="text-sm whitespace-pre-wrap break-words">
+                        {message.content}
+                      </p>
+                      <div className={`flex items-center gap-2 mt-1 ${
+                        message.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+                      }`}>
+                        <span className="text-xs">{formatTime(message.createdAt)}</span>
+                        {message.isEdited && !message.isDeleted && (
+                          <span className="text-xs italic">edited</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
                   
                   {/* Edit/Delete buttons - visible on hover (desktop) or tap (mobile) */}
                   {isEditable(message) && (
@@ -686,14 +699,15 @@ export function ChatScreen() {
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
-                      {getRemainingEditTime(message) && (
-                        <span className="text-xs text-muted-foreground px-1 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {getRemainingEditTime(message)}
-                        </span>
-                      )}
-                    </div>
-                  )}
+                        {getRemainingEditTime(message) && (
+                          <span className="text-xs text-muted-foreground px-1 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {getRemainingEditTime(message)}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             );

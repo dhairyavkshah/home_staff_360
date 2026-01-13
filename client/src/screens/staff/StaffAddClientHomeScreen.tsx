@@ -98,6 +98,22 @@ export function StaffAddClientHomeScreen() {
       return;
     }
 
+    // Check if user is trying to add themselves
+    const savedPhone = collaborationService.getSavedPhone();
+    if (savedPhone) {
+      const normalizedSavedPhone = savedPhone.replace(/\D/g, '');
+      if (normalizedSavedPhone === cleanedPhone) {
+        setPhoneCheckResult(null);
+        setErrors(prev => ({ ...prev, phone: "You cannot add yourself as client" }));
+        return;
+      } else {
+        setErrors(prev => {
+          const { phone, ...rest } = prev;
+          return rest;
+        });
+      }
+    }
+
     if (cleanedPhone === lastCheckedPhoneRef.current) {
       return;
     }

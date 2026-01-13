@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
@@ -38,6 +39,7 @@ interface Connection {
     displayName?: string;
     phone?: string;
     mode: string;
+    avatarData?: string;
   };
   nickname?: string;
   chatId?: string;
@@ -53,6 +55,7 @@ interface ConnectionInvite {
   senderMode: string;
   senderName?: string;
   senderPhone?: string;
+  senderAvatarData?: string;
   targetUserId?: string;
   targetName?: string;
   status: string;
@@ -66,6 +69,7 @@ interface SearchResult {
     displayName?: string;
     phone: string;
     isVerified: boolean;
+    avatarData?: string;
   } | null;
   alreadyConnected: boolean;
   pendingInvite: boolean;
@@ -144,6 +148,21 @@ export function ConnectionsTab() {
         variant: "destructive",
       });
       return;
+    }
+
+    // Check if user is trying to search for their own number
+    const savedPhone = collaborationService.getSavedPhone();
+    if (savedPhone) {
+      const normalizedSavedPhone = savedPhone.replace(/\D/g, '');
+      const normalizedSearchPhone = fullPhone.replace(/\D/g, '');
+      if (normalizedSavedPhone === normalizedSearchPhone) {
+        toast({
+          title: "Cannot Connect",
+          description: "You cannot connect with yourself",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setIsSearching(true);
@@ -337,9 +356,13 @@ export function ConnectionsTab() {
           <div className="mt-4 p-4 bg-muted rounded-md">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
+                <Avatar className="h-10 w-10">
+                  {searchResult.user.avatarData ? (
+                    <img src={searchResult.user.avatarData} alt={searchResult.user.displayName || "User"} className="h-full w-full object-cover" />
+                  ) : (
+                    <AvatarFallback>{searchResult.user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                  )}
+                </Avatar>
                 <div>
                   <p className="font-medium">{searchResult.user.displayName || "User"}</p>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -384,9 +407,15 @@ export function ConnectionsTab() {
               <Card key={invite.id} className="p-4" data-testid={`card-invite-${invite.id}`}>
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                      <UserPlus className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-                    </div>
+                    <Avatar className="h-10 w-10">
+                      {invite.senderAvatarData ? (
+                        <img src={invite.senderAvatarData} alt={invite.senderName || "Someone"} className="h-full w-full object-cover" />
+                      ) : (
+                        <AvatarFallback className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400">
+                          {invite.senderName?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
                     <div>
                       <p className="font-medium">{invite.senderName || "Someone"}</p>
                       <p className="text-sm text-muted-foreground">
@@ -464,9 +493,15 @@ export function ConnectionsTab() {
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
-                    </div>
+                    <Avatar className="h-10 w-10">
+                      {conn.otherUser.avatarData ? (
+                        <img src={conn.otherUser.avatarData} alt={conn.nickname || conn.otherUser.displayName || "User"} className="h-full w-full object-cover" />
+                      ) : (
+                        <AvatarFallback className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                          {(conn.nickname || conn.otherUser.displayName || "U").charAt(0)}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
                     <div>
                       <p className="font-medium">
                         {conn.nickname || conn.otherUser.displayName || "User"}

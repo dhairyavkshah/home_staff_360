@@ -229,4 +229,4 @@ See Home Staff 360 in action! Professional staff management for homes, hotels, r
 
 ---
 
-*Last Updated: January 9, 2026*
+*Last Updated: January 13, 2026*

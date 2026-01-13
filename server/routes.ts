@@ -1083,6 +1083,8 @@ router.get("/api/user/profile", authenticateToken, async (req: Request, res: Res
       hasPassword: !!user.passwordHash,
       preferredLanguage: user.preferredLanguage,
       connectCount: user.connectCount,
+      avatarData: user.avatarData,
+      avatarUpdatedAt: user.avatarUpdatedAt,
       createdAt: user.createdAt
     });
   } catch (error) {
@@ -1094,13 +1096,17 @@ router.get("/api/user/profile", authenticateToken, async (req: Request, res: Res
 router.patch("/api/user/profile", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
-    const { displayName, userType, preferredLanguage, deviceInfo } = req.body;
+    const { displayName, userType, preferredLanguage, deviceInfo, avatarData } = req.body;
 
     const updateData: any = { lastActiveAt: new Date() };
     if (displayName !== undefined) updateData.displayName = displayName;
     if (userType !== undefined) updateData.userType = userType;
     if (preferredLanguage !== undefined) updateData.preferredLanguage = preferredLanguage;
     if (deviceInfo !== undefined) updateData.deviceInfo = deviceInfo;
+    if (avatarData !== undefined) {
+      updateData.avatarData = avatarData;
+      updateData.avatarUpdatedAt = new Date();
+    }
 
     await db.update(serverUsers)
       .set(updateData)
@@ -2941,7 +2947,8 @@ router.get("/api/connections/search", authenticateToken, async (req: Request, re
         id: foundUser.id,
         displayName: foundUser.displayName,
         phone: foundUser.phone.slice(0, -4) + '****', // Mask last 4 digits
-        isVerified: foundUser.isVerified
+        isVerified: foundUser.isVerified,
+        avatarData: foundUser.avatarData
       },
       alreadyConnected: !!existingConnection,
       pendingInvite: !!pendingInvite
@@ -2973,7 +2980,8 @@ router.get("/api/connections/invites/received", authenticateToken, async (req: R
       return {
         ...invite,
         senderName: sender?.displayName,
-        senderPhone: sender?.phone ? sender.phone.slice(0, -4) + '****' : undefined
+        senderPhone: sender?.phone ? sender.phone.slice(0, -4) + '****' : undefined,
+        senderAvatarData: sender?.avatarData
       };
     }));
 
@@ -3194,7 +3202,8 @@ router.get("/api/connections", authenticateToken, async (req: Request, res: Resp
           id: otherUserId,
           displayName: otherUser?.displayName,
           phone: otherUser?.phone ? otherUser.phone.slice(0, -4) + '****' : undefined,
-          mode: otherUserMode
+          mode: otherUserMode,
+          avatarData: otherUser?.avatarData
         },
         nickname: conn.nickname,
         chatId: chat?.id,
@@ -3314,7 +3323,8 @@ router.get("/api/chats", authenticateToken, async (req: Request, res: Response) 
             return {
               userId: p.userId,
               displayName: user?.displayName,
-              mode: p.userMode
+              mode: p.userMode,
+              avatarData: user?.avatarData
             };
           })
       );
@@ -3411,7 +3421,8 @@ router.get("/api/chats/:chatId", authenticateToken, async (req: Request, res: Re
           return {
             userId: p.userId,
             displayName: user?.displayName,
-            mode: p.userMode
+            mode: p.userMode,
+            avatarData: user?.avatarData
           };
         })
     );
@@ -3474,6 +3485,7 @@ router.get("/api/chats/:chatId/messages", authenticateToken, async (req: Request
       return {
         ...msg,
         senderName: sender?.displayName,
+        senderAvatarData: sender?.avatarData,
         isOwn: msg.senderId === userId
       };
     }));

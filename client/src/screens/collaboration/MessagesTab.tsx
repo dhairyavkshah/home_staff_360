@@ -4,11 +4,11 @@ import {
   RefreshCw,
   Bell,
   BellOff,
-  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
@@ -19,6 +19,7 @@ interface ChatParticipant {
   id: string;
   userId: string;
   displayName?: string;
+  avatarData?: string;
   isMuted: boolean;
   unreadCount: number;
 }
@@ -30,6 +31,7 @@ interface Chat {
   lastMessagePreview?: string;
   otherParticipant?: ChatParticipant & {
     displayName?: string;
+    avatarData?: string;
   };
   isMuted: boolean;
   unreadCount: number;
@@ -166,9 +168,15 @@ export function MessagesTab() {
         >
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
+              <Avatar className="h-12 w-12">
+                {chat.otherParticipant?.avatarData ? (
+                  <img src={chat.otherParticipant.avatarData} alt={chat.otherParticipant?.displayName || "User"} className="h-full w-full object-cover" />
+                ) : (
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {chat.otherParticipant?.displayName?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                )}
+              </Avatar>
               {chat.unreadCount > 0 && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                   <span className="text-xs text-primary-foreground font-medium">

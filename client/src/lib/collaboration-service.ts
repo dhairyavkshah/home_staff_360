@@ -602,6 +602,8 @@ class CollaborationService {
     hasPassword: boolean;
     preferredLanguage?: string;
     connectCount?: number;
+    avatarData?: string;
+    avatarUpdatedAt?: string;
     createdAt: string;
   }> {
     return this.apiRequest("/user/profile");
@@ -611,6 +613,7 @@ class CollaborationService {
     displayName?: string;
     userType?: string;
     preferredLanguage?: string;
+    avatarData?: string;
   }): Promise<{ success: boolean; message?: string }> {
     return this.apiRequest("/user/profile", {
       method: "PATCH",

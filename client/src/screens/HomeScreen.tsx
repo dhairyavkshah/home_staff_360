@@ -58,6 +58,13 @@ export function HomeScreen() {
     }
   }, [data.startTour, data.tourMode, startTour]);
 
+  // Refresh data when returning from profile settings
+  useEffect(() => {
+    if (data.refresh) {
+      setRefreshKey((k) => k + 1);
+    }
+  }, [data.refresh]);
+
   const profile = useMemo(() => storage.getProfile(), [refreshKey]);
   const accounts = useMemo(() => storage.getAccounts().filter(a => a.ownerType === 'HOME'), [refreshKey]);
   const activeAccountId = useMemo(() => storage.getActiveAccountId(), [refreshKey]);
