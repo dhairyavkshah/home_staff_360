@@ -19,14 +19,9 @@ import { useTour, shouldShowTour } from "@/lib/guided-tour";
 import { useToast } from "@/hooks/use-toast";
 import { StorageWarningBanner } from "@/components/StorageWarningBanner";
 import { useRealtimeContext } from "@/lib/realtime-provider";
+import { App } from "@capacitor/app";
 import { ExitAppDialog } from "@/components/ExitAppDialog";
 import { initPushNotifications } from "@/lib/push-notification-service";
-
-// Helper to check if running on native platform using window-based detection
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
 
 export function HomeScreen() {
   const { navigate, data, goBack, canGoBack } = useNavigation();
@@ -41,31 +36,16 @@ export function HomeScreen() {
   const [showExitDialog, setShowExitDialog] = useState(false);
 
   useEffect(() => {
-    if (!isNativePlatform()) return;
-
-    let backHandler: any = null;
-    
-    const setupBackHandler = async () => {
-      try {
-        const { App } = await import("@capacitor/app");
-        backHandler = await App.addListener("backButton", () => {
-          if (canGoBack) {
-            goBack();
-          } else {
-            setShowExitDialog(true);
-          }
-        });
-      } catch (error) {
-        console.error("[HomeScreen] Failed to setup back button handler:", error);
+    const backHandler = App.addListener("backButton", () => {
+      if (canGoBack) {
+        goBack();
+      } else {
+        setShowExitDialog(true);
       }
-    };
-
-    setupBackHandler();
+    });
 
     return () => {
-      if (backHandler) {
-        backHandler.remove?.();
-      }
+      backHandler.then(handle => handle.remove());
     };
   }, [canGoBack, goBack]);
 
@@ -84,18 +64,9 @@ export function HomeScreen() {
     if (pushNotificationsInitializedRef.current) return;
     pushNotificationsInitializedRef.current = true;
 
-    // Defer push notification init to avoid blocking initial render
-    const timer = setTimeout(() => {
-      try {
-        initPushNotifications().catch((error) => {
-          console.error("Failed to initialize push notifications:", error);
-        });
-      } catch (error) {
-        console.error("Push notification init error:", error);
-      }
-    }, 500);
-    
-    return () => clearTimeout(timer);
+    initPushNotifications().catch((error) => {
+      console.error("Failed to initialize push notifications:", error);
+    });
   }, []);
 
   const profile = useMemo(() => storage.getProfile(), [refreshKey]);
@@ -435,14 +406,7 @@ export function HomeScreen() {
       <ExitAppDialog
         open={showExitDialog}
         onOpenChange={setShowExitDialog}
-        onExit={async () => {
-          try {
-            const { App } = await import("@capacitor/app");
-            App.exitApp();
-          } catch (error) {
-            console.error("[HomeScreen] Failed to exit app:", error);
-          }
-        }}
+        onExit={() => App.exitApp()}
         onStay={() => setShowExitDialog(false)}
       />
     </div>

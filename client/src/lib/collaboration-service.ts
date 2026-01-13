@@ -182,15 +182,7 @@ class CollaborationService {
   }
 
   // Check if user needs to re-authenticate (has token but new tab/session)
-  // Skip session verification on native mobile platforms - the device itself is the security boundary
-  // and sessionStorage gets cleared when the app closes, causing unwanted re-auth prompts
   needsSessionVerification(): boolean {
-    // Check if running in a native Capacitor app using window-based detection
-    const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
-    
-    if (isNative) {
-      return false;
-    }
     return this.isAuthenticated() && !this.isSessionVerified();
   }
 

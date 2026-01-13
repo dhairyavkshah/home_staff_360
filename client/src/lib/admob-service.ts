@@ -1,8 +1,14 @@
-// Helper to check if running on native platform using window-based detection
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
+import { Capacitor } from "@capacitor/core";
+import { 
+  AdMob, 
+  AdOptions, 
+  InterstitialAdPluginEvents, 
+  RewardAdPluginEvents, 
+  AdLoadInfo,
+  AdmobConsentStatus,
+  AdmobConsentDebugGeography,
+  RewardAdOptions
+} from "@capacitor-community/admob";
 
 export type AdType = "interstitial" | "rewarded" | "banner";
 
@@ -23,10 +29,11 @@ const DEFAULT_TEST_AD_UNITS = {
 class AdMobService {
   private initialized = false;
   private config: AdMobConfig = DEFAULT_TEST_AD_UNITS;
-  private consentStatus: any = null;
+  private isNativeEnvironment = false;
+  private consentStatus: AdmobConsentStatus | null = null;
 
-  private checkIsNative(): boolean {
-    return isNativePlatform();
+  constructor() {
+    this.isNativeEnvironment = Capacitor.isNativePlatform();
   }
 
   async initialize(customConfig?: Partial<AdMobConfig>): Promise<boolean> {
@@ -34,7 +41,7 @@ class AdMobService {
       return true;
     }
 
-    if (!this.checkIsNative()) {
+    if (!this.isNativeEnvironment) {
       console.log("[AdMob] Not a native platform, skipping initialization");
       return false;
     }
@@ -44,8 +51,6 @@ class AdMobService {
         this.config = { ...this.config, ...customConfig };
       }
 
-      const { AdMob } = await import("@capacitor-community/admob");
-
       await AdMob.initialize({
         testingDevices: this.config.testMode ? ["EMULATOR"] : [],
         initializeForTesting: this.config.testMode,
@@ -53,7 +58,7 @@ class AdMobService {
 
       await this.requestConsentInfo();
 
-      await this.setupListeners();
+      this.setupListeners();
       this.initialized = true;
       console.log("[AdMob] Initialized successfully");
       return true;
@@ -65,8 +70,6 @@ class AdMobService {
 
   private async requestConsentInfo(): Promise<void> {
     try {
-      const { AdMob, AdmobConsentStatus, AdmobConsentDebugGeography } = await import("@capacitor-community/admob");
-      
       const consentInfo = await AdMob.requestConsentInfo({
         debugGeography: this.config.testMode 
           ? AdmobConsentDebugGeography.EEA 
@@ -84,70 +87,64 @@ class AdMobService {
     }
   }
 
-  private async setupListeners(): Promise<void> {
-    try {
-      const { AdMob, InterstitialAdPluginEvents, RewardAdPluginEvents } = await import("@capacitor-community/admob");
+  private setupListeners(): void {
+    AdMob.addListener(InterstitialAdPluginEvents.Loaded, (info: AdLoadInfo) => {
+      console.log("[AdMob] Interstitial ad loaded");
+    });
 
-      AdMob.addListener(InterstitialAdPluginEvents.Loaded, () => {
-        console.log("[AdMob] Interstitial ad loaded");
-      });
+    AdMob.addListener(InterstitialAdPluginEvents.Showed, () => {
+      console.log("[AdMob] Interstitial ad shown");
+    });
 
-      AdMob.addListener(InterstitialAdPluginEvents.Showed, () => {
-        console.log("[AdMob] Interstitial ad shown");
-      });
+    AdMob.addListener(InterstitialAdPluginEvents.Dismissed, () => {
+      console.log("[AdMob] Interstitial ad dismissed");
+    });
 
-      AdMob.addListener(InterstitialAdPluginEvents.Dismissed, () => {
-        console.log("[AdMob] Interstitial ad dismissed");
-      });
+    AdMob.addListener(InterstitialAdPluginEvents.FailedToLoad, (error) => {
+      console.error("[AdMob] Interstitial ad failed to load:", error);
+    });
 
-      AdMob.addListener(InterstitialAdPluginEvents.FailedToLoad, (error) => {
-        console.error("[AdMob] Interstitial ad failed to load:", error);
-      });
+    AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error) => {
+      console.error("[AdMob] Interstitial ad failed to show:", error);
+    });
 
-      AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error) => {
-        console.error("[AdMob] Interstitial ad failed to show:", error);
-      });
+    AdMob.addListener(RewardAdPluginEvents.Loaded, (info: AdLoadInfo) => {
+      console.log("[AdMob] Rewarded ad loaded");
+    });
 
-      AdMob.addListener(RewardAdPluginEvents.Loaded, () => {
-        console.log("[AdMob] Rewarded ad loaded");
-      });
+    AdMob.addListener(RewardAdPluginEvents.Showed, () => {
+      console.log("[AdMob] Rewarded ad shown");
+    });
 
-      AdMob.addListener(RewardAdPluginEvents.Showed, () => {
-        console.log("[AdMob] Rewarded ad shown");
-      });
+    AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward) => {
+      console.log("[AdMob] User earned reward:", reward);
+    });
 
-      AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward) => {
-        console.log("[AdMob] User earned reward:", reward);
-      });
+    AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+      console.log("[AdMob] Rewarded ad dismissed");
+    });
 
-      AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
-        console.log("[AdMob] Rewarded ad dismissed");
-      });
+    AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error) => {
+      console.error("[AdMob] Rewarded ad failed to load:", error);
+    });
 
-      AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error) => {
-        console.error("[AdMob] Rewarded ad failed to load:", error);
-      });
-
-      AdMob.addListener(RewardAdPluginEvents.FailedToShow, (error) => {
-        console.error("[AdMob] Rewarded ad failed to show:", error);
-      });
-    } catch (error) {
-      console.error("[AdMob] Failed to setup listeners:", error);
-    }
+    AdMob.addListener(RewardAdPluginEvents.FailedToShow, (error) => {
+      console.error("[AdMob] Rewarded ad failed to show:", error);
+    });
   }
 
   async prepareInterstitial(): Promise<boolean> {
-    if (!this.initialized || !this.checkIsNative()) {
+    if (!this.initialized || !this.isNativeEnvironment) {
       return false;
     }
 
     try {
-      const { AdMob } = await import("@capacitor-community/admob");
-      
-      await AdMob.prepareInterstitial({
+      const options: AdOptions = {
         adId: this.config.interstitialAdUnitId,
         isTesting: this.config.testMode,
-      });
+      };
+
+      await AdMob.prepareInterstitial(options);
       return true;
     } catch (error) {
       console.error("[AdMob] Failed to prepare interstitial:", error);
@@ -156,12 +153,11 @@ class AdMobService {
   }
 
   async showInterstitial(): Promise<boolean> {
-    if (!this.initialized || !this.checkIsNative()) {
+    if (!this.initialized || !this.isNativeEnvironment) {
       return false;
     }
 
     try {
-      const { AdMob } = await import("@capacitor-community/admob");
       await AdMob.showInterstitial();
       return true;
     } catch (error) {
@@ -171,17 +167,17 @@ class AdMobService {
   }
 
   async prepareRewardedAd(): Promise<boolean> {
-    if (!this.initialized || !this.checkIsNative()) {
+    if (!this.initialized || !this.isNativeEnvironment) {
       return false;
     }
 
     try {
-      const { AdMob } = await import("@capacitor-community/admob");
-      
-      await AdMob.prepareRewardVideoAd({
+      const options: RewardAdOptions = {
         adId: this.config.rewardedAdUnitId,
         isTesting: this.config.testMode,
-      });
+      };
+
+      await AdMob.prepareRewardVideoAd(options);
       return true;
     } catch (error) {
       console.error("[AdMob] Failed to prepare rewarded ad:", error);
@@ -190,32 +186,30 @@ class AdMobService {
   }
 
   async showRewardedAd(): Promise<{ type: string; amount: number } | null> {
-    if (!this.initialized || !this.checkIsNative()) {
+    if (!this.initialized || !this.isNativeEnvironment) {
       return null;
     }
 
     return new Promise(async (resolve) => {
-      let rewardListener: any = null;
-      let dismissListener: any = null;
+      let rewardListener: Awaited<ReturnType<typeof AdMob.addListener>> | null = null;
+      let dismissListener: Awaited<ReturnType<typeof AdMob.addListener>> | null = null;
 
       const cleanup = async () => {
         if (rewardListener) await rewardListener.remove();
         if (dismissListener) await dismissListener.remove();
       };
 
+      rewardListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, async (reward) => {
+        await cleanup();
+        resolve({ type: reward.type, amount: reward.amount });
+      });
+
+      dismissListener = await AdMob.addListener(RewardAdPluginEvents.Dismissed, async () => {
+        await cleanup();
+        resolve(null);
+      });
+
       try {
-        const { AdMob, RewardAdPluginEvents } = await import("@capacitor-community/admob");
-
-        rewardListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, async (reward) => {
-          await cleanup();
-          resolve({ type: reward.type, amount: reward.amount });
-        });
-
-        dismissListener = await AdMob.addListener(RewardAdPluginEvents.Dismissed, async () => {
-          await cleanup();
-          resolve(null);
-        });
-
         await AdMob.showRewardVideoAd();
       } catch (error) {
         console.error("[AdMob] Failed to show rewarded ad:", error);
@@ -234,10 +228,10 @@ class AdMobService {
   }
 
   isNative(): boolean {
-    return this.checkIsNative();
+    return this.isNativeEnvironment;
   }
 
-  getConsentStatus(): any {
+  getConsentStatus(): AdmobConsentStatus | null {
     return this.consentStatus;
   }
 }

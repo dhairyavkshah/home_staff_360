@@ -1,8 +1,7 @@
-// Helper to check if running on native platform using window-based detection
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
+import { Capacitor } from "@capacitor/core";
+import { Camera } from "@capacitor/camera";
+import { Filesystem } from "@capacitor/filesystem";
+import { LocalNotifications } from "@capacitor/local-notifications";
 
 export type PermissionType = "camera" | "storage" | "notifications" | "location" | "media";
 
@@ -21,6 +20,8 @@ export interface PermissionInfo {
   icon: string;
   required: boolean;
 }
+
+const isNativePlatform = Capacitor.isNativePlatform();
 
 export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
   {
@@ -61,9 +62,7 @@ export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
 ];
 
 class PermissionsService {
-  private checkIsNative(): boolean {
-    return isNativePlatform();
-  }
+  private isNative = Capacitor.isNativePlatform();
 
   async checkAllPermissions(): Promise<PermissionStatus> {
     const status: PermissionStatus = {
@@ -76,9 +75,8 @@ class PermissionsService {
 
     status.location = await this.checkLocationPermission();
 
-    if (this.checkIsNative()) {
+    if (this.isNative) {
       try {
-        const { Camera } = await import("@capacitor/camera");
         const cameraStatus = await Camera.checkPermissions();
         status.camera = this.mapCapacitorStatus(cameraStatus.camera);
         status.media = this.mapCapacitorStatus(cameraStatus.photos);
@@ -88,7 +86,6 @@ class PermissionsService {
       }
 
       try {
-        const { Filesystem } = await import("@capacitor/filesystem");
         const fsStatus = await Filesystem.checkPermissions();
         status.storage = this.mapCapacitorStatus(fsStatus.publicStorage);
       } catch {
@@ -96,7 +93,6 @@ class PermissionsService {
       }
 
       try {
-        const { LocalNotifications } = await import("@capacitor/local-notifications");
         const notifStatus = await LocalNotifications.checkPermissions();
         status.notifications = this.mapCapacitorStatus(notifStatus.display);
       } catch {
@@ -114,7 +110,7 @@ class PermissionsService {
       }
     }
 
-    if (!this.checkIsNative()) {
+    if (!this.isNative) {
       this.saveLastCheckedStatus(status);
     }
 
@@ -163,9 +159,8 @@ class PermissionsService {
   }
 
   async requestCameraPermission(): Promise<"granted" | "denied"> {
-    if (this.checkIsNative()) {
+    if (this.isNative) {
       try {
-        const { Camera } = await import("@capacitor/camera");
         const result = await Camera.requestPermissions({ permissions: ["camera"] });
         return result.camera === "granted" ? "granted" : "denied";
       } catch {
@@ -183,9 +178,8 @@ class PermissionsService {
   }
 
   async requestMediaPermission(): Promise<"granted" | "denied"> {
-    if (this.checkIsNative()) {
+    if (this.isNative) {
       try {
-        const { Camera } = await import("@capacitor/camera");
         const result = await Camera.requestPermissions({ permissions: ["photos"] });
         return result.photos === "granted" || result.photos === "limited" ? "granted" : "denied";
       } catch {
@@ -197,9 +191,8 @@ class PermissionsService {
   }
 
   async requestStoragePermission(): Promise<"granted" | "denied"> {
-    if (this.checkIsNative()) {
+    if (this.isNative) {
       try {
-        const { Filesystem } = await import("@capacitor/filesystem");
         const result = await Filesystem.requestPermissions();
         return result.publicStorage === "granted" ? "granted" : "denied";
       } catch {
@@ -211,9 +204,8 @@ class PermissionsService {
   }
 
   async requestNotificationPermission(): Promise<"granted" | "denied"> {
-    if (this.checkIsNative()) {
+    if (this.isNative) {
       try {
-        const { LocalNotifications } = await import("@capacitor/local-notifications");
         const result = await LocalNotifications.requestPermissions();
         return result.display === "granted" ? "granted" : "denied";
       } catch {

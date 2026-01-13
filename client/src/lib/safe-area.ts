@@ -1,7 +1,6 @@
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
+import { Capacitor } from '@capacitor/core';
+import { SafeArea as SafeAreaCommunity, SystemBarsStyle } from '@capacitor-community/safe-area';
+import { SafeArea as SafeAreaPlugin } from 'capacitor-plugin-safe-area';
 
 export interface SafeAreaInsets {
   top: number;
@@ -43,6 +42,7 @@ function notifyListeners(insets: SafeAreaInsets): void {
     try {
       listener(insets);
     } catch {
+      // Ignore listener errors
     }
   });
 }
@@ -62,7 +62,6 @@ export function getSafeAreaInsets(): SafeAreaInsets {
 
 async function fetchInsetsFromPlugin(): Promise<SafeAreaInsets> {
   try {
-    const { SafeArea: SafeAreaPlugin } = await import("capacitor-plugin-safe-area");
     const result = await SafeAreaPlugin.getSafeAreaInsets();
     const insets = result.insets;
     
@@ -78,7 +77,7 @@ async function fetchInsetsFromPlugin(): Promise<SafeAreaInsets> {
 }
 
 async function fetchAndSetInsets(): Promise<void> {
-  if (!isNativePlatform()) {
+  if (!Capacitor.isNativePlatform()) {
     cachedInsets = DEFAULT_INSETS;
     updateCSSProperties(cachedInsets);
     return;
@@ -100,25 +99,24 @@ export async function initSafeArea(): Promise<void> {
   if (isInitialized) return;
   isInitialized = true;
   
-  if (!isNativePlatform()) {
+  if (!Capacitor.isNativePlatform()) {
     cachedInsets = DEFAULT_INSETS;
     updateCSSProperties(cachedInsets);
     return;
   }
 
   try {
-    const { SafeArea: SafeAreaCommunity, SystemBarsStyle } = await import("@capacitor-community/safe-area");
     const isDarkMode = document.documentElement.classList.contains('dark');
     await SafeAreaCommunity.setSystemBarsStyle({
       style: isDarkMode ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
     });
   } catch {
+    // Ignore style errors
   }
 
   await fetchAndSetInsets();
   
   try {
-    const { SafeArea: SafeAreaPlugin } = await import("capacitor-plugin-safe-area");
     await SafeAreaPlugin.addListener('safeAreaChanged', (data) => {
       const insets = data.insets;
       cachedInsets = {
@@ -136,6 +134,7 @@ export async function initSafeArea(): Promise<void> {
       notifyListeners(cachedInsets);
     });
   } catch {
+    // Fallback polling for devices without listener support
     setInterval(async () => {
       await fetchAndSetInsets();
     }, 1000);
@@ -143,16 +142,16 @@ export async function initSafeArea(): Promise<void> {
 }
 
 export async function updateStatusBarTheme(isDark: boolean): Promise<void> {
-  if (!isNativePlatform()) {
+  if (!Capacitor.isNativePlatform()) {
     return;
   }
 
   try {
-    const { SafeArea: SafeAreaCommunity, SystemBarsStyle } = await import("@capacitor-community/safe-area");
     await SafeAreaCommunity.setSystemBarsStyle({
       style: isDark ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
     });
   } catch {
+    // Ignore errors
   }
 }
 

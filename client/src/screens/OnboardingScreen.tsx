@@ -16,13 +16,8 @@ import { CountrySelector } from "@/components/ui/country-selector";
 import { CurrencySelector } from "@/components/ui/currency-selector";
 import { collaborationService } from "@/lib/collaboration-service";
 import { detectCountryFromPhoneNumber } from "@/lib/geolocation-service";
+import { App } from "@capacitor/app";
 import { useTranslation } from "@/lib/i18n/i18n-context";
-
-// Helper to check if running on native platform using window-based detection
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
 
 export function OnboardingScreen() {
   const { navigate, data } = useNavigation();
@@ -53,23 +48,11 @@ export function OnboardingScreen() {
   }, [navigate]);
 
   useEffect(() => {
-    let backHandler: { remove: () => void } | null = null;
-    
-    async function setupBackHandler() {
-      try {
-        const { App } = await import("@capacitor/app");
-        const handler = await App.addListener("backButton", () => {
-        });
-        backHandler = handler;
-      } catch (error) {
-        console.error("Failed to setup back button handler:", error);
-      }
-    }
-    
-    setupBackHandler();
+    const backHandler = App.addListener("backButton", () => {
+    });
 
     return () => {
-      backHandler?.remove();
+      backHandler.then(handle => handle.remove());
     };
   }, []);
 

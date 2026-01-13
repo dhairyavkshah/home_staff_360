@@ -2,8 +2,6 @@
 
 ## Home Staff 360
 
-**Version 3.0**
-
 ---
 
 ## Short Description (80 characters max)
@@ -20,13 +18,10 @@ Staff management for homes & businesses. Attendance, payments, chat & reports.
 
 ```
 Home Staff 360 - Professional Staff Management Platform
-Version 3.0
 
 Transform how you manage staff operations with Home Staff 360 - the comprehensive real-time platform designed for household management and adaptable to hospitality, restaurant, and other staff-oriented businesses.
 
-YOUR DATA, YOUR DEVICE, YOUR CONTROL
-
-Home Staff 360 uses a privacy-first architecture. Your business data stays exclusively on your device - we never access it. Our servers store only the minimum needed for authentication and collaboration.
+Originally crafted for household staff management, Home Staff 360 delivers powerful workforce tools that scale seamlessly across industries. Whether you're managing domestic staff, coordinating hotel housekeeping teams, overseeing restaurant personnel, or running any staff-centric operation, this platform provides the professional-grade features you need.
 
 VERSATILE APPLICATIONS
 
@@ -60,7 +55,7 @@ Real-Time Collaboration
 - Connect instantly with staff members or clients
 - See attendance updates as they happen
 - Approve expenses and requests in real-time
-- Never miss an update with push notifications
+- Never miss an update with live notifications
 
 Instant Messaging
 - Direct messaging with your team
@@ -117,45 +112,37 @@ Invoice Generation
 - Share via any messaging app
 - Track paid and pending status
 
-Auto-Backup
-- WhatsApp-style automatic backups
-- Stored locally on your device only
-- Configurable frequency (daily/weekly/monthly)
-- Background processing with notifications
-
 SECURE & PRIVATE
 
 - Phone + password authentication with OTP
 - Encrypted data transmission (HTTPS/TLS)
 - Biometric lock and PIN security options
-- Your business data never leaves your device
+- No personal data used for ad targeting
 - GDPR and DPDP Act compliant
 
 GLOBAL ACCESSIBILITY
 
 21 Languages: English, Hindi, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Telugu, Tamil, Urdu, Bengali, Odia, Assamese, Spanish, French, German, Arabic, Chinese, Japanese, Portuguese, Russian
 
-120+ Currencies: Comprehensive support for all 173 countries with automatic detection
+27 Currencies: INR, USD, EUR, GBP, AUD, CAD, and more
 
-SUBSCRIPTION OPTIONS
+FUTURE ROADMAP
 
-Free Tier: Full features with ads
-Premium Tier: Ad-free experience with priority support
-- Monthly and Annual plans available
-- Fair 5-tier pricing across 173 countries
-- Secure Google Play Billing
+We are continuously enhancing Home Staff 360 to better serve diverse industries:
+- Industry-specific templates for hospitality and restaurants
+- Advanced scheduling and shift management
+- Team hierarchy and department structures
+- Enhanced analytics for business operations
+- Integration with popular business tools
 
-NEW IN VERSION 3.0
+FREE TO USE
 
-- Enhanced app stability on Android
-- Improved push notification handling
-- Better platform detection
-- Smoother startup experience
+Home Staff 360 is free with all core features included. Premium subscription available for ad-free experience.
 
 Download now and experience professional staff management!
 ```
 
-**Character Count: ~3,480**
+**Character Count: ~3,450**
 
 ---
 
@@ -174,7 +161,6 @@ staff,management,attendance,salary,hospitality,restaurant,household,maid,invoice
 ```
 Home Staff 360
 Professional Staff Management for Homes & Businesses
-Your Data, Your Device, Your Control
 ```
 
 ---
@@ -189,20 +175,9 @@ Professional staff management platform. Perfect for homes, hotels, restaurants &
 
 ---
 
-## What's New (Version 3.0)
+## What's New (for updates)
 
-```
-Version 3.0 - Enhanced Stability & Performance
-
-- Improved app stability on Android devices
-- Refined push notification handling
-- Better platform detection for smoother experience
-- Enhanced session management for mobile app restarts
-
-Your Data, Your Device, Your Control!
-```
-
-**Character Count: 290**
+See RELEASE_NOTES.md for version-specific update descriptions.
 
 ---
 
@@ -249,30 +224,9 @@ Your Data, Your Device, Your Control!
 ## Video Description (optional)
 
 ```
-See Home Staff 360 in action! Professional staff management for homes, hotels, restaurants, and service businesses. Real-time collaboration, instant messaging, attendance tracking - all in one powerful platform. Your data stays on your device. Manage your team together, from anywhere.
+See Home Staff 360 in action! Professional staff management for homes, hotels, restaurants, and service businesses. Real-time collaboration, instant messaging, attendance tracking - all in one powerful platform. Manage your team together, from anywhere.
 ```
 
 ---
 
-## Privacy Highlights (for Data Safety section)
-
-**Data Collected**
-- Phone number (for authentication)
-- Password (stored encrypted)
-- Profile name and avatar (optional)
-- Chat messages (for collaboration)
-
-**Data NOT Collected**
-- Your business/operational data
-- Contacts, photos, or files
-- Browsing history
-- Location data (unless you enable it)
-
-**Security**
-- All data encrypted in transit
-- Business data stored locally only
-- Optional biometric/PIN protection
-
----
-
-*Last Updated: January 13, 2026*
+*Last Updated: January 9, 2026*

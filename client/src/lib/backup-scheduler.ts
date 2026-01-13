@@ -1,9 +1,5 @@
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import { storage } from "@/lib/storage";
-
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
 
 interface BackupSchedulerPlugin {
   scheduleBackup(options: { frequency: string; backupData?: string }): Promise<{ success: boolean }>;
@@ -11,27 +7,16 @@ interface BackupSchedulerPlugin {
   performBackupNow(options: { backupData: string }): Promise<{ success: boolean }>;
 }
 
-async function getBackupScheduler(): Promise<BackupSchedulerPlugin | null> {
-  if (!isNativePlatform()) return null;
-  try {
-    const { registerPlugin } = await import("@capacitor/core");
-    return registerPlugin<BackupSchedulerPlugin>("BackupScheduler");
-  } catch (error) {
-    console.error("Failed to get BackupScheduler plugin:", error);
-    return null;
-  }
-}
+const BackupScheduler = registerPlugin<BackupSchedulerPlugin>("BackupScheduler");
 
 export async function scheduleNativeBackup(frequency: "daily" | "weekly" | "monthly"): Promise<boolean> {
-  if (!isNativePlatform()) {
+  if (!Capacitor.isNativePlatform()) {
     console.log("Native backup scheduler not available on web");
     return false;
   }
 
   try {
-    const BackupScheduler = await getBackupScheduler();
-    if (!BackupScheduler) return false;
-
+    // Get current backup data to pass to native
     const backupData = JSON.stringify(storage.exportBackup());
     
     const result = await BackupScheduler.scheduleBackup({ 
@@ -47,14 +32,11 @@ export async function scheduleNativeBackup(frequency: "daily" | "weekly" | "mont
 }
 
 export async function cancelNativeBackup(): Promise<boolean> {
-  if (!isNativePlatform()) {
+  if (!Capacitor.isNativePlatform()) {
     return false;
   }
 
   try {
-    const BackupScheduler = await getBackupScheduler();
-    if (!BackupScheduler) return false;
-
     const result = await BackupScheduler.cancelBackup();
     console.log("Native backup cancelled:", result);
     return result.success;
@@ -65,15 +47,13 @@ export async function cancelNativeBackup(): Promise<boolean> {
 }
 
 export async function performNativeBackupNow(): Promise<boolean> {
-  if (!isNativePlatform()) {
+  if (!Capacitor.isNativePlatform()) {
     console.log("Native backup not available on web");
     return false;
   }
 
   try {
-    const BackupScheduler = await getBackupScheduler();
-    if (!BackupScheduler) return false;
-
+    // Get current backup data
     const backupData = JSON.stringify(storage.exportBackup());
     
     const result = await BackupScheduler.performBackupNow({ backupData });
@@ -86,5 +66,5 @@ export async function performNativeBackupNow(): Promise<boolean> {
 }
 
 export function isNativeBackupAvailable(): boolean {
-  return isNativePlatform();
+  return Capacitor.isNativePlatform();
 }

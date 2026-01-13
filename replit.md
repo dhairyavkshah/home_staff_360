@@ -1,7 +1,5 @@
 # Home Staff 360
 
-**Version 3.0** | **January 13, 2026**
-
 ## Overview
 Home Staff 360 is a professional staff management platform designed as a hybrid mobile application (React + Capacitor) with a backend server. It provides real-time workforce management with live data synchronization, suitable for household staff, hospitality businesses, restaurants, and other service-oriented operations. The platform supports two main operating modes: Home User Mode for employers and managers to track staff activities, and Staff User Mode for service professionals to manage clients, earnings, and expenses.
 
@@ -22,17 +20,6 @@ Home Staff 360 is a professional staff management platform designed as a hybrid 
 
 ## Important Documents
 - **MIGRATION_CHECKLIST.md**: Formal procedures for safely managing database schema changes when the app has live users and production data. Must be followed for all database migrations.
-- **docs/PRIVACY_POLICY.md**: Privacy policy for app store and users
-- **docs/RELEASE_NOTES.md**: Version history and release notes
-- **docs/APP_STORE_DESCRIPTIONS.md**: App store listing descriptions
-
-## Version History
-
-| Version | Date | Highlights |
-|---------|------|------------|
-| 3.0 | Jan 13, 2026 | Stability improvements, refined push notifications, platform detection fixes |
-| 2.0 | Jan 2026 | Subscription model, profile avatars, auto-backup, 120+ currencies |
-| 1.0 | Jan 2026 | Live platform for homes, hospitality, restaurants & service businesses |
 
 ## System Architecture
 
@@ -58,7 +45,7 @@ Home Staff 360 uses a **hybrid storage model** with two distinct storage locatio
 | Storage Location | What Is Stored | Purpose |
 |-----------------|----------------|---------|
 | **Your Device (Primary)** | Staff records, attendance, payments, expenses, laundry, invoices, documents, clients, households, notes, settings | All business/operational data |
-| **Our Server (Minimal)** | Phone number, password hash, user connections, chat messages, approval requests, notifications, profile avatars | Authentication & collaboration only |
+| **Our Server (Minimal)** | Phone number, password hash, user connections, chat messages, approval requests, notifications | Authentication & collaboration only |
 
 ### Local Device Storage (Primary - Your Data)
 All business and operational data stays **exclusively on user devices**:
@@ -82,7 +69,6 @@ Our PostgreSQL server stores **only the minimum data required** for:
 - **Chat Messages**: Messages sent between connected users
 - **Approval Workflows**: Items shared between users requiring approval
 - **Notifications**: System notifications for collaboration features
-- **Profile Avatars**: Profile images for collaboration features
 
 ### Why This Hybrid Approach?
 - **Maximum Privacy**: Your sensitive business data never touches our servers
@@ -100,7 +86,7 @@ Our PostgreSQL server stores **only the minimum data required** for:
 - **Multi-Language Support**: 21 languages available.
 - **Multi-Currency Support**: 120+ national/regional currencies supporting all 173 countries, with automatic currency detection based on setup location.
 - **Real-Time Collaboration**: Chat messaging, connection invites, shared spaces, and live sync for operational data.
-- **Push Notifications**: Implemented for Android using Firebase Cloud Messaging (FCM) with Capacitor Push Notifications plugin. Supports background notifications when app is closed. Token registration on app start (deferred 500ms for stability), unregistration on logout. Web fallback uses Notifications API. Events include chat messages, connection requests, and collaboration updates.
+- **Push Notifications**: Implemented for Android using Firebase Cloud Messaging (FCM) with Capacitor Push Notifications plugin. Supports background notifications when app is closed. Token registration on app start, unregistration on logout. Web fallback uses Notifications API. Events include chat messages, connection requests, and collaboration updates.
 - **User Profile Avatars**: Profile images uploaded and compressed to 512x512 pixels max, stored as base64 on server. Displayed across chat, connections, messages, and notifications via reusable UserAvatar component and use-user-avatar hook with caching.
 - **Subscription Model**: Two plans (Monthly/Annual), two tiers (Free/Premium), and 5-tier pricing across 173 countries via Google Play Billing.
 - **Auto-Backup**: WhatsApp-style background backup system with user consent, configurable frequency (daily/weekly/monthly), Android WorkManager integration, foreground service notifications during backup execution, and **local device storage only** (not uploaded to servers).
@@ -110,21 +96,6 @@ Our PostgreSQL server stores **only the minimum data required** for:
 - **Rate Limiting**: Implemented for OTP requests, authentication attempts, password resets, and Socket.IO connections.
 - **Data Protection**: HTTPS/TLS, GDPR and DPDP Act compliance, database transactions for critical operations.
 - **Duplicate Prevention**: Phone number validation to prevent duplicate staff/clients, with normalization.
-
-## Version 3.0 Technical Notes
-
-### Stability Improvements
-- **Platform Detection**: Uses window-based Capacitor detection (`!!(window as any).Capacitor?.isNativePlatform?.()`) instead of direct imports for better reliability
-- **No Module-Level Capacitor Calls**: All Capacitor platform checks happen at function call time, not module load time, preventing crashes when the Capacitor bridge isn't ready
-- **Push Notifications**: Deferred initialization by 500ms with try-catch wrapper to prevent blocking app startup
-- **Session Management**: Session verification skipped on native platforms where sessionStorage is unreliable after app restart
-- **Haptic Feedback**: button.tsx, checkbox.tsx, switch.tsx, use-haptics.ts, and sound-service.ts all use deferred platform detection to avoid module-load crashes
-
-### Build Requirements
-- After code changes, rebuild APK/AAB using:
-  1. `npx cap sync android`
-  2. Build in Android Studio: Build → Build Bundle(s) / APK(s)
-- Web version updates via Replit publish do not affect native APK
 
 ## External Dependencies
 
@@ -142,4 +113,3 @@ Our PostgreSQL server stores **only the minimum data required** for:
 | Mobile | Capacitor (Android) |
 | SMS | Twilio |
 | Forms | React Hook Form, Zod |
-| Push Notifications | Firebase Cloud Messaging |

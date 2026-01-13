@@ -1,12 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, HelpCircle, Volume2, Vibrate, MapPin, Link2, Crown } from "lucide-react";
+import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
-
-// Helper to check if running on native platform using window-based detection
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -109,10 +104,8 @@ export function SettingsScreen() {
 
   const handleExitComplete = useCallback(async () => {
     try {
-      const { App } = await import("@capacitor/app");
       await App.exitApp();
-    } catch (error) {
-      console.error("Failed to exit app:", error);
+    } catch {
     }
     try {
       window.close();
@@ -631,7 +624,7 @@ export function SettingsScreen() {
             <div className="text-center flex flex-col gap-2">
               <div>
                 <p className="font-semibold text-base">Home Staff 360</p>
-                <p className="text-xs text-muted-foreground">{t("version")}: v3.0</p>
+                <p className="text-xs text-muted-foreground">{t("version")}: v2.0</p>
               </div>
               <p className="text-sm text-muted-foreground">{t("appTagline")}</p>
               <p className="text-xs text-muted-foreground/70 pt-1">{t("craftedBy")}</p>

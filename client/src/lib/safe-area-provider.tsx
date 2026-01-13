@@ -1,10 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
-
-// Helper to check if running on native platform using window-based detection
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
+import { Capacitor } from "@capacitor/core";
+import { SafeArea as SafeAreaCommunity, SystemBarsStyle } from "@capacitor-community/safe-area";
+import { SafeArea as SafeAreaPlugin } from "capacitor-plugin-safe-area";
 
 interface SafeAreaInsets {
   top: number;
@@ -84,18 +81,13 @@ export function SafeAreaProvider({ children }: SafeAreaProviderProps) {
   }, [initialHeight]);
 
   useEffect(() => {
-    let pollingInterval: ReturnType<typeof setInterval> | null = null;
-    let cachedSafeAreaPlugin: any = null;
-    let listenerHandle: any = null;
-
     async function initializeSafeArea() {
-      if (!isNativePlatform()) {
+      if (!Capacitor.isNativePlatform()) {
         setIsReady(true);
         return;
       }
 
       try {
-        const { SafeArea: SafeAreaCommunity, SystemBarsStyle } = await import("@capacitor-community/safe-area");
         const isDarkMode = document.documentElement.classList.contains('dark');
         await SafeAreaCommunity.setSystemBarsStyle({
           style: isDarkMode ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
@@ -105,10 +97,7 @@ export function SafeAreaProvider({ children }: SafeAreaProviderProps) {
       }
 
       try {
-        const safeAreaModule = await import("capacitor-plugin-safe-area");
-        cachedSafeAreaPlugin = safeAreaModule.SafeArea;
-        
-        const result = await cachedSafeAreaPlugin.getSafeAreaInsets();
+        const result = await SafeAreaPlugin.getSafeAreaInsets();
         const pluginInsets = result.insets;
         
         let finalInsets: SafeAreaInsets = {
@@ -129,7 +118,7 @@ export function SafeAreaProvider({ children }: SafeAreaProviderProps) {
         setIsReady(true);
 
         try {
-          listenerHandle = await cachedSafeAreaPlugin.addListener('safeAreaChanged', (data: any) => {
+          await SafeAreaPlugin.addListener('safeAreaChanged', (data) => {
             const newInsets = data.insets;
             let updatedInsets: SafeAreaInsets = {
               top: Math.max(newInsets.top || 0, 0),
@@ -148,12 +137,10 @@ export function SafeAreaProvider({ children }: SafeAreaProviderProps) {
             updateCSSProperties(updatedInsets);
           });
         } catch {
-          // Listener not supported, use polling with cached plugin
-          pollingInterval = setInterval(async () => {
+          // Listener not supported, use polling
+          const interval = setInterval(async () => {
             try {
-              if (!cachedSafeAreaPlugin) return;
-              
-              const refreshResult = await cachedSafeAreaPlugin.getSafeAreaInsets();
+              const refreshResult = await SafeAreaPlugin.getSafeAreaInsets();
               const refreshInsets = refreshResult.insets;
               
               let polledInsets: SafeAreaInsets = {
@@ -173,6 +160,8 @@ export function SafeAreaProvider({ children }: SafeAreaProviderProps) {
               // Ignore polling errors
             }
           }, 2000);
+
+          return () => clearInterval(interval);
         }
       } catch {
         setInsets(androidFallbackInsets);
@@ -182,15 +171,6 @@ export function SafeAreaProvider({ children }: SafeAreaProviderProps) {
     }
 
     initializeSafeArea();
-
-    return () => {
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
-      }
-      if (listenerHandle && typeof listenerHandle.remove === 'function') {
-        listenerHandle.remove();
-      }
-    };
   }, [updateCSSProperties]);
 
   useEffect(() => {

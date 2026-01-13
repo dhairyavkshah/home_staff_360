@@ -1,15 +1,11 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
+import { App as CapacitorApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 import { ExitAppDialog } from "@/components/ExitAppDialog";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { useNavigation } from "@/lib/navigation";
 import { registerDirtyTrackingContext } from "@/hooks/use-dirty-tracker";
-
-// Helper to check if running on native platform using window-based detection
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
 
 interface DirtyTrackingContextType {
   isDirty: boolean;
@@ -68,11 +64,13 @@ export function DirtyTrackingProvider({ children }: { children: ReactNode }) {
       return true;
     }
 
+    // Allow normal back navigation if there's history
     if (canGoBack) {
       goBack();
       return true;
     }
 
+    // Only show exit dialog when on home screen AND no back history
     if (isOnHomeScreen) {
       setShowExitDialog(true);
       return true;
@@ -104,15 +102,10 @@ export function DirtyTrackingProvider({ children }: { children: ReactNode }) {
     setPendingBackNavigation(false);
   }, []);
 
-  const handleExitApp = useCallback(async () => {
+  const handleExitApp = useCallback(() => {
     setShowExitDialog(false);
-    if (isNativePlatform()) {
-      try {
-        const { App } = await import("@capacitor/app");
-        await App.exitApp();
-      } catch (error) {
-        console.error("Failed to exit app:", error);
-      }
+    if (Capacitor.isNativePlatform()) {
+      CapacitorApp.exitApp();
     }
   }, []);
 
@@ -121,30 +114,17 @@ export function DirtyTrackingProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!isNativePlatform()) return;
+    if (!Capacitor.isNativePlatform()) return;
 
-    let listenerHandle: any = null;
-
-    async function setupBackButtonListener() {
-      try {
-        const { App } = await import("@capacitor/app");
-        listenerHandle = await App.addListener("backButton", ({ canGoBack: browserCanGoBack }) => {
-          const handled = handleBackPress();
-          if (!handled && !browserCanGoBack) {
-            setShowExitDialog(true);
-          }
-        });
-      } catch (error) {
-        console.error("Failed to setup back button listener:", error);
+    const backButtonHandler = CapacitorApp.addListener("backButton", ({ canGoBack: browserCanGoBack }) => {
+      const handled = handleBackPress();
+      if (!handled && !browserCanGoBack) {
+        setShowExitDialog(true);
       }
-    }
-
-    setupBackButtonListener();
+    });
 
     return () => {
-      if (listenerHandle && typeof listenerHandle.remove === 'function') {
-        listenerHandle.remove();
-      }
+      backButtonHandler.then(handler => handler.remove());
     };
   }, [handleBackPress]);
 

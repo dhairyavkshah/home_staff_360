@@ -6,11 +6,6 @@ const MIN_INTERVAL = 50;
 let audioContext: AudioContext | null = null;
 let audioContextInitialized = false;
 
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
-
 function getAudioContext(): AudioContext | null {
   if (audioContext) {
     if (audioContext.state === 'suspended') {
@@ -79,8 +74,19 @@ function playPopSound(): void {
   }
 }
 
+// Check once at module load if we're on native platform
+const isNativeApp = (() => {
+  try {
+    const capacitor = (window as any).Capacitor;
+    return capacitor && typeof capacitor.isNativePlatform === 'function' && capacitor.isNativePlatform() === true;
+  } catch {
+    return false;
+  }
+})();
+
 function triggerHaptic(style: 'Light' | 'Medium' = 'Light'): void {
-  if (!isNativePlatform()) return;
+  // Only attempt haptics on actual native platform
+  if (!isNativeApp) return;
   
   try {
     import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
@@ -88,6 +94,7 @@ function triggerHaptic(style: 'Light' | 'Medium' = 'Light'): void {
       Haptics.impact({ style: impactStyle }).catch(() => {});
     }).catch(() => {});
   } catch {
+    // Silently fail
   }
 }
 

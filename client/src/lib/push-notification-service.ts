@@ -1,22 +1,13 @@
+import { Capacitor } from "@capacitor/core";
+import { PushNotifications, Token, PushNotificationSchema, ActionPerformed } from "@capacitor/push-notifications";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import { collaborationService } from "./collaboration-service";
 
 let isInitialized = false;
 let currentToken: string | null = null;
 
-// Helper to check if running on native platform using window-based detection
-function checkIsNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
-
-// Helper to get platform name
-function getPlatformName(): string {
-  if (typeof window === 'undefined') return "web";
-  return (window as any).Capacitor?.getPlatform?.() || "web";
-}
-
 export async function initPushNotifications(): Promise<boolean> {
-  if (!checkIsNativePlatform()) {
+  if (!Capacitor.isNativePlatform()) {
     console.log("[PushNotifications] Not a native platform, skipping initialization");
     return false;
   }
@@ -27,8 +18,6 @@ export async function initPushNotifications(): Promise<boolean> {
   }
   
   try {
-    const { PushNotifications } = await import("@capacitor/push-notifications");
-    
     let permStatus = await PushNotifications.checkPermissions();
     
     if (permStatus.receive === "prompt") {
@@ -54,40 +43,32 @@ export async function initPushNotifications(): Promise<boolean> {
 }
 
 async function setupPushListeners(): Promise<void> {
-  try {
-    const { PushNotifications } = await import("@capacitor/push-notifications");
+  await PushNotifications.addListener("registration", async (token: Token) => {
+    console.log("[PushNotifications] Registration token received:", token.value);
+    currentToken = token.value;
     
-    await PushNotifications.addListener("registration", async (token) => {
-      console.log("[PushNotifications] Registration token received:", token.value);
-      currentToken = token.value;
-      
-      await sendTokenToServer(token.value);
-    });
+    await sendTokenToServer(token.value);
+  });
+  
+  await PushNotifications.addListener("registrationError", (error: any) => {
+    console.error("[PushNotifications] Registration error:", error);
+  });
+  
+  await PushNotifications.addListener("pushNotificationReceived", async (notification: PushNotificationSchema) => {
+    console.log("[PushNotifications] Push received in foreground:", notification);
     
-    await PushNotifications.addListener("registrationError", (error: any) => {
-      console.error("[PushNotifications] Registration error:", error);
-    });
+    await showLocalNotification(notification);
+  });
+  
+  await PushNotifications.addListener("pushNotificationActionPerformed", (action: ActionPerformed) => {
+    console.log("[PushNotifications] Push action performed:", action);
     
-    await PushNotifications.addListener("pushNotificationReceived", async (notification) => {
-      console.log("[PushNotifications] Push received in foreground:", notification);
-      
-      await showLocalNotification(notification);
-    });
-    
-    await PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
-      console.log("[PushNotifications] Push action performed:", action);
-      
-      handleNotificationTap(action.notification);
-    });
-  } catch (error) {
-    console.error("[PushNotifications] Failed to setup listeners:", error);
-  }
+    handleNotificationTap(action.notification);
+  });
 }
 
-async function showLocalNotification(notification: any): Promise<void> {
+async function showLocalNotification(notification: PushNotificationSchema): Promise<void> {
   try {
-    const { LocalNotifications } = await import("@capacitor/local-notifications");
-    
     const permStatus = await LocalNotifications.checkPermissions();
     if (permStatus.display !== "granted") {
       console.log("[PushNotifications] Local notification permission not granted");
@@ -117,7 +98,7 @@ async function showLocalNotification(notification: any): Promise<void> {
   }
 }
 
-function handleNotificationTap(notification: any): void {
+function handleNotificationTap(notification: PushNotificationSchema): void {
   const data = notification.data || {};
   
   const entityType = data.entityType as string | undefined;
@@ -154,7 +135,7 @@ async function sendTokenToServer(token: string): Promise<void> {
       body: JSON.stringify({
         token,
         deviceId,
-        platform: getPlatformName(),
+        platform: Capacitor.getPlatform(),
       }),
     });
     
@@ -174,7 +155,7 @@ async function getDeviceId(): Promise<string> {
 }
 
 export async function registerPushToken(): Promise<boolean> {
-  if (!checkIsNativePlatform()) {
+  if (!Capacitor.isNativePlatform()) {
     return false;
   }
   
@@ -197,7 +178,7 @@ export async function registerPushToken(): Promise<boolean> {
 }
 
 export async function unregisterPushToken(): Promise<boolean> {
-  if (!checkIsNativePlatform()) {
+  if (!Capacitor.isNativePlatform()) {
     return true;
   }
   
@@ -225,5 +206,5 @@ export function getCurrentToken(): string | null {
 }
 
 export function isNativePlatform(): boolean {
-  return checkIsNativePlatform();
+  return Capacitor.isNativePlatform();
 }

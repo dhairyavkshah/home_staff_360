@@ -21,18 +21,12 @@ import { collaborationService } from "@/lib/collaboration-service";
 import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import { combinePhoneNumber, parseFullPhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
 import { useTranslation } from "@/lib/i18n/i18n-context";
-
-// Helper to check if running on native platform using window-based detection
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
+import { App } from "@capacitor/app";
 
 type AuthStep = "phone" | "password" | "otp" | "set-password" | "reset-otp" | "reset-password";
 
 interface AuthNavigationData {
   requireSessionVerification?: boolean;
-  [key: string]: unknown;
 }
 
 export function AuthScreen() {
@@ -95,36 +89,19 @@ export function AuthScreen() {
   }, [navigate, isSessionVerification]);
 
   useEffect(() => {
-    let backHandler: { remove: () => void } | null = null;
-    
-    async function setupBackHandler() {
-      try {
-        const { App } = await import("@capacitor/app");
-        const handler = await App.addListener("backButton", async () => {
-          if (step === "phone") {
-            try {
-              const { App: AppModule } = await import("@capacitor/app");
-              await AppModule.exitApp();
-            } catch (error) {
-              console.error("Failed to exit app:", error);
-            }
-          } else {
-            setStep("phone");
-            setOtp("");
-            setPassword("");
-            setConfirmPassword("");
-          }
-        });
-        backHandler = handler;
-      } catch (error) {
-        console.error("Failed to setup back button handler:", error);
+    const backHandler = App.addListener("backButton", () => {
+      if (step === "phone") {
+        App.exitApp();
+      } else {
+        setStep("phone");
+        setOtp("");
+        setPassword("");
+        setConfirmPassword("");
       }
-    }
-    
-    setupBackHandler();
+    });
 
     return () => {
-      backHandler?.remove();
+      backHandler.then(handle => handle.remove());
     };
   }, [step]);
 

@@ -1,7 +1,4 @@
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
+import { Capacitor } from "@capacitor/core";
 
 export interface PaymentConfig {
   upiId: string;
@@ -70,7 +67,7 @@ export function openUpiPayment(amount: number, config: PaymentConfig = DEFAULT_C
     
     const upiUrl = buildUpiUrl(validAmount, config);
     
-    if (isNativePlatform()) {
+    if (Capacitor.isNativePlatform()) {
       window.open(upiUrl, "_system");
     } else {
       window.location.href = upiUrl;

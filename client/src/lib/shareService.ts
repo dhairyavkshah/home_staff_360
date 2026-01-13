@@ -1,19 +1,20 @@
 import { type Currency, currencySymbols } from "@shared/schema";
+import { Share } from "@capacitor/share";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
+import { Capacitor } from "@capacitor/core";
 
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
-
+/**
+ * Downloads content as a file
+ * - On web: Creates a blob and triggers browser download
+ * - On native: Saves to Documents directory, then opens share sheet so user can save/send
+ */
 export async function downloadAsFile(content: string, filename: string): Promise<boolean> {
   const BOM = '\uFEFF';
   const fileContent = BOM + content;
 
-  if (isNativePlatform()) {
+  if (Capacitor.isNativePlatform()) {
     try {
-      const { Filesystem, Directory, Encoding } = await import("@capacitor/filesystem");
-      const { Share } = await import("@capacitor/share");
-
+      // On native, write to Documents directory (user-accessible)
       const writeResult = await Filesystem.writeFile({
         path: filename,
         data: fileContent,
@@ -23,11 +24,13 @@ export async function downloadAsFile(content: string, filename: string): Promise
 
       console.log('File saved to Documents:', writeResult.uri);
 
+      // Get the URI for sharing
       const uriResult = await Filesystem.getUri({
         directory: Directory.Documents,
         path: filename,
       });
 
+      // Open share sheet so user can choose where to save/send
       const canShare = await Share.canShare();
       if (canShare.value) {
         await Share.share({
@@ -41,6 +44,7 @@ export async function downloadAsFile(content: string, filename: string): Promise
     } catch (error) {
       const errorMessage = (error as Error).message || String(error);
       
+      // User cancelled - still a success since file was saved
       if (errorMessage.includes('cancel') || 
           errorMessage.includes('Cancel') ||
           errorMessage.includes('dismissed') ||
@@ -53,6 +57,7 @@ export async function downloadAsFile(content: string, filename: string): Promise
       return false;
     }
   } else {
+    // Web: Create blob and trigger download
     try {
       const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -62,6 +67,7 @@ export async function downloadAsFile(content: string, filename: string): Promise
       link.style.display = 'none';
       document.body.appendChild(link);
       
+      // Use setTimeout to ensure the link is in the DOM
       await new Promise<void>((resolve) => {
         setTimeout(() => {
           link.click();
@@ -69,6 +75,7 @@ export async function downloadAsFile(content: string, filename: string): Promise
         }, 100);
       });
       
+      // Cleanup after a delay
       setTimeout(() => {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
@@ -82,6 +89,11 @@ export async function downloadAsFile(content: string, filename: string): Promise
   }
 }
 
+/**
+ * Opens native sharing menu to share a report
+ * - On web: Uses Web Share API if available, falls back to download
+ * - On native: Writes file to cache and opens share sheet
+ */
 export async function shareReport(options: {
   title: string;
   text: string;
@@ -90,11 +102,9 @@ export async function shareReport(options: {
   const BOM = '\uFEFF';
   const fileContent = BOM + options.text;
 
-  if (isNativePlatform()) {
+  if (Capacitor.isNativePlatform()) {
     try {
-      const { Filesystem, Directory, Encoding } = await import("@capacitor/filesystem");
-      const { Share } = await import("@capacitor/share");
-
+      // Write to cache directory for sharing
       await Filesystem.writeFile({
         path: options.filename,
         data: fileContent,
@@ -137,10 +147,12 @@ export async function shareReport(options: {
       return false;
     }
   } else {
+    // Web: Try Web Share API first
     if (navigator.share && navigator.canShare) {
       try {
         const file = new File([fileContent], options.filename, { type: 'text/csv;charset=utf-8' });
         
+        // Check if we can share files
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({
             title: options.title,
@@ -157,6 +169,7 @@ export async function shareReport(options: {
       }
     }
     
+    // Fallback: download the file
     console.log('Web Share API not available, falling back to download');
     return await downloadAsFile(options.text, options.filename);
   }
@@ -254,21 +267,25 @@ export function generateAttendanceCSV(
   return csv;
 }
 
+/**
+ * Downloads or opens a base64-encoded file
+ * - On web: Creates a blob and triggers browser download
+ * - On native: Saves to cache directory, then opens share sheet
+ */
 export async function downloadBase64File(
   base64Data: string,
   filename: string,
   mimeType: string
 ): Promise<boolean> {
-  if (isNativePlatform()) {
+  if (Capacitor.isNativePlatform()) {
     try {
-      const { Filesystem, Directory } = await import("@capacitor/filesystem");
-      const { Share } = await import("@capacitor/share");
-
+      // Extract pure base64 if it's a data URL
       let pureBase64 = base64Data;
       if (base64Data.includes(',')) {
         pureBase64 = base64Data.split(',')[1];
       }
 
+      // Write to cache directory
       await Filesystem.writeFile({
         path: filename,
         data: pureBase64,
@@ -282,6 +299,7 @@ export async function downloadBase64File(
 
       console.log('File ready for sharing:', uriResult.uri);
 
+      // Open share sheet so user can save/open the file
       const canShare = await Share.canShare();
       if (canShare.value) {
         await Share.share({
@@ -295,6 +313,7 @@ export async function downloadBase64File(
     } catch (error) {
       const errorMessage = (error as Error).message || String(error);
       
+      // User cancelled - still consider it handled
       if (errorMessage.includes('cancel') || 
           errorMessage.includes('Cancel') ||
           errorMessage.includes('dismissed') ||
@@ -307,7 +326,9 @@ export async function downloadBase64File(
       return false;
     }
   } else {
+    // Web: Create blob and trigger download
     try {
+      // Convert base64 to blob
       let base64Content = base64Data;
       if (base64Data.includes(',')) {
         base64Content = base64Data.split(',')[1];
@@ -335,6 +356,7 @@ export async function downloadBase64File(
         }, 100);
       });
       
+      // Cleanup after a delay
       setTimeout(() => {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
@@ -348,16 +370,24 @@ export async function downloadBase64File(
   }
 }
 
+/**
+ * Opens a base64-encoded file for viewing
+ * - On web: Opens in new tab or triggers download for non-viewable types
+ * - On native: Uses share sheet to open with appropriate app
+ */
 export async function openBase64File(
   base64Data: string,
   filename: string,
   mimeType: string
 ): Promise<boolean> {
-  if (isNativePlatform()) {
+  if (Capacitor.isNativePlatform()) {
+    // On native, use the share functionality which allows opening with apps
     return downloadBase64File(base64Data, filename, mimeType);
   } else {
+    // Web: Try to open in new tab for viewable types
     try {
       if (mimeType.startsWith('image/') || mimeType === 'application/pdf') {
+        // Open viewable files in new tab
         const newWindow = window.open();
         if (newWindow) {
           newWindow.document.write(`
@@ -383,6 +413,7 @@ export async function openBase64File(
           return true;
         }
       }
+      // For other types, download
       return downloadBase64File(base64Data, filename, mimeType);
     } catch (error) {
       console.error('Failed to open file:', error);

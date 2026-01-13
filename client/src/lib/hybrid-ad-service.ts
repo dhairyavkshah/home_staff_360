@@ -1,12 +1,8 @@
 import type { Advertisement } from "@shared/schema";
 import { adService } from "./ad-service";
 import { admobService } from "./admob-service";
+import { Capacitor } from "@capacitor/core";
 import { storage } from "./storage";
-
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
 
 export type AdProvider = "custom" | "admob" | "none";
 export type AdSourcePreference = "custom_first" | "admob_first" | "admob_only" | "custom_only";
@@ -30,7 +26,7 @@ class HybridAdService {
   private isNativeApp = false;
 
   constructor() {
-    this.isNativeApp = isNativePlatform();
+    this.isNativeApp = Capacitor.isNativePlatform();
     this.loadConfig();
   }
 
@@ -92,11 +88,13 @@ class HybridAdService {
   }
 
   shouldShowAd(): boolean {
+    // Check if user has premium subscription - premium users don't see ads
     const planInfo = storage.getPlanInfo();
     if (planInfo.isPremium) {
       return false;
     }
     
+    // Free users see ads based on timing interval
     return adService.shouldShowAd();
   }
 
@@ -105,6 +103,7 @@ class HybridAdService {
   }
 
   async getNextAd(): Promise<{ ad: Advertisement | null; provider: AdProvider }> {
+    // Premium users don't see ads
     const planInfo = storage.getPlanInfo();
     if (planInfo.isPremium) {
       return { ad: null, provider: "none" };

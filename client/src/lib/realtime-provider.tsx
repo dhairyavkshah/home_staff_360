@@ -3,12 +3,7 @@ import { realtimeService } from "@/lib/realtime-service";
 import { collaborationService } from "@/lib/collaboration-service";
 import { useToast } from "@/hooks/use-toast";
 import { notificationAlertService } from "@/lib/notification-alert-service";
-
-// Helper to check if running on native platform using window-based detection
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
+import { Capacitor } from "@capacitor/core";
 
 interface NotificationPayload {
   id: string;
@@ -68,7 +63,7 @@ export function useRealtimeContext() {
 
 function playNotificationSound() {
   try {
-    if (isNativePlatform()) {
+    if (Capacitor.isNativePlatform()) {
       return;
     }
     const audio = new Audio("/notification.mp3");

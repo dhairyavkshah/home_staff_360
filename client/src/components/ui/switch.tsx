@@ -3,19 +3,25 @@ import * as SwitchPrimitives from "@radix-ui/react-switch"
 
 import { cn } from "@/lib/utils"
 
-function isNativePlatform(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).Capacitor?.isNativePlatform?.();
-}
+// Check once at module load if we're on native platform
+const isNativeApp = (() => {
+  try {
+    const capacitor = (window as any).Capacitor;
+    return capacitor && typeof capacitor.isNativePlatform === 'function' && capacitor.isNativePlatform() === true;
+  } catch {
+    return false;
+  }
+})();
 
 const triggerHaptic = () => {
-  if (!isNativePlatform()) return;
+  if (!isNativeApp) return;
   
   try {
     import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
       Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
     }).catch(() => {});
   } catch {
+    // Silently fail
   }
 };
 
