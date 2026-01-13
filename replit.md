@@ -86,7 +86,8 @@ Our PostgreSQL server stores **only the minimum data required** for:
 - **Multi-Language Support**: 21 languages available.
 - **Multi-Currency Support**: 120+ national/regional currencies supporting all 173 countries, with automatic currency detection based on setup location.
 - **Real-Time Collaboration**: Chat messaging, connection invites, shared spaces, and live sync for operational data.
-- **Push Notifications**: Implemented for Android (Capacitor LocalNotifications) and Web (Notifications API) for events like chat messages and connection updates.
+- **Push Notifications**: Implemented for Android using Firebase Cloud Messaging (FCM) with Capacitor Push Notifications plugin. Supports background notifications when app is closed. Token registration on app start, unregistration on logout. Web fallback uses Notifications API. Events include chat messages, connection requests, and collaboration updates.
+- **User Profile Avatars**: Profile images uploaded and compressed to 512x512 pixels max, stored as base64 on server. Displayed across chat, connections, messages, and notifications via reusable UserAvatar component and use-user-avatar hook with caching.
 - **Subscription Model**: Two plans (Monthly/Annual), two tiers (Free/Premium), and 5-tier pricing across 173 countries via Google Play Billing.
 - **Auto-Backup**: WhatsApp-style background backup system with user consent, configurable frequency (daily/weekly/monthly), Android WorkManager integration, foreground service notifications during backup execution, and **local device storage only** (not uploaded to servers).
 
