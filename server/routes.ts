@@ -17,7 +17,8 @@ import {
   emitLaundryUpdate,
   emitHouseholdUpdate,
   isUserOnline,
-  getOnlineUserIds
+  getOnlineUserIds,
+  getIO
 } from "./realtime";
 import { 
   serverUsers, 
@@ -229,11 +230,11 @@ function checkRateLimit(ip: string, action: string): { allowed: boolean; retryAf
 // Cleanup old entries every 5 minutes
 setInterval(() => {
   const now = Date.now();
-  for (const [key, entry] of rateLimitStore.entries()) {
+  rateLimitStore.forEach((entry, key) => {
     if (now > entry.resetAt) {
       rateLimitStore.delete(key);
     }
-  }
+  });
 }, 5 * 60 * 1000);
 
 // Rate limiting middleware factory
@@ -1110,6 +1111,95 @@ router.patch("/api/user/profile", authenticateToken, async (req: Request, res: R
   } catch (error) {
     console.error("Update profile error:", error);
     res.status(500).json({ error: "Failed to update profile" });
+  }
+});
+
+// ============ AVATAR API ============
+
+// Upload avatar
+router.post("/api/user/avatar", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { avatarData } = req.body;
+
+    if (!avatarData || typeof avatarData !== 'string') {
+      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, "Avatar data is required");
+    }
+
+    // Validate base64 image format (JPEG or PNG)
+    const base64Pattern = /^data:image\/(jpeg|png|jpg);base64,[A-Za-z0-9+/=]+$/;
+    if (!base64Pattern.test(avatarData)) {
+      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, 
+        "Invalid image format. Only JPEG and PNG base64 images are supported.");
+    }
+
+    // Check size limit (max 2MB after base64 encoding)
+    const base64Data = avatarData.split(',')[1];
+    const sizeInBytes = (base64Data.length * 3) / 4;
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (sizeInBytes > maxSize) {
+      return apiError(res, 400, ERROR_CODES.VALIDATION_ERROR, 
+        "Image size exceeds 2MB limit. Please use a smaller image.");
+    }
+
+    await db.update(serverUsers)
+      .set({ 
+        avatarData: avatarData,
+        avatarUpdatedAt: new Date()
+      })
+      .where(eq(serverUsers.id, userId));
+
+    res.json({ success: true, message: "Avatar uploaded successfully" });
+  } catch (error) {
+    console.error("Upload avatar error:", error);
+    res.status(500).json({ error: "Failed to upload avatar" });
+  }
+});
+
+// Get avatar by userId
+router.get("/api/user/avatar/:userId", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await db.query.serverUsers.findFirst({
+      where: eq(serverUsers.id, userId),
+      columns: {
+        avatarData: true,
+        avatarUpdatedAt: true
+      }
+    });
+
+    if (!user || !user.avatarData) {
+      return apiError(res, 404, ERROR_CODES.RESOURCE_NOT_FOUND, "Avatar not found");
+    }
+
+    res.json({ 
+      success: true, 
+      avatarData: user.avatarData,
+      avatarUpdatedAt: user.avatarUpdatedAt
+    });
+  } catch (error) {
+    console.error("Get avatar error:", error);
+    res.status(500).json({ error: "Failed to get avatar" });
+  }
+});
+
+// Delete avatar
+router.delete("/api/user/avatar", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    await db.update(serverUsers)
+      .set({ 
+        avatarData: null,
+        avatarUpdatedAt: null
+      })
+      .where(eq(serverUsers.id, userId));
+
+    res.json({ success: true, message: "Avatar deleted successfully" });
+  } catch (error) {
+    console.error("Delete avatar error:", error);
+    res.status(500).json({ error: "Failed to delete avatar" });
   }
 });
 
@@ -3257,8 +3347,8 @@ router.delete("/api/connections/:id", authenticateToken, async (req: Request, re
 
     // Emit real-time connection removed event (outside transaction, non-critical)
     if (!isNaN(userAId) && !isNaN(userBId)) {
-      const connectionNumId = typeof id === 'string' ? parseInt(id, 10) : id;
-      emitConnectionRemoved(userAId, userBId, connectionNumId);
+      const connectionIdStr = String(id);
+      emitConnectionRemoved(String(userAId), String(userBId), connectionIdStr);
     }
 
     res.json({ success: true });
@@ -3888,8 +3978,7 @@ router.delete("/api/chats/:chatId/clear", authenticateToken, async (req: Request
     await db.update(chatMessages)
       .set({ 
         isDeleted: true, 
-        content: "[This message was deleted]",
-        updatedAt: new Date()
+        content: "[This message was deleted]"
       })
       .where(eq(chatMessages.chatId, chatId));
 
