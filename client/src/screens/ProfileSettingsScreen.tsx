@@ -194,6 +194,7 @@ export function ProfileSettingsScreen() {
     try {
       const result = await collaborationService.updateProfile({ displayName: displayName.trim() });
       if (result.success) {
+        storage.updateProfile({ displayName: displayName.trim() });
         toast({ title: "Profile Updated", description: "Your name has been updated" });
         setProfile(prev => prev ? { ...prev, displayName: displayName.trim() } : null);
         setStep("view");
