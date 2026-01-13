@@ -7,7 +7,6 @@ import {
   Loader2,
   RefreshCw,
   Shield,
-  Users,
   KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import { combinePhoneNumber, parseFullPhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 import { App } from "@capacitor/app";
+import appIconPath from "@/assets/app-icon.png";
 
 type AuthStep = "phone" | "password" | "otp" | "set-password" | "reset-otp" | "reset-password";
 
@@ -483,8 +483,8 @@ export function AuthScreen() {
       <div className="flex-1 flex flex-col items-center justify-center px-4">
         <div className="w-full max-w-md flex flex-col gap-6">
           <div className="text-center flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Users className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 rounded-2xl overflow-hidden">
+              <img src={appIconPath} alt="Home Staff 360" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col gap-1">
               <h1 className="text-xl font-semibold">Home Staff 360</h1>
