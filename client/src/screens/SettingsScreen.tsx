@@ -125,11 +125,14 @@ export function SettingsScreen() {
   const [reminderTime, setReminderTime] = useState(attendanceReminderService.getReminderTime());
   const [backupFrequency, setBackupFrequencyState] = useState(getBackupFrequency());
 
-  const handleBackupToggle = (enabled: boolean) => {
+  const handleBackupToggle = async (enabled: boolean) => {
     const newFrequency = enabled ? "daily" : "off";
     setBackupFrequencyState(newFrequency);
-    setBackupFrequency(newFrequency);
-    toast({ title: enabled ? "Auto-backup enabled" : "Auto-backup disabled" });
+    await setBackupFrequency(newFrequency);
+    toast({ 
+      title: enabled ? "Auto-backup enabled" : "Auto-backup disabled",
+      description: enabled ? "Your first backup has been created" : undefined
+    });
   };
 
   const handleReminderToggle = (enabled: boolean) => {

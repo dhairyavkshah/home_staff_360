@@ -1,7 +1,15 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Settings, Users, Calendar, Shirt, FileText, Home, ChevronDown, Check, Building2, FolderOpen, Wallet, Receipt, ArrowRightLeft, Link2, Bell, StickyNote } from "lucide-react";
+import { Settings, Users, Calendar, Shirt, FileText, Home, ChevronDown, Check, Building2, FolderOpen, Wallet, Receipt, ArrowRightLeft, Link2, Bell, StickyNote, CloudUpload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +29,7 @@ import { StorageWarningBanner } from "@/components/StorageWarningBanner";
 import { useRealtimeContext } from "@/lib/realtime-provider";
 import { App } from "@capacitor/app";
 import { ExitAppDialog } from "@/components/ExitAppDialog";
+import { getBackupFrequency, setBackupFrequency, hasShownBackupPrompt, markBackupPromptShown } from "@/lib/auto-backup";
 
 export function HomeScreen() {
   const { navigate, data, goBack, canGoBack } = useNavigation();
@@ -32,6 +41,8 @@ export function HomeScreen() {
   const tourStartedRef = useRef(false);
   const { unreadNotificationCount } = useRealtimeContext();
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [showBackupPrompt, setShowBackupPrompt] = useState(false);
+  const [isEnablingBackup, setIsEnablingBackup] = useState(false);
 
   useEffect(() => {
     const backHandler = App.addListener("backButton", () => {
@@ -64,6 +75,45 @@ export function HomeScreen() {
       setRefreshKey((k) => k + 1);
     }
   }, [data.refresh]);
+
+  // Show backup prompt on first visit if auto-backup is not enabled
+  useEffect(() => {
+    const checkBackupPrompt = () => {
+      const frequency = getBackupFrequency();
+      const hasShown = hasShownBackupPrompt();
+      if (frequency === "off" && !hasShown) {
+        // Small delay to let the screen load first
+        setTimeout(() => setShowBackupPrompt(true), 1000);
+      }
+    };
+    checkBackupPrompt();
+  }, []);
+
+  const handleEnableBackup = async () => {
+    setIsEnablingBackup(true);
+    try {
+      await setBackupFrequency("daily");
+      markBackupPromptShown();
+      toast({
+        title: "Auto-backup enabled",
+        description: "Your first backup has been created. Daily backups will run automatically.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to enable auto-backup",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEnablingBackup(false);
+      setShowBackupPrompt(false);
+    }
+  };
+
+  const handleDismissBackupPrompt = () => {
+    markBackupPromptShown();
+    setShowBackupPrompt(false);
+  };
 
   const profile = useMemo(() => storage.getProfile(), [refreshKey]);
   const accounts = useMemo(() => storage.getAccounts().filter(a => a.ownerType === 'HOME'), [refreshKey]);
@@ -405,6 +455,56 @@ export function HomeScreen() {
         onExit={() => App.exitApp()}
         onStay={() => setShowExitDialog(false)}
       />
+
+      <Dialog open={showBackupPrompt} onOpenChange={setShowBackupPrompt}>
+        <DialogContent data-testid="dialog-backup-prompt">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-full bg-primary/10">
+                <CloudUpload className="w-6 h-6 text-primary" />
+              </div>
+              <DialogTitle>{tLabel('enableAutoBackup', 'Enable Auto-Backup')}</DialogTitle>
+            </div>
+            <DialogDescription className="text-left">
+              {tLabel('autoBackupDescription', 'Protect your data by enabling automatic backups. Your data will be saved to your device daily, ensuring you never lose important information.')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 text-sm text-muted-foreground">
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-500" />
+                {tLabel('backupFeature1', 'Automatic daily backups')}
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-500" />
+                {tLabel('backupFeature2', 'Data stays on your device')}
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-500" />
+                {tLabel('backupFeature3', 'Easy restore anytime')}
+              </li>
+            </ul>
+          </div>
+          <DialogFooter className="flex-col gap-2 sm:flex-col">
+            <Button
+              onClick={handleEnableBackup}
+              disabled={isEnablingBackup}
+              className="w-full"
+              data-testid="button-enable-backup"
+            >
+              {isEnablingBackup ? tLabel('enablingBackup', 'Enabling...') : tLabel('enableNow', 'Enable Now')}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={handleDismissBackupPrompt}
+              className="w-full"
+              data-testid="button-dismiss-backup"
+            >
+              {tLabel('notNow', 'Not Now')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -11,7 +11,16 @@ const BACKUP_STORAGE_KEYS = {
   NEXT_SCHEDULED_TIME: "hm_next_scheduled_time",
   SCHEDULED_NOTIFICATION_ID: "hm_scheduled_notification_id",
   BACKGROUND_CONSENT: "hm_backup_background_consent",
+  PROMPT_SHOWN: "hm_backup_prompt_shown",
 } as const;
+
+export function hasShownBackupPrompt(): boolean {
+  return localStorage.getItem(BACKUP_STORAGE_KEYS.PROMPT_SHOWN) === "true";
+}
+
+export function markBackupPromptShown(): void {
+  localStorage.setItem(BACKUP_STORAGE_KEYS.PROMPT_SHOWN, "true");
+}
 
 export function getBackupConsent(): boolean {
   return localStorage.getItem(BACKUP_STORAGE_KEYS.BACKGROUND_CONSENT) === "true";
@@ -45,7 +54,8 @@ export function getBackupFrequency(): BackupFrequency {
   return "off";
 }
 
-export function setBackupFrequency(frequency: BackupFrequency): void {
+export async function setBackupFrequency(frequency: BackupFrequency, runImmediately: boolean = true): Promise<void> {
+  const previousFrequency = getBackupFrequency();
   localStorage.setItem(BACKUP_STORAGE_KEYS.FREQUENCY, frequency);
   const hasConsent = getBackupConsent();
   
@@ -54,6 +64,10 @@ export function setBackupFrequency(frequency: BackupFrequency): void {
     cancelNativeBackup();
     localStorage.removeItem(BACKUP_STORAGE_KEYS.NEXT_SCHEDULED_TIME);
   } else {
+    // Run backup immediately when first enabled (turning on from off)
+    if (runImmediately && previousFrequency === "off") {
+      await performAutoBackup();
+    }
     scheduleNextBackup(frequency);
     // Schedule native background backup if consent is given
     if (hasConsent) {
