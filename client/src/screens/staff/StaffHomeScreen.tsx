@@ -64,9 +64,18 @@ export function StaffHomeScreen() {
     if (pushNotificationsInitializedRef.current) return;
     pushNotificationsInitializedRef.current = true;
 
-    initPushNotifications().catch((error) => {
-      console.error("Failed to initialize push notifications:", error);
-    });
+    // Defer push notification init to avoid blocking initial render
+    const timer = setTimeout(() => {
+      try {
+        initPushNotifications().catch((error) => {
+          console.error("Failed to initialize push notifications:", error);
+        });
+      } catch (error) {
+        console.error("Push notification init error:", error);
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const profile = useMemo(() => storage.getProfile(), [refreshKey]);

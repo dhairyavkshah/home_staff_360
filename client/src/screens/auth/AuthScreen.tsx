@@ -27,6 +27,7 @@ type AuthStep = "phone" | "password" | "otp" | "set-password" | "reset-otp" | "r
 
 interface AuthNavigationData {
   requireSessionVerification?: boolean;
+  [key: string]: unknown;
 }
 
 export function AuthScreen() {
