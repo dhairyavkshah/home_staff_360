@@ -23,6 +23,15 @@ export interface PermissionInfo {
 
 const isNativePlatform = Capacitor.isNativePlatform();
 
+// Detect if running in an iframe (e.g., Replit preview)
+const isInIframe = (): boolean => {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true; // If access is blocked, we're in a cross-origin iframe
+  }
+};
+
 export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
   {
     id: "location",
@@ -103,7 +112,10 @@ class PermissionsService {
       status.storage = "granted";
       status.media = "granted";
       
-      if ("Notification" in window) {
+      // In iframes (like Replit preview), notification permissions are blocked
+      if (isInIframe()) {
+        status.notifications = "unavailable";
+      } else if ("Notification" in window) {
         status.notifications = this.mapWebNotificationStatus(Notification.permission);
       } else {
         status.notifications = "unavailable";
@@ -258,7 +270,10 @@ class PermissionsService {
 
   areRequiredPermissionsGranted(status: PermissionStatus): boolean {
     const requiredPerms = REQUIRED_PERMISSIONS.filter(p => p.required);
-    return requiredPerms.every(perm => status[perm.id] === "granted");
+    // A permission is considered satisfied if it's granted OR unavailable (can't be granted in this environment)
+    return requiredPerms.every(perm => 
+      status[perm.id] === "granted" || status[perm.id] === "unavailable"
+    );
   }
 
   isPermissionGranted(status: PermissionStatus, type: PermissionType): boolean {

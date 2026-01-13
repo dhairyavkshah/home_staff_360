@@ -153,7 +153,8 @@ export function PermissionsScreen() {
     return permissionStatus[id];
   };
 
-  const grantedCount = Object.values(permissionStatus).filter(s => s === "granted").length;
+  // Count both granted and unavailable (unavailable permissions can't be granted in this environment)
+  const grantedCount = Object.values(permissionStatus).filter(s => s === "granted" || s === "unavailable").length;
 
   return (
     <AppLayout data-testid="screen-permissions">
@@ -189,6 +190,7 @@ export function PermissionsScreen() {
               const status = getStatusForPermission(permission.id);
               const isGranted = status === "granted";
               const isDenied = status === "denied";
+              const isUnavailable = status === "unavailable";
               const isRequired = permission.required;
 
               return (
@@ -201,20 +203,20 @@ export function PermissionsScreen() {
                     {/* Icon with status indicator */}
                     <div className="flex justify-center mb-5">
                       <div className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
-                        isGranted 
+                        isGranted || isUnavailable
                           ? "bg-green-100 dark:bg-green-900/30" 
                           : isDenied 
                           ? "bg-destructive/10" 
                           : "bg-primary/10"
                       }`}>
-                        {isGranted ? (
+                        {isGranted || isUnavailable ? (
                           <Check className="w-7 h-7 text-green-600 dark:text-green-400" />
                         ) : (
                           <Icon className={`w-7 h-7 ${isDenied ? "text-destructive" : "text-primary"}`} />
                         )}
                         
                         {/* Status dot */}
-                        {isGranted && (
+                        {(isGranted || isUnavailable) && (
                           <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-green-500 border-2 border-card flex items-center justify-center">
                             <Check className="w-3 h-3 text-white" />
                           </div>
@@ -249,6 +251,21 @@ export function PermissionsScreen() {
                             <Check className="w-5 h-5" />
                             <span className="font-medium">{t("permissionGranted")}</span>
                           </div>
+                        ) : isUnavailable ? (
+                          <>
+                            <div className="flex items-center justify-center gap-2 py-2 text-muted-foreground">
+                              <span className="text-sm">Not available in this environment</span>
+                            </div>
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={handleSkip}
+                              data-testid={`button-continue-${permission.id}`}
+                            >
+                              Continue
+                              <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                          </>
                         ) : isDenied ? (
                           <>
                             {isRequired ? (
