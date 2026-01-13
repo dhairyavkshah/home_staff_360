@@ -1,9 +1,11 @@
-import { Capacitor } from "@capacitor/core";
-import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
-import { LocalNotifications } from "@capacitor/local-notifications";
 import { storage } from "@/lib/storage";
 import { type BackupFrequency } from "@shared/schema";
 import { scheduleNativeBackup, cancelNativeBackup } from "@/lib/backup-scheduler";
+
+function isNativePlatform(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window as any).Capacitor?.isNativePlatform?.();
+}
 
 const BACKUP_STORAGE_KEYS = {
   FREQUENCY: "hm_backup_frequency",
@@ -20,7 +22,6 @@ export function getBackupConsent(): boolean {
 export function setBackupConsent(consent: boolean): void {
   localStorage.setItem(BACKUP_STORAGE_KEYS.BACKGROUND_CONSENT, consent.toString());
   
-  // Update native backup schedule based on consent
   const frequency = getBackupFrequency();
   if (consent && frequency !== "off") {
     scheduleNativeBackup(frequency);
@@ -55,7 +56,6 @@ export function setBackupFrequency(frequency: BackupFrequency): void {
     localStorage.removeItem(BACKUP_STORAGE_KEYS.NEXT_SCHEDULED_TIME);
   } else {
     scheduleNextBackup(frequency);
-    // Schedule native background backup if consent is given
     if (hasConsent) {
       scheduleNativeBackup(frequency);
     }
@@ -184,8 +184,9 @@ export function formatNextBackupTime(): string {
 }
 
 export async function deleteExistingBackup(): Promise<void> {
-  if (Capacitor.isNativePlatform()) {
+  if (isNativePlatform()) {
     try {
+      const { Filesystem, Directory } = await import("@capacitor/filesystem");
       await Filesystem.deleteFile({
         path: `HomeStaff360Backups/${BACKUP_FILENAME}`,
         directory: Directory.Documents,
@@ -209,14 +210,20 @@ export async function performAutoBackup(): Promise<{ success: boolean; filename?
 
     await deleteExistingBackup();
 
-    if (Capacitor.isNativePlatform()) {
-      await Filesystem.writeFile({
-        path: `HomeStaff360Backups/${AUTO_BACKUP_FILENAME}`,
-        data: json,
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-        recursive: true,
-      });
+    if (isNativePlatform()) {
+      try {
+        const { Filesystem, Directory, Encoding } = await import("@capacitor/filesystem");
+        await Filesystem.writeFile({
+          path: `HomeStaff360Backups/${AUTO_BACKUP_FILENAME}`,
+          data: json,
+          directory: Directory.Documents,
+          encoding: Encoding.UTF8,
+          recursive: true,
+        });
+      } catch (error) {
+        console.error("Native filesystem write failed:", error);
+        throw error;
+      }
     } else {
       const existingBackups = localStorage.getItem("hm_local_backups");
       const backups: Record<string, string> = existingBackups ? JSON.parse(existingBackups) : {};
@@ -243,8 +250,9 @@ async function scheduleNextBackup(frequency: BackupFrequency): Promise<void> {
   const nextTime = calculateNextBackupTime(frequency);
   setNextScheduledTime(nextTime.getTime());
 
-  if (Capacitor.isNativePlatform()) {
+  if (isNativePlatform()) {
     try {
+      const { LocalNotifications } = await import("@capacitor/local-notifications");
       const permissions = await LocalNotifications.checkPermissions();
       if (permissions.display !== 'granted') {
         await LocalNotifications.requestPermissions();
@@ -274,8 +282,9 @@ async function scheduleNextBackup(frequency: BackupFrequency): Promise<void> {
 }
 
 async function cancelScheduledBackup(): Promise<void> {
-  if (Capacitor.isNativePlatform()) {
+  if (isNativePlatform()) {
     try {
+      const { LocalNotifications } = await import("@capacitor/local-notifications");
       await LocalNotifications.cancel({ notifications: [{ id: BACKUP_NOTIFICATION_ID }] });
     } catch (error) {
       console.error("Failed to cancel backup notification:", error);
@@ -286,8 +295,9 @@ async function cancelScheduledBackup(): Promise<void> {
 export async function listLocalBackups(): Promise<Array<{ name: string; date: Date }>> {
   const backups: Array<{ name: string; date: Date }> = [];
 
-  if (Capacitor.isNativePlatform()) {
+  if (isNativePlatform()) {
     try {
+      const { Filesystem, Directory } = await import("@capacitor/filesystem");
       const result = await Filesystem.readdir({
         path: "HomeStaff360Backups",
         directory: Directory.Documents,
@@ -323,8 +333,9 @@ export async function listLocalBackups(): Promise<Array<{ name: string; date: Da
 }
 
 export async function loadLocalBackup(filename: string): Promise<string | null> {
-  if (Capacitor.isNativePlatform()) {
+  if (isNativePlatform()) {
     try {
+      const { Filesystem, Directory, Encoding } = await import("@capacitor/filesystem");
       const result = await Filesystem.readFile({
         path: `HomeStaff360Backups/${filename}`,
         directory: Directory.Documents,
@@ -346,8 +357,9 @@ export async function loadLocalBackup(filename: string): Promise<string | null> 
 }
 
 export async function deleteLocalBackup(filename: string): Promise<boolean> {
-  if (Capacitor.isNativePlatform()) {
+  if (isNativePlatform()) {
     try {
+      const { Filesystem, Directory } = await import("@capacitor/filesystem");
       await Filesystem.deleteFile({
         path: `HomeStaff360Backups/${filename}`,
         directory: Directory.Documents,
@@ -394,20 +406,27 @@ export function initializeAutoBackup(): void {
 
   autoBackupInterval = setInterval(checkAndBackup, 60 * 60 * 1000);
 
-  if (Capacitor.isNativePlatform()) {
-    LocalNotifications.addListener('localNotificationReceived', async (notification) => {
-      if (notification.extra?.action === 'auto_backup') {
-        console.log("Backup notification received, performing backup...");
-        await performAutoBackup();
-      }
-    });
+  if (isNativePlatform()) {
+    (async () => {
+      try {
+        const { LocalNotifications } = await import("@capacitor/local-notifications");
+        LocalNotifications.addListener('localNotificationReceived', async (notification) => {
+          if (notification.extra?.action === 'auto_backup') {
+            console.log("Backup notification received, performing backup...");
+            await performAutoBackup();
+          }
+        });
 
-    LocalNotifications.addListener('localNotificationActionPerformed', async (notification) => {
-      if (notification.notification.extra?.action === 'auto_backup') {
-        console.log("Backup notification action performed, performing backup...");
-        await performAutoBackup();
+        LocalNotifications.addListener('localNotificationActionPerformed', async (notification) => {
+          if (notification.notification.extra?.action === 'auto_backup') {
+            console.log("Backup notification action performed, performing backup...");
+            await performAutoBackup();
+          }
+        });
+      } catch (error) {
+        console.error("Failed to set up notification listeners:", error);
       }
-    });
+    })();
   }
 }
 

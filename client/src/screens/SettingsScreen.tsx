@@ -1,7 +1,12 @@
 import { useState, useMemo, useCallback } from "react";
 import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, HelpCircle, Volume2, Vibrate, MapPin, Link2, Crown } from "lucide-react";
-import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
+
+// Helper to check if running on native platform using window-based detection
+function isNativePlatform(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window as any).Capacitor?.isNativePlatform?.();
+}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -104,8 +109,10 @@ export function SettingsScreen() {
 
   const handleExitComplete = useCallback(async () => {
     try {
+      const { App } = await import("@capacitor/app");
       await App.exitApp();
-    } catch {
+    } catch (error) {
+      console.error("Failed to exit app:", error);
     }
     try {
       window.close();

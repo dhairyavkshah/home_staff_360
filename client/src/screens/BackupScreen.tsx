@@ -1,8 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
 import { Download, Share2, Trash2, FolderOpen, Check, Save } from "lucide-react";
-import { Capacitor } from "@capacitor/core";
-import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
-import { Share } from "@capacitor/share";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,12 +37,18 @@ import {
   BACKUP_FILENAME,
 } from "@/lib/auto-backup";
 
+// Helper to check if running on native platform using window-based detection
+function isNativePlatform(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window as any).Capacitor?.isNativePlatform?.();
+}
+
 export function BackupScreen() {
   const { navigate, goBack } = useNavigation();
   const { toast } = useToast();
   const { t } = useTranslation();
   const profile = useMemo(() => storage.getProfile(), []);
-  const isNative = Capacitor.isNativePlatform();
+  const isNative = isNativePlatform();
 
   const [isExporting, setIsExporting] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -130,30 +133,37 @@ export function BackupScreen() {
         const filename = BACKUP_FILENAME;
 
         if (isNative) {
-          await Filesystem.writeFile({
-            path: filename,
-            data: json,
-            directory: Directory.Cache,
-            encoding: Encoding.UTF8,
-          });
-
-          const uriResult = await Filesystem.getUri({
-            directory: Directory.Cache,
-            path: filename,
-          });
-
           try {
-            await Share.share({
-              title: "Save Backup",
-              files: [uriResult.uri],
-              dialogTitle: "Save or Share Backup",
+            const { Filesystem, Directory, Encoding } = await import("@capacitor/filesystem");
+            await Filesystem.writeFile({
+              path: filename,
+              data: json,
+              directory: Directory.Cache,
+              encoding: Encoding.UTF8,
             });
-            toast({ title: t("success"), description: t("backupCreatedAndSaved") || t("backupSaved") });
-          } catch (shareError) {
-            toast({ 
-              title: t("success"), 
-              description: t("backupCreatedLocally") || t("backupCreated")
+
+            const uriResult = await Filesystem.getUri({
+              directory: Directory.Cache,
+              path: filename,
             });
+
+            try {
+              const { Share } = await import("@capacitor/share");
+              await Share.share({
+                title: "Save Backup",
+                files: [uriResult.uri],
+                dialogTitle: "Save or Share Backup",
+              });
+              toast({ title: t("success"), description: t("backupCreatedAndSaved") || t("backupSaved") });
+            } catch (shareError) {
+              toast({ 
+                title: t("success"), 
+                description: t("backupCreatedLocally") || t("backupCreated")
+              });
+            }
+          } catch (error) {
+            console.error("Failed to save backup on native:", error);
+            throw error;
           }
         } else {
           const blob = new Blob([json], { type: "application/octet-stream" });
@@ -196,34 +206,41 @@ export function BackupScreen() {
       const filename = BACKUP_FILENAME;
 
       if (isNative) {
-        await Filesystem.writeFile({
-          path: filename,
-          data: json,
-          directory: Directory.Cache,
-          encoding: Encoding.UTF8,
-        });
-
-        const uriResult = await Filesystem.getUri({
-          directory: Directory.Cache,
-          path: filename,
-        });
-
         try {
-          await Share.share({
-            title: "Save Backup",
-            files: [uriResult.uri],
-            dialogTitle: "Save or Share Backup",
+          const { Filesystem, Directory, Encoding } = await import("@capacitor/filesystem");
+          await Filesystem.writeFile({
+            path: filename,
+            data: json,
+            directory: Directory.Cache,
+            encoding: Encoding.UTF8,
           });
-          toast({ title: t("backupSaved") });
-        } catch (shareError) {
-          if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
-            toast({ title: t("backupFileReady"), description: t("tapShareToSave") });
-            return;
+
+          const uriResult = await Filesystem.getUri({
+            directory: Directory.Cache,
+            path: filename,
+          });
+
+          try {
+            const { Share } = await import("@capacitor/share");
+            await Share.share({
+              title: "Save Backup",
+              files: [uriResult.uri],
+              dialogTitle: "Save or Share Backup",
+            });
+            toast({ title: t("backupSaved") });
+          } catch (shareError) {
+            if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
+              toast({ title: t("backupFileReady"), description: t("tapShareToSave") });
+              return;
+            }
+            toast({
+              title: t("backupFileCreated"),
+              description: t("tapShareAgainToSave").replace("{filename}", filename),
+            });
           }
-          toast({
-            title: t("backupFileCreated"),
-            description: t("tapShareAgainToSave").replace("{filename}", filename),
-          });
+        } catch (error) {
+          console.error("Failed to export backup on native:", error);
+          throw error;
         }
       } else {
         const blob = new Blob([json], { type: "application/octet-stream" });
@@ -264,34 +281,41 @@ export function BackupScreen() {
       const filename = BACKUP_FILENAME;
 
       if (isNative) {
-        await Filesystem.writeFile({
-          path: filename,
-          data: json,
-          directory: Directory.Cache,
-          encoding: Encoding.UTF8,
-        });
-
-        const uriResult = await Filesystem.getUri({
-          directory: Directory.Cache,
-          path: filename,
-        });
-
         try {
-          await Share.share({
-            title: "Home Staff 360 Backup",
-            files: [uriResult.uri],
-            dialogTitle: "Share Backup File",
+          const { Filesystem, Directory, Encoding } = await import("@capacitor/filesystem");
+          await Filesystem.writeFile({
+            path: filename,
+            data: json,
+            directory: Directory.Cache,
+            encoding: Encoding.UTF8,
           });
-          toast({ title: t("backupShared") });
-        } catch (shareError) {
-          if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
-            toast({ title: t("backupFileReady"), description: t("tapShareToSend") });
-            return;
+
+          const uriResult = await Filesystem.getUri({
+            directory: Directory.Cache,
+            path: filename,
+          });
+
+          try {
+            const { Share } = await import("@capacitor/share");
+            await Share.share({
+              title: "Home Staff 360 Backup",
+              files: [uriResult.uri],
+              dialogTitle: "Share Backup File",
+            });
+            toast({ title: t("backupShared") });
+          } catch (shareError) {
+            if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
+              toast({ title: t("backupFileReady"), description: t("tapShareToSend") });
+              return;
+            }
+            toast({
+              title: t("backupFileCreated"),
+              description: t("tapShareAgainToSend").replace("{filename}", filename),
+            });
           }
-          toast({
-            title: t("backupFileCreated"),
-            description: t("tapShareAgainToSend").replace("{filename}", filename),
-          });
+        } catch (error) {
+          console.error("Failed to share backup on native:", error);
+          throw error;
         }
       } else {
         if (navigator.share) {

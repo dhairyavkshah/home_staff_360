@@ -1,5 +1,10 @@
 import { type ReactNode, useEffect, useState } from "react";
-import { Capacitor } from '@capacitor/core';
+
+// Helper to check if running on native platform using window-based detection
+function isNativePlatform(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window as any).Capacitor?.isNativePlatform?.();
+}
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -8,10 +13,9 @@ interface AppLayoutProps {
 
 export function useKeyboardHeight() {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const isNative = Capacitor.isNativePlatform();
+  const isNative = isNativePlatform();
 
   useEffect(() => {
-    // Only set up keyboard height tracking on native mobile platforms
     if (!isNative) {
       return;
     }
@@ -44,10 +48,9 @@ export function useKeyboardHeight() {
 export function AppLayout({ children, className = "" }: AppLayoutProps) {
   const keyboardHeight = useKeyboardHeight();
   const isKeyboardOpen = keyboardHeight > 0;
-  const isNative = Capacitor.isNativePlatform();
+  const isNative = isNativePlatform();
 
   useEffect(() => {
-    // Keep auto-scroll behavior for focused inputs on mobile
     if (isKeyboardOpen && isNative) {
       const activeElement = document.activeElement as HTMLElement;
       if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
@@ -58,7 +61,6 @@ export function AppLayout({ children, className = "" }: AppLayoutProps) {
     }
   }, [isKeyboardOpen, isNative]);
 
-  // Only apply keyboard height adjustment on native mobile platforms
   const shouldApplyKeyboardHeight = isNative && isKeyboardOpen;
 
   return (

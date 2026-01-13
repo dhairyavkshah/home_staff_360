@@ -12,9 +12,13 @@ import { storage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, formatRecordCurrency } from "@/lib/calculations";
 import { currencySymbols, type InvoiceStatus } from "@shared/schema";
-import { Share } from "@capacitor/share";
-import { Capacitor } from "@capacitor/core";
 import { useI18n } from "@/lib/i18n/i18n-context";
+
+// Helper to check if running on native platform using window-based detection
+function isNativePlatform(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window as any).Capacitor?.isNativePlatform?.();
+}
 
 const STATUS_CONFIG: Record<InvoiceStatus, { icon: typeof CheckCircle; color: string; label: string }> = {
   draft: { icon: FileText, color: "bg-muted text-muted-foreground", label: "Draft" },
@@ -126,13 +130,19 @@ export function StaffInvoiceViewScreen() {
       const invoiceText = generateInvoiceText();
       const title = `Invoice ${invoice.invoiceNumber}`;
       
-      if (Capacitor.isNativePlatform()) {
-        await Share.share({
-          title: title,
-          text: invoiceText,
-          dialogTitle: t("shareInvoice"),
-        });
-        toast({ title: t("invoiceShared") });
+      if (isNativePlatform()) {
+        try {
+          const { Share } = await import("@capacitor/share");
+          await Share.share({
+            title: title,
+            text: invoiceText,
+            dialogTitle: t("shareInvoice"),
+          });
+          toast({ title: t("invoiceShared") });
+        } catch (error) {
+          console.error("Failed to share via native:", error);
+          throw error;
+        }
       } else if (navigator.share) {
         await navigator.share({
           title: title,
