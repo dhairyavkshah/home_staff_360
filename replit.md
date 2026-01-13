@@ -114,9 +114,11 @@ Our PostgreSQL server stores **only the minimum data required** for:
 ## Version 3.0 Technical Notes
 
 ### Stability Improvements
-- **Platform Detection**: Uses window-based Capacitor detection (`window.Capacitor?.isNativePlatform()`) instead of direct imports for better reliability
+- **Platform Detection**: Uses window-based Capacitor detection (`!!(window as any).Capacitor?.isNativePlatform?.()`) instead of direct imports for better reliability
+- **No Module-Level Capacitor Calls**: All Capacitor platform checks happen at function call time, not module load time, preventing crashes when the Capacitor bridge isn't ready
 - **Push Notifications**: Deferred initialization by 500ms with try-catch wrapper to prevent blocking app startup
 - **Session Management**: Session verification skipped on native platforms where sessionStorage is unreliable after app restart
+- **Haptic Feedback**: button.tsx, checkbox.tsx, switch.tsx, use-haptics.ts, and sound-service.ts all use deferred platform detection to avoid module-load crashes
 
 ### Build Requirements
 - After code changes, rebuild APK/AAB using:
