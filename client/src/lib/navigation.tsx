@@ -4,6 +4,7 @@ import { storage } from "@/lib/storage";
 export type Screen =
   | "launcher"
   | "permissions"
+  | "backup-restore"
   | "role-selection"
   | "onboarding"
   | "pin-entry"
@@ -120,7 +121,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   });
 
   const screensToExcludeFromHistory: Screen[] = [
-    "launcher", "auth", "role-selection", "permissions", "onboarding", "pin-setup", "pin-entry", "set-password"
+    "launcher", "auth", "role-selection", "permissions", "backup-restore", "onboarding", "pin-setup", "pin-entry", "set-password"
   ];
 
   const homeScreens: Screen[] = ["home", "staff-home"];

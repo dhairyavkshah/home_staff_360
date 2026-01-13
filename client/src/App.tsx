@@ -10,6 +10,7 @@ import { GuidedTourProvider } from "@/lib/guided-tour";
 import { SafeAreaProvider } from "@/lib/safe-area-provider";
 import { storage } from "@/lib/storage";
 import { initializeAutoBackup } from "@/lib/auto-backup";
+import { attendanceReminderService } from "@/lib/attendance-reminder-service";
 import { AdProvider } from "@/components/AdProvider";
 import "@/lib/demo-data";
 
@@ -27,6 +28,7 @@ import DataDeletionRequest from "@/pages/DataDeletionRequest";
 import { SplashScreen } from "@/screens/SplashScreen";
 import { LauncherScreen } from "@/screens/LauncherScreen";
 import { PermissionsScreen } from "@/screens/PermissionsScreen";
+import { BackupRestoreScreen } from "@/screens/BackupRestoreScreen";
 import { RoleSelectionScreen } from "@/screens/RoleSelectionScreen";
 import { OnboardingScreen } from "@/screens/OnboardingScreen";
 import { PinSetupScreen } from "@/screens/PinSetupScreen";
@@ -93,6 +95,17 @@ function NotificationHandler() {
   return null;
 }
 
+function AttendanceReminderHandler() {
+  const { navigate } = useNavigation();
+  
+  useEffect(() => {
+    attendanceReminderService.setNavigateFunction(navigate);
+    attendanceReminderService.initializeReminder();
+  }, [navigate]);
+  
+  return null;
+}
+
 function MobileAppRouter() {
   const { currentScreen } = useNavigation();
 
@@ -101,6 +114,8 @@ function MobileAppRouter() {
       return <LauncherScreen />;
     case "permissions":
       return <PermissionsScreen />;
+    case "backup-restore":
+      return <BackupRestoreScreen />;
     case "role-selection":
       return <RoleSelectionScreen />;
     case "onboarding":
@@ -240,6 +255,7 @@ function MobileAppWithSplash() {
             <MobileAppRouter />
             <Toaster />
             <NotificationHandler />
+            <AttendanceReminderHandler />
             <AdProvider />
           </GuidedTourProvider>
         </DirtyTrackingProvider>

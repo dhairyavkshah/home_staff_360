@@ -135,7 +135,7 @@ export function PermissionsScreen() {
         navigate("home");
       }
     } else {
-      navigate("onboarding", { userType });
+      navigate("backup-restore");
     }
   };
 
@@ -251,12 +251,18 @@ export function PermissionsScreen() {
                           </div>
                         ) : isDenied ? (
                           <>
-                            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                              {t("permissionDeniedSettings" as any) || "Denied. You can enable this later in device settings"}
-                            </p>
+                            {isRequired ? (
+                              <p className="text-xs text-destructive font-medium">
+                                {t("requiredPermissionDenied" as any) || "This permission is required to use the app. Please grant access to continue."}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                                {t("permissionDeniedSettings" as any) || "Denied. You can enable this later in device settings"}
+                              </p>
+                            )}
                             <div className="flex gap-3">
                               <Button
-                                variant="outline"
+                                variant={isRequired ? "default" : "outline"}
                                 className="flex-1"
                                 onClick={handleRequestPermission}
                                 disabled={isRequesting}
@@ -264,14 +270,16 @@ export function PermissionsScreen() {
                               >
                                 {isRequesting ? t("requesting") : t("tryAgain")}
                               </Button>
-                              <Button
-                                variant="ghost"
-                                className="flex-1"
-                                onClick={handleSkip}
-                                data-testid={`button-skip-${permission.id}`}
-                              >
-                                {t("skip")}
-                              </Button>
+                              {!isRequired && (
+                                <Button
+                                  variant="ghost"
+                                  className="flex-1"
+                                  onClick={handleSkip}
+                                  data-testid={`button-skip-${permission.id}`}
+                                >
+                                  {t("skip")}
+                                </Button>
+                              )}
                             </div>
                           </>
                         ) : (

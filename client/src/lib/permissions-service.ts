@@ -43,14 +43,14 @@ export const REQUIRED_PERMISSIONS: PermissionInfo[] = [
     name: "Media Access",
     description: "Access photos and images for staff profiles and document attachments.",
     icon: "image",
-    required: false,
+    required: true,
   },
   {
     id: "notifications",
     name: "Notifications",
     description: "Receive reminders for pending payments, attendance tracking, and important updates.",
     icon: "bell",
-    required: false,
+    required: true,
   },
   {
     id: "camera",

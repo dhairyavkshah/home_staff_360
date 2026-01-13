@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, HelpCircle, Volume2, Vibrate, MapPin, Link2, Crown } from "lucide-react";
+import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, HelpCircle, Volume2, Vibrate, MapPin, Link2, Crown, Bell, Clock } from "lucide-react";
 import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,8 @@ import { notifyCurrencyChange } from "@/hooks/useCurrency";
 import { collaborationService } from "@/lib/collaboration-service";
 import { useSubscription } from "@/hooks/useSubscription";
 import { format } from "date-fns";
+import { attendanceReminderService } from "@/lib/attendance-reminder-service";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function SettingsScreen() {
   const { navigate, goBack } = useNavigation();
@@ -118,6 +120,20 @@ export function SettingsScreen() {
   const [hapticFeedback, setHapticFeedback] = useState(isHapticEnabled());
   const [soundEffects, setSoundEffects] = useState(isSoundEnabled());
   const { isSubscribed, expiryDate } = useSubscription();
+
+  const [reminderEnabled, setReminderEnabled] = useState(attendanceReminderService.isReminderEnabled());
+  const [reminderTime, setReminderTime] = useState(attendanceReminderService.getReminderTime());
+
+  const handleReminderToggle = (enabled: boolean) => {
+    setReminderEnabled(enabled);
+    attendanceReminderService.setReminderEnabled(enabled);
+    toast({ title: enabled ? "Reminder enabled" : "Reminder disabled" });
+  };
+
+  const handleReminderTimeChange = (time: string) => {
+    setReminderTime(time);
+    attendanceReminderService.setReminderTime(time);
+  };
 
   const handleStartTour = () => {
     const mode = profile?.type || "HOME";
@@ -608,6 +624,52 @@ export function SettingsScreen() {
                 <p className="text-xs text-muted-foreground">{t("exportImportData")}</p>
               </div>
             </button>
+          </Card>
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Reminders</h2>
+          <Card className="divide-y">
+            <div className="p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="icon-halo-warning w-9 h-9">
+                  <Bell className="w-4.5 h-4.5 text-warning" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Daily Attendance Reminder</p>
+                  <p className="text-xs text-muted-foreground">Get reminded to mark attendance daily</p>
+                </div>
+              </div>
+              <Switch
+                checked={reminderEnabled}
+                onCheckedChange={handleReminderToggle}
+                data-testid="switch-attendance-reminder"
+              />
+            </div>
+            {reminderEnabled && (
+              <div className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="icon-halo-info w-9 h-9">
+                    <Clock className="w-4.5 h-4.5 text-info" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Reminder Time</p>
+                  </div>
+                </div>
+                <Select value={reminderTime} onValueChange={handleReminderTimeChange}>
+                  <SelectTrigger className="w-28" data-testid="select-reminder-time">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="18:00">6:00 PM</SelectItem>
+                    <SelectItem value="19:00">7:00 PM</SelectItem>
+                    <SelectItem value="20:00">8:00 PM</SelectItem>
+                    <SelectItem value="21:00">9:00 PM</SelectItem>
+                    <SelectItem value="22:00">10:00 PM</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </Card>
         </section>
 
