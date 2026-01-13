@@ -144,10 +144,21 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Screens that are part of onboarding flow - don't allow escaping to home
+  const onboardingFlowScreens: Screen[] = [
+    "permissions", "backup-restore", "role-selection", "onboarding", "pin-setup"
+  ];
+
   const goBack = useCallback(() => {
     setState((prev) => {
+      // If on an onboarding screen and onboarding isn't complete, don't allow going back
+      const settings = storage.getSettings();
+      if (onboardingFlowScreens.includes(prev.screen) && !settings.hasCompletedOnboarding) {
+        // Stay on current screen - don't allow escaping onboarding
+        return prev;
+      }
+
       if (prev.history.length === 0) {
-        const settings = storage.getSettings();
         const profile = storage.getProfile();
         const defaultMode = settings.defaultAppMode || profile?.type || "HOME";
         const defaultScreen = defaultMode === "STAFF" ? "staff-home" : "home";

@@ -71,13 +71,14 @@ export function LauncherScreen() {
           }
         }
       } else if (currentProfile) {
-        // Check if user has selected a role type yet
-        if (!currentProfile.type) {
-          navigate("role-selection");
-        } else if (!hasCompletedPermissions) {
-          navigate("permissions", { userType: currentProfile.type });
+        // New onboarding flow: Permissions -> Backup check -> Role Selection (only if no backup)
+        if (!hasCompletedPermissions) {
+          // Go to permissions first (don't need role type yet)
+          navigate("permissions", { userType: currentProfile.type || undefined });
         } else {
-          navigate("onboarding", { userType: currentProfile.type });
+          // Permissions done, always go to backup-restore first
+          // Backup-restore will decide: restore and go home, or proceed to role-selection
+          navigate("backup-restore");
         }
       } else {
         // No profile exists - navigate to auth first, then role selection after authentication
