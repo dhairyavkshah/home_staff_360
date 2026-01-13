@@ -1,6 +1,3 @@
-import { Capacitor } from "@capacitor/core";
-import { LocalNotifications } from "@capacitor/local-notifications";
-
 interface NotificationPayload {
   id: string;
   title: string;
@@ -8,8 +5,13 @@ interface NotificationPayload {
   type: string;
 }
 
+// Helper to check if running on native platform using window-based detection
+function isNativePlatform(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window as any).Capacitor?.isNativePlatform?.();
+}
+
 class NotificationAlertService {
-  private isNative = Capacitor.isNativePlatform();
   private notificationIdCounter = 1000;
   private shownNotifications = new Set<string>();
 
@@ -27,7 +29,7 @@ class NotificationAlertService {
       }
     }
 
-    if (this.isNative) {
+    if (isNativePlatform()) {
       await this.showNativeNotification(notification);
     } else {
       await this.showWebNotification(notification);
@@ -36,6 +38,7 @@ class NotificationAlertService {
 
   private async showNativeNotification(notification: NotificationPayload): Promise<void> {
     try {
+      const { LocalNotifications } = await import("@capacitor/local-notifications");
       const permStatus = await LocalNotifications.checkPermissions();
       if (permStatus.display !== "granted") {
         return;
@@ -82,8 +85,9 @@ class NotificationAlertService {
   }
 
   async requestPermission(): Promise<boolean> {
-    if (this.isNative) {
+    if (isNativePlatform()) {
       try {
+        const { LocalNotifications } = await import("@capacitor/local-notifications");
         const result = await LocalNotifications.requestPermissions();
         return result.display === "granted";
       } catch {
@@ -103,8 +107,9 @@ class NotificationAlertService {
   }
 
   async checkPermission(): Promise<boolean> {
-    if (this.isNative) {
+    if (isNativePlatform()) {
       try {
+        const { LocalNotifications } = await import("@capacitor/local-notifications");
         const result = await LocalNotifications.checkPermissions();
         return result.display === "granted";
       } catch {

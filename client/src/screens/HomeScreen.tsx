@@ -19,9 +19,14 @@ import { useTour, shouldShowTour } from "@/lib/guided-tour";
 import { useToast } from "@/hooks/use-toast";
 import { StorageWarningBanner } from "@/components/StorageWarningBanner";
 import { useRealtimeContext } from "@/lib/realtime-provider";
-import { App } from "@capacitor/app";
 import { ExitAppDialog } from "@/components/ExitAppDialog";
 import { initPushNotifications } from "@/lib/push-notification-service";
+
+// Helper to check if running on native platform using window-based detection
+function isNativePlatform(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window as any).Capacitor?.isNativePlatform?.();
+}
 
 export function HomeScreen() {
   const { navigate, data, goBack, canGoBack } = useNavigation();
@@ -36,16 +41,31 @@ export function HomeScreen() {
   const [showExitDialog, setShowExitDialog] = useState(false);
 
   useEffect(() => {
-    const backHandler = App.addListener("backButton", () => {
-      if (canGoBack) {
-        goBack();
-      } else {
-        setShowExitDialog(true);
+    if (!isNativePlatform()) return;
+
+    let backHandler: any = null;
+    
+    const setupBackHandler = async () => {
+      try {
+        const { App } = await import("@capacitor/app");
+        backHandler = await App.addListener("backButton", () => {
+          if (canGoBack) {
+            goBack();
+          } else {
+            setShowExitDialog(true);
+          }
+        });
+      } catch (error) {
+        console.error("[HomeScreen] Failed to setup back button handler:", error);
       }
-    });
+    };
+
+    setupBackHandler();
 
     return () => {
-      backHandler.then(handle => handle.remove());
+      if (backHandler) {
+        backHandler.remove?.();
+      }
     };
   }, [canGoBack, goBack]);
 
@@ -415,7 +435,14 @@ export function HomeScreen() {
       <ExitAppDialog
         open={showExitDialog}
         onOpenChange={setShowExitDialog}
-        onExit={() => App.exitApp()}
+        onExit={async () => {
+          try {
+            const { App } = await import("@capacitor/app");
+            App.exitApp();
+          } catch (error) {
+            console.error("[HomeScreen] Failed to exit app:", error);
+          }
+        }}
         onStay={() => setShowExitDialog(false)}
       />
     </div>
