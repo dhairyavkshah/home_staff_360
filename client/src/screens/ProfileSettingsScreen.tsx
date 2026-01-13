@@ -57,6 +57,9 @@ export function ProfileSettingsScreen() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPhonePassword, setShowPhonePassword] = useState(false);
+  const [showClearDataPassword, setShowClearDataPassword] = useState(false);
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
 
   // Change phone form
   const [newPhoneCountryCode, setNewPhoneCountryCode] = useState(getDefaultCountryCode());
@@ -679,7 +682,7 @@ export function ProfileSettingsScreen() {
                     <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="phonePassword"
-                      type={showPassword ? "text" : "password"}
+                      type={showPhonePassword ? "text" : "password"}
                       value={phonePassword}
                       onChange={(e) => setPhonePassword(e.target.value)}
                       placeholder="Enter your password"
@@ -689,9 +692,9 @@ export function ProfileSettingsScreen() {
                     <button
                       type="button"
                       className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPhonePassword(!showPhonePassword)}
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPhonePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -811,7 +814,7 @@ export function ProfileSettingsScreen() {
                   <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="clearDataPassword"
-                    type={showPassword ? "text" : "password"}
+                    type={showClearDataPassword ? "text" : "password"}
                     value={clearDataPassword}
                     onChange={(e) => setClearDataPassword(e.target.value)}
                     placeholder={t("enterYourPassword")}
@@ -821,9 +824,9 @@ export function ProfileSettingsScreen() {
                   <button
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowClearDataPassword(!showClearDataPassword)}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showClearDataPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -891,7 +894,7 @@ export function ProfileSettingsScreen() {
                   <Lock className="absolute left-3 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="deletePassword"
-                    type={showPassword ? "text" : "password"}
+                    type={showDeletePassword ? "text" : "password"}
                     value={deletePassword}
                     onChange={(e) => setDeletePassword(e.target.value)}
                     placeholder="Enter your password"
@@ -901,9 +904,9 @@ export function ProfileSettingsScreen() {
                   <button
                     type="button"
                     className="absolute right-2 p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowDeletePassword(!showDeletePassword)}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showDeletePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>

@@ -13,11 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigation } from "@/lib/navigation";
 import { collaborationService } from "@/lib/collaboration-service";
 import { storage } from "@/lib/storage";
+import { combinePhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
 import { useRealtime, useRealtimeConnection } from "@/hooks/use-realtime";
 import {
   AlertDialog,
@@ -78,7 +79,9 @@ export function ConnectionsTab() {
   const [receivedInvites, setReceivedInvites] = useState<ConnectionInvite[]>([]);
   const [sentInvites, setSentInvites] = useState<ConnectionInvite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchPhone, setSearchPhone] = useState("");
+  const [searchCountryCode, setSearchCountryCode] = useState(getDefaultCountryCode());
+  const [searchPhoneNumber, setSearchPhoneNumber] = useState("");
+  const [searchPhoneValid, setSearchPhoneValid] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isSending, setIsSending] = useState(false);
@@ -86,6 +89,10 @@ export function ConnectionsTab() {
 
   const profile = storage.getProfile();
   const currentMode = profile?.type || "HOME";
+
+  const getFullSearchPhone = useCallback(() => {
+    return combinePhoneNumber(searchCountryCode, searchPhoneNumber);
+  }, [searchCountryCode, searchPhoneNumber]);
 
   useRealtimeConnection();
 
@@ -129,10 +136,11 @@ export function ConnectionsTab() {
   };
 
   const handleSearch = async () => {
-    if (!searchPhone || searchPhone.length < 10) {
+    const fullPhone = getFullSearchPhone();
+    if (!searchPhoneValid || !searchPhoneNumber || !fullPhone) {
       toast({
         title: "Invalid Phone",
-        description: "Please enter a valid phone number with country code",
+        description: "Please enter a valid phone number",
         variant: "destructive",
       });
       return;
@@ -142,7 +150,7 @@ export function ConnectionsTab() {
     setSearchResult(null);
     try {
       const result = await collaborationService.fetchWithAuth(
-        `/connections/search?phone=${encodeURIComponent(searchPhone)}&mode=${currentMode}`
+        `/connections/search?phone=${encodeURIComponent(fullPhone)}&mode=${currentMode}`
       );
       setSearchResult(result);
       if (!result.user) {
@@ -198,7 +206,8 @@ export function ConnectionsTab() {
         });
       }
 
-      setSearchPhone("");
+      setSearchCountryCode(getDefaultCountryCode());
+      setSearchPhoneNumber("");
       setSearchResult(null);
       loadData();
     } catch (error: any) {
@@ -298,18 +307,22 @@ export function ConnectionsTab() {
           <Search className="w-4 h-4" />
           Find People
         </h4>
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-4">
-            <Input
-              placeholder="+91 98765 43210"
-              value={searchPhone}
-              onChange={(e) => setSearchPhone(e.target.value)}
-              className="flex-1"
-              data-testid="input-search-phone"
-            />
+        <div className="flex flex-col gap-3">
+          <PhoneNumberInput
+            countryCode={searchCountryCode}
+            phoneNumber={searchPhoneNumber}
+            onCountryCodeChange={setSearchCountryCode}
+            onPhoneNumberChange={setSearchPhoneNumber}
+            onValidationChange={(isValid) => setSearchPhoneValid(isValid)}
+            label=""
+            required={false}
+            testIdPrefix="search-phone"
+            showValidation={false}
+          />
           <Button
             onClick={handleSearch}
-            disabled={isSearching}
+            disabled={isSearching || !searchPhoneValid || !searchPhoneNumber}
+            className="w-full"
             data-testid="button-search-user"
           >
             {isSearching ? (
@@ -318,13 +331,6 @@ export function ConnectionsTab() {
               <Search className="w-4 h-4" />
             )}
           </Button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Include country code (e.g., +91 for India, +1 for USA)
-          </p>
-          {searchPhone && !searchPhone.trim().startsWith('+') && (
-            <p className="text-xs text-destructive">Phone number must start with + and country code</p>
-          )}
         </div>
 
         {searchResult?.user && (
