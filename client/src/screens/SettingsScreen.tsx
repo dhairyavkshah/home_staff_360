@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, HelpCircle, Volume2, Vibrate, MapPin, Link2, Crown, Bell, Clock } from "lucide-react";
+import { Database, Moon, Sun, Lock, KeyRound, ChevronRight, User, Check, LogOut, Home, Briefcase, HelpCircle, Volume2, Vibrate, MapPin, Link2, Crown, Bell, Clock, CloudUpload } from "lucide-react";
 import { App } from "@capacitor/app";
 import { ExitCoverScreen } from "@/components/ExitCoverScreen";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ import { collaborationService } from "@/lib/collaboration-service";
 import { useSubscription } from "@/hooks/useSubscription";
 import { format } from "date-fns";
 import { attendanceReminderService } from "@/lib/attendance-reminder-service";
+import { getBackupFrequency, setBackupFrequency } from "@/lib/auto-backup";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function SettingsScreen() {
@@ -61,7 +62,6 @@ export function SettingsScreen() {
   const [showDisablePinModal, setShowDisablePinModal] = useState(false);
   const [showExitCover, setShowExitCover] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const [appMode, setAppMode] = useState<UserType>(profile?.type || "HOME");
   
@@ -123,6 +123,14 @@ export function SettingsScreen() {
 
   const [reminderEnabled, setReminderEnabled] = useState(attendanceReminderService.isReminderEnabled());
   const [reminderTime, setReminderTime] = useState(attendanceReminderService.getReminderTime());
+  const [backupFrequency, setBackupFrequencyState] = useState(getBackupFrequency());
+
+  const handleBackupToggle = (enabled: boolean) => {
+    const newFrequency = enabled ? "daily" : "off";
+    setBackupFrequencyState(newFrequency);
+    setBackupFrequency(newFrequency);
+    toast({ title: enabled ? "Auto-backup enabled" : "Auto-backup disabled" });
+  };
 
   const handleReminderToggle = (enabled: boolean) => {
     setReminderEnabled(enabled);
@@ -225,11 +233,6 @@ export function SettingsScreen() {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const handleLogout = async () => {
-    await collaborationService.logout();
-    toast({ title: t("loggedOut") });
-    navigate("auth");
-  };
 
   const handleAppModeSwitch = (mode: UserType) => {
     if (mode === appMode) return;
@@ -381,23 +384,6 @@ export function SettingsScreen() {
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>
             </button>
-            {collaborationService.isAuthenticated() && (
-              <button
-                className="w-full p-4 text-left hover-elevate"
-                onClick={() => setShowLogoutModal(true)}
-                data-testid="button-logout"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="icon-halo-destructive w-9 h-9">
-                    <LogOut className="w-4.5 h-4.5 text-destructive" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm text-destructive">{t("logout")}</p>
-                    <p className="text-xs text-muted-foreground">{t("logoutDescription")}</p>
-                  </div>
-                </div>
-              </button>
-            )}
           </Card>
         </section>
 
@@ -610,19 +596,38 @@ export function SettingsScreen() {
 
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("dataManagement")}</h2>
-          <Card className="p-3">
+          <Card className="divide-y">
+            <div className="p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="icon-halo-success w-9 h-9">
+                  <CloudUpload className="w-4.5 h-4.5 text-success" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Auto-Backup</p>
+                  <p className="text-xs text-muted-foreground">
+                    {backupFrequency !== "off" ? `Backup ${backupFrequency}` : "Automatically backup your data"}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={backupFrequency !== "off"}
+                onCheckedChange={handleBackupToggle}
+                data-testid="switch-auto-backup"
+              />
+            </div>
             <button
-              className="w-full flex items-center gap-3 hover-elevate text-left"
+              className="w-full p-4 flex items-center gap-3 hover-elevate text-left"
               onClick={() => navigate("backup")}
               data-testid="button-backup"
             >
               <div className="icon-halo-info w-9 h-9">
                 <Database className="w-4.5 h-4.5 text-info" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="font-medium text-sm">{t("backupAndRestore")}</p>
                 <p className="text-xs text-muted-foreground">{t("exportImportData")}</p>
               </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
           </Card>
         </section>
@@ -743,15 +748,6 @@ export function SettingsScreen() {
         onCancel={handleDiscardChanges}
       />
 
-      <ConfirmModal
-        open={showLogoutModal}
-        onOpenChange={setShowLogoutModal}
-        onConfirm={handleLogout}
-        title={t("logoutConfirmTitle")}
-        description={t("logoutConfirmDescription")}
-        confirmText={t("logout")}
-        variant="destructive"
-      />
 
       <ExitCoverScreen 
         isVisible={showExitCover} 

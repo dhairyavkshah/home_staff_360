@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Camera,
   ImageIcon,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,6 +29,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useNavigation } from "@/lib/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { collaborationService } from "@/lib/collaboration-service";
@@ -52,6 +54,7 @@ export function ProfileSettingsScreen() {
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Profile data
   const [profile, setProfile] = useState<{
@@ -458,6 +461,12 @@ export function ProfileSettingsScreen() {
     }
   };
 
+  const handleLogout = async () => {
+    await collaborationService.logout();
+    toast({ title: t("loggedOut") });
+    navigate("auth");
+  };
+
   const getTitle = () => {
     switch (step) {
       case "edit-name": return "Edit Name";
@@ -636,6 +645,27 @@ export function ProfileSettingsScreen() {
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </button>
             </Card>
+
+            {collaborationService.isAuthenticated() && (
+              <Card className="mt-4">
+                <button
+                  className="w-full p-4 flex items-center justify-between hover-elevate text-left"
+                  onClick={() => setShowLogoutModal(true)}
+                  data-testid="button-logout"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                      <LogOut className="w-5 h-5 text-destructive" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-destructive">{t("logout")}</p>
+                      <p className="text-sm text-muted-foreground">{t("logoutDescription")}</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-destructive" />
+                </button>
+              </Card>
+            )}
 
             <h2 className="text-sm font-medium text-destructive uppercase tracking-wide mt-6">
               {t("dangerZone")}
@@ -1095,6 +1125,16 @@ export function ProfileSettingsScreen() {
           </section>
         )}
       </ScrollContent>
+
+      <ConfirmModal
+        open={showLogoutModal}
+        onOpenChange={setShowLogoutModal}
+        onConfirm={handleLogout}
+        title={t("logoutConfirmTitle")}
+        description={t("logoutConfirmDescription")}
+        confirmText={t("logout")}
+        variant="destructive"
+      />
     </AppLayout>
   );
 }
