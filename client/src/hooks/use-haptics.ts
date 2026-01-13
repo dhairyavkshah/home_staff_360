@@ -1,16 +1,11 @@
-// Check once at module load if we're on native platform
-const isNativeApp = (() => {
-  try {
-    const capacitor = (window as any).Capacitor;
-    return capacitor && typeof capacitor.isNativePlatform === 'function' && capacitor.isNativePlatform() === true;
-  } catch {
-    return false;
-  }
-})();
+function isNativePlatform(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window as any).Capacitor?.isNativePlatform?.();
+}
 
 export const useHaptics = () => {
   const impact = (style: 'Light' | 'Medium' | 'Heavy' = 'Light') => {
-    if (!isNativeApp) return;
+    if (!isNativePlatform()) return;
     try {
       import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
         const impactStyle = style === 'Heavy' ? ImpactStyle.Heavy : 
@@ -18,12 +13,11 @@ export const useHaptics = () => {
         Haptics.impact({ style: impactStyle }).catch(() => {});
       }).catch(() => {});
     } catch {
-      // Silently fail
     }
   };
 
   const notification = (type: 'Success' | 'Warning' | 'Error' = 'Success') => {
-    if (!isNativeApp) return;
+    if (!isNativePlatform()) return;
     try {
       import('@capacitor/haptics').then(({ Haptics, NotificationType }) => {
         const notifType = type === 'Error' ? NotificationType.Error :
@@ -31,40 +25,36 @@ export const useHaptics = () => {
         Haptics.notification({ type: notifType }).catch(() => {});
       }).catch(() => {});
     } catch {
-      // Silently fail
     }
   };
 
   const selectionStart = () => {
-    if (!isNativeApp) return;
+    if (!isNativePlatform()) return;
     try {
       import('@capacitor/haptics').then(({ Haptics }) => {
         Haptics.selectionStart().catch(() => {});
       }).catch(() => {});
     } catch {
-      // Silently fail
     }
   };
 
   const selectionChanged = () => {
-    if (!isNativeApp) return;
+    if (!isNativePlatform()) return;
     try {
       import('@capacitor/haptics').then(({ Haptics }) => {
         Haptics.selectionChanged().catch(() => {});
       }).catch(() => {});
     } catch {
-      // Silently fail
     }
   };
 
   const selectionEnd = () => {
-    if (!isNativeApp) return;
+    if (!isNativePlatform()) return;
     try {
       import('@capacitor/haptics').then(({ Haptics }) => {
         Haptics.selectionEnd().catch(() => {});
       }).catch(() => {});
     } catch {
-      // Silently fail
     }
   };
 
