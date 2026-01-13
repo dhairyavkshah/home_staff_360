@@ -1,3 +1,5 @@
+import { Capacitor } from "@capacitor/core";
+
 const API_BASE = "/api";
 const TOKEN_KEY = "homestaff360_collab_token";
 const SESSION_KEY = "homestaff360_session_verified";
@@ -182,7 +184,12 @@ class CollaborationService {
   }
 
   // Check if user needs to re-authenticate (has token but new tab/session)
+  // Skip session verification on native mobile platforms - the device itself is the security boundary
+  // and sessionStorage gets cleared when the app closes, causing unwanted re-auth prompts
   needsSessionVerification(): boolean {
+    if (Capacitor.isNativePlatform()) {
+      return false;
+    }
     return this.isAuthenticated() && !this.isSessionVerified();
   }
 
