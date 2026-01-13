@@ -257,6 +257,20 @@ export function AddPersonScreen() {
       // Check for duplicate phone number
       const fullPhone = getFullPhoneNumber();
       const normalizedPhone = fullPhone.replace(/\D/g, "");
+      
+      // Check if user is trying to add themselves
+      const savedPhone = collaborationService.getSavedPhone();
+      if (savedPhone) {
+        const normalizedSavedPhone = savedPhone.replace(/\D/g, "");
+        if (normalizedPhone === normalizedSavedPhone || 
+            normalizedPhone.endsWith(normalizedSavedPhone) || 
+            normalizedSavedPhone.endsWith(normalizedPhone)) {
+          newErrors.phone = "You cannot add yourself as a staff member";
+          setErrors(newErrors);
+          return false;
+        }
+      }
+      
       const existingPeople = storage.getPeople();
       const duplicate = existingPeople.find((p) => {
         // Skip current person in edit mode

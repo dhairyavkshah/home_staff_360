@@ -287,6 +287,20 @@ export function StaffAddClientHomeScreen() {
       // Check for duplicate phone number among client homes
       const fullPhone = getFullPhoneNumber();
       const normalizedPhone = fullPhone.replace(/\D/g, "");
+      
+      // Check if user is trying to add themselves as a client
+      const savedPhone = collaborationService.getSavedPhone();
+      if (savedPhone) {
+        const normalizedSavedPhone = savedPhone.replace(/\D/g, "");
+        if (normalizedPhone === normalizedSavedPhone || 
+            normalizedPhone.endsWith(normalizedSavedPhone) || 
+            normalizedSavedPhone.endsWith(normalizedPhone)) {
+          newErrors.contactPhone = "You cannot add yourself as a client";
+          setErrors(newErrors);
+          return false;
+        }
+      }
+      
       const existingHomes = storage.getClientHomes();
       const duplicate = existingHomes.find((h) => {
         // Skip current client in edit mode

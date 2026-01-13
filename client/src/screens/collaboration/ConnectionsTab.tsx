@@ -146,6 +146,23 @@ export function ConnectionsTab() {
       return;
     }
 
+    // Check if user is searching for their own phone number
+    const savedPhone = collaborationService.getSavedPhone();
+    if (savedPhone) {
+      const normalizedSearchPhone = fullPhone.replace(/\D/g, "");
+      const normalizedSavedPhone = savedPhone.replace(/\D/g, "");
+      if (normalizedSearchPhone === normalizedSavedPhone || 
+          normalizedSearchPhone.endsWith(normalizedSavedPhone) || 
+          normalizedSavedPhone.endsWith(normalizedSearchPhone)) {
+        toast({
+          title: "Cannot Connect",
+          description: "You cannot connect with yourself",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setIsSearching(true);
     setSearchResult(null);
     try {
