@@ -65,6 +65,10 @@
     <!-- Phone permission -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+
+    <!-- Touchscreen - not required for tablets/TV -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
     <!-- Storage permissions for file access -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
