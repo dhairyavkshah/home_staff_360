@@ -1116,14 +1116,6 @@ const hi: Partial<typeof en> = {
   required: "आवश्यक",
   optional: "वैकल्पिक",
   comingSoon: "जल्द आ रहा है",
-
-  // Network & Connectivity
-  noInternetConnection: "इंटरनेट कनेक्शन नहीं। कृपया अपनी नेटवर्क सेटिंग्स जांचें और फिर से प्रयास करें।",
-  networkError: "नेटवर्क त्रुटि। कृपया अपना कनेक्शन जांचें और फिर से प्रयास करें।",
-  
-  // Authentication Errors
-  verificationFailed: "सत्यापन विफल",
-  currentPasswordIncorrect: "वर्तमान पासवर्ड गलत है। कृपया फिर से प्रयास करें।",
   
   // Navigation
   home: "होम",
@@ -2159,8 +2151,6 @@ const hi: Partial<typeof en> = {
   keepBoth: "दोनों रखें",
   keepBothDescription: "मौजूदा डेटा रखें और बैकअप नए रिकॉर्ड के रूप में जोड़ें",
   importBackup: "बैकअप आयात करें",
-  cannotLogPreviousMonths: "पिछले महीनों के लिए लॉन्ड्री दर्ज नहीं कर सकते",
-  cannotLogFutureDates: "भविष्य की तारीखों के लिए लॉन्ड्री दर्ज नहीं कर सकते",
   hide: "छुपाएं",
   show: "दिखाएं",
   connectionsOnline: "कनेक्शन ऑनलाइन",
