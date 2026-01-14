@@ -164,7 +164,7 @@
 | TC113 | Settings - Change Language Hindi | Select Hindi language | Language picker open | App UI in Hindi | Pass |
 | TC114 | Settings - Change Language Spanish | Select Spanish language | Language picker open | App UI in Spanish | Pass |
 | TC115 | Settings - Language Persist | Verify language saved | App restarted | Language preference retained | Pass |
-| TC116 | Settings - Currency Select | Open currency picker | On settings page | 27 currencies listed | Pass |
+| TC116 | Settings - Currency Select | Open currency picker | On settings page | 120+ currencies listed | Pass |
 | TC117 | Settings - Change Currency USD | Select USD currency | Currency picker open | Amounts in $ format | Pass |
 | TC118 | Settings - Change Currency EUR | Select EUR currency | Currency picker open | Amounts in Euro format | Pass |
 | TC119 | Settings - Currency Persist | Verify currency saved | App restarted | Currency preference retained | Pass |

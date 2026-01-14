@@ -147,6 +147,10 @@ export function OnboardingScreen() {
       defaultAppMode: userType,
     });
 
+    // Save currency to BOTH modes during onboarding so it's the default for both
+    const existingHomeSettings = storage.getHomeSettings();
+    const existingStaffSettings = storage.getStaffSettings();
+    
     if (isHome) {
       storage.saveHomeSettings({
         householdName: accountName.trim(),
@@ -155,9 +159,21 @@ export function OnboardingScreen() {
         halfDayPercentage: parseInt(halfDayPercentage),
         language: language,
       });
+      // Also apply currency to staff mode so it's the default when user switches
+      storage.saveStaffSettings({
+        ...existingStaffSettings,
+        currency,
+        language: language,
+      });
     } else {
       storage.saveStaffSettings({
         vendorName: accountName.trim(),
+        currency,
+        language: language,
+      });
+      // Also apply currency to home mode so it's the default when user switches
+      storage.saveHomeSettings({
+        ...existingHomeSettings,
         currency,
         language: language,
       });

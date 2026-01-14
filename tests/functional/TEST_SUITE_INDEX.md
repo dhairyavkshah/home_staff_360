@@ -39,7 +39,7 @@ This document serves as the master index for the Home Staff 360 functional test 
 |---|---------|-------------|------------|
 | 1 | Authentication & Onboarding | Phone entry, OTP, Password, Login | TC001-TC090 |
 | 2 | Profile & Settings | Profile management, app settings, security | TC091-TC150 |
-| 3 | Localization & Currency | 21 languages, 27 currencies | TC151-TC190 |
+| 3 | Localization & Currency | 21 languages, 120+ currencies | TC151-TC190 |
 | 4 | People Management | Add/edit/view staff members | TC191-TC290 |
 | 5 | Attendance Management | Mark, calendar, reports, approvals | TC291-TC440 |
 | 6 | Transactions & Payments | Record payments, history, balances | TC441-TC560 |

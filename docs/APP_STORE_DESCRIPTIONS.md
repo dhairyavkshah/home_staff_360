@@ -124,7 +124,7 @@ GLOBAL ACCESSIBILITY
 
 21 Languages: English, Hindi, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Telugu, Tamil, Urdu, Bengali, Odia, Assamese, Spanish, French, German, Arabic, Chinese, Japanese, Portuguese, Russian
 
-27 Currencies: INR, USD, EUR, GBP, AUD, CAD, and more
+120+ Currencies: All major international currencies supported
 
 FUTURE ROADMAP
 

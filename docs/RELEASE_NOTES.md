@@ -35,7 +35,7 @@ Home Staff 360 is now a **fully live, real-time platform** for professional staf
 
 **Global Reach**
 - 21 languages supported
-- 27 currencies for international users
+- 120+ currencies for international users
 - Works worldwide with SMS verification
 
 ---
@@ -130,8 +130,8 @@ Home Staff 360 is now a **fully live, real-time platform** for professional staf
 **21 Languages Supported**
 English, Hindi, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Telugu, Tamil, Urdu, Bengali, Odia, Assamese, Spanish, French, German, Arabic, Chinese, Japanese, Portuguese, Russian
 
-**27 Currencies Supported**
-INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, SAR, SGD, MYR, THB, PHP, IDR, VND, KRW, BRL, MXN, ZAR, RUB, TRY, CHF, SEK, NOK, DKK, NZD
+**120+ Currencies Supported**
+All major international currencies including INR, USD, EUR, GBP, AUD, CAD, JPY, CNY, AED, and 110+ more
 
 ---
 
@@ -198,7 +198,7 @@ NOW LIVE:
 
 VERSATILE:
 - Perfect for households, hotels, restaurants & service businesses
-- 21 languages, 27 currencies
+- 21 languages, 120+ currencies
 - Beautiful Fluent 2 design
 
 Manage your team professionally, from anywhere!
