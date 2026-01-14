@@ -30,7 +30,7 @@ export default function PrivacyPolicy() {
           <div className="text-center space-y-1">
             <h1 className="text-2xl font-bold">Privacy Policy</h1>
             <p className="text-base font-semibold">Home Staff 360</p>
-            <p className="text-sm text-muted-foreground">Last Updated: January 10, 2026</p>
+            <p className="text-sm text-muted-foreground">Last Updated: January 14, 2026</p>
           </div>
 
           <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
@@ -186,14 +186,70 @@ export default function PrivacyPolicy() {
           <hr className="border-border" />
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold">4. Local Auto-Backup (Optional)</h2>
-            <p className="text-sm text-muted-foreground">Home Staff 360 offers an optional automatic backup feature:</p>
-            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
-              <li><span className="font-medium text-foreground">User Consent Required</span>: Auto-backup only activates when you explicitly consent</li>
-              <li><span className="font-medium text-foreground">Local Storage Only</span>: Backup files are stored on your device, NOT uploaded to our servers</li>
-              <li><span className="font-medium text-foreground">Your Control</span>: You can disable auto-backup or delete backup files at any time</li>
-              <li><span className="font-medium text-foreground">No Third-Party Access</span>: Local backups remain on your device and are not accessible by us</li>
-            </ul>
+            <h2 className="text-xl font-semibold">4. Data Backup &amp; Recovery</h2>
+            <p className="text-sm text-muted-foreground">Home Staff 360 provides two backup mechanisms to protect your data:</p>
+
+            <div className="space-y-3">
+              <h3 className="text-base font-medium">4.1 Local Auto-Backup (User-Controlled)</h3>
+              <p className="text-sm text-muted-foreground">An optional backup feature that saves your data to your device:</p>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
+                <li><span className="font-medium text-foreground">User Consent Required</span>: Auto-backup only activates when you explicitly consent</li>
+                <li><span className="font-medium text-foreground">Local Storage Only</span>: Backup files are stored on your device, NOT uploaded to our servers</li>
+                <li><span className="font-medium text-foreground">Your Control</span>: Configure backup frequency (daily, weekly, monthly) or disable at any time</li>
+                <li><span className="font-medium text-foreground">Portable</span>: Export and transfer backup files to other devices manually</li>
+                <li><span className="font-medium text-foreground">No Third-Party Access</span>: Local backups remain on your device and are not accessible by us</li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-base font-medium">4.2 Android Auto-Backup (System-Level)</h3>
+              <p className="text-sm text-muted-foreground">Android's built-in backup feature that preserves your app data:</p>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 pl-2">
+                <li><span className="font-medium text-foreground">Automatic</span>: Runs automatically every 24 hours when device is idle, charging, and on WiFi</li>
+                <li><span className="font-medium text-foreground">Google Drive Storage</span>: Backed up to your Google account (counts toward your Google Drive quota)</li>
+                <li><span className="font-medium text-foreground">Encrypted</span>: Data is encrypted during transfer and storage on Google's servers</li>
+                <li><span className="font-medium text-foreground">Seamless Restore</span>: When you reinstall the app, your login session and settings are automatically restored</li>
+                <li><span className="font-medium text-foreground">Device Settings Control</span>: You can disable this in your Android device settings under Backup</li>
+                <li><span className="font-medium text-foreground">25 MB Limit</span>: Limited to 25 MB per app (covers login credentials and settings)</li>
+              </ul>
+              <p className="text-sm text-muted-foreground mt-2">
+                <span className="font-medium text-foreground">Note:</span> Android Auto-Backup is managed by Google, not by us. Your data is subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google's Privacy Policy</a>.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto mt-3">
+              <table className="w-full text-sm border border-border rounded-md">
+                <thead>
+                  <tr className="bg-muted">
+                    <th className="px-3 py-2 text-left font-medium border-b border-border">Feature</th>
+                    <th className="px-3 py-2 text-left font-medium border-b border-border">Local Backup</th>
+                    <th className="px-3 py-2 text-left font-medium border-b border-border">Android Auto-Backup</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted-foreground">
+                  <tr className="border-t border-border">
+                    <td className="px-3 py-2 font-medium text-foreground">Permission Required</td>
+                    <td className="px-3 py-2">Yes (explicit consent)</td>
+                    <td className="px-3 py-2">No (system feature)</td>
+                  </tr>
+                  <tr className="border-t border-border bg-muted/30">
+                    <td className="px-3 py-2 font-medium text-foreground">Storage Location</td>
+                    <td className="px-3 py-2">Your device only</td>
+                    <td className="px-3 py-2">Google Drive</td>
+                  </tr>
+                  <tr className="border-t border-border">
+                    <td className="px-3 py-2 font-medium text-foreground">User Control</td>
+                    <td className="px-3 py-2">In-app settings</td>
+                    <td className="px-3 py-2">Device settings</td>
+                  </tr>
+                  <tr className="border-t border-border bg-muted/30">
+                    <td className="px-3 py-2 font-medium text-foreground">Data Included</td>
+                    <td className="px-3 py-2">All business data</td>
+                    <td className="px-3 py-2">Login &amp; settings</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <hr className="border-border" />
