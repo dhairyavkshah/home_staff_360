@@ -1,7 +1,7 @@
 # Home Staff 360
 
 **Version:** 3.0  
-**Last Updated:** January 13, 2026
+**Last Updated:** January 14, 2026
 
 ## Overview
 Home Staff 360 is a professional staff management platform designed as a hybrid mobile application (React + Capacitor) with a backend server. It provides real-time workforce management with live data synchronization, suitable for household staff, hospitality businesses, restaurants, and other service-oriented operations. The platform supports two main operating modes: Home User Mode for employers and managers to track staff activities, and Staff User Mode for service professionals to manage clients, earnings, and expenses.
@@ -23,6 +23,30 @@ Home Staff 360 is a professional staff management platform designed as a hybrid 
 
 ## Important Documents
 - **MIGRATION_CHECKLIST.md**: Formal procedures for safely managing database schema changes when the app has live users and production data. Must be followed for all database migrations.
+- **docs/DEPLOYMENT_WORKFLOW.md**: Complete guide for development and production build processes, GitHub Actions workflows, and deployment procedures.
+
+## Development / Production Environment Separation
+
+The project maintains separate environments for safe testing before production releases:
+
+| Environment | App ID | App Name | Server URL |
+|-------------|--------|----------|------------|
+| Development | `com.theteam360.homestaff360.dev` | Home Staff 360 DEV | Replit workspace URL |
+| Production | `com.theteam360.homestaff360` | Home Staff 360 | `https://homestaff360.replit.app` |
+
+**Configuration Files:**
+- `capacitor.config.dev.ts` - Development build config (debugging enabled)
+- `capacitor.config.prod.ts` - Production build config (debugging disabled)
+
+**GitHub Workflows:**
+- `android-dev-apk.yml` - Builds debug APK for development testing
+- `android-prod-aab.yml` - Builds signed AAB for Google Play
+- `android-prod-apk.yml` - Builds signed APK for direct distribution
+
+**Key Benefits:**
+- Both DEV and PROD apps can be installed simultaneously on the same device
+- Test risky changes safely without affecting live users
+- Separate databases prevent test data contamination
 
 ## System Architecture
 
