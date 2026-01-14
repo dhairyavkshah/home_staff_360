@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Include WebView localStorage data -->
+    <include domain="database" path="." />
+    <include domain="sharedpref" path="." />
+    <include domain="file" path="." />
+    
+    <!-- Include app-specific WebView data -->
+    <include domain="root" path="app_webview" />
+    <include domain="root" path="app_webview/Local Storage" />
+    <include domain="root" path="app_webview/databases" />
+    
+    <!-- Exclude cache files to reduce backup size -->
+    <exclude domain="cache" path="." />
+    <exclude domain="root" path="cache" />
+</full-backup-content>
