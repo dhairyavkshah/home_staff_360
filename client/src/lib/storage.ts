@@ -352,9 +352,9 @@ export const storage = {
       const attendance = this.getAttendance().filter((a) => !personIds.has(a.personId));
       setItem(STORAGE_KEYS.ATTENDANCE, attendance);
       
-      const transactionsToDelete = this.getTransactions().filter((t) => personIds.has(t.personId));
+      const transactionsToDelete = this.getTransactions().filter((t) => t.personId && personIds.has(t.personId));
       const transactionIds = new Set(transactionsToDelete.map(t => t.id));
-      const transactions = this.getTransactions().filter((t) => !personIds.has(t.personId));
+      const transactions = this.getTransactions().filter((t) => !t.personId || !personIds.has(t.personId));
       setItem(STORAGE_KEYS.TRANSACTIONS, transactions);
       
       const laundry = this.getLaundry().filter((l) => 
@@ -490,7 +490,7 @@ export const storage = {
 
   getTransactionsByAccount(accountId: string): Transaction[] {
     const personIds = new Set(this.getPeopleByAccount(accountId).map(p => p.id));
-    return this.getTransactions().filter((t) => personIds.has(t.personId));
+    return this.getTransactions().filter((t) => t.personId && personIds.has(t.personId));
   },
 
   addAttendance(data: InsertAttendance): AttendanceEntry {
@@ -542,7 +542,7 @@ export const storage = {
 
   addTransaction(data: InsertTransaction): Transaction {
     const transactions = this.getTransactions();
-    const currencyInfo = getPersonCurrencyInfo(data.personId);
+    const currencyInfo = data.personId ? getPersonCurrencyInfo(data.personId) : { currency: 'USD', symbol: '$' };
     const transaction: Transaction = {
       ...data,
       id: generateId(),
