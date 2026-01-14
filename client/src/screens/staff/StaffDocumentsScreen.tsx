@@ -123,6 +123,7 @@ export function StaffDocumentsScreen() {
       toast({
         title: tLabel('success', 'Success'),
         description: tLabel('documentAdded', 'Document added successfully'),
+        variant: "success",
       });
 
       setShowAddDialog(false);
@@ -146,6 +147,7 @@ export function StaffDocumentsScreen() {
     toast({
       title: tLabel('deleted', 'Deleted'),
       description: tLabel('documentDeleted', 'Document deleted'),
+      variant: "success",
     });
   };
 

@@ -203,7 +203,7 @@ export function AddPersonScreen() {
       });
 
       if (response.ok) {
-        toast({ title: "Connect request sent successfully" });
+        toast({ title: "Connect request sent successfully", variant: "success" });
         setPhoneCheckResult(prev => prev ? { ...prev, isConnected: true } : null);
       } else {
         const error = await response.json().catch(() => ({}));
@@ -243,7 +243,7 @@ export function AddPersonScreen() {
 
       const result = await response.json().catch(() => ({}));
       if (response.ok && result.success) {
-        toast({ title: "SMS invite sent successfully" });
+        toast({ title: "SMS invite sent successfully", variant: "success" });
       } else {
         toast({ 
           title: "Failed to send SMS invite", 
@@ -318,7 +318,7 @@ export function AddPersonScreen() {
 
     if (editMode && data.personId) {
       storage.updatePerson(data.personId, updateData);
-      toast({ title: "Staff member updated successfully" });
+      toast({ title: "Staff member updated successfully", variant: "success" });
     } else {
       let accountId: string;
       try {
@@ -328,7 +328,7 @@ export function AddPersonScreen() {
         return;
       }
       storage.addPerson({ ...updateData, accountId, isActive: true });
-      toast({ title: "Staff member added successfully" });
+      toast({ title: "Staff member added successfully", variant: "success" });
     }
 
     markClean();

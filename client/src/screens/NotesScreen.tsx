@@ -137,7 +137,7 @@ export function NotesScreen() {
         color: formColor,
         isPinned: formPinned,
       });
-      toast({ title: "Note updated" });
+      toast({ title: "Note updated", variant: "success" });
     } else {
       storage.addNote({
         accountId: targetAccountId,
@@ -147,7 +147,7 @@ export function NotesScreen() {
         color: formColor,
         isPinned: formPinned,
       });
-      toast({ title: "Note added" });
+      toast({ title: "Note added", variant: "success" });
     }
 
     refreshNotes();
@@ -157,7 +157,7 @@ export function NotesScreen() {
   const handleDelete = () => {
     if (deleteId) {
       storage.deleteNote(deleteId);
-      toast({ title: "Note deleted" });
+      toast({ title: "Note deleted", variant: "success" });
       setDeleteId(null);
       refreshNotes();
       if (screenMode === "view") {

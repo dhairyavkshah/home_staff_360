@@ -131,14 +131,15 @@ export function SettingsScreen() {
     await setBackupFrequency(newFrequency);
     toast({ 
       title: enabled ? "Auto-backup enabled" : "Auto-backup disabled",
-      description: enabled ? "Your first backup has been created" : undefined
+      description: enabled ? "Your first backup has been created" : undefined,
+      variant: "success"
     });
   };
 
   const handleReminderToggle = (enabled: boolean) => {
     setReminderEnabled(enabled);
     attendanceReminderService.setReminderEnabled(enabled);
-    toast({ title: enabled ? "Reminder enabled" : "Reminder disabled" });
+    toast({ title: enabled ? "Reminder enabled" : "Reminder disabled", variant: "success" });
   };
 
   const handleReminderTimeChange = (time: string) => {
@@ -215,7 +216,7 @@ export function SettingsScreen() {
 
     setLanguage(pendingLanguage);
     notifyCurrencyChange();
-    toast({ title: t("settingsSaved") });
+    toast({ title: t("settingsSaved"), variant: "success" });
   };
 
   const handleTogglePin = () => {
@@ -228,7 +229,7 @@ export function SettingsScreen() {
 
   const handleDisablePin = () => {
     pinService.disablePin();
-    toast({ title: "App Lock disabled" });
+    toast({ title: "App Lock disabled", variant: "success" });
     setShowDisablePinModal(false);
   };
 
@@ -246,7 +247,7 @@ export function SettingsScreen() {
       defaultAppMode: mode,
     });
     setAppMode(mode);
-    toast({ title: mode === "HOME" ? t("switchedToHomeMode") : t("switchedToStaffMode") });
+    toast({ title: mode === "HOME" ? t("switchedToHomeMode") : t("switchedToStaffMode"), variant: "success" });
     navigate(mode === "STAFF" ? "staff-home" : "home");
   };
 

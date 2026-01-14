@@ -95,7 +95,7 @@ export function StaffAttendanceScreen() {
   const handleDelete = () => {
     if (deleteId) {
       storage.deleteSelfAttendance(deleteId);
-      toast({ title: t("attendanceDeleted") || "Attendance deleted" });
+      toast({ title: t("attendanceDeleted") || "Attendance deleted", variant: "success" });
       setDeleteId(null);
       refresh();
     }

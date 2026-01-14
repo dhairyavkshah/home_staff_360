@@ -99,6 +99,7 @@ export function BusinessesScreen() {
       toast({
         title: tLabel('updated', 'Updated'),
         description: tLabel('businessUpdated', 'Business updated successfully'),
+        variant: "success",
       });
     } else {
       const newAccount = storage.addAccount({
@@ -111,6 +112,7 @@ export function BusinessesScreen() {
       toast({
         title: tLabel('added', 'Added'),
         description: tLabel('businessAdded', 'Business added successfully'),
+        variant: "success",
       });
     }
 
@@ -130,6 +132,7 @@ export function BusinessesScreen() {
     toast({
       title: tLabel('deleted', 'Deleted'),
       description: tLabel('businessDeleted', 'Business deleted'),
+      variant: "success",
     });
   };
 

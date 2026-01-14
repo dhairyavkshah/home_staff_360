@@ -189,10 +189,10 @@ export function StaffAddInvoiceScreen() {
 
     if (data?.invoiceId && !isViewMode) {
       storage.updateStaffInvoice(data.invoiceId, invoiceData);
-      toast({ title: "Invoice updated" });
+      toast({ title: "Invoice updated", variant: "success" });
     } else {
       storage.addStaffInvoice(invoiceData);
-      toast({ title: "Invoice created" });
+      toast({ title: "Invoice created", variant: "success" });
     }
 
     markClean();
@@ -203,7 +203,7 @@ export function StaffAddInvoiceScreen() {
     if (!data?.invoiceId) return;
     
     storage.deleteStaffInvoice(data.invoiceId);
-    toast({ title: "Invoice deleted" });
+    toast({ title: "Invoice deleted", variant: "success" });
     navigate("staff-invoices");
   };
 

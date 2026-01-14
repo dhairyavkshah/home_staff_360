@@ -170,7 +170,7 @@ export function TransactionsScreen() {
       date,
       isPaid: true,
     });
-    toast({ title: tLabel('transactionAdded', 'Transaction added successfully') });
+    toast({ title: tLabel('transactionAdded', 'Transaction added successfully'), variant: "success" });
 
     resetForm();
     setShowAddForm(false);
@@ -179,7 +179,7 @@ export function TransactionsScreen() {
 
   const handleDelete = (txId: string) => {
     storage.deleteTransaction(txId);
-    toast({ title: tLabel('transactionDeleted', 'Transaction deleted') });
+    toast({ title: tLabel('transactionDeleted', 'Transaction deleted'), variant: "success" });
     setDeleteConfirmId(null);
     setRefreshKey(prev => prev + 1);
   };

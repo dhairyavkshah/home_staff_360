@@ -125,7 +125,7 @@ export function StaffLogAttendanceScreen() {
         hoursWorked: hours ? parseFloat(hours) : undefined,
         note: note.trim() || undefined,
       });
-      toast({ title: t("updateAttendance") || "Attendance updated" });
+      toast({ title: t("updateAttendance") || "Attendance updated", variant: "success" });
     } else {
       storage.addSelfAttendance({
         staffUserId: profile.id,
@@ -135,7 +135,7 @@ export function StaffLogAttendanceScreen() {
         hoursWorked: hours ? parseFloat(hours) : undefined,
         note: note.trim() || undefined,
       });
-      toast({ title: t("attendanceLogged") });
+      toast({ title: t("attendanceLogged"), variant: "success" });
     }
 
     markClean();
@@ -151,7 +151,7 @@ export function StaffLogAttendanceScreen() {
     if (!data.attendanceId) return;
     
     storage.deleteSelfAttendance(data.attendanceId);
-    toast({ title: t("attendanceDeleted") || "Attendance deleted successfully" });
+    toast({ title: t("attendanceDeleted") || "Attendance deleted successfully", variant: "success" });
     navigate("staff-attendance");
   };
 

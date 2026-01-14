@@ -219,7 +219,7 @@ export function AddTransactionScreen() {
     }
 
     markClean();
-    toast({ title: tLabel('transactionAdded', 'Transaction added successfully') });
+    toast({ title: tLabel('transactionAdded', 'Transaction added successfully'), variant: "success" });
     if (selectedPersonId) {
       navigate("person-detail", { personId: selectedPersonId });
     } else {
@@ -235,7 +235,7 @@ export function AddTransactionScreen() {
     });
     
     storage.deleteTransaction(data.transactionId);
-    toast({ title: tLabel('transactionDeleted', 'Transaction deleted successfully') });
+    toast({ title: tLabel('transactionDeleted', 'Transaction deleted successfully'), variant: "success" });
     if (selectedPersonId) {
       navigate("person-detail", { personId: selectedPersonId });
     } else {

@@ -97,7 +97,7 @@ export function ProfileAvatar({
     try {
       const compressed = await compressImage(file);
       onAvatarChange?.(compressed);
-      toast({ title: "Profile photo updated" });
+      toast({ title: "Profile photo updated", variant: "success" });
       setIsOpen(false);
     } catch (error: any) {
       toast({ title: "Failed to process image", description: error.message, variant: "destructive" });
@@ -108,7 +108,7 @@ export function ProfileAvatar({
 
   const handleDelete = () => {
     onAvatarChange?.(null);
-    toast({ title: "Profile photo removed" });
+    toast({ title: "Profile photo removed", variant: "success" });
     setIsOpen(false);
   };
 

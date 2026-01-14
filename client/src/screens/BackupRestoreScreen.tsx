@@ -59,6 +59,7 @@ export function BackupRestoreScreen() {
       toast({
         title: "Data restored successfully",
         description: `Your data has been restored from ${sourceName}.`,
+        variant: "success",
       });
 
       const defaultMode = settings.defaultAppMode || "HOME";

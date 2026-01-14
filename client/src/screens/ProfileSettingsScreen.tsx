@@ -193,7 +193,7 @@ export function ProfileSettingsScreen() {
       if (result.success) {
         // Update local storage profile as well
         storage.updateProfile({ displayName: displayName.trim() });
-        toast({ title: "Profile Updated", description: "Your name has been updated" });
+        toast({ title: "Profile Updated", description: "Your name has been updated", variant: "success" });
         setProfile(prev => prev ? { ...prev, displayName: displayName.trim() } : null);
         setStep("view");
       }
@@ -240,7 +240,7 @@ export function ProfileSettingsScreen() {
     try {
       const result = await collaborationService.changePassword(currentPassword, newPassword);
       if (result.success) {
-        toast({ title: "Password Changed", description: "Your password has been updated" });
+        toast({ title: "Password Changed", description: "Your password has been updated", variant: "success" });
         setProfile(prev => prev ? { ...prev, hasPassword: true } : null);
         setStep("view");
         setCurrentPassword("");
@@ -328,7 +328,7 @@ export function ProfileSettingsScreen() {
     try {
       const result = await collaborationService.confirmPhoneChange(fullPhone, otp);
       if (result.success) {
-        toast({ title: "Phone Updated", description: "Your phone number has been changed" });
+        toast({ title: "Phone Updated", description: "Your phone number has been changed", variant: "success" });
         setProfile(prev => prev ? { ...prev, phone: fullPhone } : null);
         setStep("view");
         setNewPhoneCountryCode(getDefaultCountryCode());
@@ -365,6 +365,7 @@ export function ProfileSettingsScreen() {
         toast({
           title: "Account Deleted",
           description: "Your account has been permanently deleted",
+          variant: "success",
         });
         localStorage.clear();
         navigate("auth");
@@ -398,6 +399,7 @@ export function ProfileSettingsScreen() {
         toast({
           title: t("clearAllDataSuccess"),
           description: t("clearAllDataSuccessDescription"),
+          variant: "success",
         });
         navigate("role-selection");
       } else {
@@ -427,7 +429,7 @@ export function ProfileSettingsScreen() {
       if (result.success) {
         storage.updateProfile({ profileImage: compressedImage });
         setProfile(prev => prev ? { ...prev, avatarData: compressedImage } : null);
-        toast({ title: "Profile Photo Updated", description: "Your profile photo has been saved" });
+        toast({ title: "Profile Photo Updated", description: "Your profile photo has been saved", variant: "success" });
       }
     } catch (error: any) {
       toast({
@@ -448,7 +450,7 @@ export function ProfileSettingsScreen() {
       if (result.success) {
         storage.updateProfile({ profileImage: undefined });
         setProfile(prev => prev ? { ...prev, avatarData: undefined } : null);
-        toast({ title: "Profile Photo Removed", description: "Your profile photo has been removed" });
+        toast({ title: "Profile Photo Removed", description: "Your profile photo has been removed", variant: "success" });
       }
     } catch (error: any) {
       toast({
@@ -463,7 +465,7 @@ export function ProfileSettingsScreen() {
 
   const handleLogout = async () => {
     await collaborationService.logout();
-    toast({ title: t("loggedOut") });
+    toast({ title: t("loggedOut"), variant: "success" });
     navigate("auth");
   };
 

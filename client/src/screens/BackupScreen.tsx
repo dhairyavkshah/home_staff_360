@@ -96,6 +96,7 @@ export function BackupScreen() {
       description: frequencyToSave === "off" 
         ? t("autoBackupDisabled") 
         : t("autoBackupSettingsSaved"),
+      variant: "success",
     });
   };
 
@@ -148,11 +149,12 @@ export function BackupScreen() {
               files: [uriResult.uri],
               dialogTitle: "Save or Share Backup",
             });
-            toast({ title: t("success"), description: t("backupCreatedAndSaved") || t("backupSaved") });
+            toast({ title: t("success"), description: t("backupCreatedAndSaved") || t("backupSaved"), variant: "success" });
           } catch (shareError) {
             toast({ 
               title: t("success"), 
-              description: t("backupCreatedLocally") || t("backupCreated")
+              description: t("backupCreatedLocally") || t("backupCreated"),
+              variant: "success",
             });
           }
         } else {
@@ -163,7 +165,7 @@ export function BackupScreen() {
           a.download = filename;
           a.click();
           URL.revokeObjectURL(url);
-          toast({ title: t("success"), description: t("backupCreatedAndDownloaded") || t("backupDownloaded") });
+          toast({ title: t("success"), description: t("backupCreatedAndDownloaded") || t("backupDownloaded"), variant: "success" });
         }
       } else {
         throw new Error(result.error);
@@ -214,7 +216,7 @@ export function BackupScreen() {
             files: [uriResult.uri],
             dialogTitle: "Save or Share Backup",
           });
-          toast({ title: t("backupSaved") });
+          toast({ title: t("backupSaved"), variant: "success" });
         } catch (shareError) {
           if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
             toast({ title: t("backupFileReady"), description: t("tapShareToSave") });
@@ -233,7 +235,7 @@ export function BackupScreen() {
         a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
-        toast({ title: t("backupDownloaded") });
+        toast({ title: t("backupDownloaded"), variant: "success" });
       }
     } catch (error) {
       if ((error as Error).message?.includes("cancel") || (error as Error).message?.includes("Cancel")) {
@@ -282,7 +284,7 @@ export function BackupScreen() {
             files: [uriResult.uri],
             dialogTitle: "Share Backup File",
           });
-          toast({ title: t("backupShared") });
+          toast({ title: t("backupShared"), variant: "success" });
         } catch (shareError) {
           if ((shareError as Error).message?.includes("cancel") || (shareError as Error).message?.includes("Cancel")) {
             toast({ title: t("backupFileReady"), description: t("tapShareToSend") });
@@ -308,7 +310,7 @@ export function BackupScreen() {
           a.download = filename;
           a.click();
           URL.revokeObjectURL(url);
-          toast({ title: t("backupDownloaded") });
+          toast({ title: t("backupDownloaded"), variant: "success" });
         }
       }
     } catch (error) {
@@ -422,7 +424,7 @@ export function BackupScreen() {
       if (!importResult.success) {
         throw new Error(importResult.error || t("importValidationFailed"));
       }
-      toast({ title: t("backupRestored") });
+      toast({ title: t("backupRestored"), variant: "success" });
       navigate(profile?.type === "STAFF" ? "staff-home" : "home");
     } catch (error) {
       toast({
@@ -443,7 +445,7 @@ export function BackupScreen() {
     
     const success = await deleteLocalBackup(backupToDelete);
     if (success) {
-      toast({ title: t("backupDeleted") });
+      toast({ title: t("backupDeleted"), variant: "success" });
       await loadBackupsList();
     } else {
       toast({

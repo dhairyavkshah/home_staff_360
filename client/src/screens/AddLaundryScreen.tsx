@@ -244,7 +244,7 @@ export function AddLaundryScreen() {
     };
 
     storage.addLaundry(laundryData);
-    toast({ title: "Laundry batch added successfully" });
+    toast({ title: "Laundry batch added successfully", variant: "success" });
     markClean();
     navigate("laundry-view");
   };
@@ -253,7 +253,7 @@ export function AddLaundryScreen() {
     if (!navData.laundryId) return;
     
     storage.deleteLaundry(navData.laundryId);
-    toast({ title: "Laundry batch deleted successfully" });
+    toast({ title: "Laundry batch deleted successfully", variant: "success" });
     navigate("laundry-view");
   };
 

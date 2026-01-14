@@ -110,7 +110,7 @@ export function AddAttendanceScreen() {
         note: note.trim() || undefined,
       });
       markClean();
-      toast({ title: t("updateAttendance") || "Attendance updated" });
+      toast({ title: t("updateAttendance") || "Attendance updated", variant: "success" });
     } else {
       storage.addAttendance({
         personId,
@@ -120,7 +120,7 @@ export function AddAttendanceScreen() {
         note: note.trim() || undefined,
       });
       markClean();
-      toast({ title: t("attendanceMarked") });
+      toast({ title: t("attendanceMarked"), variant: "success" });
     }
     navigate("person-detail", { personId, source });
   };

@@ -65,7 +65,7 @@ export function StaffInvoiceViewScreen() {
   const handleDelete = () => {
     if (!data.invoiceId) return;
     storage.deleteStaffInvoice(data.invoiceId);
-    toast({ title: "Invoice deleted" });
+    toast({ title: "Invoice deleted", variant: "success" });
     navigate("staff-invoices");
   };
 
@@ -75,7 +75,7 @@ export function StaffInvoiceViewScreen() {
       status: 'paid',
       paidDate: new Date().toISOString().split('T')[0]
     });
-    toast({ title: "Invoice marked as paid" });
+    toast({ title: "Invoice marked as paid", variant: "success" });
     navigate("staff-invoices");
   };
 
@@ -132,18 +132,19 @@ export function StaffInvoiceViewScreen() {
           text: invoiceText,
           dialogTitle: t("shareInvoice"),
         });
-        toast({ title: t("invoiceShared") });
+        toast({ title: t("invoiceShared"), variant: "success" });
       } else if (navigator.share) {
         await navigator.share({
           title: title,
           text: invoiceText,
         });
-        toast({ title: t("invoiceShared") });
+        toast({ title: t("invoiceShared"), variant: "success" });
       } else {
         await navigator.clipboard.writeText(invoiceText);
         toast({ 
           title: t("success"), 
-          description: "Invoice copied to clipboard" 
+          description: "Invoice copied to clipboard",
+          variant: "success",
         });
       }
     } catch (error) {

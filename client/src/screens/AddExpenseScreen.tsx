@@ -137,7 +137,7 @@ export function AddExpenseScreen() {
   const removeExistingAttachment = (docId: string) => {
     storage.deleteDocument(docId);
     setAttachmentRefreshKey(k => k + 1);
-    toast({ title: tLabel('attachmentRemoved', 'Attachment removed') });
+    toast({ title: tLabel('attachmentRemoved', 'Attachment removed'), variant: "success" });
   };
 
   const validate = () => {
@@ -180,7 +180,7 @@ export function AddExpenseScreen() {
     }
     const newExpense = storage.addExpense({ ...expenseData, accountId });
     expenseId = newExpense.id;
-    toast({ title: tLabel('expenseAdded', 'Expense added successfully') });
+    toast({ title: tLabel('expenseAdded', 'Expense added successfully'), variant: "success" });
 
     for (const attachment of pendingAttachments) {
       storage.addDocument({
@@ -209,7 +209,7 @@ export function AddExpenseScreen() {
     });
     
     storage.deleteExpense(data.expenseId);
-    toast({ title: tLabel('expenseDeleted', 'Expense deleted successfully') });
+    toast({ title: tLabel('expenseDeleted', 'Expense deleted successfully'), variant: "success" });
     navigate("expenses");
   };
 

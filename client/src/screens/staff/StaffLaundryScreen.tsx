@@ -128,7 +128,7 @@ export function StaffLaundryScreen() {
   const confirmDelete = () => {
     if (deleteTarget) {
       storage.deleteStaffLaundryJob(deleteTarget.id);
-      toast({ title: "Laundry job deleted" });
+      toast({ title: "Laundry job deleted", variant: "success" });
       setDeleteTarget(null);
       setRefreshKey((k) => k + 1);
     }

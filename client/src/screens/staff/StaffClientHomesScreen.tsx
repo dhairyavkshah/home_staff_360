@@ -88,7 +88,7 @@ export function StaffClientHomesScreen() {
         ? storage.getClientHomesByAccount(activeAccountId)
         : storage.getClientHomes();
       setHomes(updatedHomes);
-      toast({ title: t("clientHomeDeleted") });
+      toast({ title: t("clientHomeDeleted"), variant: "success" });
       setDeleteId(null);
     }
   };
@@ -99,7 +99,7 @@ export function StaffClientHomesScreen() {
       ? storage.getClientHomesByAccount(activeAccountId)
       : storage.getClientHomes();
     setHomes(updatedHomes);
-    toast({ title: isActive ? t("clientHomeDeactivated") : t("clientHomeActivated") });
+    toast({ title: isActive ? t("clientHomeDeactivated") : t("clientHomeActivated"), variant: "success" });
   };
 
   const handleFilterChange = (groupId: string, optionIds: string[]) => {

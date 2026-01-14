@@ -247,7 +247,7 @@ export function StaffLogLaundryScreen() {
       pickupDeliveryCharge: deliveryCharge,
       note: provider.trim() || undefined,
     });
-    toast({ title: t("laundryJobLogged") });
+    toast({ title: t("laundryJobLogged"), variant: "success" });
 
     markClean();
     navigate("staff-laundry");
@@ -257,7 +257,7 @@ export function StaffLogLaundryScreen() {
     if (!data.laundryJobId) return;
     
     storage.deleteStaffLaundryJob(data.laundryJobId);
-    toast({ title: t("laundryJobDeleted") || "Laundry job deleted successfully" });
+    toast({ title: t("laundryJobDeleted") || "Laundry job deleted successfully", variant: "success" });
     navigate("staff-laundry");
   };
 

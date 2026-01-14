@@ -290,7 +290,7 @@ export function ChatScreen() {
           : m
       ));
 
-      toast({ title: "Message edited" });
+      toast({ title: "Message edited", variant: "success" });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -317,7 +317,7 @@ export function ChatScreen() {
         m.id === messageId ? { ...m, isDeleted: true, content: "[This message was deleted]" } : m
       ));
 
-      toast({ title: "Message deleted" });
+      toast({ title: "Message deleted", variant: "success" });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -383,7 +383,7 @@ export function ChatScreen() {
         setMessages((prev) => [...prev, { ...result.message, isOwn: true }]);
       }
 
-      toast({ title: "File sent" });
+      toast({ title: "File sent", variant: "success" });
     } catch (error) {
       console.error("Failed to upload file:", error);
       toast({

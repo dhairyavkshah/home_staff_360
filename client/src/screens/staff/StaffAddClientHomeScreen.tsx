@@ -192,7 +192,7 @@ export function StaffAddClientHomeScreen() {
         throw new Error(error.message || "Failed to send connect request");
       }
 
-      toast({ title: "Connect request sent successfully" });
+      toast({ title: "Connect request sent successfully", variant: "success" });
       setPhoneCheckResult((prev) => prev ? { ...prev, isConnected: true } : null);
     } catch (error) {
       toast({
@@ -228,7 +228,7 @@ export function StaffAddClientHomeScreen() {
         throw new Error(result.error || result.details || result.message || "Failed to send SMS invite");
       }
 
-      toast({ title: "SMS invitation sent successfully" });
+      toast({ title: "SMS invitation sent successfully", variant: "success" });
     } catch (error) {
       toast({
         title: "Failed to send SMS invite",
@@ -353,7 +353,7 @@ export function StaffAddClientHomeScreen() {
         currency,
         customCurrencySymbol: currency === "OTHER" ? customCurrencySymbol.trim() : undefined,
       });
-      toast({ title: t("clientHomeUpdated") });
+      toast({ title: t("clientHomeUpdated"), variant: "success" });
       markClean();
     } else {
       storage.addClientHome({
@@ -369,7 +369,7 @@ export function StaffAddClientHomeScreen() {
         currency,
         customCurrencySymbol: currency === "OTHER" ? customCurrencySymbol.trim() : undefined,
       });
-      toast({ title: t("clientHomeAdded") });
+      toast({ title: t("clientHomeAdded"), variant: "success" });
       markClean();
     }
 

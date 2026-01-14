@@ -97,6 +97,7 @@ export function HomeScreen() {
       toast({
         title: "Auto-backup enabled",
         description: "Your first backup has been created. Daily backups will run automatically.",
+        variant: "success",
       });
     } catch (error) {
       toast({

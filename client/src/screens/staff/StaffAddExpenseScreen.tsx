@@ -153,7 +153,7 @@ export function StaffAddExpenseScreen() {
     };
 
     storage.addStaffExpense(expenseData);
-    toast({ title: t("expenseAdded") });
+    toast({ title: t("expenseAdded"), variant: "success" });
 
     markClean();
     navigate("staff-expenses");
@@ -163,7 +163,7 @@ export function StaffAddExpenseScreen() {
     if (!expenseId) return;
     
     storage.deleteStaffExpense(expenseId);
-    toast({ title: t("expenseDeleted") || "Expense deleted successfully" });
+    toast({ title: t("expenseDeleted") || "Expense deleted successfully", variant: "success" });
     navigate("staff-expenses");
   };
 

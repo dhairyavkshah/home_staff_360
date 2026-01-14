@@ -113,14 +113,14 @@ export function StaffExpensesScreen() {
   const togglePaid = (id: string, currentStatus: boolean) => {
     storage.updateStaffExpense(id, { isPaid: !currentStatus });
     refreshExpenses();
-    toast({ title: currentStatus ? t("markedAsUnpaid") : t("markedAsPaid") });
+    toast({ title: currentStatus ? t("markedAsUnpaid") : t("markedAsPaid"), variant: "success" });
   };
 
   const handleDelete = () => {
     if (deleteId) {
       storage.deleteStaffExpense(deleteId);
       refreshExpenses();
-      toast({ title: t("expenseDeleted") });
+      toast({ title: t("expenseDeleted"), variant: "success" });
       setDeleteId(null);
     }
   };

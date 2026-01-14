@@ -99,7 +99,7 @@ export function StaffEarningsScreen() {
   const confirmDeleteAttendance = () => {
     if (deleteAttendanceId) {
       storage.deleteSelfAttendance(deleteAttendanceId);
-      toast({ title: t("attendanceDeleted") || "Attendance deleted" });
+      toast({ title: t("attendanceDeleted") || "Attendance deleted", variant: "success" });
       setDeleteAttendanceId(null);
       refresh();
     }
@@ -108,7 +108,7 @@ export function StaffEarningsScreen() {
   const confirmDeleteLaundry = () => {
     if (deleteLaundryId) {
       storage.deleteStaffLaundryJob(deleteLaundryId);
-      toast({ title: t("laundryJobDeleted") || "Laundry job deleted" });
+      toast({ title: t("laundryJobDeleted") || "Laundry job deleted", variant: "success" });
       setDeleteLaundryId(null);
       refresh();
     }

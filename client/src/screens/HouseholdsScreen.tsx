@@ -76,6 +76,7 @@ export function HouseholdsScreen() {
       toast({
         title: tLabel('updated', 'Updated'),
         description: tLabel('householdUpdated', 'Household updated successfully'),
+        variant: "success",
       });
     } else {
       const newAccount = storage.addAccount({
@@ -88,6 +89,7 @@ export function HouseholdsScreen() {
       toast({
         title: tLabel('added', 'Added'),
         description: tLabel('householdAdded', 'Household added successfully'),
+        variant: "success",
       });
     }
 
@@ -105,6 +107,7 @@ export function HouseholdsScreen() {
     toast({
       title: tLabel('deleted', 'Deleted'),
       description: tLabel('householdDeleted', 'Household deleted'),
+      variant: "success",
     });
   };
 

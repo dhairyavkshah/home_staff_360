@@ -67,6 +67,7 @@ export function PinSetupScreen() {
               toast({
                 title: t("pinSetSuccessfully"),
                 description: t("appProtectedWithPin"),
+                variant: "success",
               });
               navigateToReturn();
             }
@@ -96,6 +97,7 @@ export function PinSetupScreen() {
       toast({
         title: t("pinSetSuccessfully"),
         description: t("appProtectedWithPin"),
+        variant: "success",
       });
       navigateToReturn();
     } else {
@@ -112,6 +114,7 @@ export function PinSetupScreen() {
         toast({
           title: t("biometricEnabled"),
           description: t("biometricEnabledDesc"),
+          variant: "success",
         });
         navigateToReturn();
       } else {
@@ -128,6 +131,7 @@ export function PinSetupScreen() {
     toast({
       title: t("pinSetSuccessfully"),
       description: t("appProtectedWithPin"),
+      variant: "success",
     });
     navigate(returnScreen as any);
   };
