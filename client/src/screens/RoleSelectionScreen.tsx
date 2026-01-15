@@ -7,7 +7,6 @@ import { permissionsService } from "@/lib/permissions-service";
 import { collaborationService } from "@/lib/collaboration-service";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { type UserType, type Language } from "@shared/schema";
-import { LanguageSelector } from "@/components/ui/language-selector";
 
 interface RoleCardProps {
   type: UserType;

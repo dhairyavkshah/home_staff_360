@@ -22,7 +22,6 @@ import { useTranslation } from "@/lib/i18n/i18n-context";
 import { useTour } from "@/lib/guided-tour";
 import { setHapticEnabled, setSoundEnabled, isHapticEnabled, isSoundEnabled } from "@/lib/sound-service";
 import { getCurrencyForCountry, getCountryByCode } from "@/lib/geolocation-service";
-import { LanguageSelector } from "@/components/ui/language-selector";
 import { CurrencySelector } from "@/components/ui/currency-selector";
 import { notifyCurrencyChange } from "@/hooks/useCurrency";
 import { collaborationService } from "@/lib/collaboration-service";

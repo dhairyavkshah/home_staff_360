@@ -116,7 +116,7 @@ Home Staff 360 v4.0 introduces a **privacy-first hybrid storage architecture** t
 - Push notifications for messages and updates
 
 #### Global Accessibility
-- 21 languages supported
+- English language (multi-language support temporarily removed - returning in future versions)
 - 120+ currencies for worldwide use
 - Automatic currency detection based on location
 - SMS verification works globally
@@ -220,7 +220,7 @@ NEW IN 4.0:
 FEATURES:
 - Real-time collaboration & messaging
 - Attendance, payments, expenses tracking
-- 21 languages, 120+ currencies
+- 120+ currencies worldwide
 - Perfect for homes, hotels, restaurants
 
 Your Data, Your Device, Your Control!
@@ -233,7 +233,7 @@ Your Data, Your Device, Your Control!
 ### Short What's New (150 characters)
 
 ```
-v4.0: Privacy-first design - your data stays on your device. Login persists across updates. Free with ads or go Premium. 21 languages supported!
+v4.0: Privacy-first design - your data stays on your device. Login persists across updates. Free with ads or go Premium. 120+ currencies supported!
 ```
 
 **Character Count: 147**

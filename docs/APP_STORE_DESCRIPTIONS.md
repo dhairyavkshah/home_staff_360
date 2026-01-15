@@ -122,7 +122,7 @@ SECURE & PRIVATE
 
 GLOBAL ACCESSIBILITY
 
-21 Languages: English, Hindi, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Telugu, Tamil, Urdu, Bengali, Odia, Assamese, Spanish, French, German, Arabic, Chinese, Japanese, Portuguese, Russian
+Language: English (Multi-language support temporarily removed in v4.0 - will return in future versions)
 
 120+ Currencies: All major international currencies supported
 
@@ -168,7 +168,7 @@ Professional Staff Management for Homes & Businesses
 ## Promotional Text (170 characters max)
 
 ```
-Professional staff management platform. Perfect for homes, hotels, restaurants & service businesses. Real-time attendance, messaging, payments & reports. 21 languages.
+Professional staff management platform. Perfect for homes, hotels, restaurants & service businesses. Real-time attendance, messaging, payments & reports. 120+ currencies.
 ```
 
 **Character Count: 168**
@@ -216,7 +216,7 @@ See RELEASE_NOTES.md for version-specific update descriptions.
 4. Connection request and approval
 5. Staff User earnings dashboard
 6. Invoice creation and sharing
-7. Settings with language options
+7. Settings with currency options
 8. Dark mode showcase
 
 ---

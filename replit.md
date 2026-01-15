@@ -110,7 +110,7 @@ Our PostgreSQL server stores **only the minimum data required** for:
 
 ## Feature Specifications
 - **Notes Feature**: Full-screen view/edit, 20,000 character limit, 6 color options, pin functionality, and "All contexts" mode.
-- **Multi-Language Support**: 21 languages available.
+- **Multi-Language Support**: English only (multi-language support temporarily removed in v4.0 - will return in future versions).
 - **Multi-Currency Support**: 120+ national/regional currencies supporting all 173 countries, with automatic currency detection based on setup location.
 - **Real-Time Collaboration**: Chat messaging, connection invites, shared spaces, and live sync for operational data.
 - **Profile Images**: 512x512 JPEG compression, displayed in chat messages, connections list, and message previews. Upload/delete via Profile Settings.
