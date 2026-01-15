@@ -135,7 +135,8 @@ export function PermissionsScreen() {
         navigate("home");
       }
     } else {
-      navigate("backup-restore");
+      // Pass userType to backup-restore so it can skip role-selection if user already chose
+      navigate("backup-restore", { userType });
     }
   };
 

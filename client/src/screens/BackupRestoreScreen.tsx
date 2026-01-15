@@ -12,7 +12,7 @@ import { listLocalBackups, loadLocalBackup } from "@/lib/auto-backup";
 type ScreenState = "checking" | "no-backup" | "backup-found" | "restoring";
 
 export function BackupRestoreScreen() {
-  const { navigate } = useNavigation();
+  const { navigate, data } = useNavigation();
   const { toast } = useToast();
   const [screenState, setScreenState] = useState<ScreenState>("checking");
   const [backupInfo, setBackupInfo] = useState<{ name: string; date: Date } | null>(null);
@@ -151,7 +151,14 @@ export function BackupRestoreScreen() {
   };
 
   const handleStartFresh = () => {
-    navigate("role-selection");
+    // If userType was passed from permissions (user already selected their role),
+    // go directly to onboarding. Otherwise, go to role selection.
+    const userType = data.userType;
+    if (userType) {
+      navigate("onboarding", { userType });
+    } else {
+      navigate("role-selection");
+    }
   };
 
   const formatBackupDate = (date: Date) => {
