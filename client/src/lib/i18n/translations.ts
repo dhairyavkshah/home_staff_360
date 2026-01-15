@@ -787,7 +787,7 @@ const en = {
   attendanceReminder: "Don't forget to mark attendance",
   
   // Staff Details Screen
-  staffDetails: "Staff Details",
+  staffDetails: "Staff Personnel Details",
   viewStaffMember: "View Staff Member",
   basicInformationSection: "Informations de base",
   salaryDetails: "Salary Details",
