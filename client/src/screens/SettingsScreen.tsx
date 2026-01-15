@@ -50,6 +50,7 @@ export function SettingsScreen() {
   }, []);
   
   const appSettings = useMemo(() => storage.getSettings(), []);
+  const primaryUserMode = appSettings.defaultAppMode || profile?.type || "HOME";
   const [selectedAccountId, setSelectedAccountId] = useState(activeAccount?.id || "");
   const country = appSettings.detectedCountry || appSettings.country || "";
   const [currency, setCurrency] = useState<Currency>(modeSettings.currency);
@@ -363,7 +364,7 @@ export function SettingsScreen() {
                     <>
                       <p className="font-medium text-sm">{profile.displayName}</p>
                       <p className="text-xs text-muted-foreground">
-                        {isHome ? t("homeUser") : t("staffProfessional")}
+                        Primary User Mode: {primaryUserMode === "HOME" ? t("homeUser") : t("staffProfessional")}
                       </p>
                     </>
                   )}

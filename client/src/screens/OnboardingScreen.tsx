@@ -124,7 +124,8 @@ export function OnboardingScreen() {
         displayName: displayName.trim(),
       });
     } else {
-      storage.updateProfile({ displayName: displayName.trim() });
+      // Update both display name AND type to match onboarding selection
+      storage.updateProfile({ displayName: displayName.trim(), type: userType });
     }
 
     const existingAccounts = storage.getAccounts();
