@@ -30,7 +30,7 @@ export default function PrivacyPolicy() {
           <div className="text-center space-y-1">
             <h1 className="text-2xl font-bold">Privacy Policy</h1>
             <p className="text-base font-semibold">Home Staff 360</p>
-            <p className="text-sm text-muted-foreground">Last Updated: January 14, 2026</p>
+            <p className="text-sm text-muted-foreground">Last Updated: January 15, 2026</p>
           </div>
 
           <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">

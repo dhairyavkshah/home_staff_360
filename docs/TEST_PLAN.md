@@ -1,7 +1,7 @@
 # Home Staff 360 - Comprehensive Test Plan
 
-**Version:** 3.0  
-**Last Updated:** January 13, 2026
+**Version:** 4.0  
+**Last Updated:** January 15, 2026
 
 ## Overview
 

@@ -1,7 +1,7 @@
 # Privacy Policy
 
-**Home Staff 360 v3.0**  
-**Last Updated: January 13, 2026**
+**Home Staff 360 v4.0**  
+**Last Updated: January 15, 2026**
 
 ---
 
