@@ -4,7 +4,7 @@ import { useNavigation } from "@/lib/navigation";
 
 export function AdProvider() {
   const { currentScreen } = useNavigation();
-  const { currentAd, showAd, adProvider, dismissAd } = useHybridAds(currentScreen);
+  const { currentAd, secondAd, showAd, adProvider, dismissAd } = useHybridAds(currentScreen);
 
   if (!showAd || !currentAd || adProvider !== "custom") {
     return null;
@@ -14,5 +14,5 @@ export function AdProvider() {
     return null;
   }
 
-  return <AdOverlay ad={currentAd} onClose={dismissAd} />;
+  return <AdOverlay ad={currentAd} secondAd={secondAd} onClose={dismissAd} />;
 }

@@ -5183,6 +5183,7 @@ router.get("/api/ads/next", async (req: Request, res: Response) => {
     res.json({
       id: selectedAd.id,
       title: selectedAd.title,
+      advertiser: selectedAd.advertiser,
       videoUrl: selectedAd.videoUrl,
       thumbnailUrl: selectedAd.thumbnailUrl,
       duration: selectedAd.duration,
@@ -5192,6 +5193,119 @@ router.get("/api/ads/next", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Get next ad error:", error);
     res.status(500).json({ error: "Failed to get next ad" });
+  }
+});
+
+// GET /api/ads/next-pair - Get two ads for back-to-back display (first unskippable, second skippable)
+router.get("/api/ads/next-pair", async (req: Request, res: Response) => {
+  try {
+    // Feature flag check - ads disabled globally
+    if (!AD_FEATURE_ENABLED) {
+      return res.status(404).json({ error: "Ads are disabled", adsDisabled: true });
+    }
+
+    const deviceId = req.query.deviceId as string | undefined;
+    
+    // Check global ads enabled setting
+    const settings = await db.query.adSettings.findFirst();
+    if (settings && !settings.adsEnabled) {
+      return res.status(404).json({ error: "Ads are disabled", adsDisabled: true });
+    }
+    
+    const now = new Date();
+    
+    // Get all active ads within valid date range
+    const activeAds = await db.query.advertisements.findMany({
+      where: and(
+        eq(advertisements.isActive, true),
+        or(
+          sql`${advertisements.startDate} IS NULL`,
+          sql`${advertisements.startDate} <= ${now}`
+        ),
+        or(
+          sql`${advertisements.endDate} IS NULL`,
+          sql`${advertisements.endDate} >= ${now}`
+        )
+      )
+    });
+
+    if (activeAds.length === 0) {
+      return res.status(404).json({ error: "No ads available" });
+    }
+
+    // Filter out ads that have exceeded maxPlayCount for this device
+    let eligibleAds = activeAds;
+    if (deviceId) {
+      const adPlayCounts = await db.select({
+        adId: adImpressions.adId,
+        playCount: sql<number>`count(*)`
+      })
+      .from(adImpressions)
+      .where(eq(adImpressions.deviceId, deviceId))
+      .groupBy(adImpressions.adId);
+      
+      const playCountMap = new Map(adPlayCounts.map(pc => [pc.adId, Number(pc.playCount)]));
+      
+      eligibleAds = activeAds.filter(ad => {
+        if (ad.maxPlayCount === null || ad.maxPlayCount === undefined) {
+          return true; // Unlimited plays
+        }
+        const currentCount = playCountMap.get(ad.id) || 0;
+        return currentCount < ad.maxPlayCount;
+      });
+    }
+
+    if (eligibleAds.length === 0) {
+      return res.status(404).json({ error: "No ads available" });
+    }
+
+    // Helper function for weighted random selection
+    const selectWeightedAd = (ads: typeof eligibleAds) => {
+      const totalWeight = ads.reduce((sum, ad) => sum + (ad.weight || 1), 0);
+      let random = Math.random() * totalWeight;
+      
+      for (const ad of ads) {
+        random -= ad.weight || 1;
+        if (random <= 0) {
+          return ad;
+        }
+      }
+      return ads[0];
+    };
+
+    // Select first ad
+    const firstAd = selectWeightedAd(eligibleAds);
+    
+    // Select second ad (different from first if possible)
+    let secondAd = null;
+    if (eligibleAds.length > 1) {
+      const remainingAds = eligibleAds.filter(ad => ad.id !== firstAd.id);
+      if (remainingAds.length > 0) {
+        secondAd = selectWeightedAd(remainingAds);
+      }
+    } else if (eligibleAds.length === 1) {
+      // If only one ad, use it for both
+      secondAd = firstAd;
+    }
+
+    const formatAd = (ad: typeof firstAd) => ({
+      id: ad.id,
+      title: ad.title,
+      advertiser: ad.advertiser,
+      videoUrl: ad.videoUrl,
+      thumbnailUrl: ad.thumbnailUrl,
+      duration: ad.duration,
+      targetUrl: ad.targetUrl,
+      orientation: ad.orientation
+    });
+
+    res.json({
+      first: formatAd(firstAd),
+      second: secondAd ? formatAd(secondAd) : null
+    });
+  } catch (error) {
+    console.error("Get ad pair error:", error);
+    res.status(500).json({ error: "Failed to get ad pair" });
   }
 });
 

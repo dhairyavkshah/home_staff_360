@@ -144,6 +144,52 @@ class HybridAdService {
     return { ad: null, provider: "none" };
   }
 
+  async getTwoAds(): Promise<{ 
+    firstAd: Advertisement | null; 
+    secondAd: Advertisement | null; 
+    provider: AdProvider 
+  }> {
+    // Premium users don't see ads
+    const planInfo = storage.getPlanInfo();
+    if (planInfo.isPremium) {
+      return { firstAd: null, secondAd: null, provider: "none" };
+    }
+
+    const preference = this.config.sourcePreference;
+
+    if (preference === "admob_only") {
+      return { firstAd: null, secondAd: null, provider: "admob" };
+    }
+
+    if (preference === "custom_only" || preference === "custom_first") {
+      const ads = await adService.getTwoAds();
+      if (ads.first) {
+        return { firstAd: ads.first, secondAd: ads.second, provider: "custom" };
+      }
+      
+      if (preference === "custom_first" && this.isNativeApp && this.admobInitialized) {
+        return { firstAd: null, secondAd: null, provider: "admob" };
+      }
+      
+      return { firstAd: null, secondAd: null, provider: "none" };
+    }
+
+    if (preference === "admob_first") {
+      if (this.isNativeApp && this.admobInitialized) {
+        return { firstAd: null, secondAd: null, provider: "admob" };
+      }
+      
+      const ads = await adService.getTwoAds();
+      if (ads.first) {
+        return { firstAd: ads.first, secondAd: ads.second, provider: "custom" };
+      }
+      
+      return { firstAd: null, secondAd: null, provider: "none" };
+    }
+
+    return { firstAd: null, secondAd: null, provider: "none" };
+  }
+
   async showAdMobInterstitial(): Promise<boolean> {
     if (!this.isNativeApp || !this.admobInitialized) {
       return false;

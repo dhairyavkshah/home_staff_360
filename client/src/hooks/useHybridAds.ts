@@ -19,6 +19,7 @@ export const AD_EXCLUDED_SCREENS = [
 
 interface UseHybridAdsReturn {
   currentAd: Advertisement | null;
+  secondAd: Advertisement | null;
   showAd: boolean;
   adProvider: AdProvider;
   dismissAd: () => void;
@@ -30,6 +31,7 @@ interface UseHybridAdsReturn {
 
 export function useHybridAds(currentScreen?: string): UseHybridAdsReturn {
   const [currentAd, setCurrentAd] = useState<Advertisement | null>(null);
+  const [secondAd, setSecondAd] = useState<Advertisement | null>(null);
   const [showAd, setShowAd] = useState(false);
   const [adProvider, setAdProvider] = useState<AdProvider>("none");
   const [isLoading, setIsLoading] = useState(false);
@@ -60,7 +62,7 @@ export function useHybridAds(currentScreen?: string): UseHybridAdsReturn {
     setIsLoading(true);
 
     try {
-      const result = await hybridAdService.getNextAd();
+      const result = await hybridAdService.getTwoAds();
       
       if (result.provider === "admob" && hybridAdService.isNative() && hybridAdService.isAdMobReady()) {
         setAdProvider("admob");
@@ -70,8 +72,9 @@ export function useHybridAds(currentScreen?: string): UseHybridAdsReturn {
           setShowAd(false);
           setAdProvider("none");
         }
-      } else if (result.ad) {
-        setCurrentAd(result.ad);
+      } else if (result.firstAd) {
+        setCurrentAd(result.firstAd);
+        setSecondAd(result.secondAd);
         setAdProvider("custom");
         setShowAd(true);
         hybridAdService.markAdShown();
@@ -87,6 +90,7 @@ export function useHybridAds(currentScreen?: string): UseHybridAdsReturn {
   const dismissAd = useCallback(() => {
     setShowAd(false);
     setCurrentAd(null);
+    setSecondAd(null);
     setAdProvider("none");
   }, []);
 
@@ -125,6 +129,7 @@ export function useHybridAds(currentScreen?: string): UseHybridAdsReturn {
 
   return {
     currentAd,
+    secondAd,
     showAd,
     adProvider,
     dismissAd,

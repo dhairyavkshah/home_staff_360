@@ -141,6 +141,41 @@ class AdService {
     }
   }
 
+  async getTwoAds(): Promise<{ first: Advertisement | null; second: Advertisement | null }> {
+    try {
+      const adsEnabled = await this.checkAdsEnabled();
+      if (!adsEnabled) {
+        return { first: null, second: null };
+      }
+
+      const deviceId = this.getDeviceId();
+      const response = await fetch(`/api/ads/next-pair?deviceId=${encodeURIComponent(deviceId)}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          const singleAd = await this.getNextAd();
+          return { first: singleAd, second: null };
+        }
+        throw new Error(`Failed to fetch ads: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        first: data.first || null,
+        second: data.second || null,
+      };
+    } catch (error) {
+      console.error("Error fetching ad pair:", error);
+      const singleAd = await this.getNextAd();
+      return { first: singleAd, second: null };
+    }
+  }
+
   async recordImpression(data: Omit<InsertAdImpression, "sessionId" | "deviceId">): Promise<boolean> {
     try {
       const impressionData: InsertAdImpression = {
