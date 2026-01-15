@@ -39,7 +39,7 @@ const en = {
   camera: "Camera",
   location: "Location",
   home: "Home",
-  staff: "Personnel",
+  staff: "Staff Personnel",
   expenses: "Expenses",
   expensesBills: "Expenses",
   payables: "Payables",
