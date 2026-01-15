@@ -309,15 +309,7 @@ export function SettingsScreen() {
             </div>
           )}
 
-          <div className="flex flex-col gap-4">
-            <Label htmlFor="language">{t("language")}</Label>
-            <LanguageSelector
-              value={pendingLanguage}
-              onValueChange={(v) => setPendingLanguage(v as Language)}
-              showIcon={false}
-              data-testid="select-language"
-            />
-          </div>
+          {/* Language selector hidden - English only for now */}
 
           {isHome && (
             <>

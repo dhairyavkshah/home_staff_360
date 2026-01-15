@@ -269,7 +269,7 @@ export const getCurrencySymbol = (currency: Currency, customSymbol?: string): st
   return CURRENCIES[currency].symbol;
 };
 
-export const languages = ['en', 'hi', 'gu', 'kn', 'ml', 'mr', 'pa', 'te', 'ta', 'ur', 'bn', 'or', 'as', 'es', 'fr', 'de', 'ar', 'zh', 'ja', 'pt', 'ru'] as const;
+export const languages = ['en'] as const;
 export type Language = typeof languages[number];
 
 export const languageLabels: Record<Language, string> = {

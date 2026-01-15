@@ -79,14 +79,7 @@ export function RoleSelectionScreen() {
 
       <div className="flex-1 overflow-y-auto">
         <div className="content-container py-4 flex flex-col gap-6">
-          <div className="flex justify-end">
-            <LanguageSelector
-              value={language}
-              onValueChange={(value) => setLanguage(value as Language)}
-              className="w-auto min-w-[160px]"
-              data-testid="select-language"
-            />
-          </div>
+          {/* Language selector hidden - English only for now */}
 
           <div className="flex flex-col items-center text-center gap-3 fade-in-up">
             <div className="icon-halo-primary w-14 h-14">
