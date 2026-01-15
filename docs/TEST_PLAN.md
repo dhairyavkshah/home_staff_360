@@ -1,6 +1,6 @@
 # Home Staff 360 - Comprehensive Test Plan
 
-**Version:** 4.0  
+**Version:** 5.0  
 **Last Updated:** January 15, 2026
 
 ## Overview
@@ -197,7 +197,7 @@ This document outlines all end-to-end use cases for the Home Staff 360 applicati
 
 | ID | Use Case | Steps | Expected Result |
 |----|----------|-------|-----------------|
-| SET-001 | Change language | Settings → Language → Select | English only (multi-language temporarily removed in v4.0) |
+| SET-001 | Change language | Settings → Language → Select | English only (multi-language temporarily removed in v5.0) |
 | SET-002 | Change currency | Settings → Currency → Select | Currency symbol changes |
 | SET-003 | Toggle dark mode | Settings → Theme → Dark | App switches to dark |
 | SET-004 | Enable backup | Settings → Auto backup → Enable | Backup scheduled |

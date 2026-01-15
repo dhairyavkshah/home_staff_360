@@ -122,7 +122,7 @@ SECURE & PRIVATE
 
 GLOBAL ACCESSIBILITY
 
-Language: English (Multi-language support temporarily removed in v4.0 - will return in future versions)
+Language: English (Multi-language support temporarily removed in v5.0 - will return in future versions)
 
 120+ Currencies: All major international currencies supported
 

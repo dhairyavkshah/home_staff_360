@@ -6,13 +6,13 @@
 
 ---
 
-## Version 4.0.0
+## Version 5.0.0
 
 **Release Date: January 15, 2026**
 
-### What's New in Version 4.0
+### What's New in Version 5.0
 
-Home Staff 360 v4.0 introduces a **privacy-first hybrid storage architecture** that keeps your business data on your device while enabling seamless collaboration. This release also introduces our new monetization model with a dual-ad system for free users and a premium ad-free subscription.
+Home Staff 360 v5.0 introduces a **privacy-first hybrid storage architecture** that keeps your business data on your device while enabling seamless collaboration. This release also introduces our new monetization model with a dual-ad system for free users and a premium ad-free subscription.
 
 ---
 
@@ -98,7 +98,7 @@ Home Staff 360 v4.0 introduces a **privacy-first hybrid storage architecture** t
 
 ---
 
-### All v4.0 Features
+### All v5.0 Features
 
 #### Privacy & Security
 - Hybrid storage model with local-first approach
@@ -156,7 +156,7 @@ Home Staff 360 v4.0 introduces a **privacy-first hybrid storage architecture** t
 
 ---
 
-### Migration from v3.x
+### Migration from v4.x
 
 **What Changes:**
 - Your local data remains intact and unchanged
@@ -197,7 +197,7 @@ Home Staff 360 v4.0 introduces a **privacy-first hybrid storage architecture** t
 
 ### Future Roadmap
 
-**Upcoming in v4.x:**
+**Upcoming in v5.x:**
 - Industry-specific templates for hospitality
 - Advanced scheduling and shift management
 - Team hierarchy and department structures
@@ -210,9 +210,9 @@ Home Staff 360 v4.0 introduces a **privacy-first hybrid storage architecture** t
 ### Google Play Console Format (500 characters max)
 
 ```
-v4.0 - Privacy-First Staff Management
+v5.0 - Privacy-First Staff Management
 
-NEW IN 4.0:
+NEW IN 5.0:
 - Your data stays on YOUR device - we can't access it
 - Login persists across app updates
 - Free with ads, Premium for ad-free
@@ -233,7 +233,7 @@ Your Data, Your Device, Your Control!
 ### Short What's New (150 characters)
 
 ```
-v4.0: Privacy-first design - your data stays on your device. Login persists across updates. Free with ads or go Premium. 120+ currencies supported!
+v5.0: Privacy-first design - your data stays on your device. Login persists across updates. Free with ads or go Premium. 120+ currencies supported!
 ```
 
 **Character Count: 147**
@@ -244,6 +244,7 @@ v4.0: Privacy-first design - your data stays on your device. Login persists acro
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 5.0.0 | Jan 15, 2026 | Privacy-first hybrid storage, dual-ad system, login persistence, premium subscription, English-only (multi-language returning in future), onboarding flow fix |
 | 4.0.0 | Jan 15, 2026 | Privacy-first hybrid storage, dual-ad system, login persistence, premium subscription |
 | 3.0.0 | Jan 2026 | Enhanced collaboration, improved UI, bug fixes |
 | 2.0.0 | Jan 2026 | Real-time messaging, auto-connections, admin system |
