@@ -21363,6 +21363,11 @@ const as: Partial<typeof en> = {
   zarSouthAfricanRand: "ZAR - South African Rand",
 };
 
+// Aggregated translations object
+export const translations: { [key: string]: Partial<typeof en> } = {
+  en, hi, gu, kn, ml, es, fr, de, ar, zh, ja, pt, mr, pa, te, ta, ur, bn, or, as
+};
+
 export function getTranslation(language: Language, key: TranslationKey): string {
   return translations[language]?.[key] || translations.en[key] || key;
 }
