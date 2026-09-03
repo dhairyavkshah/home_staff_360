@@ -1,0 +1,157 @@
+App Store Descriptions
+Home Staff 360 v5.0
+Your Data, Your Device, Your Control
+________________________________________
+Short Description (80 characters max)
+Manage staff for homes & businesses. Privacy-first with attendance & payments.
+Character Count: 78
+________________________________________
+Full Description (4000 characters max)
+Home Staff 360 - Your Data, Your Device, Your Control
+The privacy-first staff management platform that keeps YOUR business data on YOUR device. Perfect for households, hotels, restaurants, and service businesses.
+PRIVACY-FIRST DESIGN
+Unlike other apps, Home Staff 360 stores all your business data locally on your device. We never see your staff records, payments, or expenses. Your sensitive information never touches our servers.
+What stays on YOUR device:
+- Staff records and profiles
+- Attendance logs
+- Payment and salary records
+- Expenses and receipts
+- Invoices and documents
+- Client information
+- Notes and settings
+What we store (minimal):
+- Phone number for login
+- Chat messages between connected users
+- Connection requests
+WHY THIS MATTERS
+- Your data is truly private - we cannot access it
+- No data mining or selling to advertisers
+- Complete ownership and control
+- GDPR and DPDP Act compliant by design
+DUAL USER MODES
+Home User Mode (For Employers/Managers):
+- Track staff attendance with one tap
+- Record payments and advances
+- Monitor expenses with approvals
+- Generate comprehensive reports
+- Connect with your staff in real-time
+Staff User Mode (For Service Professionals):
+- Manage multiple clients efficiently
+- Log attendance at each location
+- Track earnings and payment history
+- Create professional invoices
+- Record expenses with receipt capture
+REAL-TIME COLLABORATION
+- Connect instantly with staff or clients
+- Direct messaging with edit/delete options
+- Live attendance updates
+- Push notifications for messages
+- Auto-connection when adding people
+INDUSTRY APPLICATIONS
+Households: Manage domestic staff, track laundry services, organize expenses
+Hospitality: Coordinate housekeeping teams, track attendance across departments
+Restaurants: Monitor kitchen and service staff, manage shift-based hours
+Service Businesses: Track field staff, create invoices, manage client locations
+Property Management: Coordinate building staff, security personnel
+KEY FEATURES
+Attendance Tracking
+- Mark full day, half day, or leave
+- Calendar views and statistics
+- Weekly off days and holidays
+Payment Management
+- Record salaries and advances
+- Track pending balances
+- Complete transaction history
+Expense Tracking
+- Categorize by type
+- Attach receipt photos
+- Monthly and yearly summaries
+Invoice Generation
+- Create professional invoices
+- Share via any app
+- Track paid/pending status
+SECURITY
+- Phone + password authentication
+- SMS verification (OTP)
+- Optional biometric lock and PIN
+- Encrypted data transmission (HTTPS/TLS)
+- Secure password hashing
+GLOBAL ACCESSIBILITY
+Language: English
+Currencies: 120+ supported worldwide
+Currency Detection: Automatic based on location
+FREE WITH ADS OR GO PREMIUM
+Free users see brief ads to support development:
+- First ad: 30 seconds (supports our team)
+- Second ad: Skippable after 5 seconds
+Premium subscribers enjoy:
+- Completely ad-free experience
+- Priority support
+- Future premium features
+Download Home Staff 360 today and take control of your staff management - with privacy you can trust!
+Character Count: ~2,650
+________________________________________
+Keywords (100 characters max)
+staff,management,attendance,salary,privacy,household,maid,invoice,hospitality,restaurant,payments
+Character Count: 99
+________________________________________
+Feature Graphic Text
+Home Staff 360
+Your Data, Your Device, Your Control
+________________________________________
+Promotional Text (170 characters max)
+Privacy-first staff management. Your data stays on YOUR device. Perfect for homes, hotels & restaurants. Real-time messaging, attendance, payments. 120+ currencies.
+Character Count: 166
+________________________________________
+What's New (Google Play - 500 characters max)
+v5.0 - Privacy-First Staff Management
+NEW:
+- Privacy-first design: Your business data stays on YOUR device
+- We cannot access your staff records, payments, or expenses
+- Login persists across app updates
+- Dual-ad system for free users (Premium available)
+FEATURES:
+- Real-time collaboration and messaging
+- Attendance, payments, expense tracking
+- 120+ currencies worldwide
+- English interface
+Your Data, Your Device, Your Control!
+Character Count: 423
+________________________________________
+Short What's New (150 characters)
+v5.0: Privacy-first - your data stays on your device. Login persists across updates. Free with ads or Premium. 120+ currencies.
+Character Count: 128
+________________________________________
+App Category
+Primary: Business
+Secondary: Productivity
+________________________________________
+Content Rating
+Everyone - No objectionable content
+________________________________________
+Target Audience
+•	Household managers and homeowners
+•	Domestic staff and service professionals
+•	Hotel and hospitality managers
+•	Restaurant owners and managers
+•	Small service business operators
+•	Property managers
+•	Family offices
+•	Cleaning service operators
+•	Catering company managers
+________________________________________
+Screenshots Suggestions
+1.	Home dashboard with staff overview
+2.	Attendance tracking calendar
+3.	Real-time chat messaging
+4.	Payment recording screen
+5.	Expense tracking with receipt
+6.	Invoice generation
+7.	Staff User earnings view
+8.	Settings with dark mode
+________________________________________
+Video Description (optional)
+Home Staff 360 - Your Data, Your Device, Your Control. The privacy-first staff management app that keeps your business data on YOUR device. Perfect for homes, hotels, restaurants, and service businesses. Real-time collaboration, instant messaging, and comprehensive tracking - all with privacy you can trust.
+________________________________________
+Last Updated: February 2, 2026
+
