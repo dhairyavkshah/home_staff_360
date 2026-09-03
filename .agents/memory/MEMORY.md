@@ -1,1 +1,2 @@
 - [Offline architecture](offline-architecture.md) — keep the bundled app local-only; no server, account, realtime, SMS, ads, subscription, or remote sync path.
+- [GitHub npm registry](github-npm-registry.md) — GitHub Actions must replace Replit-only package-lock download URLs before installing dependencies.
