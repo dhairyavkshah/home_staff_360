@@ -28,3 +28,31 @@ mtime_ms = 1788429487525
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:926ded96-8b87-4756-96b3-122dda815e5c/ea55c52e-0747-4453-81a4-6f25ee9b344f/1b81e2d3-696a-47e7-b6b6-a95d41d9b1fa"
 storage_version_token = "1788429512493381"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "jWDjwGH6o1CNwyJ-4lfj8"
+uri = "file://release-artifacts-v5.2/internal-apk/homestaff360-dev-apk/HomeStaff360-DEV-v5.2-code7.apk"
+type = "unspecified"
+title = "Home Staff 360 Internal APK v5.2"
+description = "Internal Android APK, versionCode 7, target API 36."
+logical_id = "4ed53405-5626-43c4-b49b-61d9913de84f"
+content_hash = "sha256:0a4f00f4e901272019b62224282d467fe8985dd1849794097395e31590df1480"
+size = 12818847
+mtime_ms = 1788431135316
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:926ded96-8b87-4756-96b3-122dda815e5c/4ed53405-5626-43c4-b49b-61d9913de84f/5d90e2ef-ce33-4e72-9c4e-eb8345e1b2d0"
+storage_version_token = "1788431153571573"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "mUH6Qnx7cbi4Tre8TG5Yu"
+uri = "file://release-artifacts-v5.2/play-aab/homestaff360-prod-aab-v5.2-code7/app-release.aab"
+type = "unspecified"
+title = "Home Staff 360 Play AAB v5.2"
+description = "Google Play AAB, versionCode 7, target API 36, with no native .so libraries."
+logical_id = "ccc63056-c955-4916-81e4-fd77b9c6d169"
+content_hash = "sha256:796c9f70fa01f618191346e93a2203e5e500a8a2bf103a2ea91ca922eb67c7f0"
+size = 7549609
+mtime_ms = 1788431141928
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:926ded96-8b87-4756-96b3-122dda815e5c/ccc63056-c955-4916-81e4-fd77b9c6d169/62354adc-92c2-4f29-ba43-957686ad747b"
+storage_version_token = "1788431154986178"
+content_type = "application/octet-stream"
