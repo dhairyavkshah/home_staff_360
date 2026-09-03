@@ -1,0 +1,30 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Aa68NPyWgn0VXtIg7VwnT"
+uri = "file://release-artifacts/internal-apk/homestaff360-dev-apk/HomeStaff360-DEV-v5.1-code6.apk"
+type = "unspecified"
+title = "Home Staff 360 Internal APK v5.1"
+description = "Successful internal Android APK build, versionCode 6."
+logical_id = "bc306ddb-ecab-4859-83c6-bccd35477cc1"
+content_hash = "sha256:482f9d7f6e1ab35aec290c53ec904865d9128de229377007defd06c19c381183"
+size = 16747749
+mtime_ms = 1788429479633
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:926ded96-8b87-4756-96b3-122dda815e5c/bc306ddb-ecab-4859-83c6-bccd35477cc1/9bdbe181-70e7-4c28-ae9f-cb005e179dca"
+storage_version_token = "1788429511062004"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "eUs0mnVEt4x7OjoqogNjX"
+uri = "file://release-artifacts/play-aab/homestaff360-prod-aab-v5.1-code6/app-release.aab"
+type = "unspecified"
+title = "Home Staff 360 Play AAB v5.1"
+description = "Successful Google Play Android App Bundle build, versionCode 6."
+logical_id = "ea55c52e-0747-4453-81a4-6f25ee9b344f"
+content_hash = "sha256:b347d9d0e689cd1e53aa4131c53d1d631d99a26342899e52963e4a59a179f180"
+size = 8969141
+mtime_ms = 1788429487525
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:926ded96-8b87-4756-96b3-122dda815e5c/ea55c52e-0747-4453-81a4-6f25ee9b344f/1b81e2d3-696a-47e7-b6b6-a95d41d9b1fa"
+storage_version_token = "1788429512493381"
+content_type = "application/octet-stream"
