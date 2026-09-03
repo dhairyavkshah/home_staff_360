@@ -14,44 +14,55 @@ export function PrivacyPolicyScreen() {
           <div>
             <h1 className="text-xl font-semibold">Your data stays with you</h1>
             <p className="mt-1 text-muted-foreground">
-              Home Staff 360 is designed to work locally and offline.
+              Home Staff 360 is a local-first app. This policy explains what the
+              app stores and how you control it.
             </p>
           </div>
           <section>
             <h2 className="font-semibold">Data storage</h2>
             <p className="mt-1 text-muted-foreground">
-              Profiles, people, attendance, wages, expenses, notes, photos,
-              settings, and other records are stored on your device. The app
-              does not upload these records to a Home Staff 360 server.
+              Profiles, staff and household records, attendance, wages, payments,
+              expenses, documents, notes, reminders, photos, and settings are
+              stored in the app on your device. The app does not upload these
+              records to a Home Staff 360 server.
             </p>
           </section>
           <section>
-            <h2 className="font-semibold">Accounts and communication</h2>
+            <h2 className="font-semibold">No online account</h2>
             <p className="mt-1 text-muted-foreground">
-              The app does not require phone sign-in, OTP verification, or an
-              online account. It does not send SMS invitations, collaboration
-              requests, chat messages, advertisements, or remote notifications.
+              No phone sign-in, OTP verification, server sync, chat, SMS
+              invitations, remote notifications, advertising, subscriptions, or
+              usage analytics are part of the app.
             </p>
           </section>
           <section>
-            <h2 className="font-semibold">Device permissions</h2>
+            <h2 className="font-semibold">Permissions and sharing</h2>
             <p className="mt-1 text-muted-foreground">
-              Optional device permissions are used only for features you
-              choose, such as selecting a profile photo, saving a backup, or
-              scheduling a local reminder.
+              Optional access may be used when you choose to capture or select a
+              photo, create or restore a file, or schedule a local reminder.
+              Exported files shared through another app are handled under that
+              app's privacy policy.
             </p>
           </section>
           <section>
             <h2 className="font-semibold">Backups and deletion</h2>
             <p className="mt-1 text-muted-foreground">
-              Backups are files you create and control. You can remove your
-              profile and all app records using Clear all local data in
-              Profile. Uninstalling the app may also remove locally stored
-              records, so keep your own backup if needed.
+              Backups and exports are copies you create and control. Android may
+              also back up or transfer app data according to your device and
+              Google backup settings. Use Clear all local data in Profile to
+              remove app records; delete saved backup copies separately.
+            </p>
+          </section>
+          <section>
+            <h2 className="font-semibold">Your choices</h2>
+            <p className="mt-1 text-muted-foreground">
+              You can deny optional permissions, edit or delete local records,
+              export a copy, or clear all app data. The app does not maintain an
+              online account or server copy of your records.
             </p>
           </section>
           <p className="text-xs text-muted-foreground">
-            Last updated: September 3, 2026
+            Effective date: September 3, 2026
           </p>
         </Card>
       </ScrollContent>
