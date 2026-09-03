@@ -15,9 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSimpleDirtyTracker } from "@/hooks/use-dirty-tracker";
 import { useDirtyForm } from "@/lib/dirty-tracking";
 import { useTranslation } from "@/lib/i18n/i18n-context";
-import { collaborationService } from "@/lib/collaboration-service";
 import { combinePhoneNumber, parseFullPhoneNumber, getDefaultCountryCode } from "@/lib/phone-utils";
-import { UserCheck, UserPlus, Send, Loader2, CheckCircle } from "lucide-react";
 import { 
   type SalaryType, 
   STAFF_ROLES, 
@@ -28,13 +26,6 @@ import {
   CURRENCIES,
 } from "@shared/schema";
 import { useCurrency } from "@/hooks/useCurrency";
-
-interface PhoneCheckResult {
-  exists: boolean;
-  isConnected?: boolean;
-  displayName?: string;
-  userId?: string;
-}
 
 export function StaffAddClientHomeScreen() {
   const { goBack, navigate } = useNavigation();
@@ -76,176 +67,12 @@ export function StaffAddClientHomeScreen() {
   const [currency, setCurrency] = useState<Currency>(defaultCurrency);
   const [customCurrencySymbol, setCustomCurrencySymbol] = useState("");
 
-  const [phoneCheckResult, setPhoneCheckResult] = useState<PhoneCheckResult | null>(null);
-  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
-  const [isSendingRequest, setIsSendingRequest] = useState(false);
-  const [isSendingInvite, setIsSendingInvite] = useState(false);
-  const phoneCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastCheckedPhoneRef = useRef<string>("");
-
   const getFullPhoneNumber = useCallback(() => {
     return combinePhoneNumber(countryCode, phoneNumber);
   }, [countryCode, phoneNumber]);
 
   const handlePhoneValidationChange = useCallback((isValid: boolean) => {
     setPhoneValid(isValid);
-  }, []);
-
-  const checkPhoneNumber = useCallback(async (fullPhone: string) => {
-    const cleanedPhone = fullPhone.replace(/\D/g, "");
-    if (cleanedPhone.length < 10) {
-      setPhoneCheckResult(null);
-      return;
-    }
-
-    // Check if user is trying to add themselves
-    const savedPhone = collaborationService.getSavedPhone();
-    if (savedPhone) {
-      const normalizedSavedPhone = savedPhone.replace(/\D/g, '');
-      if (normalizedSavedPhone === cleanedPhone) {
-        setPhoneCheckResult(null);
-        setErrors(prev => ({ ...prev, phone: "You cannot add yourself as client" }));
-        return;
-      } else {
-        setErrors(prev => {
-          const { phone, ...rest } = prev;
-          return rest;
-        });
-      }
-    }
-
-    if (cleanedPhone === lastCheckedPhoneRef.current) {
-      return;
-    }
-
-    lastCheckedPhoneRef.current = cleanedPhone;
-    setIsCheckingPhone(true);
-    setPhoneCheckResult(null);
-
-    try {
-      const token = collaborationService.getToken();
-      const response = await fetch(`/api/phone/check?phone=${encodeURIComponent(fullPhone)}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to check phone");
-      }
-
-      const data = await response.json();
-      setPhoneCheckResult({
-        exists: data.exists,
-        isConnected: data.isConnected,
-        displayName: data.displayName,
-        userId: data.userId,
-      });
-    } catch (error) {
-      console.error("Phone check error:", error);
-      setPhoneCheckResult(null);
-    } finally {
-      setIsCheckingPhone(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (phoneCheckTimeoutRef.current) {
-      clearTimeout(phoneCheckTimeoutRef.current);
-    }
-
-    const digitsOnly = phoneNumber.replace(/\D/g, "");
-    if (digitsOnly.length >= 4 && phoneValid) {
-      phoneCheckTimeoutRef.current = setTimeout(() => {
-        checkPhoneNumber(getFullPhoneNumber());
-      }, 1000);
-    } else {
-      setPhoneCheckResult(null);
-      lastCheckedPhoneRef.current = "";
-    }
-
-    return () => {
-      if (phoneCheckTimeoutRef.current) {
-        clearTimeout(phoneCheckTimeoutRef.current);
-      }
-    };
-  }, [phoneNumber, countryCode, phoneValid, checkPhoneNumber, getFullPhoneNumber]);
-
-  const handleSendConnectRequest = async () => {
-    if (!phoneCheckResult?.userId || !profile?.displayName) return;
-
-    setIsSendingRequest(true);
-    try {
-      const token = collaborationService.getToken();
-      const response = await fetch("/api/connections/request", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          targetUserId: phoneCheckResult.userId,
-          requesterName: profile.displayName,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.message || "Failed to send connect request");
-      }
-
-      toast({ title: "Connect request sent successfully", variant: "success" });
-      setPhoneCheckResult((prev) => prev ? { ...prev, isConnected: true } : null);
-    } catch (error) {
-      toast({
-        title: "Failed to send connect request",
-        description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSendingRequest(false);
-    }
-  };
-
-  const handleSendSmsInvite = async () => {
-    if (!phoneNumber || !profile?.displayName) return;
-
-    setIsSendingInvite(true);
-    try {
-      const token = collaborationService.getToken();
-      const response = await fetch("/api/invitations/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          phone: getFullPhoneNumber(),
-          inviterName: profile.displayName,
-        }),
-      });
-
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || result.details || result.message || "Failed to send SMS invite");
-      }
-
-      toast({ title: "SMS invitation sent successfully", variant: "success" });
-    } catch (error) {
-      toast({
-        title: "Failed to send SMS invite",
-        description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSendingInvite(false);
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (phoneCheckTimeoutRef.current) {
-        clearTimeout(phoneCheckTimeoutRef.current);
-      }
-    };
   }, []);
 
   useEffect(() => {
@@ -445,100 +272,6 @@ export function StaffAddClientHomeScreen() {
             testIdPrefix="client-phone"
           />
           {errors.contactPhone && <p className="text-xs text-destructive">{errors.contactPhone}</p>}
-          
-          {isCheckingPhone && (
-            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg" data-testid="status-phone-checking">
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Checking phone number...</span>
-            </div>
-          )}
-
-          {!isCheckingPhone && phoneCheckResult && (
-            <>
-              {phoneCheckResult.exists && phoneCheckResult.isConnected && (
-                <div 
-                  className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg"
-                  data-testid="status-already-connected"
-                >
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50">
-                    <CheckCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Already Connected</p>
-                    {phoneCheckResult.displayName && (
-                      <p className="text-xs text-blue-700 dark:text-blue-300 truncate">{phoneCheckResult.displayName}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {phoneCheckResult.exists && !phoneCheckResult.isConnected && (
-                <div 
-                  className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg"
-                  data-testid="status-user-found"
-                >
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50">
-                    <UserPlus className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                      {phoneCheckResult.displayName || "Registered User"}
-                    </p>
-                    <p className="text-xs text-green-700 dark:text-green-300">Available to connect</p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="default"
-                    className="bg-green-600 hover:bg-green-700 text-white shrink-0"
-                    onClick={handleSendConnectRequest}
-                    disabled={isSendingRequest}
-                    data-testid="button-send-connect-request"
-                  >
-                    {isSendingRequest ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <UserCheck className="w-4 h-4 mr-1" />
-                        Connect
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
-
-              {!phoneCheckResult.exists && (
-                <div 
-                  className="flex items-center gap-3 p-3 bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 rounded-lg"
-                  data-testid="status-user-not-found"
-                >
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/50">
-                    <Send className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-sky-900 dark:text-sky-100">User not registered</p>
-                    <p className="text-xs text-sky-700 dark:text-sky-300">Send an SMS invite</p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="default"
-                    className="bg-sky-600 hover:bg-sky-700 text-white shrink-0"
-                    onClick={handleSendSmsInvite}
-                    disabled={isSendingInvite}
-                    data-testid="button-send-sms-invite"
-                  >
-                    {isSendingInvite ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 mr-1" />
-                        Invite
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
         </div>
 
         <div className="flex flex-col gap-4">

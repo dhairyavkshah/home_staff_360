@@ -11,11 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { type Currency, type UserType } from "@shared/schema";
 import { pinService } from "@/lib/pin-service";
 import { useTour } from "@/lib/guided-tour";
-import { getCurrencyForCountry, getUserCountry, detectCountryFromIP } from "@/lib/geolocation-service";
+import { getCurrencyForCountry, getUserCountry } from "@/lib/geolocation-service";
 import { CountrySelector } from "@/components/ui/country-selector";
 import { CurrencySelector } from "@/components/ui/currency-selector";
-import { collaborationService } from "@/lib/collaboration-service";
-import { detectCountryFromPhoneNumber } from "@/lib/geolocation-service";
 import { App } from "@capacitor/app";
 import { useTranslation } from "@/lib/i18n/i18n-context";
 
@@ -41,13 +39,6 @@ export function OnboardingScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (!collaborationService.isAuthenticated()) {
-      navigate("auth");
-      return;
-    }
-  }, [navigate]);
-
-  useEffect(() => {
     const backHandler = App.addListener("backButton", () => {
     });
 
@@ -57,29 +48,11 @@ export function OnboardingScreen() {
   }, []);
 
   useEffect(() => {
-    async function detectCountry() {
-      const savedPhone = collaborationService.getSavedPhone();
-      if (savedPhone) {
-        const phoneCountry = detectCountryFromPhoneNumber(savedPhone);
-        if (phoneCountry) {
-          setCountry(phoneCountry);
-          setCurrency(getCurrencyForCountry(phoneCountry));
-          setCountryLocked(true);
-          return;
-        }
-      }
-      
+    function detectCountry() {
       const existingCountry = getUserCountry();
       if (existingCountry) {
         setCountry(existingCountry);
         setCurrency(getCurrencyForCountry(existingCountry));
-        return;
-      }
-
-      const detectedCode = await detectCountryFromIP();
-      if (detectedCode) {
-        setCountry(detectedCode);
-        setCurrency(getCurrencyForCountry(detectedCode));
       }
     }
     detectCountry();
@@ -178,21 +151,6 @@ export function OnboardingScreen() {
         currency,
         language: language,
       });
-    }
-
-    // Sync display name and user type to server
-    if (collaborationService.isAuthenticated()) {
-      try {
-        const result = await collaborationService.updateProfile({
-          displayName: displayName.trim(),
-          userType: userType,
-        });
-        if (result.success) {
-          storage.updateProfile({ displayName: displayName.trim() });
-        }
-      } catch (error) {
-        console.error("Failed to sync profile to server:", error);
-      }
     }
 
     toast({

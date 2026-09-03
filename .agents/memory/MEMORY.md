@@ -1,0 +1,1 @@
+- [Offline architecture](offline-architecture.md) — keep the bundled app local-only; no server, account, realtime, SMS, ads, subscription, or remote sync path.

@@ -222,99 +222,21 @@ export function getCurrencyForCountry(countryCode: string): Currency {
   return country?.currency || "USD";
 }
 
-let cachedCountryCode: string | null = null;
-
-export async function detectCountryFromIP(): Promise<string | null> {
-  if (cachedCountryCode) {
-    return cachedCountryCode;
-  }
-
-  const apis = [
-    async () => {
-      const response = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
-      const data = await response.json();
-      return data.country_code?.toUpperCase();
-    },
-    async () => {
-      const response = await fetch('https://api.country.is/', { signal: AbortSignal.timeout(5000) });
-      const data = await response.json();
-      return data.country?.toUpperCase();
-    },
-    async () => {
-      const response = await fetch('https://freeipapi.com/api/json/', { signal: AbortSignal.timeout(5000) });
-      const data = await response.json();
-      return data.countryCode?.toUpperCase();
-    },
+export async function detectCountryFromLocation(): Promise<string | null> {
+  const locales = [
+    ...(typeof navigator !== "undefined" ? navigator.languages || [] : []),
+    typeof navigator !== "undefined" ? navigator.language : "",
+    Intl.DateTimeFormat().resolvedOptions().locale,
   ];
 
-  for (const apiFn of apis) {
-    try {
-      const countryCode = await apiFn();
-      if (countryCode && COUNTRIES.some(c => c.code === countryCode)) {
-        cachedCountryCode = countryCode;
-        return countryCode;
-      }
-    } catch {
-      continue;
+  for (const locale of locales) {
+    const countryCode = locale?.split("-")[1]?.toUpperCase();
+    if (countryCode && COUNTRIES.some((country) => country.code === countryCode)) {
+      return countryCode;
     }
   }
 
   return null;
-}
-
-export async function detectCountryFromLocation(): Promise<string | null> {
-  const ipCountry = await detectCountryFromIP();
-  if (ipCountry) {
-    return ipCountry;
-  }
-
-  return new Promise((resolve) => {
-    if (!("geolocation" in navigator)) {
-      resolve(null);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const countryCode = await reverseGeocode(latitude, longitude);
-          resolve(countryCode);
-        } catch {
-          resolve(null);
-        }
-      },
-      () => {
-        resolve(null);
-      },
-      { timeout: 10000, enableHighAccuracy: false }
-    );
-  });
-}
-
-async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
-  try {
-    // Note: Do not set User-Agent header as it's forbidden in browsers
-    // OpenStreetMap Nominatim accepts requests without it for client-side apps
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=3`
-    );
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    const data = await response.json();
-    const countryCode = data.address?.country_code?.toUpperCase();
-    
-    if (countryCode && COUNTRIES.some(c => c.code === countryCode)) {
-      return countryCode;
-    }
-    
-    return null;
-  } catch {
-    return null;
-  }
 }
 
 export async function detectAndSaveCountry(): Promise<{ country: string; currency: Currency } | null> {

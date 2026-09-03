@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Router, Route, Switch } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-provider";
@@ -11,19 +10,9 @@ import { SafeAreaProvider } from "@/lib/safe-area-provider";
 import { storage } from "@/lib/storage";
 import { initializeAutoBackup } from "@/lib/auto-backup";
 import { attendanceReminderService } from "@/lib/attendance-reminder-service";
-import { AdProvider } from "@/components/AdProvider";
 import "@/lib/demo-data";
 
-import AdminLogin from "@/pages/admin/AdminLogin";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminManagement from "@/pages/admin/AdminManagement";
-import AdminBackups from "@/pages/admin/AdminBackups";
-import AdminRolesPage from "@/pages/admin/AdminRolesPage";
-import AdminTeamPage from "@/pages/admin/AdminTeamPage";
-import AdminMaintenance from "@/pages/admin/AdminMaintenance";
-import AdminAds from "@/pages/admin/AdminAds";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import DataDeletionRequest from "@/pages/DataDeletionRequest";
 
 import { SplashScreen } from "@/screens/SplashScreen";
 import { LauncherScreen } from "@/screens/LauncherScreen";
@@ -72,28 +61,10 @@ import { StaffInvoicesScreen } from "@/screens/staff/StaffInvoicesScreen";
 import { StaffAddInvoiceScreen } from "@/screens/staff/StaffAddInvoiceScreen";
 import { StaffInvoiceViewScreen } from "@/screens/staff/StaffInvoiceViewScreen";
 
-import { PhoneVerificationScreen } from "@/screens/collaboration/PhoneVerificationScreen";
-import { CollaborationHubScreen } from "@/screens/collaboration/CollaborationHubScreen";
-import { LinkAccountScreen } from "@/screens/collaboration/LinkAccountScreen";
-import { SyncActivityScreen } from "@/screens/collaboration/SyncActivityScreen";
-import { NotificationCenterScreen } from "@/screens/collaboration/NotificationCenterScreen";
-import { ApprovalDetailScreen } from "@/screens/collaboration/ApprovalDetailScreen";
-import { ChatScreen } from "@/screens/collaboration/ChatScreen";
-import { AuthScreen } from "@/screens/auth/AuthScreen";
 import { ProfileSettingsScreen } from "@/screens/ProfileSettingsScreen";
-import { SubscriptionScreen } from "@/screens/SubscriptionScreen";
 import { PrivacyPolicyScreen } from "@/screens/PrivacyPolicyScreen";
 import { NotesScreen } from "@/screens/NotesScreen";
-import { MaintenanceBanner } from "@/components/MaintenanceBanner";
-import { useTranslation } from "@/lib/i18n/i18n-context";
-import { RealtimeProvider } from "@/lib/realtime-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { useNotificationAlerts } from "@/hooks/use-notification-alerts";
-
-function NotificationHandler() {
-  useNotificationAlerts();
-  return null;
-}
 
 function AttendanceReminderHandler() {
   const { navigate } = useNavigation();
@@ -205,26 +176,8 @@ function MobileAppRouter() {
       return <StaffExpensesScreen />;
     case "staff-add-expense":
       return <StaffAddExpenseScreen />;
-    case "phone-verification":
-      return <PhoneVerificationScreen />;
-    case "collaboration-hub":
-      return <CollaborationHubScreen />;
-    case "link-account":
-      return <LinkAccountScreen />;
-    case "sync-activity":
-      return <SyncActivityScreen />;
-    case "notification-center":
-      return <NotificationCenterScreen />;
-    case "approval-detail":
-      return <ApprovalDetailScreen />;
-    case "chat":
-      return <ChatScreen />;
-    case "auth":
-      return <AuthScreen />;
     case "profile-settings":
       return <ProfileSettingsScreen />;
-    case "subscription":
-      return <SubscriptionScreen />;
     case "privacy-policy":
       return <PrivacyPolicyScreen />;
     case "notes":
@@ -248,39 +201,14 @@ function MobileAppWithSplash() {
 
   return (
     <NavigationProvider>
-      <RealtimeProvider>
-        <DirtyTrackingProvider>
-          <GuidedTourProvider>
-            <MaintenanceBanner />
-            <MobileAppRouter />
-            <Toaster />
-            <NotificationHandler />
-            <AttendanceReminderHandler />
-            <AdProvider />
-          </GuidedTourProvider>
-        </DirtyTrackingProvider>
-      </RealtimeProvider>
+      <DirtyTrackingProvider>
+        <GuidedTourProvider>
+          <MobileAppRouter />
+          <Toaster />
+          <AttendanceReminderHandler />
+        </GuidedTourProvider>
+      </DirtyTrackingProvider>
     </NavigationProvider>
-  );
-}
-
-function AdminApp() {
-  return (
-    <ThemeProvider defaultTheme="light" storageKey="homestaff360-admin-theme">
-      <TooltipProvider>
-        <Switch>
-          <Route path="/admin/dashboard" component={AdminDashboard} />
-          <Route path="/admin/ads" component={AdminAds} />
-          <Route path="/admin/admins" component={AdminManagement} />
-          <Route path="/admin/backups" component={AdminBackups} />
-          <Route path="/admin/maintenance" component={AdminMaintenance} />
-          <Route path="/admin/roles" component={AdminRolesPage} />
-          <Route path="/admin/team" component={AdminTeamPage} />
-          <Route path="/admin" component={AdminLogin} />
-        </Switch>
-        <Toaster />
-      </TooltipProvider>
-    </ThemeProvider>
   );
 }
 
@@ -288,47 +216,21 @@ function PrivacyPolicyApp() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="homestaff360-theme">
       <TooltipProvider>
-        <PrivacyPolicy />
-      </TooltipProvider>
-    </ThemeProvider>
-  );
-}
-
-function DataDeletionApp() {
-  return (
-    <ThemeProvider defaultTheme="light" storageKey="homestaff360-theme">
-      <TooltipProvider>
-        <DataDeletionRequest />
+        <NavigationProvider>
+          <PrivacyPolicy />
+        </NavigationProvider>
       </TooltipProvider>
     </ThemeProvider>
   );
 }
 
 function App() {
-  const isAdminRoute = window.location.pathname.startsWith("/admin");
   const isPrivacyRoute = window.location.pathname === "/privacypolicy";
-  const isDataDeletionRoute = window.location.pathname === "/delete-data";
 
   if (isPrivacyRoute) {
     return (
       <ErrorBoundary>
         <PrivacyPolicyApp />
-      </ErrorBoundary>
-    );
-  }
-
-  if (isDataDeletionRoute) {
-    return (
-      <ErrorBoundary>
-        <DataDeletionApp />
-      </ErrorBoundary>
-    );
-  }
-
-  if (isAdminRoute) {
-    return (
-      <ErrorBoundary>
-        <AdminApp />
       </ErrorBoundary>
     );
   }

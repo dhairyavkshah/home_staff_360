@@ -54,18 +54,7 @@ export type Screen =
   | "staff-invoice-view"
   | "report-preview"
   | "feedback"
-  | "phone-verification"
-  | "collaboration-hub"
-  | "link-account"
-  | "sync-activity"
-  | "notification-center"
-  | "approval-detail"
-  | "chat"
-  | "messages-list"
-  | "auth"
-  | "set-password"
   | "profile-settings"
-  | "subscription"
   | "privacy-policy"
   | "notes";
 
@@ -121,7 +110,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   });
 
   const screensToExcludeFromHistory: Screen[] = [
-    "launcher", "auth", "role-selection", "permissions", "backup-restore", "onboarding", "pin-setup", "pin-entry", "set-password"
+    "launcher", "role-selection", "permissions", "backup-restore", "onboarding", "pin-setup", "pin-entry"
   ];
 
   const homeScreens: Screen[] = ["home", "staff-home"];

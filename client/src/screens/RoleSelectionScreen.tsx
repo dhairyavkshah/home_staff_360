@@ -1,10 +1,8 @@
-import { useEffect } from "react";
 import { Home, Briefcase, ArrowRight, Shield, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigation } from "@/lib/navigation";
 import { permissionsService } from "@/lib/permissions-service";
-import { collaborationService } from "@/lib/collaboration-service";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { type UserType, type Language } from "@shared/schema";
 
@@ -57,12 +55,6 @@ function RoleCard({ type, title, description, icon: Icon, features, buttonText, 
 export function RoleSelectionScreen() {
   const { navigate } = useNavigation();
   const { language, setLanguage, t } = useI18n();
-
-  useEffect(() => {
-    if (!collaborationService.isAuthenticated()) {
-      navigate("auth");
-    }
-  }, [navigate]);
 
   const handleSelectRole = (type: UserType) => {
     if (permissionsService.hasCompletedPermissionsFlow()) {

@@ -272,7 +272,7 @@ export const getCurrencySymbol = (currency: Currency, customSymbol?: string): st
 export const languages = ['en'] as const;
 export type Language = typeof languages[number];
 
-export const languageLabels: Record<Language, string> = {
+export const languageLabels: Record<string, string> = {
   en: 'English',
   hi: 'हिंदी (Hindi)',
   gu: 'ગુજરાતી (Gujarati)',

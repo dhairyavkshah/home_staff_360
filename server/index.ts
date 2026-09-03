@@ -4,8 +4,6 @@ import { createServer as createViteServer, createLogger } from "vite";
 import fs from "fs";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
-import routes from "./routes";
-import { initRealtime } from "./realtime";
 
 // Handle both ESM and CJS environments for __dirname
 const getFilename = () => {
@@ -44,40 +42,6 @@ function log(message: string, source = "express") {
 }
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-app.use(routes);
-
-app.use((req, res, next) => {
-  const start = Date.now();
-  const reqPath = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (reqPath.startsWith("/api")) {
-      let logLine = `${req.method} ${reqPath} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
-});
 
 async function setupVite(app: express.Express, server: any) {
   const vite = await createViteServer({
@@ -136,8 +100,6 @@ function serveStatic(app: express.Express) {
 (async () => {
   const server = createServer(app);
   
-  initRealtime(server);
-
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";

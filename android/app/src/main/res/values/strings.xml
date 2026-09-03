@@ -4,7 +4,4 @@
     <string name="title_activity_main">Home Staff 360</string>
     <string name="package_name">com.homestaff360.app</string>
     <string name="custom_url_scheme">com.homestaff360.app</string>
-    <!-- AdMob App ID - Replace with your actual AdMob App ID for production -->
-    <!-- Test App ID for development: ca-app-pub-3940256099942544~3347511713 -->
-    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
 </resources>

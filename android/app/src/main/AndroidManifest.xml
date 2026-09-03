@@ -30,15 +30,6 @@
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Google AdMob App ID (Required for Google Play compliance) -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="@string/admob_app_id"/>
-        
-        <!-- AdMob Ad ID permission for personalized ads -->
-        <meta-data
-            android:name="com.google.android.gms.ads.AD_MANAGER_APP"
-            android:value="true"/>
 
         <!-- WorkManager foreground service for background backups -->
         <service
@@ -48,7 +39,6 @@
     </application>
 
     <!-- Permissions -->
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Camera permission for photo capture -->
     <uses-permission android:name="android.permission.CAMERA" />

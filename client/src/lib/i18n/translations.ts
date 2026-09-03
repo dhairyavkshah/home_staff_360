@@ -960,12 +960,6 @@ const en = {
   verifyPhone: "Verify Phone",
   enterPhoneNumber: "Enter Phone Number",
   phoneNumberPlaceholder: "+1 234 567 8900",
-  sendOtp: "Send OTP",
-  enterOtp: "Enter OTP",
-  otpSent: "OTP sent to your phone",
-  otpExpires: "OTP expires in",
-  verifyOtp: "Verify OTP",
-  resendOtp: "Resend OTP",
   phoneVerified: "Phone verified successfully",
   
   // Linking Accounts
@@ -1337,7 +1331,6 @@ const en = {
   
   // Auth Screen
   invalidPhoneWithFormat: "Please enter a valid phone number with correct format",
-  devModeOtpCode: "Dev Mode - OTP Code",
   otpSentToPhone: "Check your phone for the verification code",
   passwordRequired: "Please enter your password",
   welcomeBack: "Welcome Back",

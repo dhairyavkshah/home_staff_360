@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Calendar, ClipboardList, Building2, Settings, Shirt, Briefcase, ChevronDown, Check, Users, FolderOpen, Receipt, FileText, Link2, Bell, StickyNote } from "lucide-react";
+import { Calendar, ClipboardList, Building2, Settings, Shirt, Briefcase, ChevronDown, Check, Users, FolderOpen, Receipt, FileText, StickyNote } from "lucide-react";
 import { getCurrencyIcon, groupTotalsByCurrency, formatCurrencyTotals, mergeCurrencyTotals } from "@/lib/calculations";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ import { usePlanStatus } from "@/hooks/use-plan-status";
 import { useTour, shouldShowTour } from "@/lib/guided-tour";
 import { useToast } from "@/hooks/use-toast";
 import { StorageWarningBanner } from "@/components/StorageWarningBanner";
-import { useRealtimeContext } from "@/lib/realtime-provider";
 import { App } from "@capacitor/app";
 import { ExitAppDialog } from "@/components/ExitAppDialog";
 
@@ -30,7 +29,6 @@ export function StaffHomeScreen() {
   const { planType } = usePlanStatus();
   const { startTour } = useTour();
   const tourStartedRef = useRef(false);
-  const { unreadNotificationCount } = useRealtimeContext();
   const [showExitDialog, setShowExitDialog] = useState(false);
 
   useEffect(() => {
@@ -349,28 +347,6 @@ export function StaffHomeScreen() {
             </DropdownMenu>
           </div>
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("notification-center")}
-              data-testid="button-notifications"
-              className="relative"
-            >
-              <Bell className="h-5 w-5" />
-              {unreadNotificationCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center">
-                  {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
-                </span>
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("collaboration-hub")}
-              data-testid="button-collaboration"
-            >
-              <Link2 className="h-5 w-5" />
-            </Button>
             <Button
               variant="ghost"
               size="icon"
