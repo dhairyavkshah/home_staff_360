@@ -1,21 +1,17 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Release builds use R8 shrinking and obfuscation. These rules protect only
+# classes referenced by Android manifests, Capacitor registration, or
+# WorkManager's persisted worker names.
+-keep class com.theteam360.homestaff360.MainActivity { *; }
+-keep class com.theteam360.homestaff360.BackupSchedulerPlugin { *; }
+-keep class com.theteam360.homestaff360.BackupWorker { *; }
+-keepnames class com.theteam360.homestaff360.BackupWorker
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Capacitor discovers plugin metadata and bridge members at runtime.
+-keep class com.getcapacitor.** { *; }
+-keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations
+-keepattributes RuntimeVisibleParameterAnnotations,RuntimeInvisibleParameterAnnotations
+-keepattributes AnnotationDefault,InnerClasses,EnclosingMethod,Exceptions,Signature
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Preserve useful release crash line information without disabling obfuscation.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile

@@ -3,7 +3,7 @@ name: Build Production APK (Signed)
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, v4]
     paths:
       - 'android/**'
       - 'client/**'
@@ -35,14 +35,13 @@ jobs:
       
       - name: Configure Production Capacitor
         run: |
-          # Use production capacitor config
+          # Use production bundled/offline capacitor config
           cp capacitor.config.prod.ts capacitor.config.ts
-          echo "Production config ready with URL: https://homestaff360.replit.app"
+          echo "Production offline config ready"
       
       - name: Build web app (Production)
         env:
           VITE_APP_ENV: production
-          VITE_API_BASE_URL: 'https://homestaff360.replit.app'
         run: npm run build
       
       - name: Sync Capacitor
@@ -55,8 +54,12 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
-          echo "Keystore decoded successfully"
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
+            echo "Keystore decoded successfully"
+          else
+            echo "No keystore configured; Gradle will produce an unsigned release APK"
+          fi
       
       - name: Build Signed APK
         working-directory: android
@@ -71,11 +74,13 @@ jobs:
         id: version
         run: |
           VERSION_NAME=$(grep "versionName" android/app/build.gradle | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          VERSION_CODE=$(grep "versionCode" android/app/build.gradle | head -1 | sed 's/.*versionCode \([0-9]*\).*/\1/')
           echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
+          echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
       
       - name: Upload Production APK
         uses: actions/upload-artifact@v4
         with:
-          name: homestaff360-prod-apk-v${{ steps.version.outputs.version_name }}
+          name: homestaff360-prod-apk-v${{ steps.version.outputs.version_name }}-code${{ steps.version.outputs.version_code }}
           path: android/app/build/outputs/apk/release/*.apk
           retention-days: 90

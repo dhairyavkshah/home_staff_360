@@ -1,4 +1,4 @@
-# Home Staff 360 - Design System v5.0
+# Home Staff 360 - Design System v5.1
 ## Microsoft Fluent 2 Design Philosophy
 
 ### Design Philosophy
@@ -328,4 +328,4 @@ Action buttons: mt-6, flex gap-3
 
 ---
 
-*Design System v5.0 - Microsoft Fluent 2*
+*Design System v5.1 - Microsoft Fluent 2*
