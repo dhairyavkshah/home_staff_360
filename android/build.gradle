@@ -9,7 +9,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.7.2'
+        classpath 'com.android.tools.build:gradle:8.9.1'
         classpath 'com.google.gms:google-services:4.4.2'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21'
 
@@ -34,7 +34,7 @@ allprojects {
             force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
             force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22'
             force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22'
-            // Pin androidx.core to 1.15.0 to avoid requiring AGP 8.9.1+ and compileSdk 36
+            // Keep AndroidX Core versions aligned across Capacitor plugins.
             force 'androidx.core:core:1.15.0'
             force 'androidx.core:core-ktx:1.15.0'
         }

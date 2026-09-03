@@ -1,5 +1,4 @@
 import { Capacitor } from "@capacitor/core";
-import { Camera } from "@capacitor/camera";
 import { Filesystem } from "@capacitor/filesystem";
 import { LocalNotifications } from "@capacitor/local-notifications";
 
@@ -85,14 +84,11 @@ class PermissionsService {
     status.location = await this.checkLocationPermission();
 
     if (this.isNative) {
-      try {
-        const cameraStatus = await Camera.checkPermissions();
-        status.camera = this.mapCapacitorStatus(cameraStatus.camera);
-        status.media = this.mapCapacitorStatus(cameraStatus.photos);
-      } catch {
-        status.camera = "prompt";
-        status.media = "prompt";
-      }
+      // Android's system file picker grants access to the selected file only,
+      // so broad media permission is not required. Camera access is requested
+      // by the WebView only when the user starts a capture.
+      status.camera = await this.checkWebCameraPermission();
+      status.media = "granted";
 
       try {
         const fsStatus = await Filesystem.checkPermissions();
@@ -171,35 +167,18 @@ class PermissionsService {
   }
 
   async requestCameraPermission(): Promise<"granted" | "denied"> {
-    if (this.isNative) {
-      try {
-        const result = await Camera.requestPermissions({ permissions: ["camera"] });
-        return result.camera === "granted" ? "granted" : "denied";
-      } catch {
-        return "denied";
-      }
-    } else {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        stream.getTracks().forEach(track => track.stop());
-        return "granted";
-      } catch {
-        return "denied";
-      }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop());
+      return "granted";
+    } catch {
+      return "denied";
     }
   }
 
   async requestMediaPermission(): Promise<"granted" | "denied"> {
-    if (this.isNative) {
-      try {
-        const result = await Camera.requestPermissions({ permissions: ["photos"] });
-        return result.photos === "granted" || result.photos === "limited" ? "granted" : "denied";
-      } catch {
-        return "denied";
-      }
-    } else {
-      return "granted";
-    }
+    // The system file picker scopes access to files selected by the user.
+    return "granted";
   }
 
   async requestStoragePermission(): Promise<"granted" | "denied"> {

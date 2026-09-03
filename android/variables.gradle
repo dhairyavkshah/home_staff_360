@@ -1,7 +1,7 @@
 ext {
-    minSdkVersion = 24
-    compileSdkVersion = 35
-    targetSdkVersion = 35
+    minSdkVersion = 23
+    compileSdkVersion = 36
+    targetSdkVersion = 36
     
     // Kotlin version - override plugin defaults
     // Must be 2.0.x+ to read kotlinx-coroutines 1.10.2 metadata (compiled with Kotlin 2.1.0)

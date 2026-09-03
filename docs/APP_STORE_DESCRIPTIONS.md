@@ -79,7 +79,7 @@ Character count: 144 (170-character limit)
 
 ## What's new
 
-**Home Staff 360 v5.1 — Offline edition**
+**Home Staff 360 v5.2 — Offline edition**
 
 - Your records stay on your device.
 - No account, phone sign-in, OTP, server sync, chat, ads, or subscription.
@@ -89,7 +89,7 @@ Character count: 144 (170-character limit)
 
 ## Short what's new
 
-v5.1: Private offline staff management with local records, backups, exports, and reminders. No account or OTP required.
+v5.2: Private offline staff management with local records, backups, exports, and reminders. No account or OTP required.
 
 Character count: 119 (150-character limit)
 

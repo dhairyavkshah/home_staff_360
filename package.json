@@ -1,6 +1,6 @@
 {
   "name": "rest-express",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -14,7 +14,6 @@
     "@capacitor/android": "^8.5.1",
     "@capacitor/app": "^8.1.1",
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/camera": "^8.2.4",
     "@capacitor/cli": "^7.6.9",
     "@capacitor/core": "^8.5.1",
     "@capacitor/filesystem": "^8.1.3",
