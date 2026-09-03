@@ -32,6 +32,9 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Install Android SDK 36
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
