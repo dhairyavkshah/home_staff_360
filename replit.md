@@ -15,6 +15,13 @@ Home Staff 360 is a professional staff management platform designed as a hybrid 
 - Service Businesses: Cleaning, maintenance, field staff
 - Property Management: Building staff and security
 
+## Running on Replit
+
+- Use the **Start application** workflow, which runs `npm run dev` on port 5000.
+- The development PostgreSQL database is managed by Replit. Run `npm run db:push` after intentional schema changes.
+- Authentication accepts `JWT_SECRET` or the workspace-provided `SESSION_SECRET`.
+- Twilio credentials are optional in development. Without them, the app runs normally but SMS/OTP delivery is disabled and development OTP behavior is used.
+
 ## User Preferences
 - Simple language and clear explanations
 - Iterative development with small, testable changes

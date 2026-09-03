@@ -3,9 +3,9 @@ import { Server as HTTPServer } from "http";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET: string = (() => {
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET;
   if (!secret) {
-    throw new Error("CRITICAL: JWT_SECRET environment variable is required for security. Please set it in your environment.");
+    throw new Error("CRITICAL: JWT_SECRET or SESSION_SECRET environment variable is required for security. Please set one in your environment.");
   }
   return secret;
 })();
